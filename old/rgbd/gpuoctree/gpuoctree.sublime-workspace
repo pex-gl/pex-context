@@ -1,0 +1,746 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"minC",
+				"minChildDistance"
+			],
+			[
+				"cell",
+				"cellSize"
+			],
+			[
+				"minCh",
+				"minChildDistance"
+			],
+			[
+				"textu",
+				"texture2D"
+			],
+			[
+				"center",
+				"centerbox"
+			],
+			[
+				"texture",
+				"textureWidth"
+			],
+			[
+				"oc",
+				"octreeTexture"
+			],
+			[
+				"Octre",
+				"OctreeTracer"
+			],
+			[
+				"octr",
+				"octreeTexture"
+			],
+			[
+				"chil",
+				"children"
+			],
+			[
+				"oct",
+				"octreeTexture"
+			],
+			[
+				"vide",
+				"videoElem"
+			],
+			[
+				"tra",
+				"translationY"
+			],
+			[
+				"cha",
+				"channelId"
+			],
+			[
+				"xy",
+				"xyd2xyz"
+			],
+			[
+				"max",
+				"maxDimension"
+			],
+			[
+				"chan",
+				"channel"
+			],
+			[
+				"min",
+				"minDepth"
+			],
+			[
+				"chann",
+				"channelData"
+			],
+			[
+				"DEP",
+				"DEPTH_BUFFER_BIT"
+			],
+			[
+				"clear",
+				"clearColor"
+			],
+			[
+				"resu",
+				"results"
+			],
+			[
+				"dept",
+				"depthPoints"
+			],
+			[
+				"rgb",
+				"rgb2hsl"
+			],
+			[
+				"depth",
+				"depthPixels"
+			],
+			[
+				"color",
+				"colorPixels"
+			],
+			[
+				"load",
+				"loadConfigs"
+			],
+			[
+				"cal",
+				"callback"
+			],
+			[
+				"call",
+				"callbackSequence"
+			],
+			[
+				"cmd",
+				"cmdSetColor"
+			],
+			[
+				"prot",
+				"prototype"
+			],
+			[
+				"class",
+				"className"
+			],
+			[
+				"bac",
+				"background-position"
+			],
+			[
+				"cla",
+				"className"
+			],
+			[
+				"drop",
+				"dropTarget"
+			],
+			[
+				"pro",
+				"progressBar"
+			],
+			[
+				"plac",
+				"placeHolder"
+			],
+			[
+				"cube",
+				"cubeInstance"
+			],
+			[
+				"tex",
+				"texCoord"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "OctreeTracerMaterial.glsl",
+			"settings":
+			{
+				"buffer_size": 6383,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "gpuoctree.coffee",
+			"settings":
+			{
+				"buffer_size": 2626,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "OctreeTextureEncoder.coffee",
+			"settings":
+			{
+				"buffer_size": 1739,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "OctreeHelper.js",
+			"settings":
+			{
+				"buffer_size": 2186,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "Packages/User/Plask Project.sublime-build",
+	"command_palette":
+	{
+		"height": 375.0,
+		"selected_items":
+		[
+			[
+				"tra",
+				"Trailing Spaces: Delete Trailing Spaces"
+			],
+			[
+				"trail",
+				"Trailing Spaces: Delete Trailing Spaces"
+			],
+			[
+				"space",
+				"Indentation: Convert to Spaces"
+			],
+			[
+				"trai",
+				"Trailing Spaces: Delete Trailing Spaces"
+			],
+			[
+				"vb",
+				"Set Syntax: VBScript"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"glsl",
+				"Set Syntax: GLSL"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 462.0
+	},
+	"console":
+	{
+		"height": 125.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/OctreeTextureEncoder.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/gpuoctree.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/OctreeTracerMaterial.glsl",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/OctreeTracer.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/gpuoctree.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/OctreeHelper.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/OctreeTextureEncoder.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/raymarching.glsl",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/OctreeTracerMaterial.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/.gitignore",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/OctreeHelper.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/gpuoctree.sublime-workspace",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/AxisHelper.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/BoundingBoxHelper.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/lib/pex.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/octreetest.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/raymarching.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/BFSOctreeIterator.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/OctreeTracer.glsl",
+		"/Users/vorg/Workspace/var-rgbd-stussy/07_gpuoctree/octreetest.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/geom.json",
+		"/Users/vorg/Workspace/var-rgbd-stussy/01_octree/octreetest.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/octreetest.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/stussy.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/01_octree/octreetest.js",
+		"/Users/vorg/Workspace/var-hm-wcmc/wcmccontroller/controller.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/materials/RGBDTextured.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/materials/RGBDTextured.glsl",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/RGBDMesh.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/stussy.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/helpers/CameraHelper.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/RGBDSource.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/02_model/model.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/05_nogpu/nogpu.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/05_nogpu/utils.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/materials/RGBDUtils.inc.glsl",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/settings.txt",
+		"/Users/vorg/Workspace/var-rgbd-stussy/05_nogpu/assets/03_Anthony_xml/01_NORTH_TAKE_07_19_13_43_16_comp_0_07_21_15_27_32_depthProperties.xml",
+		"/Users/vorg/Workspace/var-rgbd-stussy/05_nogpu/nogpu.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/05_nogpu/assets/03_Anthony_xml/04_WEST_03_TAKE_07_19_13_43_53_comp_0_07_22_01_35_03_depthProperties.xml",
+		"/Users/vorg/Workspace/var-rgbd-stussy/05_nogpu/assets/03_Anthony_xml/02_EAST_03_TAKE_07_19_13_43_04_comp_0_07_21_18_58_22_depthProperties.xml",
+		"/Users/vorg/Workspace/var-rgbd-stussy/stuff/2013-07-23 recombine/Affine3Drecombe2/src/testApp.cpp",
+		"/Users/vorg/Workspace/var-rgbd-stussy/stuff/2013-07-23 recombine/Affine3Drecombe2/src/testApp.h",
+		"/Users/vorg/Workspace/var-rgbd-stussy/stuff/2013-07-23 recombine/Affine3Drecombe2/config.make",
+		"/Users/vorg/Workspace/var-rgbd-stussy/stuff/2013-07-23 recombine/Affine3Drecombe2/addons.make",
+		"/Users/vorg/Workspace/var-rgbd-stussy/05_nogpu/RGBDConfig.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/05_nogpu/RGBDSource.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/05_nogpu/octreetest.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/05_nogpu/RGBDSource.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/05_nogpu/RGBDConfig.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/05_nogpu/assets/03_Anthony_xml/03_SOUTH_03_TAKE_07_19_13_43_52_comp_0_07_22_08_58_19_depthProperties.xml",
+		"/Users/vorg/Workspace/vorg-pex/src/pex/scene/PerspectiveCamera.coffee",
+		"/Users/vorg/Workspace/vorg-pex/src/pex/geom/Mat4.coffee",
+		"/Users/vorg/Workspace/vorg-pex/src/pex/gui/GUI.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/assets/xml/west_depthProperties.xml",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/assets/xml/south_depthProperties.xml",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/assets/xml/east_depthProperties.xml",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/assets/xml/north_depthProperties.xml",
+		"/Users/vorg/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/Users/vorg/Library/Application Support/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
+		"/Users/vorg/Workspace/var-hm-wcmc/wcmccontroller/node_modules/serialport/src/serialport_unix.cpp",
+		"/Users/vorg/Workspace/var-hm-wcmc/wcmccontroller/package.json",
+		"/Users/vorg/Workspace/vorg-pex/src/pex/gl/Texture2D.js",
+		"/Users/vorg/Workspace/vorg-pex/src/pex/utils/ObjReader.coffee",
+		"/Users/vorg/Workspace/vorg-kollektor/routes/api.utils.js",
+		"/Users/vorg/Workspace/vorg-kollektor/README.md",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/octreetest.js",
+		"/Users/vorg/Library/Application Support/Sublime Text 2/Packages/Default/Default (OSX).sublime-keymap",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/octreetest2.coffee",
+		"/Users/vorg/Workspace/vorg-kollektor/app.js",
+		"/Users/vorg/Workspace/vorg-pex/tools/build.js",
+		"/Users/vorg/Workspace/vorg-pex/src/pex/gl/Program.coffee",
+		"/Users/vorg/Workspace/vorg-pex/src/pex/materials/Material.js",
+		"/Users/vorg/Workspace/vorg-pex/src/pex/materials.js",
+		"/Users/vorg/Workspace/vorg-pex/src/pex/geom.js",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/RGBDConfig.coffee",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/assets/_depthProperties.xml",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/materials/RGBDTextured.2.glsl",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/materials/RGBDUtils.inc.2.glsl",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/materials/RGBD.example.glsl",
+		"/Users/vorg/Workspace/var-rgbd-stussy/experiments/assets/aaron.png",
+		"/Users/vorg/Library/Application Support/Sublime Text 2/Packages/SideBarEnhancements/messages/11.13.2012.1305.0.txt"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"sceneOctree2",
+			"children",
+			"cell",
+			"0.2",
+			"0.0",
+			"cellSize.x * ",
+			"childSize",
+			"@",
+			"1",
+			"3",
+			"calcCameraRay",
+			"cornerbox",
+			"texel",
+			"calcCameraRay",
+			"octreeTexture",
+			"x",
+			"Octree",
+			"wcPosition",
+			"rayDir",
+			"calcCameraRay",
+			"wNear",
+			"calcCameraRay",
+			"near",
+			"scene",
+			"x",
+			"cornerbox",
+			"maxcomp",
+			"console.",
+			"position",
+			"target",
+			"position",
+			"pointsMesh",
+			"target",
+			"rayOrigin",
+			"scene",
+			"Vec3",
+			"1024",
+			"mesh",
+			"data",
+			"v",
+			"Octree",
+			"plane",
+			"pointSize",
+			"debugMode",
+			"@meshes[@sourceId]",
+			"debugMode",
+			"vColor",
+			"updateChannels",
+			"10",
+			"target",
+			"kinect",
+			"textureSize",
+			"channelTranslations",
+			"channelRotations",
+			"kinect",
+			"processDepthPixels",
+			"channelRotations",
+			"channelTranslations",
+			"channelRotations",
+			"buildMesh",
+			"xyd2xyz",
+			"rb2hsl",
+			"  pex.sys.Window.create\n  pex.sys.Window.create\n  pex.sys.Window.create\ntarget",
+			"  pex.sys.Window.create\n  pex.sys.Window.create\ntarget",
+			"  pex.sys.Window.create\ntarget",
+			"target",
+			"self",
+			"conso",
+			"arrayToMatrix",
+			"buildMesh",
+			"processDepthPixels",
+			"buildMesh",
+			"processDepthPixels",
+			"colorPixels",
+			"buildMesh",
+			"colorPixels[i]",
+			"getPixels",
+			"isP",
+			"Color",
+			"color",
+			"seq",
+			"minDepth",
+			"setNormalizedValue",
+			"dirty",
+			"setNormalizedValue",
+			"deserialize",
+			"min",
+			"matrix",
+			"0",
+			"mask",
+			"baud",
+			"container",
+			"currPos",
+			"x",
+			"findPos",
+			"y:",
+			":y",
+			"pos",
+			"findPos",
+			"Wrapper",
+			"onDrop",
+			"conso",
+			"drop",
+			"laceHolder",
+			"imageProgress",
+			"dropTargets",
+			"h1",
+			"resizeImage",
+			"downloadFile",
+			"downloaded",
+			"mesh",
+			"cubeInstance",
+			"cubes",
+			"1",
+			"Camera",
+			"	",
+			"vertices",
+			"tra",
+			"hsl2depth",
+			"pos",
+			"samplePos",
+			"depthValueFromSample",
+			"ppx",
+			"tab",
+			"theme"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"  "
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "OctreeTracerMaterial.glsl",
+					"settings":
+					{
+						"buffer_size": 6383,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4942,
+								4942
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/OpenGL Shading Language (GLSL)/GLSL.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1940.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "gpuoctree.coffee",
+					"settings":
+					{
+						"buffer_size": 2626,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2312,
+								2312
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CoffeeScript/CoffeeScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "OctreeTextureEncoder.coffee",
+					"settings":
+					{
+						"buffer_size": 1739,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								442,
+								442
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CoffeeScript/CoffeeScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "OctreeHelper.js",
+					"settings":
+					{
+						"buffer_size": 2186,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 11.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 33.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 190.0
+	},
+	"replace":
+	{
+		"height": 66.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"mat4",
+				"src/pex/geom/Mat4.coffee"
+			],
+			[
+				"vec3",
+				"src/pex/geom/Vec3.coffee"
+			],
+			[
+				"perspectivecamera",
+				"src/pex/scene/PerspectiveCamera.coffee"
+			],
+			[
+				"b",
+				"tools/build.js"
+			],
+			[
+				"gui",
+				"src/pex/gui/GUI.js"
+			],
+			[
+				"texture2d",
+				"src/pex/gl/Texture2D.js"
+			],
+			[
+				"objreader",
+				"src/pex/utils/ObjReader.coffee"
+			],
+			[
+				"obj",
+				"examples/objreader/objreader.coffee"
+			],
+			[
+				"bui",
+				"tools/build.js"
+			],
+			[
+				"arcba",
+				"src/pex/scene/Arcball.coffee"
+			],
+			[
+				"mesh",
+				"src/pex/gl/Mesh.coffee"
+			],
+			[
+				"lineb",
+				"src/pex/geom/gen/LineBuilder.coffee"
+			],
+			[
+				"progra",
+				"src/pex/gl/Program.coffee"
+			],
+			[
+				"buil",
+				"tools/build.js"
+			],
+			[
+				"program",
+				"src/pex/gl/Program.coffee"
+			],
+			[
+				"material",
+				"src/pex/materials/Material.js"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 225.0,
+	"status_bar_visible": true
+}

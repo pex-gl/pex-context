@@ -1,0 +1,53 @@
+analytic
+
+::begin parameters
+color Diffuse 1 0 0
+color SpecularColor 1 0 0
+float DiffuseScale 0 1 0.5
+float SpecularScale 0 0.999 .028
+float Roughness 0.005 2 0.2
+::end parameters
+
+::begin shader
+
+vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
+{
+    vec3 Kd = Diffuse.xyz * DiffuseScale;
+    vec3 Ks = SpecularColor.xyz * SpecularScale;
+
+    vec3 H = normalize(L + V);
+    float NdotL = clamp(dot(N, L), 0, 1);
+    float NdotV = dot(N, V);
+    float NdotH = dot(N, H);
+    float LdotH = dot(L, H);
+
+    float a_2 = Roughness * Roughness;
+    float NdotL_2 = NdotL * NdotL;
+    float NdotV_2 = NdotV * NdotV;
+    float NdotH_2 = NdotH * NdotH;
+    float OneMinusNdotL_2 = 1.0 - NdotL_2;
+    float OneMinusNdotV_2 = 1.0 - NdotV_2;
+
+    vec3 Fd = 1.0 - Ks;
+
+    float gamma = clamp(dot(V - N * NdotV, L - N * NdotL), 0, 1);
+    float A = 1.0 - 0.5 * (a_2 / (a_2 + 0.33));
+    float B = 0.45 * (a_2 / (a_2 + 0.09));
+    float C = sqrt(OneMinusNdotL_2 * OneMinusNdotV_2) / max(NdotL, NdotV);
+
+    vec3 Rd = Kd * Fd * (A + B * gamma * C) * NdotL;
+
+    float D = NdotH_2 * (a_2 - 1.0) + 1.0;
+
+    vec3 Fs = Ks + Fd * exp(-6 * LdotH);
+
+    float G1_1 = 1.0 + sqrt(1.0 + a_2 * (OneMinusNdotL_2 / NdotL_2));
+    float G1_2 = 1.0 + sqrt(1.0 + a_2 * (OneMinusNdotV_2 / NdotV_2));
+    float G = G1_1 * G1_2;
+
+    vec3 Rs = (a_2 * Fs) / (D * D * G * NdotV);
+
+    return Rd + Rs;
+}
+
+::end shader

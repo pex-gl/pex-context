@@ -1,0 +1,23 @@
+void main() {
+  FragData data;
+  data.color = vec3(0.0);
+  data.albedo = vec3(0.0);
+  data.opacity = 1.0;
+  data.position = vPosition;
+  data.positionWorld = vPositionWorld;
+  data.positionView = vPositionView;
+  data.normalWorld = normalize(vNormalWorld);
+  data.normalView = normalize(vNormalView);
+  data.texCoord = vTexCoord;
+  data.eyePosView = vec3(0.0, 0.0, 0.0);
+  data.eyeDirView = normalize(data.eyePosView - data.positionView);
+  data.lightAtten = 1.0;
+  data.lightColor = correctGammaInput(lightColor.rgb);
+  data.lightPosWorld = lightPos;
+  data.lightPosView = vLightPosView;
+  //data.lightDirWorld = normalize(-data.lightPosWorld);
+  //data.lightDirView = normalize(data.lightPosView - vec3(viewMatrix * vec4(0.0, 0.0, 0.0, 1.0)));
+  data.lightDirWorld = normalize(data.lightPosWorld - data.positionWorld);
+  data.lightDirView = normalize(data.lightPosView - data.positionView);
+  data.reflectionColor = vec3(0.0);
+  data.exposure = exposure;

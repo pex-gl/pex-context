@@ -1,0 +1,71 @@
+analytic
+
+# "Distribution-based BRDFs" [Ashikhmin 07]
+
+# variables go here...
+# only floats supported right now.
+# [type] [name] [min val] [max val] [default val]
+
+::begin parameters
+float Roughness 0 1 0.5
+float SpecIntensity 0 1 0.028
+float Diffuse 0 1 0.1
+bool ShowDistributionTerm false
+::end parameters
+
+
+# Then comes the shader. This should be GLSL code
+# that defines a function called BRDF (although you can
+# add whatever else you want too, like sqr() below).
+
+::begin shader
+
+float SchlickFresnel(float r0, float u)
+{
+    return r0 + (1.0f - r0) * pow(1.0f - u, 5.0f);
+}
+
+float VelvetDistribution(float NDotH2)
+{
+    float cot2 = NDotH2 / (1.000001f - NDotH2);
+    float sin2 = 1.0f - NDotH2;
+    float sin4 = sin2 * sin2;
+    float amp = 4.0f;
+    float m2 = Roughness * Roughness + 0.000001f;
+    float cnorm = 1.0f / (3.14159265f * (1 + amp * m2));
+    
+    return cnorm * (1.0f + (amp * exp(-cot2 / (m2 + 0.000001f)) / sin4));
+}
+
+float MicrofacetDenominator(float ndotl, float ndotv) {
+    return 1.0f / (4.0f * (ndotl + ndotv - ndotl * ndotv));
+}
+
+vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
+{
+    float oo_pi = 1.0f / 3.14159265;
+    vec3  H = normalize(L+V);
+    float HdotV = clamp(dot(H,V), 0.0f, 1.0f);
+    float NdotH = clamp(dot(N,H), 0.0f, 1.0f);
+    float NdotH2 = NdotH * NdotH;
+    float NdotV = clamp(dot(N,V), 0.0f, 1.0f);
+    float NdotL = clamp(dot(N,L), 0.0f, 1.0f);
+    
+    float diffuseintensity = SchlickFresnel(SpecIntensity, HdotV);
+    float Diff = Diffuse * (1.0f - diffuseintensity) * oo_pi;
+                      
+    float F = SchlickFresnel(SpecIntensity, HdotV);
+    float D = VelvetDistribution(NdotH2);
+    float G = 1.0f;
+    float Denom = MicrofacetDenominator(NdotL, NdotV);
+    float Spec = D * F * G * Denom;
+    
+    vec3 color = (Diff + Spec) * vec3(1.0f);
+    
+    if(ShowDistributionTerm)
+        color = vec3(D);
+
+    return color;
+}
+
+::end shader
