@@ -23,20 +23,17 @@ Window.create({
 ## FOAM style init
 
 ```javascript
-var Foam     = require('foam-gl');
+var Foam = require('foam-gl');
 
-Foam.App.newOnLoadWithResource(
-  {
-      path : '../resources/basic2d.glsl' // bundle.js relative
-  },
-  {
-    setup : function(resource){
-    },
-    update : function() {
-      var gl = this._gl,
-    }
-  }
-);
+function setup(){
+    this.setWindowSize(800,600);
+}
+
+function draw(){
+    var gl = this._hl;
+}
+
+Foam.App.newOnLoad(setup,draw);
 ```
 
 ## Glo style init
