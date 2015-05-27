@@ -30,7 +30,7 @@ function setup(){
 }
 
 function draw(){
-    var gl = this._hl;
+    var gl = this._gl;
 }
 
 Foam.App.newOnLoad(setup,draw);
