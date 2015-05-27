@@ -1,0 +1,15 @@
+{
+  "name": "00-core",
+  "version": "0.0.0",
+  "description": "Trying a new pex core implementation",
+  "main": "main.js",
+  "scripts": {
+    "test": "plask main.js"
+  },
+  "keywords": [
+    "pex",
+    "webgl"
+  ],
+  "author": "marcin.ignac@gmail.com",
+  "license": "MIT"
+}
