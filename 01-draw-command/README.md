@@ -26,3 +26,11 @@ RenderState https://github.com/AnalyticalGraphicsInc/cesium/blob/b26/Source/Rend
 VertexArray http://www.personal.psu.edu/kyn5050/Documentation/VertexArray.html
 Framebuffer http://www.personal.psu.edu/kyn5050/Documentation/Framebuffer.html
 Example draw command https://github.com/AnalyticalGraphicsInc/cesium/blob/5d86b185d92ff8bbece8e7389b0bb171f9fa38e8/Source/Scene/Sun.js#L75
+
+
+## Issues / Questions
+
+- Where to put texture sampler state?
+- How to do FBO PingPong -  draw commands that are identical but with FBO changing multiple times during the frame
+
+
