@@ -1,5 +1,7 @@
 Trying out a new minimal pex core implementation.
 
+# Init
+
 ## Pex v3 style init
 
 ```javascript
@@ -68,3 +70,12 @@ var render = function () {
 
 render();
 ```
+
+# Passing gl object around
+
+Requirement to pass `gl` object in the constructor raises a problem to carry that context arround in nested class structures. Eg. Window/App would have to pass it to View -> Scene -> Effect -> 3DModel -> Program.
+
+Alternatively we could have `Window.getCurrent().getContext()` or `Context.getCurrent()`. Issues:
+
+- async resource loading can get messed up if we have multiple windows
+- requiring Window/Context more than once can produce zombie references
