@@ -41,7 +41,5 @@ createWindow({
     this.mesh.draw();
     this.mesh.unbind(this.program);
     this.program.unbind();
-
-    console.log(gl.getError())
   }
 })

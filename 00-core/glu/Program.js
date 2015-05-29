@@ -1,3 +1,5 @@
+//Program implementation
+
 var kVertexShaderPrefix = '' +
   '#ifdef GL_ES\n' +
   'precision highp float;\n' +
@@ -92,49 +94,18 @@ Program.prototype.link = function() {
 };
 
 Program.prototype.bind = function() {
-  this.gl.useProgram(this.handle);
+  return this.gl.useProgram(this.handle);
 };
 
 Program.prototype.unbind = function() {
   this.gl.useProgram(null);
-}
+};
 
 Program.prototype.dispose = function() {
   this.gl.deleteShader(this.vertShader);
   this.gl.deleteShader(this.fragShader);
-  this.gl.deleteProgram(this.handle);
+  return this.gl.deleteProgram(this.handle);
 };
-
-/*
-Program.load = function(url, callback, options) {
-  var program;
-  program = new Program();
-  IO.loadTextFile(url, function(source) {
-    console.log("Program.Compiling " + url);
-    program.addSources(source);
-    program.link();
-    if (callback) {
-      callback();
-    }
-    if (options && options.autoreload) {
-      return IO.watchTextFile(url, function(source) {
-        var e;
-        try {
-          program.gl.detachShader(program.handle, program.vertShader);
-          program.gl.detachShader(program.handle, program.fragShader);
-          program.addSources(source);
-          return program.link();
-        } catch (_error) {
-          e = _error;
-          console.log("Program.load : failed to reload " + url);
-          return console.log(e);
-        }
-      });
-    }
-  });
-  return program;
-};
-*/
 
 Program.makeUniformSetter = function(gl, type, location) {
   var setterFun = null;
@@ -158,43 +129,38 @@ Program.makeUniformSetter = function(gl, type, location) {
       break;
     case gl.FLOAT_VEC2:
       setterFun = function(v) {
-        return gl.uniform2f(location, v.x, v.y);
+        return gl.uniform2f(location, v[0], v[1]);
       };
       break;
     case gl.FLOAT_VEC3:
       setterFun = function(v) {
-        return gl.uniform3f(location, v.x, v.y, v.z);
+        return gl.uniform3f(location, v[0], v[1], v[2]);
       };
       break;
     case gl.FLOAT_VEC4:
       setterFun = function(v) {
-        if (v.r != null) {
-          gl.uniform4f(location, v.r, v.g, v.b, v.a);
-        }
-        if (v.x != null) {
-          return gl.uniform4f(location, v.x, v.y, v.z, v.w);
-        }
+        gl.uniform4f(location, v[0], v[1], v[2], v[3]);
       };
       break;
     case gl.FLOAT_MAT4:
       var mv = new Float32Array(16);
       setterFun = function(m) {
-        mv[0] = m.a11;
-        mv[1] = m.a21;
-        mv[2] = m.a31;
-        mv[3] = m.a41;
-        mv[4] = m.a12;
-        mv[5] = m.a22;
-        mv[6] = m.a32;
-        mv[7] = m.a42;
-        mv[8] = m.a13;
-        mv[9] = m.a23;
-        mv[10] = m.a33;
-        mv[11] = m.a43;
-        mv[12] = m.a14;
-        mv[13] = m.a24;
-        mv[14] = m.a34;
-        mv[15] = m.a44;
+        mv[0]  = m[0];
+        mv[1]  = m[1];
+        mv[2]  = m[2];
+        mv[3]  = m[3];
+        mv[4]  = m[4];
+        mv[5]  = m[5];
+        mv[6]  = m[6];
+        mv[7]  = m[7];
+        mv[8]  = m[8];
+        mv[9]  = m[9];
+        mv[10] = m[10];
+        mv[11] = m[11];
+        mv[12] = m[12];
+        mv[13] = m[13];
+        mv[14] = m[14];
+        mv[15] = m[15];
         return gl.uniformMatrix4fv(location, false, mv);
       };
   }

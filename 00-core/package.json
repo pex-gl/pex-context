@@ -11,5 +11,8 @@
     "webgl"
   ],
   "author": "marcin.ignac@gmail.com",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "array-pack-2d": "^0.1.1"
+  }
 }
