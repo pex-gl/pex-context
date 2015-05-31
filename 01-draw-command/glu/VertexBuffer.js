@@ -1,5 +1,7 @@
-//VertexBuffer implementation
-//Example usage new VertexBuffer(gl, vertices, { usage: gl.STATIC_DRAW, target: gl.ARRAY_BUFFER, type: Float32Array})
+var pack = require('array-pack-2d');
+
+//VBO implementation
+//Example usage new Buffer(gl, vertices, { usage: gl.STATIC_DRAW, target: gl.ARRAY_BUFFER, type: Float32Array})
 function VertexBuffer(gl, data, opts) {
   this.gl = gl;
   opts = opts || {};
@@ -8,7 +10,18 @@ function VertexBuffer(gl, data, opts) {
   this.type = opts.type || Float32Array; //Uint16Array, Uint32Array in WebGL2.0?
   this.size = opts.size || 3; //element size, FIXME: is that good assumption?
 
-  this.dataBuf = Array.isArray(data) ? new this.type(data) : data;
+  if (Array.isArray(data)) {
+    //array of arrays -> flat typed array
+    if (Array.isArray(data[0])) {
+      data = pack(data, this.type);
+    }
+    //array -> flat type array
+    else {
+      data = new this.type(data)
+    }
+  }
+
+  this.dataBuf = data;
   this.handle = this.gl.createBuffer();
   this.gl.bindBuffer(this.target, this.handle);
   this.gl.bufferData(this.target, this.dataBuf, this.usage);
