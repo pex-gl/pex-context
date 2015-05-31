@@ -110,9 +110,10 @@ createWindow({
 
     console.time('frame');
     for(var i=0; i<this.commands.length; i++) {
-      this.commands[i].execute(this.context);
+      this.context.submit(this.commands[i]);
     }
+    this.context.render();
     console.timeEnd('frame');
-    console.log('est fps', Math.floor(1000/28));
+    console.log('est fps', Math.floor(1000/12));
   }
 })

@@ -42,11 +42,85 @@ Context.prototype.draw = function(cmd) {
 }
 
 Context.prototype.submit = function(cmd) {
-
+  this.commands.push(cmd);
 }
 
 Context.prototype.render = function() {
+  var gl = this.gl;
+  var prevCmd;
+  for(var i=0; i<this.commands.length; i++) {
+    var cmd = this.commands[i];
 
+    if (!prevCmd || prevCmd.program != cmd.program) {
+      if (cmd.program) {
+        cmd.program.bind();
+      }
+    }
+
+    if (cmd.program && cmd.uniforms) {
+      for(var uniformName in cmd.uniforms) {
+        cmd.program.uniforms[uniformName](cmd.uniforms[uniformName]);
+      }
+    }
+
+    if (cmd.vertexArray) {
+      var shouldUnbind = false;
+      var shouldBind = false;
+      if (prevCmd) {
+        if (prevCmd.vertexArray) {
+          if (prevCmd.vertexArray != cmd.vertexArray) {
+            shouldUnbind = true;
+            shouldBind = true;
+          }
+        }
+        else {
+          shouldBind = true;
+        }
+      }
+      else {
+        shouldBind = true;
+      }
+
+      if (shouldUnbind) {
+        prevCmd.vertexArray.unbind(prevCmd.program);
+      }
+      if (shouldBind) {
+        cmd.vertexArray.bind(cmd.program);
+      }
+    }
+
+    if (cmd.renderState) {
+      if (!prevCmd || !prevCmd.renderState || prevCmd.renderState.depthTest != cmd.renderState.depthTest) {
+        if (cmd.renderState.depthTest.enabled) {
+          gl.enable(gl.DEPTH_TEST);
+        }
+        else {
+          gl.disable(gl.DEPTH_TEST);
+        }
+      }
+    }
+
+    if (cmd.vertexArray) {
+      cmd.vertexArray.draw();
+    }
+    else {
+      //clear command
+      cmd.execute(this);
+    }
+
+    prevCmd = cmd;
+  }
+
+
+  if (prevCmd) {
+    if (prevCmd.vertexArray) {
+      prevCmd.vertexArray.unbind(prevCmd.program);
+    }
+
+    if (prevCmd.program) {
+      prevCmd.program.unbind();
+    }
+  }
 
   this.commands = [];
 }
