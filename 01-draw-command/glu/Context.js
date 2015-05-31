@@ -1,5 +1,6 @@
 function Context(gl) {
   this.gl = gl;
+  this.commands = [];
 }
 
 Context.prototype.clear = function(cmd) {
@@ -29,10 +30,25 @@ Context.prototype.draw = function(cmd) {
     gl.disable(gl.DEPTH_TEST);
   }
   cmd.program.bind();
+  if (cmd.uniforms) {
+    for(var uniformName in cmd.uniforms) {
+      cmd.program.uniforms[uniformName](cmd.uniforms[uniformName]);
+    }
+  }
   cmd.vertexArray.bind(cmd.program);
   cmd.vertexArray.draw();
   cmd.vertexArray.unbind(cmd.program);
   cmd.program.unbind();
+}
+
+Context.prototype.submit = function(cmd) {
+
+}
+
+Context.prototype.render = function() {
+
+
+  this.commands = [];
 }
 
 module.exports = Context;

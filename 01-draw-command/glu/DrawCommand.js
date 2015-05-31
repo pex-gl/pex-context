@@ -5,6 +5,7 @@ function DrawCommand(opts) {
   this.program = opts.program;
   this.vertexArray = opts.vertexArray;
   this.renderState = opts.renderState;
+  this.uniforms = opts.uniforms;
 }
 
 DrawCommand.prototype.execute = function(context) {
