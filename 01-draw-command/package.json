@@ -1,0 +1,16 @@
+{
+  "name": "01-draw-command",
+  "version": "0.0.0",
+  "description": "Draw Command based renderer / architecture",
+  "main": "basic.js",
+  "dependencies": {
+    "geo-3d-box": "^1.0.3",
+    "normals": "^1.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
