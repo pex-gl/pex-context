@@ -4,7 +4,7 @@ var Program      = require('./glu/Program');
 var VertexArray  = require('./glu/VertexArray');
 var Context      = require('./glu/Context');
 var Texture2D    = require('./glu/Texture2D');
-var FrameBuffer  = require('./glu/FrameBuffer');
+var Framebuffer  = require('./glu/Framebuffer');
 var ClearCommand = require('./glu/ClearCommand');
 var DrawCommand  = require('./glu/DrawCommand');
 var Vec3         = require('./geom/Vec3');
@@ -71,11 +71,17 @@ createWindow({
     var viewMatrix = this.viewMatrix = new Mat4().lookAt(this.eye, this.target, this.up).toArray();
 
     this.clearCmd = new ClearCommand({
-      color: [0.2, 0.2, 0.2, 1.0],
+      color: [0.2, 0.82, 0.2, 1.0],
       depth: true
     });
 
-    //this.renderTarget = new FrameBuffer(gl);
+    this.renderTarget = new Framebuffer(gl, this.width, this.height, { depth: true });
+
+    this.clearRenderTargetCmd = new ClearCommand({
+      color: [0.92, 0.2, 0.2, 1.0],
+      depth: true,
+      framebuffer: this.renderTarget
+    });
 
     this.cube = createCube(gl);
     this.cubeProgram = new Program(gl, CUBE_VERT, CUBE_FRAG);
@@ -90,7 +96,9 @@ createWindow({
       uniforms: {
         projectionMatrix: projectionMatrix,
         viewMatrix: viewMatrix
-      }
+      },
+      viewport: [0, 0, this.width, this.height],
+      framebuffer: this.renderTarget
     });
 
     this.quad = createFSQ(gl);
@@ -104,9 +112,9 @@ createWindow({
         }
       },
       uniforms: {
-        //FIXME: This is automagic asssining texture to a next available texture unit. 
+        //FIXME: This is automagic asssining texture to a next available texture unit.
         //FIXME: How to implement texture sampler objects?
-        texture: Texture2D.genNoise(gl, 256, 256)
+        texture: this.renderTarget.getColorAttachment(0)
       }
     });
   },
@@ -121,8 +129,9 @@ createWindow({
 
     this.cubeDrawCmd.uniforms.viewMatrix = viewMatrix;
 
-    this.context.submit(this.clearCmd);
+    this.context.submit(this.clearRenderTargetCmd);
     this.context.submit(this.cubeDrawCmd);
+    this.context.submit(this.clearCmd);
     this.context.submit(this.blitCmd);
     this.context.render();
   }

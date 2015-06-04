@@ -53,6 +53,41 @@ Context.prototype.render = function() {
   for(var i=0; i<this.commands.length; i++) {
     var cmd = this.commands[i];
 
+    //FIXME: store default viewport
+    //FIXME: compare with previous viewport
+    if (cmd.viewport) {
+      gl.viewport(cmd.viewport[0], cmd.viewport[1], cmd.viewport[2], cmd.viewport[3]);
+    }
+
+    //if !a && !b -> nothing
+    //if a && !b -> a
+    //if a && b && a == b -> nothing
+    //if a && b && a != b -> a
+    //if !a && b -> undo b / default (a)
+
+    //FIXME: can we generalize it somehow?
+    if (cmd.framebuffer) {
+      if (prevCmd) {
+        if (prevCmd.framebuffer != cmd.framebuffer) {
+          cmd.framebuffer.bind();
+        }
+        else {
+          //keep the same framebuffer bound
+        }
+      }
+      else {
+        cmd.framebuffer.bind();
+      }
+    }
+    else if (prevCmd && prevCmd.framebuffer) {
+      //FIXME: framebuffer automagic, keeping ref to previousily bound fbo
+      //gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      prevCmd.framebuffer.unbind();
+    }
+    else {
+      //nothing to do
+    }
+
     if (!prevCmd || prevCmd.program != cmd.program) {
       if (cmd.program) {
         cmd.program.bind();
@@ -120,16 +155,17 @@ Context.prototype.render = function() {
       //clear command
       cmd.execute(this);
     }
-
     prevCmd = cmd;
   }
 
 
   if (prevCmd) {
+    //FIXME: do this only if prev vertexArray is different
     if (prevCmd.vertexArray) {
       prevCmd.vertexArray.unbind(prevCmd.program);
     }
 
+    //FIXME: do this only if prev program is different
     if (prevCmd.program) {
       prevCmd.program.unbind();
     }

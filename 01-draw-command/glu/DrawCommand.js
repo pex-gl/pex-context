@@ -6,6 +6,7 @@ function DrawCommand(opts) {
   this.vertexArray = opts.vertexArray;
   this.renderState = opts.renderState;
   this.uniforms = opts.uniforms;
+  this.framebuffer = opts.framebuffer;
   this.tmp = opts.tmp;
 }
 
