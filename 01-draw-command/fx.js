@@ -273,6 +273,45 @@ createWindow({
       framebuffer: this.blur3VFBO
     });
 
+    //blur 20 more times
+    this.blurCommands = [];
+    for(var i=0; i<20; i++) {
+      this.blurCommands.push(new DrawCommand({
+        vertexArray: this.quad,
+        program: this.blur3HProgram,
+        renderState: {
+          depthTest: {
+            enabled: false
+          }
+        },
+        uniforms: {
+          //FIXME: This is automagic asssining texture to a next available texture unit.
+          //FIXME: How to implement texture sampler objects?
+          texture: this.blur3VFBO.getColorAttachment(0),
+          textureSize: [ this.blur3VFBO.getColorAttachment(0).width, this.blur3HFBO.getColorAttachment(0).height ]
+        },
+        viewport: [0, 0, this.width/4, this.height/4],
+        framebuffer: this.blur3HFBO
+      }));
+      this.blurCommands.push(new DrawCommand({
+        vertexArray: this.quad,
+        program: this.blur3VProgram,
+        renderState: {
+          depthTest: {
+            enabled: false
+          }
+        },
+        uniforms: {
+          //FIXME: This is automagic asssining texture to a next available texture unit.
+          //FIXME: How to implement texture sampler objects?
+          texture: this.blur3HFBO.getColorAttachment(0),
+          textureSize: [ this.blur3HFBO.getColorAttachment(0).width, this.blur3HFBO.getColorAttachment(0).height ]
+        },
+        viewport: [0, 0, this.width/4, this.height/4],
+        framebuffer: this.blur3VFBO
+      }));
+    }
+
     //GAMMA
     this.gammaProgram = new Program(gl, BLIT_VERT, TO_GAMMA_FRAG);
 
@@ -332,6 +371,9 @@ createWindow({
     this.context.submit(this.downsampleCmd);
     this.context.submit(this.blur3HCmd);
     this.context.submit(this.blur3VCmd);
+    this.blurCommands.forEach(function(cmd) {
+      this.context.submit(cmd);
+    }.bind(this));
     this.context.submit(this.gammaCmd);
     this.context.submit(this.blitCmd);
     this.context.render();
