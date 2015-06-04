@@ -108,6 +108,26 @@ void main() { \
 } \
 ';
 
+//TODO: How to make this Gamma correct?
+var TO_LINEAR_FRAG = '\
+varying vec2 vTexCoord; \
+uniform sampler2D texture; \
+void main() { \
+  vec4 color = texture2D(texture, vTexCoord); \
+  gl_FragColor = vec4(pow(color.rgb, vec3(2.2)), color.a); \
+} \
+';
+
+//TODO: How to make this Gamma correct?
+var TO_GAMMA_FRAG = '\
+varying vec2 vTexCoord; \
+uniform sampler2D texture; \
+void main() { \
+  vec4 color = texture2D(texture, vTexCoord); \
+  gl_FragColor = vec4(pow(color.rgb, vec3(1.0/2.2)), color.a); \
+} \
+';
+
 createWindow({
   settings: {
     width: 1280,
@@ -121,7 +141,7 @@ createWindow({
     this.context = new Context(gl);
 
     this.timeStart = Date.now();
-    this.eye = new Vec3(4, 2, 4);
+    this.eye = new Vec3(2.5, 1.5, 2.5);
     this.target = new Vec3(0, 0, 0);
     this.up = new Vec3(0, 1, 0);
 
@@ -161,8 +181,33 @@ createWindow({
       framebuffer: this.colorFBO
     });
 
-    //DOWNSAMPLE
+    //FULLSCREEN QUAD
+
     this.quad = createFSQ(gl);
+
+    //LINEAR
+    this.linearProgram = new Program(gl, BLIT_VERT, TO_LINEAR_FRAG);
+
+    this.linearFBO = new Framebuffer(gl, this.width, this.height);
+    this.linearCmd = new DrawCommand({
+      vertexArray: this.quad,
+      program: this.linearProgram,
+      renderState: {
+        depthTest: {
+          enabled: false
+        }
+      },
+      uniforms: {
+        //FIXME: This is automagic asssining texture to a next available texture unit.
+        //FIXME: How to implement texture sampler objects?
+        texture: this.colorFBO.getColorAttachment(0),
+        textureSize: [ this.colorFBO.getColorAttachment(0).width, this.colorFBO.getColorAttachment(0).height ]
+      },
+      viewport: [0, 0, this.width, this.height],
+      framebuffer: this.linearFBO
+    });
+
+    //DOWNSAMPLE
     this.downsampleProgram = new Program(gl, BLIT_VERT, DOWNSAMPLE_FRAG);
 
     this.downsampleFBO = new Framebuffer(gl, this.width/4, this.height/4);
@@ -177,8 +222,8 @@ createWindow({
       uniforms: {
         //FIXME: This is automagic asssining texture to a next available texture unit.
         //FIXME: How to implement texture sampler objects?
-        texture: this.colorFBO.getColorAttachment(0),
-        textureSize: [ this.colorFBO.getColorAttachment(0).width, this.colorFBO.getColorAttachment(0).height ]
+        texture: this.linearFBO.getColorAttachment(0),
+        textureSize: [ this.linearFBO.getColorAttachment(0).width, this.colorFBO.getColorAttachment(0).height ]
       },
       viewport: [0, 0, this.width/4, this.height/4],
       framebuffer: this.downsampleFBO
@@ -228,6 +273,28 @@ createWindow({
       framebuffer: this.blur3VFBO
     });
 
+    //GAMMA
+    this.gammaProgram = new Program(gl, BLIT_VERT, TO_GAMMA_FRAG);
+
+    this.gammaFBO = new Framebuffer(gl, this.width/4, this.height/4);
+    this.gammaCmd = new DrawCommand({
+      vertexArray: this.quad,
+      program: this.gammaProgram,
+      renderState: {
+        depthTest: {
+          enabled: false
+        }
+      },
+      uniforms: {
+        //FIXME: This is automagic asssining texture to a next available texture unit.
+        //FIXME: How to implement texture sampler objects?
+        texture: this.blur3VFBO.getColorAttachment(0),
+        textureSize: [ this.blur3VFBO.getColorAttachment(0).width, this.colorFBO.getColorAttachment(0).height ]
+      },
+      viewport: [0, 0, this.width/4, this.height/4],
+      framebuffer: this.gammaFBO
+    });
+
     //BLIT
 
     this.blitProgram = new Program(gl, BLIT_VERT, BLIT_FRAG);
@@ -242,7 +309,7 @@ createWindow({
       uniforms: {
         //FIXME: This is automagic asssining texture to a next available texture unit.
         //FIXME: How to implement texture sampler objects?
-        texture: this.blur3VFBO.getColorAttachment(0)
+        texture: this.gammaFBO.getColorAttachment(0)
       },
       viewport: [0, 0, this.width, this.height],
     });
@@ -261,9 +328,11 @@ createWindow({
     this.context.submit(this.clearCmd);
     this.context.submit(this.clearRenderTargetCmd);
     this.context.submit(this.cubeDrawCmd);
+    this.context.submit(this.linearCmd);
     this.context.submit(this.downsampleCmd);
     this.context.submit(this.blur3HCmd);
     this.context.submit(this.blur3VCmd);
+    this.context.submit(this.gammaCmd);
     this.context.submit(this.blitCmd);
     this.context.render();
   }
