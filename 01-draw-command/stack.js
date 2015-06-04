@@ -12,7 +12,7 @@ var DrawCommand  = require('./glu/DrawCommand');
 var Vec3         = require('./geom/Vec3');
 var Mat4         = require('./geom/Mat4');
 var Quat         = require('./geom/Quat');
-var createCube     = require('./vgen/createCube');
+var createCube   = require('./vgen/createCube');
 
 var VERT_SRC = '\
 attribute vec3 position; \

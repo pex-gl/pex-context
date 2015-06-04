@@ -1,3 +1,5 @@
+var Texture2D = require('./Texture2D');
+
 function Context(gl) {
   this.gl = gl;
   this.commands = [];
@@ -57,9 +59,20 @@ Context.prototype.render = function() {
       }
     }
 
+    //FIXME: counting texture uniforms to autoassign texture units
+    var numTextures = 0;
     if (cmd.program && cmd.uniforms) {
       for(var uniformName in cmd.uniforms) {
-        cmd.program.uniforms[uniformName](cmd.uniforms[uniformName]);
+        if (cmd.program.uniforms[uniformName]) {
+          if (cmd.uniforms[uniformName] instanceof Texture2D) {
+            cmd.uniforms[uniformName].bind(numTextures);
+            cmd.program.uniforms[uniformName](numTextures);
+            //FIXME: unbind when we are done
+          }
+          else {
+            cmd.program.uniforms[uniformName](cmd.uniforms[uniformName]);
+          }
+        }
       }
     }
 

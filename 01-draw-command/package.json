@@ -5,7 +5,8 @@
   "main": "basic.js",
   "dependencies": {
     "geo-3d-box": "^1.0.3",
-    "normals": "^1.0.1"
+    "normals": "^1.0.1",
+    "object-assign": "^2.0.0"
   },
   "devDependencies": {},
   "scripts": {
