@@ -323,7 +323,7 @@ createWindow({
     this.eye.z = 4*Math.sin(t);
     var viewMatrix = new Mat4().lookAt(this.eye, this.target, this.up).toArray();
 
-    //this.cubeDrawCmd.uniforms.viewMatrix = viewMatrix;
+    this.cubeDrawCmd.uniforms.viewMatrix = viewMatrix;
 
     this.context.submit(this.clearCmd);
     this.context.submit(this.clearRenderTargetCmd);
