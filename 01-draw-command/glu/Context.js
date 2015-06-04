@@ -81,8 +81,8 @@ Context.prototype.render = function() {
     }
     else if (prevCmd && prevCmd.framebuffer) {
       //FIXME: framebuffer automagic, keeping ref to previousily bound fbo
-      //gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      prevCmd.framebuffer.unbind();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      //prevCmd.framebuffer.unbind();
     }
     else {
       //nothing to do

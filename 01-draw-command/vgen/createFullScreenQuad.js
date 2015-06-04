@@ -6,9 +6,10 @@ function createFullScreenQuad(gl) {
     [-1, 1], [1, 1], [1,-1],
     [-1, 1], [1,-1], [-1,-1]
   ], { size: 2 });
+  //NODE: for fbo this might need to be flipped
   va.addAttribute('texCoord', [
-    [0, 0], [1, 0], [1, 1],
-    [0, 0], [1, 1], [0, 1]
+    [0, 1], [1, 1], [1, 0],
+    [0, 1], [1, 0], [0, 0]
   ], { size: 2 });
   return va;
 }

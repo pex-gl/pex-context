@@ -7,6 +7,7 @@ function DrawCommand(opts) {
   this.renderState = opts.renderState;
   this.uniforms = opts.uniforms;
   this.framebuffer = opts.framebuffer;
+  this.viewport = opts.viewport;
   this.tmp = opts.tmp;
 }
 
