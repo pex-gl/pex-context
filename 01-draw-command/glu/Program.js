@@ -16,15 +16,43 @@ var kFragmentShaderPrefix = '' +
   '#endif\n' +
   '#define FRAG\n';
 
-function Program(gl, vertSrc, fragSrc) {
+function Program(gl, vertSrc, fragSrc, debug) {
   this.gl = gl;
   this.handle = this.gl.createProgram();
   this.uniforms = {};
   this.attributes = {};
-  this.addSources(vertSrc, fragSrc);
-  this.ready = false;
-  if (this.vertShader && this.fragShader) {
-    this.link();
+
+  if (vertSrc && vertSrc.then && fragSrc && fragSrc.then) {
+    Promise.all([vertSrc, fragSrc]).then(function(sources) {
+      if (debug) console.log(sources[0]);
+      if (debug) console.log(sources[1]);
+      this.addSources(sources[0], sources[1]);
+      this.ready = false;
+      if (this.vertShader && this.fragShader) {
+        this.link();
+      }
+    }.bind(this)).catch(function(e) {
+      console.log(e.stack)
+    })
+  }
+  else if (vertSrc && vertSrc.then) {
+    Promise.all([vertSrc]).then(function(sources) {
+      if (debug) console.log(sources[0]);
+      this.addSources(sources[0], sources[0]);
+      this.ready = false;
+      if (this.vertShader && this.fragShader) {
+        this.link();
+      }
+    }.bind(this)).catch(function(e) {
+      console.log(e.stack)
+    })
+  }
+  else {
+    this.addSources(vertSrc, fragSrc);
+    this.ready = false;
+    if (this.vertShader && this.fragShader) {
+      this.link();
+    }
   }
 }
 

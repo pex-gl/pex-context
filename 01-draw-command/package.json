@@ -4,9 +4,12 @@
   "description": "Draw Command based renderer / architecture",
   "main": "basic.js",
   "dependencies": {
+    "bunny": "^1.0.1",
     "geo-3d-box": "^1.0.3",
     "normals": "^1.0.1",
-    "object-assign": "^2.0.0"
+    "object-assign": "^2.0.0",
+    "rescale-vertices": "^1.0.0",
+    "torus-mesh": "^1.0.0"
   },
   "devDependencies": {},
   "scripts": {

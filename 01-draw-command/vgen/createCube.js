@@ -1,14 +1,17 @@
 var VertexArray  = require('../glu/VertexArray');
 
-function createCube(gl) {
+function createCube(gl, sx, sy, sz) {
+  sx = sx || 1;
+  sy = sy || sx || 1;
+  sz = sz || sx || 1;
   var va = new VertexArray(gl);
   va.addAttribute('position', [
-    [-1, -1,  1], [-1,  1,  1], [ 1,  1,  1], [ 1, -1,  1], //front face
-    [-1, -1, -1], [-1,  1, -1], [ 1,  1, -1], [ 1, -1, -1], //back face
-    [ 1, -1,  1], [ 1,  1,  1], [ 1,  1, -1], [ 1, -1, -1], //right face
-    [-1, -1,  1], [-1,  1,  1], [-1,  1, -1], [-1, -1, -1], //left face
-    [-1,  1,  1], [-1,  1, -1], [ 1,  1, -1], [ 1,  1,  1], //top face
-    [-1, -1,  1], [-1, -1, -1], [ 1, -1, -1], [ 1, -1,  1]  //bottom face
+    [-sx/2, -sy/2,  sz/2], [-sx/2,  sy/2,  sz/2], [ sx/2,  sy/2,  sz/2], [ sx/2, -sy/2,  sz/2], //front face
+    [-sx/2, -sy/2, -sz/2], [-sx/2,  sy/2, -sz/2], [ sx/2,  sy/2, -sz/2], [ sx/2, -sy/2, -sz/2], //back face
+    [ sx/2, -sy/2,  sz/2], [ sx/2,  sy/2,  sz/2], [ sx/2,  sy/2, -sz/2], [ sx/2, -sy/2, -sz/2], //right face
+    [-sx/2, -sy/2,  sz/2], [-sx/2,  sy/2,  sz/2], [-sx/2,  sy/2, -sz/2], [-sx/2, -sy/2, -sz/2], //left face
+    [-sx/2,  sy/2,  sz/2], [-sx/2,  sy/2, -sz/2], [ sx/2,  sy/2, -sz/2], [ sx/2,  sy/2,  sz/2], //top face
+    [-sx/2, -sy/2,  sz/2], [-sx/2, -sy/2, -sz/2], [ sx/2, -sy/2, -sz/2], [ sx/2, -sy/2,  sz/2]  //bottom face
   ], { size: 3 });
   va.addAttribute('normal', [
     [ 0,  0,  1], [ 0,  0,  1], [ 0,  0,  1], [ 0,  0,  1], //front face

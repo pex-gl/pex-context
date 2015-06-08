@@ -1,4 +1,5 @@
 var Texture2D = require('./Texture2D');
+var TextureCube = require('./TextureCube');
 
 function Context(gl) {
   this.gl = gl;
@@ -34,7 +35,9 @@ Context.prototype.draw = function(cmd) {
   cmd.program.bind();
   if (cmd.uniforms) {
     for(var uniformName in cmd.uniforms) {
-      cmd.program.uniforms[uniformName](cmd.uniforms[uniformName]);
+      if (cmd.program.uniforms[uniformName]) {
+        cmd.program.uniforms[uniformName](cmd.uniforms[uniformName]);
+      }
     }
   }
   cmd.vertexArray.bind(cmd.program);
@@ -100,6 +103,11 @@ Context.prototype.render = function() {
       for(var uniformName in cmd.uniforms) {
         if (cmd.program.uniforms[uniformName]) {
           if (cmd.uniforms[uniformName] instanceof Texture2D) {
+            cmd.uniforms[uniformName].bind(numTextures);
+            cmd.program.uniforms[uniformName](numTextures);
+            //FIXME: unbind when we are done
+          }
+          if (cmd.uniforms[uniformName] instanceof TextureCube) {
             cmd.uniforms[uniformName].bind(numTextures);
             cmd.program.uniforms[uniformName](numTextures);
             //FIXME: unbind when we are done

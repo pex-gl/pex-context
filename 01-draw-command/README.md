@@ -39,6 +39,44 @@ Other links
 http://c0de517e.blogspot.co.uk/2014/04/how-to-make-rendering-engine.html  
 Designing a Data-Driven Renderer in GPU Pro 3  
 
+
+**Metal**
+```ObjectiveC
+
+	self.skyboxPipeline = [self
+	   pipelineForVertexFunctionNamed:@"vertex_skybox"
+	   fragmentFunctionNamed:@"fragment_cube_lookup"
+	];
+
+    id<MTLRenderCommandEncoder> commandEncoder = [commandBuffer renderCommandEncoderWithDescriptor:renderPass];
+        [commandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
+        [commandEncoder setCullMode:MTLCullModeBack];
+        
+        [self drawSkyboxWithCommandEncoder:commandEncoder];
+
+    (void)drawSkyboxWithCommandEncoder:(id<MTLRenderCommandEncoder>)commandEncoder {
+    
+    MTLDepthStencilDescriptor *depthDescriptor = [MTLDepthStencilDescriptor new];
+    depthDescriptor.depthCompareFunction = MTLCompareFunctionLess;
+    depthDescriptor.depthWriteEnabled = NO;
+    id <MTLDepthStencilState> depthState = [self.device newDepthStencilStateWithDescriptor:depthDescriptor];
+
+    [commandEncoder setRenderPipelineState:self.skyboxPipeline];
+    [commandEncoder setDepthStencilState:depthState];
+    [commandEncoder setVertexBuffer:self.skybox.vertexBuffer offset:0 atIndex:0];
+    [commandEncoder setVertexBuffer:self.uniformBuffer offset:0 atIndex:1];
+    [commandEncoder setFragmentBuffer:self.uniformBuffer offset:0 atIndex:0];
+    [commandEncoder setFragmentTexture:self.cubeTexture atIndex:0];
+    [commandEncoder setFragmentSamplerState:self.samplerState atIndex:0];
+
+    [commandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+                               indexCount:[self.skybox.indexBuffer length] / sizeof(UInt16)
+                                indexType:MTLIndexTypeUInt16
+                              indexBuffer:self.skybox.indexBuffer
+                        indexBufferOffset:0];
+
+```
+
 ## Issues / Questions
 
 - Where to put texture sampler state?

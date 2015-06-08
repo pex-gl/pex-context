@@ -23,10 +23,12 @@ VertexArray.prototype.bind = function(program) {
 
   for(var attributeName in this.attributes) {
     var attribute = this.attributes[attributeName];
-    gl.bindBuffer(gl.ARRAY_BUFFER, attribute.handle);
-    //TODO: check if program has attribute
-    gl.vertexAttribPointer(program.attributes[attributeName], attribute.size, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(program.attributes[attributeName]);
+    if (program.attributes[attributeName] !== undefined) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, attribute.handle);
+      //TODO: check if program has attribute
+      gl.vertexAttribPointer(program.attributes[attributeName], attribute.size, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(program.attributes[attributeName]);
+    }
   }
 
   if (this.indexBuffer) {
