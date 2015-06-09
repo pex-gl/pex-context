@@ -1,6 +1,8 @@
 var TextureCube = require('pex-glu').TextureCube;
 var fs          = require('fs');
 
+
+
 function log2(x) {
   return Math.log(x) / Math.LN2;
 }

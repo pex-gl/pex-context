@@ -4,7 +4,8 @@ function TextureCube(gl, images) {
   this.gl = gl;
   this.handle = this.gl.createTexture();
 
-  if (images.then) {
+  //FIXME: Should TextureCube care about promises?
+  if (images && images.then) {
     images.then(function(images) {
       try {
         this.update(images);
@@ -14,7 +15,7 @@ function TextureCube(gl, images) {
       }
     }.bind(this));
   }
-  else {
+  else if (images) {
     this.update(images);
   }
 }

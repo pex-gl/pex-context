@@ -16,6 +16,7 @@ var rescaleVertices = require('rescale-vertices');
 var glslify      = require('glslify-promise');
 var loadImage    = require('./sys/loadImage');
 var Time         = require('./sys/Time');
+var loadDDSCubemap = require('./sys/loadDDSCubemap');
 
 var targetBounds = [
   [-1, -1, -1],
@@ -36,6 +37,8 @@ createWindow({
     showNormalsFrag: glslify(__dirname + '/sh/materials/ShowNormals.frag'),
     skyboxVert: glslify(__dirname + '/sh/materials/Skybox.vert'),
     skyboxFrag: glslify(__dirname + '/sh/materials/Skybox.frag'),
+    pbrVert: glslify(__dirname + '/sh/materials/PBR.vert'),
+    pbrFrag: glslify(__dirname + '/sh/materials/PBR.frag'),
     skyboxCubeMapImages: Promise.all([
       loadImage(__dirname + '/assets/cubemaps/uffizi/uffizi_cross_posx.jpg'),
       loadImage(__dirname + '/assets/cubemaps/uffizi/uffizi_cross_negx.jpg'),
@@ -78,13 +81,18 @@ createWindow({
     this.bunnyMesh.addAttribute('normal', normals.vertexNormals(bunny.cells, bunny.positions), { size: 3 });
     this.bunnyMesh.addIndexBuffer(bunny.cells);
 
-    this.bunnyProgram = new Program(gl, this.resources.showNormalsVert, this.resources.showNormalsFrag);
+    this.reflectionTexture = loadDDSCubemap(gl, __dirname + '/assets/cubemaps/pmrem_dds/ForestReflection.dds');
+    this.skyBoxTexture = loadDDSCubemap(gl, __dirname + '/assets/cubemaps/pmrem_dds/ForestIrradiance.dds');
+
+    //this.bunnyProgram = new Program(gl, this.resources.showNormalsVert, this.resources.showNormalsFrag);
+    this.bunnyProgram = new Program(gl, this.resources.pbrVert, this.resources.pbrFrag);
     this.bunnyDrawCmd = new DrawCommand({
       vertexArray: this.bunnyMesh,
       program: this.bunnyProgram,
       uniforms: {
         projectionMatrix: this.projectionMatrix,
-        modelMatrix: new Mat4().toArray()
+        modelMatrix: new Mat4().toArray(),
+        texture: this.reflectionTexture
       },
       renderState: {
         depthTest: {
@@ -94,7 +102,7 @@ createWindow({
     });
     this.commands.push(this.bunnyDrawCmd);
 
-    this.skyBoxTexture = new TextureCube(gl, this.resources.skyboxCubeMapImages);
+    //this.skyBoxTexture = new TextureCube(gl, this.resources.skyboxCubeMapImages);
     this.skyboxProgram = new Program(gl, this.resources.skyboxVert, this.resources.skyboxFrag);
     this.skyBoxMesh = createCube(this.gl, 50);
     this.skyBoxDrawCmd = new DrawCommand({
@@ -123,10 +131,12 @@ createWindow({
     //t = 0.5;
     this.eye.x = 4*Math.cos(Math.PI * t);
     this.eye.z = 4*Math.sin(Math.PI * t);
-    var viewMatrix = new Mat4().lookAt(this.eye, this.target, this.up).toArray();
+    var viewMatrix = new Mat4().lookAt(this.eye, this.target, this.up);
 
-    this.bunnyDrawCmd.uniforms.viewMatrix = viewMatrix;
-    this.skyBoxDrawCmd.uniforms.viewMatrix = viewMatrix;
+    this.bunnyDrawCmd.uniforms.viewMatrix = viewMatrix.toArray();
+    this.bunnyDrawCmd.uniforms.invViewMatrix = viewMatrix.dup().invert().toArray();
+    this.bunnyDrawCmd.uniforms.normalMatrix = viewMatrix.dup().invert().transpose().toArray();
+    this.skyBoxDrawCmd.uniforms.viewMatrix = viewMatrix.toArray();
 
     this.commands.forEach(function(cmd) {
       this.context.submit(cmd);
