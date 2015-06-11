@@ -1,5 +1,5 @@
 //utils
-var debug           = require('debug').enable('!pex/*');
+var debug           = require('debug').enable('pex/VertexArray');
 var extend          = require('extend');
 
 //sys
