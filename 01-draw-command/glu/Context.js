@@ -3,6 +3,9 @@ var TextureCube = require('./TextureCube');
 
 function Context(gl) {
   this.gl = gl;
+  this.defaults = {
+    viewport: gl.getParameter(gl.VIEWPORT)
+  }
   this.commands = [];
 }
 
@@ -26,7 +29,7 @@ Context.prototype.clear = function(cmd) {
 
 Context.prototype.draw = function(cmd) {
   var gl = this.gl;
-  if (cmd.renderState.depthTest.enabled) {
+  if (cmd.renderState.depthTest) {
     gl.enable(gl.DEPTH_TEST);
   }
   else {
@@ -53,6 +56,7 @@ Context.prototype.submit = function(cmd) {
 Context.prototype.render = function() {
   var gl = this.gl;
   var prevCmd;
+
   for(var i=0; i<this.commands.length; i++) {
     var cmd = this.commands[i];
 
@@ -107,12 +111,13 @@ Context.prototype.render = function() {
             cmd.program.uniforms[uniformName](numTextures);
             //FIXME: unbind when we are done
           }
-          if (cmd.uniforms[uniformName] instanceof TextureCube) {
+          else if (cmd.uniforms[uniformName] instanceof TextureCube) {
             cmd.uniforms[uniformName].bind(numTextures);
             cmd.program.uniforms[uniformName](numTextures);
             //FIXME: unbind when we are done
           }
           else {
+            //console.log('setting', uniformName, cmd.uniforms[uniformName])
             cmd.program.uniforms[uniformName](cmd.uniforms[uniformName]);
           }
         }
@@ -147,7 +152,7 @@ Context.prototype.render = function() {
 
     if (cmd.renderState) {
       if (!prevCmd || !prevCmd.renderState || prevCmd.renderState.depthTest != cmd.renderState.depthTest) {
-        if (cmd.renderState.depthTest.enabled) {
+        if (cmd.renderState.depthTest) {
           gl.enable(gl.DEPTH_TEST);
         }
         else {
@@ -162,6 +167,11 @@ Context.prototype.render = function() {
     else {
       //clear command
       cmd.execute(this);
+    }
+
+    if (cmd.viewport) {
+      //FIXME: this should go from some kind of stack?
+      //gl.viewport(this.defaults.viewport[0], this.defaults.viewport[1], this.defaults.viewport[2], this.defaults.viewport[3]);
     }
     prevCmd = cmd;
   }
@@ -178,6 +188,8 @@ Context.prototype.render = function() {
       prevCmd.program.unbind();
     }
   }
+
+  //console.log('render', gl.getError())
 
   this.commands = [];
 }
