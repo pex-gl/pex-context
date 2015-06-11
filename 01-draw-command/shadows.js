@@ -1,44 +1,26 @@
-var createWindow = require('./sys/createWindow');
+var createWindow  = require('./sys/createWindow');
 
-var Program      = require('./glu/Program');
-var VertexArray  = require('./glu/VertexArray');
-var Context      = require('./glu/Context');
-var ClearCommand = require('./glu/ClearCommand');
-var DrawCommand  = require('./glu/DrawCommand');
-var TextureCube  = require('./glu/TextureCube');
-var Framebuffer  = require('./glu/Framebuffer');
-var Texture2D    = require('./glu/Texture2D');
-var Vec3         = require('./geom/Vec3');
-var Mat4         = require('./geom/Mat4');
-var torus        = require('torus-mesh')();
-var createCube   = require('./vgen/createCube');
-var bunny        = require('bunny');
-var normals      = require('normals');
+var Program         = require('./glu/Program');
+var VertexArray     = require('./glu/VertexArray');
+var Context         = require('./glu/Context');
+var ClearCommand    = require('./glu/ClearCommand');
+var DrawCommand     = require('./glu/DrawCommand');
+var TextureCube     = require('./glu/TextureCube');
+var Framebuffer     = require('./glu/Framebuffer');
+var Texture2D       = require('./glu/Texture2D');
+var Vec3            = require('./geom/Vec3');
+var Mat4            = require('./geom/Mat4');
+var torus           = require('torus-mesh')();
+var createCube      = require('./agen/createCube');
+var bunny           = require('bunny');
+var normals         = require('normals');
 var rescaleVertices = require('rescale-vertices');
-var glslify      = require('glslify-promise');
-var loadImage    = require('./sys/loadImage');
-var Time         = require('./sys/Time');
-var loadDDSCubemap = require('./sys/loadDDSCubemap');
-var createFSQ    = require('./vgen/createFullScreenQuad');
-
-var BLIT_VERT = '\
-attribute vec2 position; \
-attribute vec2 texCoord; \
-varying vec2 vTexCoord; \
-void main() { \
-  gl_Position = vec4(position, 0.0, 1.0); \
-  vTexCoord = texCoord; \
-} \
-';
-
-var BLIT_FRAG = '\
-varying vec2 vTexCoord; \
-uniform sampler2D texture; \
-void main() { \
-  gl_FragColor = vec4(vTexCoord, 0.0, 1.0); \
-  gl_FragColor = texture2D(texture, vTexCoord); \
-} \
-';
+var glslify         = require('glslify-promise');
+var loadImage       = require('./sys/loadImage');
+var Time            = require('./sys/Time');
+var loadDDSCubemap  = require('./sys/loadDDSCubemap');
+var createFSQ       = require('./vgen/createFullScreenQuad');
+var toVertexArray   = require('./glu/createVertexArrayFromGeometry');
 
 createWindow({
   settings: {
@@ -53,7 +35,9 @@ createWindow({
     ShowNormalsVert: glslify(__dirname + '/sh/materials/ShowNormals.vert'),
     ShowNormalsFrag: glslify(__dirname + '/sh/materials/ShowNormals.frag'),
     ShadowMappedVert: glslify(__dirname + '/sh/materials/ShadowMapped.vert'),
-    ShadowMappedFrag: glslify(__dirname + '/sh/materials/ShadowMapped.frag')
+    ShadowMappedFrag: glslify(__dirname + '/sh/materials/ShadowMapped.frag'),
+    BlitVert: glslify(__dirname + '/sh/materials/Blit.vert'),
+    BlitFrag: glslify(__dirname + '/sh/materials/Blit.frag')
   },
   init: function() {
       try {
@@ -83,13 +67,13 @@ createWindow({
 
       this.commands = [];
 
-      //FIXME: this.mesh.addAttribute - is too long
-      this.bunnyMesh = new VertexArray(gl);
-      this.bunnyMesh.addAttribute('position', rescaleVertices(bunny.positions, targetBounds), { size: 3 });
-      this.bunnyMesh.addAttribute('normal', normals.vertexNormals(bunny.cells, bunny.positions), { size: 3 });
-      this.bunnyMesh.addIndexBuffer(bunny.cells);
+      this.bunnyMesh = toVertexArray(gl, {
+        position: rescaleVertices(bunny.positions, targetBounds),
+        normal: normals.vertexNormals(bunny.cells, bunny.positions),
+        indices: bunny.cells
+      });
 
-      this.floorMesh = createCube(gl, 5, 0.1, 5);
+      this.floorMesh = toVertexArray(gl, createCube(5, 0.1, 5));
 
       this.drawDepthProgram = new Program(gl, this.resources.ShowNormalsVert, this.resources.ShowNormalsFrag);
       this.drawShadowMappedProgram = new Program(gl, this.resources.ShadowMappedVert, this.resources.ShadowMappedFrag);
@@ -97,7 +81,7 @@ createWindow({
       this.depthMap = Texture2D.create(gl, 1024, 1024, { format: this.gl.DEPTH_COMPONENT, type: this.gl.UNSIGNED_SHORT });
       this.shadowFBO = new Framebuffer(gl, 1024, 1024, { depth: this.depthMap });
 
-      this.blitProgram = new Program(gl, BLIT_VERT, BLIT_FRAG);
+      this.blitProgram = new Program(gl, this.resources.BlitVert, this.resources.BlitFrag);
 
       this.clearShadowCmd = new ClearCommand({
         color: [0.2, 0.82, 0.2, 1.0],

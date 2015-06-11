@@ -10,12 +10,14 @@ function VertexArray(gl) {
 VertexArray.prototype.addAttribute = function(name, data, opts) {
   opts = opts || {};
   this.attributes[name] = new VertexBuffer(this.gl, data, opts);
+  return this;
 }
 
 VertexArray.prototype.addIndexBuffer = function(data, opts) {
   opts = opts || {};
   opts.type = Uint16Array;
   this.indexBuffer = new VertexBuffer(this.gl, data, opts);
+  return this;
 }
 
 VertexArray.prototype.bind = function(program) {
