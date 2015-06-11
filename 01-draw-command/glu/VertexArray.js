@@ -9,6 +9,7 @@ function VertexArray(gl) {
 
 VertexArray.prototype.addAttribute = function(name, data, opts) {
   opts = opts || {};
+  opts.target = this.gl.ARRAY_BUFFER;
   this.attributes[name] = new VertexBuffer(this.gl, data, opts);
   return this;
 }
@@ -20,6 +21,7 @@ VertexArray.prototype.updateAttribute = function(name, data) {
 VertexArray.prototype.addIndexBuffer = function(data, opts) {
   opts = opts || {};
   opts.type = Uint16Array;
+  opts.target = this.gl.ELEMENT_ARRAY_BUFFER;
   this.indexBuffer = new VertexBuffer(this.gl, data, opts);
   return this;
 }
@@ -56,8 +58,7 @@ VertexArray.prototype.unbind = function(program) {
 VertexArray.prototype.draw = function(opts) {
   var gl = this.gl;
   var primitiveType = (opts && opts.primitiveType) || gl.TRIANGLES;
-  var num = this.attributes.position.dataBuf.length / 2; //FIXME: hardcoded
-  //this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.geometry.faces.buffer.handle);
+  var num = this.attributes.position.dataBuf.length / this.attributes.position.size;
 
   if (this.indexBuffer) {
     this.gl.drawElements(primitiveType, this.indexBuffer.dataBuf.length, this.gl.UNSIGNED_SHORT, 0);
