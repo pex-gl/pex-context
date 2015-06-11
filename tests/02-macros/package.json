@@ -1,0 +1,11 @@
+{
+  "name": "custom-operators",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "sweet.js": "^0.7.4"
+  },
+  "scripts": {
+    "compile": "(node node_modules/sweet.js --module ./macros-vec3.js --readable-names --sourcemap --output out.js main.js; node out.js)"
+  }
+}
