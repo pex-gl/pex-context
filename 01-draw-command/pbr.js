@@ -90,9 +90,9 @@ createWindow({
       vertexArray: this.bunnyMesh,
       program: this.bunnyProgram,
       uniforms: {
-        projectionMatrix: this.projectionMatrix,
-        modelMatrix: new Mat4().toArray(),
-        texture: this.reflectionTexture
+        projectionMatrix  : this.projectionMatrix,
+        modelMatrix       : new Mat4().toArray(),
+        texture           : this.reflectionTexture
       },
       renderState: {
         depthTest: {
