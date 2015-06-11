@@ -28,25 +28,8 @@ Context.prototype.clear = function(cmd) {
 }
 
 Context.prototype.draw = function(cmd) {
-  var gl = this.gl;
-  if (cmd.renderState.depthTest) {
-    gl.enable(gl.DEPTH_TEST);
-  }
-  else {
-    gl.disable(gl.DEPTH_TEST);
-  }
-  cmd.program.bind();
-  if (cmd.uniforms) {
-    for(var uniformName in cmd.uniforms) {
-      if (cmd.program.uniforms[uniformName]) {
-        cmd.program.uniforms[uniformName](cmd.uniforms[uniformName]);
-      }
-    }
-  }
-  cmd.vertexArray.bind(cmd.program);
-  cmd.vertexArray.draw();
-  cmd.vertexArray.unbind(cmd.program);
-  cmd.program.unbind();
+  this.submit(cmd);
+  this.render();
 }
 
 Context.prototype.submit = function(cmd) {
