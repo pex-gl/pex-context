@@ -87,6 +87,7 @@ Context.prototype.render = function() {
 
     if (!prevCmd || prevCmd.program != cmd.program) {
       if (cmd.program) {
+        if (!cmd.program.ready) continue;
         cmd.program.bind();
       }
     }
