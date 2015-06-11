@@ -87,6 +87,11 @@ Context.prototype.render = function() {
     //FIXME: counting texture uniforms to autoassign texture units
     var numTextures = 0;
     if (cmd.program && cmd.uniforms) {
+      Object.keys(cmd.program.uniforms).forEach(function(uniformName) {
+        if (cmd.uniforms[uniformName] === undefined) {
+          throw new Error('Context.render missing uniform value "' + uniformName + '""');
+        }
+      })
       for(var uniformName in cmd.uniforms) {
         if (cmd.program.uniforms[uniformName]) {
           if (cmd.uniforms[uniformName] instanceof Texture2D) {
