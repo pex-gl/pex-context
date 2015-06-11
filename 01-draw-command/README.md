@@ -14,6 +14,16 @@ And you can save that state objects, replay them, drop them, filter them, log th
 
 So more game engine like, more functional, more virtual dom like, less hidden state dragging around.
 
+## Examples
+
+fx - postprocessing, fbo chaining
+fbr - hdr, loading cubemaps, glslify
+?shadows - shadow maps, materials with passes (shadow, opaque, transparent)
+?dynamic geometry - line builder, expanding VAO
+?sdf fonts - gui
+?mesh - geometry + vao + material
+
+
 ## References
 
 **Cesium**  
@@ -51,11 +61,11 @@ Designing a Data-Driven Renderer in GPU Pro 3
     id<MTLRenderCommandEncoder> commandEncoder = [commandBuffer renderCommandEncoderWithDescriptor:renderPass];
         [commandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
         [commandEncoder setCullMode:MTLCullModeBack];
-        
+
         [self drawSkyboxWithCommandEncoder:commandEncoder];
 
     (void)drawSkyboxWithCommandEncoder:(id<MTLRenderCommandEncoder>)commandEncoder {
-    
+
     MTLDepthStencilDescriptor *depthDescriptor = [MTLDepthStencilDescriptor new];
     depthDescriptor.depthCompareFunction = MTLCompareFunctionLess;
     depthDescriptor.depthWriteEnabled = NO;
@@ -81,5 +91,3 @@ Designing a Data-Driven Renderer in GPU Pro 3
 
 - Where to put texture sampler state?
 - How to do FBO PingPong -  draw commands that are identical but with FBO changing multiple times during the frame
-
-
