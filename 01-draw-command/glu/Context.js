@@ -92,11 +92,13 @@ Context.prototype.render = function() {
           if (cmd.uniforms[uniformName] instanceof Texture2D) {
             cmd.uniforms[uniformName].bind(numTextures);
             cmd.program.uniforms[uniformName](numTextures);
+            numTextures++;
             //FIXME: unbind when we are done
           }
           else if (cmd.uniforms[uniformName] instanceof TextureCube) {
             cmd.uniforms[uniformName].bind(numTextures);
             cmd.program.uniforms[uniformName](numTextures);
+            numTextures++;
             //FIXME: unbind when we are done
           }
           else {
