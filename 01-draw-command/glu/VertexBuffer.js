@@ -6,9 +6,16 @@ function VertexBuffer(gl, data, opts) {
   this.gl = gl;
   opts = opts || {};
   this.usage = opts.usage || gl.STATIC_DRAW; //DYNAMIC_DRAW
-  this.target = opts.target || gl.ARRAY_BUFFER; //ELEMENT_ARRAY_BUFFER
+  this.target = opts.target; //ELEMENT_ARRAY_BUFFER
   this.type = opts.type || Float32Array; //Uint16Array, Uint32Array in WebGL2.0?
-  this.size = opts.size || 3; //element size, FIXME: is that good assumption?
+  this.size = opts.size;
+  //FIXME: refactor attrib size guessing code
+  if (!this.size && Array.isArray(data) && Array.isArray(data[0])) {
+    this.size = data[0].length;
+  }
+  if (!this.size) {
+    throw new Error('Couldn\t guess attribute size');
+  }
 
   if (Array.isArray(data)) {
     //array of arrays -> flat typed array
@@ -29,6 +36,7 @@ function VertexBuffer(gl, data, opts) {
   this.handle = this.gl.createBuffer();
   this.gl.bindBuffer(this.target, this.handle);
   this.gl.bufferData(this.target, this.dataBuf, this.usage);
+  this.gl.bindBuffer(this.target, null);
 }
 
 //assuming the same array length
@@ -47,6 +55,7 @@ VertexBuffer.prototype.update = function(data) {
   }
   this.gl.bindBuffer(this.target, this.handle);
   this.gl.bufferData(this.target, this.dataBuf, this.usage);
+  this.gl.bindBuffer(this.target, null);
 }
 
 VertexBuffer.prototype.dispose = function() {
