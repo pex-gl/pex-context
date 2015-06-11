@@ -62,11 +62,10 @@ createWindow({
         this.initMeshes();
         this.initResources();
         this.initCommands();
-
         this.on('resize', this.onResize.bind(this));
       }
       catch(e) {
-        console.log(e);
+        console.log(e.stack);
       }
   },
   initMeshes: function() {
