@@ -4,13 +4,16 @@
   "description": "Draw Command based renderer / architecture",
   "main": "basic.js",
   "dependencies": {
+    "browserify": "^10.2.4",
     "bunny": "^1.0.1",
     "debug": "^2.2.0",
     "extend": "^2.0.1",
     "geo-3d-box": "^1.0.3",
     "gl-mat4": "^1.1.4",
+    "merge": "^1.2.0",
     "normals": "^1.0.1",
     "object-assign": "^3.0.0",
+    "ramda": "^0.14.0",
     "rescale-vertices": "^1.0.0",
     "torus-mesh": "^1.0.0"
   },
@@ -19,5 +22,5 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "MIT"
 }
