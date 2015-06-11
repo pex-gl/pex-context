@@ -7,6 +7,7 @@ var createWindow    = require('./sys/createWindow');
 var loadImage       = require('./sys/loadImage');
 var Time            = require('./sys/Time');
 var loadDDSCubemap  = require('./sys/loadDDSCubemap');
+var Platform        = require('./sys/Platform');
 
 //glu
 var Program         = require('./glu/Program');
@@ -43,7 +44,8 @@ createWindow({
   settings: {
     width: 1280,
     height: 720,
-    multisample: true
+    multisample: true,
+    fullscreen: Platform.isBrowser
   },
   //Problems with preloading resources
   //-might need gl context
