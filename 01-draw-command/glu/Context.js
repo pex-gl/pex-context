@@ -5,7 +5,7 @@ var log = require('debug')('pex/Context');
 function Context(gl) {
   this.gl = gl;
   this.defaults = {
-    viewport: gl.getParameter(gl.VIEWPORT)
+    viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]
   }
   this.commands = [];
 }
@@ -41,6 +41,10 @@ Context.prototype.render = function() {
   log('render');
   var gl = this.gl;
   var prevCmd;
+
+  //Update current WebGL context size. Could be done only on resize;
+  this.defaults.viewport[2] = gl.drawingBufferWidth;
+  this.defaults.viewport[3] = gl.drawingBufferHeight;
 
   for(var i=0; i<this.commands.length; i++) {
     var cmd = this.commands[i];
