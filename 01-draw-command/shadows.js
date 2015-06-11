@@ -1,5 +1,6 @@
-//debug
+//utils
 var debug           = require('debug').enable('!pex/*');
+var extend          = require('extend');
 
 //sys
 var createWindow    = require('./sys/createWindow');
@@ -34,6 +35,7 @@ var translate       = require('gl-mat4/translate');
 
 //shaders
 var glslify         = require('glslify-promise');
+
 
 createWindow({
   settings: {
@@ -116,6 +118,49 @@ createWindow({
   initCommands: function() {
     this.commands = [];
 
+    var drawRenderState = {
+      depthTest: true
+    };
+
+    var blitRenderState = {
+      depthTest: true
+    };
+
+    var drawShadowUniforms = {
+      projectionMatrix  : this.lightProjectionMatrix,
+      viewMatrix        : this.lightViewMatrix
+    };
+
+    var drawShadowFloorUniforms = extend({
+      modelMatrix       : this.floorModelMatrix
+    }, drawShadowUniforms);
+
+    var drawShadowBunnyUniforms = extend({
+      modelMatrix       : this.bunnyModelMatrix
+    }, drawShadowUniforms)
+
+    var drawUniforms = {
+      projectionMatrix  : this.camProjectionMatrix,
+      viewMatrix        : this.viewMatrix,
+      depthMap          : this.depthMap,
+      ambientColor      : [0.0, 0.0, 0.0, 0.0],
+      diffuseColor      : [1.0, 1.0, 1.0, 1.0],
+      lightPos          : this.lightPos,
+      wrap              : 0,
+      lightNear         : this.lightNear,
+      lightFar          : this.lightFar,
+      lightViewMatrix   : this.lightViewMatrix,
+      lightProjectionMatrix: this.lightProjectionMatrix
+    };
+
+    var drawFloorUniforms = extend({
+      modelMatrix       : this.floorModelMatrix
+    }, drawUniforms);
+
+    var drawBunnyUniforms = extend({
+      modelMatrix       : this.bunnyModelMatrix
+    }, drawUniforms);
+
     this.clearShadowCmd = new ClearCommand({
       color: [0.2, 0.82, 0.2, 1.0],
       depth: true,
@@ -128,89 +173,43 @@ createWindow({
     });
 
     this.floorDrawShadowCmd = new DrawCommand({
-      vertexArray: this.floorMesh,
-      program: this.drawDepthProgram,
-      uniforms: {
-        projectionMatrix  : this.lightProjectionMatrix,
-        viewMatrix        : this.lightViewMatrix,
-        modelMatrix       : this.floorModelMatrix
-      },
-      renderState: {
-        depthTest: true
-      },
-      viewport: [0, 0, this.shadowFBO.width, this.shadowFBO.height],
-      framebuffer: this.shadowFBO
+      vertexArray : this.floorMesh,
+      program     : this.drawDepthProgram,
+      uniforms    : drawShadowFloorUniforms,
+      renderState : drawRenderState,
+      viewport    : [0, 0, this.shadowFBO.width, this.shadowFBO.height],
+      framebuffer : this.shadowFBO
     });
 
     this.bunnyDrawShadowCmd = new DrawCommand({
-      vertexArray: this.bunnyMesh,
-      program: this.drawDepthProgram,
-      uniforms: {
-        projectionMatrix  : this.lightProjectionMatrix,
-        viewMatrix        : this.lightViewMatrix,
-        modelMatrix       : this.bunnyModelMatrix
-      },
-      renderState: {
-        depthTest: true
-      },
-      viewport: [0, 0, this.shadowFBO.width, this.shadowFBO.height],
-      framebuffer: this.shadowFBO
+      vertexArray : this.bunnyMesh,
+      program     : this.drawDepthProgram,
+      uniforms    : drawShadowBunnyUniforms,
+      renderState : drawRenderState,
+      viewport    : [0, 0, this.shadowFBO.width, this.shadowFBO.height],
+      framebuffer : this.shadowFBO
     });
 
     this.floorDrawCmd = new DrawCommand({
-      vertexArray: this.floorMesh,
-      program: this.drawShadowMappedProgram,
-      uniforms: {
-        projectionMatrix  : this.camProjectionMatrix,
-        viewMatrix        : this.viewMatrix,
-        modelMatrix       : this.floorModelMatrix,
-        depthMap          : this.depthMap,
-        ambientColor      : [0.0, 0.0, 0.0, 0.0],
-        diffuseColor      : [1.0, 1.0, 1.0, 1.0],
-        lightPos          : this.lightPos,
-        wrap              : 0,
-        lightNear         : this.lightNear,
-        lightFar          : this.lightFar,
-        lightViewMatrix   : this.lightViewMatrix,
-        lightProjectionMatrix: this.lightProjectionMatrix
-      },
-      renderState: {
-        depthTest: true
-      }
+      vertexArray : this.floorMesh,
+      program     : this.drawShadowMappedProgram,
+      uniforms    : drawFloorUniforms,
+      renderState : drawRenderState
     });
 
     this.bunnyDrawCmd = new DrawCommand({
-      vertexArray: this.bunnyMesh,
-      program: this.drawShadowMappedProgram,
-      uniforms: {
-        projectionMatrix  : this.camProjectionMatrix,
-        viewMatrix        : this.viewMatrix,
-        modelMatrix       : this.bunnyModelMatrix,
-        depthMap          : this.depthMap,
-        ambientColor      : [0.3, 0.3, 0.3, 1.0],
-        diffuseColor      : [1.0, 1.0, 1.0, 1.0],
-        lightPos          : this.lightPos,
-        wrap              : 0,
-        lightNear         : this.lightNear,
-        lightFar          : this.lightFar,
-        lightViewMatrix   : this.lightViewMatrix,
-        lightProjectionMatrix: this.lightProjectionMatrix
-      },
-      renderState: {
-        depthTest: true
-      }
+      vertexArray : this.bunnyMesh,
+      program     : this.drawShadowMappedProgram,
+      uniforms    : drawBunnyUniforms,
+      renderState : drawRenderState
     });
 
     this.blitCmd = new DrawCommand({
-      vertexArray: this.quad,
-      program: this.blitProgram,
-      renderState: {
-        depthTest: {
-          enabled: false
-        }
-      },
-      uniforms: {
-        texture: this.blitTexture,
+      vertexArray : this.quad,
+      program     : this.blitProgram,
+      renderState : blitRenderState,
+      uniforms    : {
+        texture : this.blitTexture,
         textureSize: [ this.blitTexture.width, this.blitTexture.height ]
       }
     });
