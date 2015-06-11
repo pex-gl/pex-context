@@ -1,5 +1,6 @@
-var plask = require('plask');
 var R = require('ramda');
+var Platform = require('./Platform');
+var createBrowserWindow = require('./createBrowserWindow');
 
 function createWindow(opts) {
   opts.settings = opts.settings || {};
@@ -32,7 +33,16 @@ function createWindow(opts) {
       })
     }
   }
-  plask.simpleWindow(opts);
+  if (Platform.isPlask) {
+    var plask = require('plask');
+    plask.simpleWindow(opts);
+  }
+  else if (Platform.isBrowser) {
+    var win = createBrowserWindow(opts);
+  }
+  else {
+    throw new Error('Can\'t create Window. Unknown platform');
+  }
 }
 
 module.exports = createWindow;
