@@ -11,6 +11,9 @@ varying vec3 vWorldPosition;
 uniform mat4 lightProjectionMatrix;
 uniform mat4 lightViewMatrix;
 
+#pragma glslify: toLinear=require(../lib/gamma-in)
+#pragma glslify: toGamma=require(../lib/gamma-out)
+
 //fron depth buf normalized z to linear (eye space) z
 //http://stackoverflow.com/questions/6652253/getting-the-true-z-value-from-the-depth-buffer
 float ndcDepthToEyeSpace(float ndcDepth) {
@@ -30,7 +33,9 @@ void main() {
   vec3 L = normalize(lightPos);
   vec3 N = normalize(vNormal);
   float NdotL = max(0.0, (dot(N, L) + wrap) / (1.0 + wrap));
-  gl_FragColor = ambientColor + NdotL * diffuseColor;
+  vec3 ambient = toLinear(ambientColor.rgb);
+  vec3 diffuse = toLinear(diffuseColor.rgb);
+  gl_FragColor.rgb = ambient + NdotL * diffuse;
 
   vec4 lightViewPosition = lightViewMatrix * vec4(vWorldPosition, 1.0);
   float lightDist1 = -lightViewPosition.z;
@@ -43,7 +48,9 @@ void main() {
   if (lightDist1 < lightDist2 + bias)
     gl_FragColor = min(gl_FragColor,  vec4(1.0, 1.0, 1.0, 1.0));
   else
-    gl_FragColor = min(gl_FragColor, vec4(0.5, 0.5, 0.5, 1.0));
+    gl_FragColor = min(gl_FragColor, vec4(0.05, 0.05, 0.05, 1.0));
+
+  gl_FragColor.rgb = toGamma(gl_FragColor.rgb);
 
   //gl_FragColor = vec4(lightDist1/5.0);
   //gl_FragColor = vec4(lightUV, 0.0, 1.0);
