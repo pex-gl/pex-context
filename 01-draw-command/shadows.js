@@ -274,6 +274,13 @@ createWindow({
     this.commands.forEach(function(cmd) {
       this.context.submit(cmd);
     }.bind(this));
-    this.context.render();
+
+    try {
+      this.context.render();
+    }
+    catch(e) {
+      console.log(e);
+      console.log(e.stack)
+    }
   }
 })
