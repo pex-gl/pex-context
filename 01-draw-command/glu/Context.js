@@ -164,7 +164,7 @@ Context.prototype.render = function() {
 
     if (cmd.viewport) {
       //FIXME: this should go from some kind of stack?
-      //gl.viewport(this.defaults.viewport[0], this.defaults.viewport[1], this.defaults.viewport[2], this.defaults.viewport[3]);
+      gl.viewport(this.defaults.viewport[0], this.defaults.viewport[1], this.defaults.viewport[2], this.defaults.viewport[3]);
     }
     prevCmd = cmd;
   }
