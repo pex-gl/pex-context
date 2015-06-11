@@ -7,16 +7,20 @@ function createWindow(opts) {
 
   //wait for all resources to load
   if (opts.resources) {
-    var oldInit = opts.init;
-    var oldDraw = opts.draw;
+    opts._init = opts.init;
+    opts._draw = opts.draw;
     opts.draw = function() {};
     opts.init = function() {
       Promise.all(R.values(opts.resources)).then(function(resources) {
-        opts.init = oldInit;
-        opts.draw = oldDraw;
+        opts.draw = function() {
+          if (opts.update) {
+            opts.update();
+          }
+          opts._draw();
+        };
         console.log('init resources', resources.length);
         try {
-          opts.init();
+          opts._init();
         }
         catch(e) {
           console.log()
