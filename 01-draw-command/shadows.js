@@ -63,6 +63,7 @@ createWindow({
         this.initResources();
         this.initCommands();
 
+        this.on('resize', this.onResize.bind(this));
       }
       catch(e) {
         console.log(e);
@@ -229,6 +230,9 @@ createWindow({
     this.commands.push(this.floorDrawCmd);
     this.commands.push(this.bunnyDrawCmd);
     //this.commands.push(this.blitCmd);
+  },
+  onResize: function(e) {
+    perspective(this.camProjectionMatrix, Math.PI/4, this.width/this.height, 0.1, 100);
   },
   update: function() {
     Time.verbose = true;
