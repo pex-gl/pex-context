@@ -2,3 +2,4 @@
 .atom-build.json
 .idea
 node_modules/
+01-draw-command/*.web.js
