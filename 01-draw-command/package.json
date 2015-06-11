@@ -10,6 +10,7 @@
     "geo-3d-box": "^1.0.3",
     "gl-mat4": "^1.1.4",
     "normals": "^1.0.1",
+    "object-assign": "^3.0.0",
     "rescale-vertices": "^1.0.0",
     "torus-mesh": "^1.0.0"
   },
