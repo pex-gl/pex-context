@@ -186,8 +186,6 @@ Context.prototype.render = function() {
     }
   }
 
-  //console.log('render', gl.getError())
-
   this.commands = [];
 }
 
