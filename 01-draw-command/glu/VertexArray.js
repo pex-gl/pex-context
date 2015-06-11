@@ -13,6 +13,10 @@ VertexArray.prototype.addAttribute = function(name, data, opts) {
   return this;
 }
 
+VertexArray.prototype.updateAttribute = function(name, data) {
+  this.attributes[name].update(data);
+}
+
 VertexArray.prototype.addIndexBuffer = function(data, opts) {
   opts = opts || {};
   opts.type = Uint16Array;

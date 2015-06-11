@@ -1,4 +1,4 @@
-var pack = require('array-pack-2d');
+var unpack = require('../util/unpack-array');
 
 //VBO implementation
 //Example usage new Buffer(gl, vertices, { usage: gl.STATIC_DRAW, target: gl.ARRAY_BUFFER, type: Float32Array})
@@ -13,16 +13,38 @@ function VertexBuffer(gl, data, opts) {
   if (Array.isArray(data)) {
     //array of arrays -> flat typed array
     if (Array.isArray(data[0])) {
-      data = pack(data, this.type);
+      this.dataBuf = new this.type(data.length * data[0].length);
+      unpack(this.dataBuf, data);
     }
     //array -> flat type array
     else {
-      data = new this.type(data)
+      this.dataBuf = new this.type(data)
     }
   }
+  else {
+    //assuming typed array
+    this.dataBuf = data;
+  }
 
-  this.dataBuf = data;
   this.handle = this.gl.createBuffer();
+  this.gl.bindBuffer(this.target, this.handle);
+  this.gl.bufferData(this.target, this.dataBuf, this.usage);
+}
+
+//assuming the same array length
+VertexBuffer.prototype.update = function(data) {
+  if (Array.isArray(data)) {
+    if (Array.isArray(data[0])) {
+      unpack(this.dataBuf, data);
+    }
+    //array -> flat type array
+    else {
+      this.dataBuf.set(data);
+    }
+  }
+  else {
+    this.dataBuf.set(data);
+  }
   this.gl.bindBuffer(this.target, this.handle);
   this.gl.bufferData(this.target, this.dataBuf, this.usage);
 }

@@ -26,12 +26,14 @@ var bunny           = require('bunny');
 var torus           = require('torus-mesh')();
 var normals         = require('normals');
 var rescaleVertices = require('rescale-vertices');
+var SimplexNoise    = require('simplex-noise');
 
 //math
 var createMat4      = require('gl-mat4/create');
 var lookAt          = require('gl-mat4/lookAt');
 var perspective     = require('gl-mat4/perspective');
 var translate       = require('gl-mat4/translate');
+var copy3           = require('gl-vec3/copy');
 
 //shaders
 var glslify         = require('glslify-promise');
@@ -74,9 +76,13 @@ createWindow({
       [ 1,  1,  1]
     ];
 
+    this.bunnyBaseVertices = rescaleVertices(bunny.positions, targetBounds);
+    this.bunnyNoiseVertices = rescaleVertices(bunny.positions, targetBounds);
+    this.bunnyBaseNormals = normals.vertexNormals(bunny.cells, bunny.positions);
+
     this.bunnyMesh = toVertexArray(gl, {
-      position: rescaleVertices(bunny.positions, targetBounds),
-      normal: normals.vertexNormals(bunny.cells, bunny.positions),
+      position: this.bunnyBaseVertices,
+      normal: this.bunnyBaseNormals,
       indices: bunny.cells
     });
 
@@ -114,6 +120,8 @@ createWindow({
     this.quad = createFSQ(gl);
 
     this.blitTexture = this.depthMap;
+
+    this.noise = new SimplexNoise();
   },
   initCommands: function() {
     this.commands = [];
@@ -227,11 +235,28 @@ createWindow({
     Time.update();
 
     //rotate camera
-    var t = Time.seconds / 5;
+    var t = Time.seconds / 10;
     this.eye[0] = 6*Math.cos(Math.PI * t);
     this.eye[1] = 3;
     this.eye[2] = 6*Math.sin(Math.PI * t);
     lookAt(this.viewMatrix, this.eye, this.target, this.up);
+
+    for(var i=0; i<this.bunnyBaseVertices.length; i++) {
+      var v = this.bunnyNoiseVertices[i];
+      var n = this.bunnyBaseNormals[i];
+      //reset position
+      copy3(v, this.bunnyBaseVertices[i]);
+      var noiseFrequency = 1;
+      var noiseScale = 0.1;
+      var f = this.noise.noise3D(v[0]*noiseFrequency, v[1]*noiseFrequency, v[2]*noiseFrequency + Time.seconds);
+      v[0] += n[0] * noiseScale * (f+1);
+      v[1] += n[1] * noiseScale * (f+1);
+      v[2] += n[2] * noiseScale * (f+1);
+    }
+
+    this.bunnyMesh.updateAttribute('position', this.bunnyNoiseVertices);
+    //FIXME: GC Scream!
+    this.bunnyMesh.updateAttribute('normal', normals.vertexNormals(bunny.cells, this.bunnyNoiseVertices));
   },
   draw: function() {
     var gl = this.gl;
