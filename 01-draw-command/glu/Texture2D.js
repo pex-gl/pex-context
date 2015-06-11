@@ -1,6 +1,6 @@
 var assign = require('object-assign');
 //var TEXTURE_MAX_ANISOTROPY_EXT = 0x84FE;
-var Platform = {};
+var Platform = require('../sys/Platform');
 
 function Texture2D(gl) {
   this.gl = gl
