@@ -5,6 +5,7 @@
   "main": "basic.js",
   "dependencies": {
     "bunny": "^1.0.1",
+    "debug": "^2.2.0",
     "geo-3d-box": "^1.0.3",
     "normals": "^1.0.1",
     "object-assign": "^2.0.0",

@@ -4,7 +4,7 @@ function createCube(sx, sy, sz) {
   sy = sy || sx || 1;
   sz = sz || sx || 1;
   return {
-    positions: [
+    position: [
       [-sx/2, -sy/2,  sz/2], [-sx/2,  sy/2,  sz/2], [ sx/2,  sy/2,  sz/2], [ sx/2, -sy/2,  sz/2], //front face
       [-sx/2, -sy/2, -sz/2], [-sx/2,  sy/2, -sz/2], [ sx/2,  sy/2, -sz/2], [ sx/2, -sy/2, -sz/2], //back face
       [ sx/2, -sy/2,  sz/2], [ sx/2,  sy/2,  sz/2], [ sx/2,  sy/2, -sz/2], [ sx/2, -sy/2, -sz/2], //right face
@@ -12,7 +12,7 @@ function createCube(sx, sy, sz) {
       [-sx/2,  sy/2,  sz/2], [-sx/2,  sy/2, -sz/2], [ sx/2,  sy/2, -sz/2], [ sx/2,  sy/2,  sz/2], //top face
       [-sx/2, -sy/2,  sz/2], [-sx/2, -sy/2, -sz/2], [ sx/2, -sy/2, -sz/2], [ sx/2, -sy/2,  sz/2]  //bottom face
     ],
-    normals: [
+    normal: [
       [ 0,  0,  1], [ 0,  0,  1], [ 0,  0,  1], [ 0,  0,  1], //front face
       [ 0,  0, -1], [ 0,  0, -1], [ 0,  0, -1], [ 0,  0, -1], //back face
       [ 1,  0,  0], [ 1,  0,  0], [ 1,  0,  0], [ 1,  0,  0], //right face
@@ -20,7 +20,7 @@ function createCube(sx, sy, sz) {
       [ 0,  1,  0], [ 0,  1,  0], [ 0,  1,  0], [ 0,  1,  0], //top face
       [ 0, -1,  0], [ 0, -1,  0], [ 0, -1,  0], [ 0, -1,  0]  //bottom face
     ],
-    cells: [
+    indices: [
       [ 0,  3,  2], [ 0,  2,  1], //front face
       [ 6,  7,  4], [ 5,  6,  4], //back face
       [ 8, 11, 10], [ 8, 10,  9], //right face

@@ -1,5 +1,5 @@
-var createWindow  = require('./sys/createWindow');
-
+var debug           = require('debug').enable('!pex/*');
+var createWindow    = require('./sys/createWindow');
 var Program         = require('./glu/Program');
 var VertexArray     = require('./glu/VertexArray');
 var Context         = require('./glu/Context');
@@ -40,7 +40,6 @@ createWindow({
     BlitFrag: glslify(__dirname + '/sh/materials/Blit.frag')
   },
   init: function() {
-      try {
       this.framerate(60);
 
       var gl = this.gl;
@@ -142,8 +141,7 @@ createWindow({
         },
         renderState: {
           depthTest: true
-        },
-        viewport: [0, 0, this.width, this.height] //FIXME: not needed
+        }
       });
 
       this.bunnyDrawCmd = new DrawCommand({
@@ -164,14 +162,12 @@ createWindow({
         },
         renderState: {
           depthTest: true
-        },
-        viewport: [0, 0, this.width, this.height] //FIXME: not needed
+        }
       });
 
       this.quad = createFSQ(gl);
 
-      this.blitTexture = this.shadowFBO.getColorAttachment(0);
-      //this.blitTexture = this.depthMap;
+      this.blitTexture = this.depthMap;
       this.blitCmd = new DrawCommand({
         vertexArray: this.quad,
         program: this.blitProgram,
@@ -183,8 +179,7 @@ createWindow({
         uniforms: {
           texture: this.blitTexture,
           textureSize: [ this.blitTexture.width, this.blitTexture.height ]
-        },
-        viewport: [0, 0, this.width, this.height]
+        }
       });
 
       this.commands.push(this.clearShadowCmd);
@@ -194,10 +189,6 @@ createWindow({
       this.commands.push(this.floorDrawCmd);
       this.commands.push(this.bunnyDrawCmd);
       //this.commands.push(this.blitCmd);
-    }
-    catch(e) {
-      console.log(e)
-    }
   },
   draw: function() {
     Time.verbose = true;
@@ -223,6 +214,6 @@ createWindow({
     this.commands.forEach(function(cmd) {
       this.context.submit(cmd);
     }.bind(this));
-    this.context.render();
+    this.context.render({debug: true});
   }
 })

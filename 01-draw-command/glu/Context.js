@@ -1,5 +1,6 @@
 var Texture2D = require('./Texture2D');
 var TextureCube = require('./TextureCube');
+var log = require('debug')('pex/Context');
 
 function Context(gl) {
   this.gl = gl;
@@ -37,11 +38,13 @@ Context.prototype.submit = function(cmd) {
 }
 
 Context.prototype.render = function() {
+  log('render');
   var gl = this.gl;
   var prevCmd;
 
   for(var i=0; i<this.commands.length; i++) {
     var cmd = this.commands[i];
+    log('cmd', i, '/', this.commands.length, cmd.viewport);
 
     //FIXME: store default viewport
     //FIXME: compare with previous viewport
