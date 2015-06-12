@@ -42,7 +42,7 @@ void main() {
   vec4 lightDeviceCoordsPosition = lightProjectionMatrix * lightViewPosition;
   vec2 lightDeviceCoordsPositionNormalized = lightDeviceCoordsPosition.xy / lightDeviceCoordsPosition.w;
   vec2 lightUV = lightDeviceCoordsPositionNormalized.xy * 0.5 + 0.5;
-  float bias = 0.005;
+  float bias = 0.01;
   float lightDist2 = readDepth(depthMap, lightUV);
 
   if (lightDist1 < lightDist2 + bias)

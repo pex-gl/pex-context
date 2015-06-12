@@ -39,7 +39,7 @@ vec3 getSkybox(samplerCube reflectionMap, vec3 reflectionWorld) {
 }
 
 void main() {
-  float textureSize = 256;
+  float textureSize = 256.0;
   float level = 5.0;
   gl_FragColor.rgb = tonemapReinhard(getSkybox(texture, normalize(vNormal)), 1.0);
   gl_FragColor.a = 1.0;

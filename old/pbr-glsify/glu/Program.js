@@ -1,6 +1,7 @@
 var Context = require('./Context');
 var sys = require('pex-sys');
 var IO = sys.IO;
+var Promise = require('bluebird');
 
 var kVertexShaderPrefix = '' +
   '#ifdef GL_ES\n' +
@@ -33,9 +34,7 @@ function Program(vertSrc, fragSrc) {
       if (this.vertShader && this.fragShader) {
         this.link();
       }
-    }.bind(this)).catch(function(e) {
-      console.log(e.stack)
-    })
+    }.bind(this))
   }
   else {
     this.addSources(vertSrc, fragSrc);

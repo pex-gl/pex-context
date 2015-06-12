@@ -2,7 +2,7 @@
 function createCube(sx, sy, sz) {
   sx = sx || 1;
   sy = sy || sx || 1;
-  sz = sz || sx || 1;
+  sz = sz || sy || sx || 1;
   return {
     position: [
       [-sx/2, -sy/2,  sz/2], [-sx/2,  sy/2,  sz/2], [ sx/2,  sy/2,  sz/2], [ sx/2, -sy/2,  sz/2], //front face

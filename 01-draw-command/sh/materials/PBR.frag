@@ -43,7 +43,7 @@ void main() {
   roughness = smoothstep(0.29, 0.31, 0.3 + 0.3 * snoise3(4.0*positionWorld));
   vec3 eyePosView = vec3(0.0, 0.0, 0.0);
   vec3 eyeDirView = normalize(eyePosView - positionView);
-  float textureSize = 256;
+  float textureSize = 256.0;
   float level = 5.0;
   gl_FragColor.rgb = tonemapReinhard(getReflection(texture, normalize(eyeDirView)), 1.0);
   gl_FragColor.a = 1.0;

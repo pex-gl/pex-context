@@ -1,5 +1,7 @@
 //Program implementation
 
+var Promise = require('bluebird');
+
 var kVertexShaderPrefix = '' +
   '#ifdef GL_ES\n' +
   'precision highp float;\n' +
@@ -31,9 +33,7 @@ function Program(gl, vertSrc, fragSrc, debug) {
       if (this.vertShader && this.fragShader) {
         this.link();
       }
-    }.bind(this)).catch(function(e) {
-      console.log(e.stack)
-    })
+    }.bind(this))
   }
   else if (vertSrc && vertSrc.then) {
     Promise.all([vertSrc]).then(function(sources) {
@@ -43,9 +43,7 @@ function Program(gl, vertSrc, fragSrc, debug) {
       if (this.vertShader && this.fragShader) {
         this.link();
       }
-    }.bind(this)).catch(function(e) {
-      console.log(e.stack)
-    })
+    }.bind(this))
   }
   else {
     this.addSources(vertSrc, fragSrc);
@@ -73,7 +71,9 @@ Program.prototype.addVertexSource = function(vertSrc) {
   this.gl.shaderSource(this.vertShader, kVertexShaderPrefix + vertSrc + '\n');
   this.gl.compileShader(this.vertShader);
   if (!this.gl.getShaderParameter(this.vertShader, this.gl.COMPILE_STATUS)) {
-    throw new Error(this.gl.getShaderInfoLog(this.vertShader));
+    var err = this.gl.getShaderInfoLog(this.vertShader);
+    console.log(err);
+    throw new Error(err);
   }
 };
 
@@ -82,7 +82,9 @@ Program.prototype.addFragmentSource = function(fragSrc) {
   this.gl.shaderSource(this.fragShader, kFragmentShaderPrefix + fragSrc + '\n');
   this.gl.compileShader(this.fragShader);
   if (!this.gl.getShaderParameter(this.fragShader, this.gl.COMPILE_STATUS)) {
-    throw new Error(this.gl.getShaderInfoLog(this.fragShader));
+    var err = this.gl.getShaderInfoLog(this.fragShader);
+    console.log(err);
+    throw new Error(err);
   }
 };
 

@@ -1,5 +1,5 @@
 var TextureCube = require('../glu/TextureCube');
-var Platform = {};
+var Platform = require('../sys/Platform');
 var path = require('path');
 var fs = require('fs');
 
@@ -7,18 +7,47 @@ var getWorkingDirectory = function() {
   return path.dirname(process.mainModule.filename);
 }
 
-var loadBinaryFile = function (file, callback) {
-  var fullPath = path.resolve(getWorkingDirectory(), file);
-  if (!fs.existsSync(fullPath)) {
-    if (callback) {
-      return callback(null);
+var loadBinaryFilePlask = function (file, callback) {
+  console.log('loadBinaryFile', file);
+  try {
+    var fullPath = path.resolve(getWorkingDirectory(), file);
+    if (!fs.existsSync(fullPath)) {
+      console.log('nothing!');
+      if (callback) {
+        return callback(null);
+      }
     }
   }
+  catch(e) {
+    console.log(e);
+    throw new Error();
+  }
+  console.log('data!');
   var data = toArrayBuffer(fs.readFileSync(fullPath));
   if (callback) {
     callback(data);
   }
 }
+
+var loadBinaryFileBrowser = function (url, callback) {
+  var request = new XMLHttpRequest();
+  request.open('GET', url, true);
+  request.responseType = "arraybuffer";
+  request.onreadystatechange = function (e) {
+    if (request.readyState == 4) {
+      if (request.status == 200) {
+        if (callback) {
+          callback(request.response);
+        }
+      } else {
+        console.log('loadTextFile error : ' + request.response);
+      }
+    }
+  };
+  request.send(null);
+};
+
+  var loadBinaryFile = Platform.isBrowser ? loadBinaryFileBrowser : loadBinaryFilePlask;
 
 function toArrayBuffer(buffer) {
   var ab = new ArrayBuffer(buffer.length);

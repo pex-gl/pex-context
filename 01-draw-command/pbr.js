@@ -16,6 +16,7 @@ var rescaleVertices = require('rescale-vertices');
 var glslify      = require('glslify-promise');
 var loadImage    = require('./sys/loadImage');
 var Time         = require('./sys/Time');
+var Platform         = require('./sys/Platform');
 var loadDDSCubemap = require('./sys/loadDDSCubemap');
 
 var targetBounds = [
@@ -23,11 +24,14 @@ var targetBounds = [
   [ 1,  1,  1]
 ];
 
+var ASSETS_PATH = Platform.isBrowser ? 'assets' : __dirname + '/assets'
+
 createWindow({
   settings: {
     width: 1280,
     height: 720,
-    multisample: true
+    multisample: true,
+    fullscreen: Platform.isBrowser
   },
   //Problems with preloading resources
   //-might need gl context
@@ -38,20 +42,17 @@ createWindow({
     skyboxVert: glslify(__dirname + '/sh/materials/Skybox.vert'),
     skyboxFrag: glslify(__dirname + '/sh/materials/Skybox.frag'),
     pbrVert: glslify(__dirname + '/sh/materials/PBR.vert'),
-    pbrFrag: glslify(__dirname + '/sh/materials/PBR.frag'),
-    skyboxCubeMapImages: Promise.all([
-      loadImage(__dirname + '/assets/cubemaps/uffizi/uffizi_cross_posx.jpg'),
-      loadImage(__dirname + '/assets/cubemaps/uffizi/uffizi_cross_negx.jpg'),
-      loadImage(__dirname + '/assets/cubemaps/uffizi/uffizi_cross_posy.jpg'),
-      loadImage(__dirname + '/assets/cubemaps/uffizi/uffizi_cross_negy.jpg'),
-      loadImage(__dirname + '/assets/cubemaps/uffizi/uffizi_cross_posz.jpg'),
-      loadImage(__dirname + '/assets/cubemaps/uffizi/uffizi_cross_negz.jpg')
-    ])
+    pbrFrag: glslify(__dirname + '/sh/materials/PBR.frag')
   },
   init: function() {
+    console.log('int');
     this.framerate(60);
 
     var gl = this.gl;
+
+    if (Platform.isBrowser) {
+      this.lodExt = this.gl.getExtension('EXT_shader_texture_lod');
+    }
 
     this.context = new Context(gl);
 
@@ -81,11 +82,17 @@ createWindow({
     this.bunnyMesh.addAttribute('normal', normals.vertexNormals(bunny.cells, bunny.positions), { size: 3 });
     this.bunnyMesh.addIndexBuffer(bunny.cells);
 
-    this.reflectionTexture = loadDDSCubemap(gl, __dirname + '/assets/cubemaps/pmrem_dds/ForestReflection.dds');
-    this.skyBoxTexture = loadDDSCubemap(gl, __dirname + '/assets/cubemaps/pmrem_dds/ForestIrradiance.dds');
+    this.reflectionTexture = loadDDSCubemap(gl, ASSETS_PATH + '/cubemaps/pmrem_dds/ForestReflection.dds');
+    this.skyBoxTexture = loadDDSCubemap(gl, ASSETS_PATH + '/cubemaps/pmrem_dds/ForestIrradiance.dds');
 
-    //this.bunnyProgram = new Program(gl, this.resources.showNormalsVert, this.resources.showNormalsFrag);
-    this.bunnyProgram = new Program(gl, this.resources.pbrVert, this.resources.pbrFrag);
+    //
+    try {
+      this.bunnyProgram = new Program(gl, this.resources.pbrVert, this.resources.pbrFrag);
+      //this.bunnyProgram = new Program(gl, this.resources.showNormalsVert, this.resources.showNormalsFrag);
+    }
+    catch(e) {
+      console.log(e.stack);
+    }
     this.bunnyDrawCmd = new DrawCommand({
       vertexArray: this.bunnyMesh,
       program: this.bunnyProgram,
@@ -102,8 +109,13 @@ createWindow({
     });
     this.commands.push(this.bunnyDrawCmd);
 
-    //this.skyBoxTexture = new TextureCube(gl, this.resources.skyboxCubeMapImages);
-    this.skyboxProgram = new Program(gl, this.resources.skyboxVert, this.resources.skyboxFrag);
+    try {
+      this.skyboxProgram = new Program(gl, this.resources.skyboxVert, this.resources.skyboxFrag);
+      //this.skyboxProgram = new Program(gl, this.resources.showNormalsVert, this.resources.showNormalsFrag);
+    }
+    catch(e) {
+      console.log(e);
+    }
     this.skyBoxMesh = createCube(this.gl, 50);
     this.skyBoxDrawCmd = new DrawCommand({
       vertexArray: this.skyBoxMesh,
@@ -133,6 +145,9 @@ createWindow({
     this.eye.z = 4*Math.sin(Math.PI * t);
     var viewMatrix = new Mat4().lookAt(this.eye, this.target, this.up);
 
+    if (!this.bunnyDrawCmd) {
+      return;
+    }
     this.bunnyDrawCmd.uniforms.viewMatrix = viewMatrix.toArray();
     this.bunnyDrawCmd.uniforms.invViewMatrix = viewMatrix.dup().invert().toArray();
     this.bunnyDrawCmd.uniforms.normalMatrix = viewMatrix.dup().invert().transpose().toArray();

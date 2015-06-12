@@ -4,6 +4,7 @@
   "description": "Draw Command based renderer / architecture",
   "main": "basic.js",
   "dependencies": {
+    "bluebird": "^2.9.27",
     "browserify": "^10.2.4",
     "bunny": "^1.0.1",
     "debug": "^2.2.0",

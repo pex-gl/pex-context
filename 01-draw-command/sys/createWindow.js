@@ -1,6 +1,7 @@
 var R = require('ramda');
 var Platform = require('./Platform');
 var createBrowserWindow = require('./createBrowserWindow');
+var Promise = require('bluebird');
 
 function createWindow(opts) {
   opts.settings = opts.settings || {};
@@ -25,17 +26,9 @@ function createWindow(opts) {
           opts._draw();
         };
         console.log('init resources', resources.length);
-        try {
           opts._init();
-        }
-        catch(e) {
-          console.log()
-        }
         console.log('init end');
-      }).catch(function(e) {
-        console.log(e.stack);
-        throw e;
-      })
+      }).done();
     }
   }
   if (Platform.isPlask) {
