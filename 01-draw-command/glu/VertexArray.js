@@ -13,7 +13,13 @@ function VertexArray(gl) {
   this.indexBuffer = null;
   this.attributes = {};
 
-  if(gl.getExtension && !Ext.createVertexArray) {
+  if(gl.createVertexArray) {
+    log('Native VAO! binding..');
+    Ext.createVertexArray = gl.createVertexArray.bind(gl);
+    Ext.bindVertexArray = gl.bindVertexArray.bind(gl);
+    Ext.deleteVertexArray = gl.deleteVertexArray.bind(gl);
+  }
+  else if(gl.getExtension && !Ext.createVertexArray) {
     var vaoExt = gl.getExtension('OES_vertex_array_object');
     log('OES_vertex_array_object', vaoExt);
     if (vaoExt) {
@@ -26,7 +32,8 @@ function VertexArray(gl) {
   if (Ext.createVertexArray) {
     this.vao = Ext.createVertexArray();
     this.vaoValid = true;
-    log('using VAO');
+    Ext.bindVertexArray(this.vao);
+    log('using VAO', this.vao);
   }
 }
 
@@ -55,11 +62,12 @@ VertexArray.prototype.bind = function(program) {
   //log('bind');
   if (this.vao) {
     //log('bind vao')
-    Ext.bindVertexArray(this.vao);
+    //Ext.bindVertexArray(this.vao);
   }
   if (!this.vao || (this.vao && !this.vaoValid)) {
     this.bindBuffers(program);
   }
+  this.bindBuffers(program);
   this.vaoValid = true;
 }
 
@@ -99,6 +107,12 @@ VertexArray.prototype.unbind = function(program) {
 VertexArray.prototype.unbindBuffers = function(program) {
   var gl = this.gl;
   gl.disableVertexAttribArray(program.attributes.position);
+  for(var attributeName in this.attributes) {
+    var attribute = this.attributes[attributeName];
+    if (program.attributes[attributeName] !== undefined) {
+      gl.disableVertexAttribArray(program.attributes[attributeName]);
+    }
+  }
   if (this.indexBuffer) {
     this.gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
   }
