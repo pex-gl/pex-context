@@ -1,5 +1,6 @@
 var Platform = require('./Platform');
 var merge = require('merge');
+var log = require('debug')('pex/BrowserWindow');
 
 var requestAnimFrameFps = 60;
 
@@ -283,13 +284,22 @@ function createBrowserWindow(obj) {
     var gl = null;
     var ctx = null;
     if (obj.settings.type == '3d') {
+      var webglContexts = ['webgl', 'experimental-webgl'];
+      var webglContexts = ['webgl2', 'experimental-webgl2', 'webgl', 'experimental-webgl'];
       try {
-        gl = canvas.getContext('experimental-webgl', {
-          antialias: true,
-          stencil: obj.settings.stencil,
-          premultipliedAlpha : obj.settings.premultipliedAlpha,
-          preserveDrawingBuffer: obj.settings.preserveDrawingBuffer
-        });
+        for(var i=0; i<webglContexts.length; i++) {
+          gl = canvas.getContext(webglContexts[i], {
+            antialias: true,
+            stencil: obj.settings.stencil,
+            premultipliedAlpha : obj.settings.premultipliedAlpha,
+            preserveDrawingBuffer: obj.settings.preserveDrawingBuffer
+          });
+
+          if (gl) {
+            log('Got WebGL context "' + webglContexts[i] + '"');
+            break;
+          }
+        }
       }
       catch (err) {
         throw new Error(err);
