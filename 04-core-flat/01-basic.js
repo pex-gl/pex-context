@@ -38,14 +38,14 @@ function init(){
         VERT_SRC,FRAG_SRC,
         {0 : 'aVertexPosition', 1 : 'aVertexColor'}
     );
-
-    console.log('program','num attributes',program.getNumAttributes());
-    console.log('program','attributes',program.getAttributes());
-    console.log('program','location aVertexPosition',program.getAttribLocation('aVertexPosition'));
-    console.log('program','type aVertexColor',program.getAttribType('aVertexColor'));
-    console.log('program','num uniforms',program.getNumUniforms());
-    console.log('program','uniform info uPointSize',program.getUniformInfo('uPointSize'));
-
+    //
+    //console.log('program','num attributes',program.getNumAttributes());
+    //console.log('program','attributes',program.getAttributes());
+    //console.log('program','location aVertexPosition',program.getAttribLocation('aVertexPosition'));
+    //console.log('program','type aVertexColor',program.getAttribType('aVertexColor'));
+    //console.log('program','num uniforms',program.getNumUniforms());
+    //console.log('program','uniform info uPointSize',program.getUniformInfo('uPointSize'));
+    //
     program.bind();
     program.uniform('uPointSize',1.0);
 
@@ -63,7 +63,6 @@ function init(){
     gl.clearColor(0.15,0.15,0.15,1);
     gl.enable(gl.DEPTH_TEST);
 
-    //
     this._vboCubeVertices0 = new Vbo(
         gl.ARRAY_BUFFER,
         new Float32Array([
@@ -99,11 +98,11 @@ function init(){
         ]),
         gl.STATIC_DRAW
     );
-
-    console.log('vboCubeVertices0','dataType',this._vboCubeVertices0.getDataType());
-    console.log('vboCubeVertices0','byteLength',this._vboCubeVertices0.getByteLength());
-    console.log('vboCubeVertices0','length',this._vboCubeVertices0.getLength());
-
+    //
+    //console.log('vboCubeVertices0','dataType',this._vboCubeVertices0.getDataType());
+    //console.log('vboCubeVertices0','byteLength',this._vboCubeVertices0.getByteLength());
+    //console.log('vboCubeVertices0','length',this._vboCubeVertices0.getLength());
+    //
     this._iboCube0 = new Vbo(
         gl.ELEMENT_ARRAY_BUFFER,
         new Uint16Array([
@@ -116,11 +115,11 @@ function init(){
         ]),
         gl.STATIC_DRAW
     );
-
-    console.log('iboCube0','dataType',this._iboCube0.getDataType());
-    console.log('iboCube0','byteLength',this._iboCube0.getByteLength());
-    console.log('iboCube0','length',this._iboCube0.getLength());
-
+    //
+    //console.log('iboCube0','dataType',this._iboCube0.getDataType());
+    //console.log('iboCube0','byteLength',this._iboCube0.getByteLength());
+    //console.log('iboCube0','length',this._iboCube0.getLength());
+    //
     this._iboCube1 = new Vbo(
         gl.ELEMENT_ARRAY_BUFFER,
         new Uint16Array([
@@ -131,20 +130,22 @@ function init(){
         ])
     );
 
-    //
-    var vao0 = this._vao0 = new Vao();
-    vao0.bindBuffer(this._vboCubeVertices0);
-    vao0.bindBuffer(this._iboCube0);
+    this._vao0 = new Vao();
+    this._vao0.bind();
+    this._vboCubeVertices0.bind();
+    this._iboCube0.bind();
+    this._vao0.enableVertexAttribArray(0);
+    this._vao0.vertexAttribPointer(0,3,gl.FLOAT,false, 6 * 4, 0);
+    this._vao0.enableVertexAttribArray(1);
+    this._vao0.vertexAttribPointer(1,3, gl.FLOAT, false, 6 * 4, 3 * 4);
 
-    vao0.enableVertexAttribArray(0);
-    vao0.vertexAttribPointer(0,3,gl.FLOAT,false, 6 * 4, 0);
-    vao0.enableVertexAttribArray(1);
-    vao0.vertexAttribPointer(1,3, gl.FLOAT, false, 6 * 4, 3 * 4);
-
-    //copy vao, disable color attrib, replace ibo
-    var vao1 = this._vao1 = vao0.copy();
-    vao1.disableVertexAttribArray(1);
-    vao1.bindBufferAtIndex(this._iboCube1,0);
+    this._vao1 = new Vao();
+    this._vao1.bind();
+    this._vboCubeVertices0.bind();
+    this._iboCube1.bind();
+    this._vao1.enableVertexAttribArray(0);
+    this._vao1.vertexAttribPointer(0,3,gl.FLOAT,false, 6 * 4, 0);
+    this._vao1.disableVertexAttribArray(1);
 
 }
 
@@ -156,7 +157,7 @@ function draw(){
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    var vao, vaoIndexBuffer;
+    var vaoIndexBuffer;
     var matrixModelView = this._matrixModelView;
     var scale;
     var d = 2.25 + (0.5 + Math.sin(t) * 0.5) * 7.75;
@@ -177,20 +178,17 @@ function draw(){
     scale = 0.5 + (0.5 + Math.sin(t * 2 + Math.PI) * 0.5) * 0.5;
     program.uniform('uScale',scale,scale,scale);
 
-    vao = this._vao0;
-    vaoIndexBuffer = vao.getCurrentBuffer(gl.ELEMENT_ARRAY_BUFFER);
-    vao.bind();
+    this._vao0.apply();
+    vaoIndexBuffer = this._vao0.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING);
     gl.drawElements(gl.TRIANGLES, vaoIndexBuffer.getLength(), vaoIndexBuffer.getDataFormat(), 0);
 
     program.uniform('uModelViewMatrix', this._matrixTranslationR.toFloat32Array());
     scale = 0.5 + (0.5 + Math.sin(t * 2) * 0.5) * 0.5;
     program.uniform('uScale',scale,scale,scale);
 
-    vao = this._vao1;
-    vaoIndexBuffer = vao.getCurrentBuffer(gl.ELEMENT_ARRAY_BUFFER);
-    vao.bind();
+    this._vao1.apply();
+    vaoIndexBuffer = this._vao1.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING);
     gl.drawElements(gl.TRIANGLES, vaoIndexBuffer.getLength(), vaoIndexBuffer.getDataFormat(), 0);
-
 
     t += 1.0 / 60.0;
 }

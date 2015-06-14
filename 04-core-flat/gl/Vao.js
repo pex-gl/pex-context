@@ -1,9 +1,9 @@
 var Window = require('../sys/Window');
 var Id     = require('../sys/Id');
-var Vbo    = require('./Vbo');
+var Stack  = require('./Stack');
 
-var curr = {};
-var prev = {};
+var stack  = {};
+var active = {};
 
 function copyAttriProperties(from,to){
     for(var entry in from){
@@ -49,19 +49,20 @@ VertexAttribDivisor.prototype.copy = function(){
 };
 
 function Vao(){
-    this._gl = Window.getCurrentContext();
-    this._buffers    = {};
-    this._bufferCurr = {};
-    this._bufferPrev = {};
+    var gl = this._gl = Window.getCurrentContext();
+    var glid = gl.id;
+    stack[glid]  = stack[glid] === undefined ? new Stack() : stack[glid];
+    active[glid] = active[glid] === undefined ? null : active[glid];
 
-    var gl = this._gl;
+    this._buffers = {};
+    this._bufferStack = {};
+
     var targets = [gl.ARRAY_BUFFER, gl.ELEMENT_ARRAY_BUFFER];
 
     for(var i = 0, target; i < targets.length; ++i){
         target = targets[i];
-        this._buffers[target]    = [];
-        this._bufferCurr[target] = null;
-        this._bufferPrev[target] = null;
+        this._buffers[target]     = [];
+        this._bufferStack[target] = new Stack();
     }
 
     this._vertexAttribArrays   = {};
@@ -75,18 +76,18 @@ Vao.prototype.copy = function(){
     var gl  = this._gl;
     var out = new Vao();
 
-    var buffers    = this._buffers;
-    var bufferCurr = this._bufferCurr;
+    var buffers     = this._buffers;
+    var bufferStack = this._bufferStack;
 
-    var outBuffers    = out._buffers;
-    var outBufferCurr = out._bufferCurr;
+    var outBuffers     = out._buffers;
+    var outBufferStack = out._bufferStack;
 
     var targets = [gl.ARRAY_BUFFER, gl.ELEMENT_ARRAY_BUFFER];
 
     for(var i = 0, target; i < targets.length; ++i){
         target = targets[i];
-        outBuffers[target]    = buffers[target].slice(0);
-        outBufferCurr[target] = bufferCurr[target];
+        outBuffers[target] = buffers[target].slice(0);
+        outBufferStack[target] = bufferStack[target].copy();
     }
 
     var arrays   = this._vertexAttribArrays;
@@ -122,7 +123,7 @@ Vao.prototype.copy = function(){
     return out;
 };
 
-Vao.prototype.bindBuffer = function(vbo){
+Vao.prototype._bindBuffer = function(vbo){
     var gl = this._gl;
     var target = vbo.getTarget();
     var buffers = this._buffers[target];
@@ -137,75 +138,26 @@ Vao.prototype.bindBuffer = function(vbo){
         }
     }
 
-    this._bufferPrev[target] = this._bufferCurr[target];
-    this._bufferCurr[target] = vbo;
+    this._bufferStack[target].push(vbo);
 };
 
-Vao.prototype.bindBufferAtIndex = function(vbo,index){
-    var target  = vbo.getTarget();
-    var buffers = this._buffers[target];
-    var bufferAtIndex = buffers[index];
-    if(bufferAtIndex === undefined){
-        throw new RangeError('Buffer index out of range.');
-    }
-    if(this._bufferCurr[target] == bufferAtIndex){
-        this._bufferCurr[target] = vbo;
-    }
-    if(this._bufferPrev[target] == bufferAtIndex){
-        this._bufferPrev[target] = vbo;
-    }
-    buffers[index] = vbo;
-};
-
-Vao.prototype.unbindBuffer = function(vbo) {
+Vao.prototype._unbindBuffer = function(vbo) {
     var target  = vbo.getTarget();
     var buffers = this._buffers[target];
     var index = buffers.indexOf(vbo);
     if (index == -1) {
         throw new Error('Buffer not bound.');
     }
-    this._bufferCurr[target] = this._bufferPrev[target];
-    this._bufferCurr[target].bind();
-};
-
-Vao.prototype.removeBuffer = function(vbo){
-    var target  = vbo.getTarget();
-    var buffers = this._buffers[target];
-    var index = buffers.indexOf(vbo);
-    if (index == -1) {
-        throw new Error('Buffer not bound.');
+    var stack_ = this._bufferStack[target];
+    if(stack_.isEmpty()){
+        throw new Error('No buffer associated with vao.');
     }
-    buffers.splice(index, 1);
-    if(target != gl.ARRAY_BUFFER){
-        return;
+
+    if(stack_.peek() != this){
+        throw new Error('Buffer previously not bound.');
     }
-    delete this._vertexAttribArrays[index];
-    delete this._vertexAttribPointers[index];
-};
 
-Vao.prototype.setActiveElementArrayBuffer = function(indexOrBuffer){
-    var target = this._gl.ELEMENT_ARRAY_BUFFER;
-    var buffers = this._buffers[target];
-    if(indexOrBuffer instanceof Vbo){
-        if(buffers.indexOf(indexOrBuffer) == -1){
-            throw new Error('Buffer previously not bound.');
-        }
-        this._bufferCurr[target] = indexOrBuffer;
-    } else if(typeof indexOrBuffer === 'number' ){
-        var buffer = buffers[indexOrBuffer];
-        if(buffer === undefined){
-            throw new RangeError('Buffer index out of bounds.');
-        }
-        this._bufferCurr[target] = buffer;
-    }
-};
-
-Vao.prototype.hasBuffer = function(vbo){
-    return this._buffers[vbo.getTarget()].indexOf(vbo) != -1;
-};
-
-Vao.prototype.getCurrentBuffer = function(target){
-    return this._bufferCurr[target];
+    stack_.pop();
 };
 
 function safeResolve(attrib,index,type_ctor){
@@ -214,24 +166,48 @@ function safeResolve(attrib,index,type_ctor){
 }
 
 Vao.prototype.enableVertexAttribArray = function(index){
+    if(stack[this._gl.id].isEmpty() || stack[this._gl.id].peek() != this){
+        throw new Error('Vao not bound.');
+    }
+
     var target = this._gl.ARRAY_BUFFER;
-    var bufferIndex = this._buffers[target].indexOf(this._bufferCurr[target]);
+    var bufferIndex = this._buffers[target].indexOf(this._bufferStack[target].peek());
+    if(bufferIndex == -1){
+        throw new Error('No gl.ARRAY_BUFFER target bound.');
+    }
+
     var vertexAttribArrays = this._vertexAttribArrays[bufferIndex];
     var array = safeResolve(vertexAttribArrays,index,VertexAttribArray);
     array.enabled = true;
 };
 
 Vao.prototype.disableVertexAttribArray = function(index){
+    if(stack[this._gl.id].isEmpty() || stack[this._gl.id].peek() != this){
+        throw new Error('Vao not bound.');
+    }
+
     var target = this._gl.ARRAY_BUFFER;
-    var bufferIndex = this._buffers[target].indexOf(this._bufferCurr[target]);
+    var bufferIndex = this._buffers[target].indexOf(this._bufferStack[target].peek());
+    if(bufferIndex == -1){
+        throw new Error('No gl.ARRAY_BUFFER target bound.');
+    }
+
     var vertexAttribArrays = this._vertexAttribArrays[bufferIndex];
     var array = safeResolve(vertexAttribArrays,index,VertexAttribArray);
     array.enabled = false;
 };
 
 Vao.prototype.vertexAttribPointer = function(index,size,type,normalized,stride,offset){
+    if(stack[this._gl.id].isEmpty() || stack[this._gl.id].peek() != this){
+        throw new Error('Vao not bound.');
+    }
+
     var target = this._gl.ARRAY_BUFFER;
-    var bufferIndex = this._buffers[target].indexOf(this._bufferCurr[target]);
+    var bufferIndex = this._buffers[target].indexOf(this._bufferStack[target].peek());
+    if(bufferIndex == -1){
+        throw new Error('No gl.ARRAY_BUFFER target bound.');
+    }
+
     var vertexAttribPointers = this._vertexAttribPointers[bufferIndex];
     var pointer = safeResolve(vertexAttribPointers,index,VertexAttribPointer);
     pointer.size = size;
@@ -243,7 +219,11 @@ Vao.prototype.vertexAttribPointer = function(index,size,type,normalized,stride,o
 };
 
 Vao.prototype.vertexAttribDivisor = function(index,divisor){
-    var vertexAttribDivisors = this._vertexAttribDivisors[this._arrayBuffers.indexOf(this._arrayBufferCurr)];
+    if(stack[this._gl.id].isEmpty() || stack[this._gl.id].peek() != this){
+        throw new Error('Vao not bound.');
+    }
+
+    var vertexAttribDivisors = this._vertexAttribDivisors[this._bufferStack[target].peek()];
     var divisor_ = safeResolve(vertexAttribDivisors,index,VertexAttribDivisor);
     divisor_.divisor = divisor;
     divisor_.isDirty = true;
@@ -303,11 +283,11 @@ Vao.prototype.getVertexAttribDivisors = function(buffer){
     return this._vertexAttribDivisors[bufferIndex];
 };
 
-Vao.prototype.bind = function(){
-    var gl = this._gl
+Vao.prototype.apply = function(){
+    var gl = this._gl;
+    var glid = gl.id;
 
-    prev[gl] = curr[gl];
-    var vaoDiffers = curr[gl] == prev[gl];
+    var vaoActiveDiffers = active[glid] != this;
 
     var buffers;
     var vertexAttribArrays = this._vertexAttribArrays;
@@ -323,7 +303,7 @@ Vao.prototype.bind = function(){
 
     for(var i = 0, l = buffers.length; i < l; ++i){
         buffer = buffers[i];
-        buffer.bind();
+        buffer._bindInternal();
 
         bufferArrays   = vertexAttribArrays[i];
         bufferPointers = vertexAttribPointers[i];
@@ -331,23 +311,24 @@ Vao.prototype.bind = function(){
 
         for(var index in bufferArrays){
             array    = bufferArrays[index];
+            pointer  = bufferPointers[index];
             indexNum = +index;
 
-            if(!array.enabled && (array.prevEnabled || vaoDiffers)){
+            if(!array.enabled && (array.prevEnabled || vaoActiveDiffers)){
                 gl.disableVertexAttribArray(indexNum);
                 array.enabled = array.prevEnabled = false;
                 continue;
             }
-            if(!array.prevEnabled || vaoDiffers){
+            if(!array.prevEnabled || vaoActiveDiffers){
                 gl.enableVertexAttribArray(indexNum);
                 array.prevEnabled = true;
             }
 
-            pointer = bufferPointers[index];
             if(pointer === undefined){
                 throw new Error('No VertexAttribPointer set.');
             }
-            if(pointer.isDirty){
+
+            if(pointer.isDirty || vaoActiveDiffers){
                 gl.vertexAttribPointer(
                     indexNum,
                     pointer.size,
@@ -360,7 +341,7 @@ Vao.prototype.bind = function(){
             }
 
             divisor = bufferDivisors[index];
-            if(divisor === undefined || !divisor.isDirty){
+            if(divisor === undefined || !divisor.isDirty || !vaoActiveDiffers){
                 continue;
             }
             gl.vertexAttribDivisor(
@@ -370,28 +351,48 @@ Vao.prototype.bind = function(){
         }
     }
 
-    var elementArrayBuffer = this._bufferCurr[gl.ELEMENT_ARRAY_BUFFER];
-    if(elementArrayBuffer !== null){
-        elementArrayBuffer.bind();
+    var elementArrayBufferStack = this._bufferStack[gl.ELEMENT_ARRAY_BUFFER];
+    if(!elementArrayBufferStack.isEmpty()){
+        elementArrayBufferStack.peek()._bindInternal();
     }
 
-    curr[gl] = this;
+    active[glid] = this;
+};
+
+Vao.prototype.bind = function(){
+    stack[this._gl.id].push(this);
 };
 
 Vao.prototype.unbind = function(){
-    var gl = this._gl;
-    var prevVao = prev[gl];
-
-    curr[gl] = prevVao;
-    if(prevVao == this || !prevVao){
-        return;
+    var stack_ = stack[this._gl.id];
+    if(stack_.isEmpty() || stack_.peek() != this){
+        throw new Error('Vao previously not bound.');
     }
-
-    prevVao.bind();
+    stack_.pop();
 };
 
-Vao.getCurrent = function(gl){
-    return curr[gl];
+Vao.prototype.getParameter = function(cap){
+    var gl = this._gl;
+    switch(cap){
+        case gl.ELEMENT_ARRAY_BUFFER_BINDING:
+            var stack_ = this._bufferStack[gl.ELEMENT_ARRAY_BUFFER];
+            return stack_.isEmpty() ? undefined : stack_.peek();
+            break;
+        case gl.ARRAY_BUFFER_BINDING:
+            var stack_ = this._bufferStack[gl.ARRAY_BUFFER];
+            return stack_.isEmpty() ? undefined : stack_.peek();
+            break;
+        default:
+            throw Error('fds');
+    }
+};
+
+Vao.prototype.getId = function(){
+    return this._id;
+};
+
+Vao.__getStack = function(){
+    return stack;
 };
 
 module.exports = Vao;

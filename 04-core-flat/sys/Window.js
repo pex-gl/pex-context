@@ -4,8 +4,6 @@ var Resource = require('./Resource');
 var Screen   = require('./Screen');
 var Id       = require('./Id');
 
-var ContextStack = require('../gl/ContextStack');
-
 var current = null;
 
 function Window(){
@@ -79,7 +77,7 @@ Window.create = function(obj, resources, callbackError, callbackProcess, strict)
                     this.framerate(60);
 
                     this._gl = this.gl;
-                    this._contextStack = new ContextStack();
+                    this._gl.id = Id.get(); //need to patch gl with id for maps
                     delete this.gl;
 
                     init.call(this,resources);

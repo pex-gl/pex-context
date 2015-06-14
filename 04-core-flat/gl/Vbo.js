@@ -1,11 +1,13 @@
 var Window = require('../sys/Window');
 var Id     = require('../sys/Id');
+var Stack  = require('./Stack');
+var Vao    = require('./Vao');
 
-var curr = {};
-var prev = {};
+var stack = {};
 
 function Vbo(target,sizeOrData,usage){
     var gl = Window.getCurrentContext();
+    stack[gl.id] = stack[gl.id] === undefined ? new Stack() : stack[gl.id];
 
     this._gl         = gl;
     this._target     = target === undefined ? gl.ARRAY_BUFFER : target;
@@ -56,6 +58,10 @@ Vbo.prototype.getDataFormat = function(){
     return this._dataFormat;
 };
 
+Vbo.prototype.getId = function(){
+    return this._id;
+};
+
 Vbo.prototype.dispose = function(){
     if(!this._handle){
         return;
@@ -64,27 +70,52 @@ Vbo.prototype.dispose = function(){
     this._handle = null;
 };
 
-Vbo.prototype.bind = function(){
-    var gl = this._gl;
+Vbo.prototype._bindInternal = function(){
+    this._gl.bindBuffer(this._target,this._handle);
+};
 
-    prev[gl] = curr[gl];
-    if(curr[gl] == this){
+Vbo.prototype.bind = function(){
+    var glid = this._gl.id;
+    var stack_ = stack[glid];
+    var vao = Vao.__getStack()[glid];
+
+    //associate vao.vertexAttrib... with buffer
+    if(vao !== undefined && !vao.isEmpty()){
+        vao.peek()._bindBuffer(this);
+    }
+
+    if(stack_.peek() == this){
         return;
     }
-    gl.bindBuffer(this._target,this._handle);
-    curr[gl] = this;
+
+    this._bindInternal();
+    stack_.push(this);
 };
 
 Vbo.prototype.unbind = function(){
-    var gl      = this._gl;
-    var prevVbo = prev[gl];
+    var glid = this._gl.id;
+    var stack_ = stack[glid];
+    var vao = Vao.__getStack()[glid];
 
-    curr[gl] = prevVbo;
-    if(prevVbo == this || !prevVbo){
+    if(stack_.peek() != this){
+        throw new Error('Vbo previously not bound.');
+    }
+
+    if(vao !== undefined && !vao.isEmpty()){
+        vao.peek()._unbindBuffer(this);
+    }
+
+    stack_.pop();
+    if(stack_.isEmpty()){
+        this._gl.bindBuffer(this._target,null);
         return;
     }
-    prevVbo.bind();
-    prev[gl] = this;
+    var prev = stack_.peek();
+    if(prev == this){
+        return;
+    }
+
+    prev._bindInternal();
 };
 
 Vbo.prototype.bufferData = function(sizeOrData){
@@ -121,5 +152,8 @@ Vbo.prototype.bufferSubData = function(offset,data){
     this._gl.bufferSubData(this._target,offset,data);
 };
 
+Vbo.__getStack = function(){
+    return stack;
+};
 
 module.exports = Vbo;

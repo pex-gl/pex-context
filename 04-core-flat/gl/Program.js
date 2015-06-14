@@ -1,8 +1,9 @@
 var Window = require('../sys/Window');
 var Id     = require('../sys/Id');
+var Stack  = require('./Stack');
 
-var prev = {};
-var curr = {};
+var stack = {};
+
 
 var STR_ERROR_UNIFORM_UNDEFINED = 'Uniform "%s" is not defined.';
 var STR_ERROR_WRONG_NUM_ARGS = 'Wrong number of arguments.';
@@ -14,7 +15,9 @@ var PREFIX_VERTEX_SHADER   = '#define VERTEX_SHADER\n';
 var PREFIX_FRAGMENT_SHADER = '#define FRAGMENT_SHADER\n';
 
 function Program(vertSrc,fragSrc,attribLocationsToBind){
-    this._gl = Window.getCurrentContext();
+    var gl = this._gl = Window.getCurrentContext();
+    stack[gl.id] = stack[gl.id] === undefined ? new Stack() : stack[gl.id];
+
     this._handle = null;
     this._attributes = {};
     this._numAttributes = 0;
@@ -29,13 +32,16 @@ function Program(vertSrc,fragSrc,attribLocationsToBind){
 
 Program.prototype.bind = function(){
     var gl = this._gl;
+    var stack_ = stack[gl.id];
 
-    prev[gl] = curr[gl];
-    if(prev[gl] == this){
+    var prev = stack_.peek();
+    stack_.push(this);
+
+    if(prev == this){
         return;
     }
+
     gl.useProgram(this._handle);
-    curr[gl] = this;
 
     //var presets  = this._uniformPresets;
     //for(var preset in presets){
@@ -45,12 +51,13 @@ Program.prototype.bind = function(){
 
 Program.prototype.unbind = function(){
     var gl = this._gl;
+    var stack_ = stack[gl.id];
 
-    curr[gl] = prev[gl];
-    if(this == prev[gl]){
+    var prev = stack_.pop();
+    if(prev == this){
         return;
     }
-    gl.useProgram(prev[gl]._handle);
+    gl.useProgram(prev._handle);
 };
 
 
