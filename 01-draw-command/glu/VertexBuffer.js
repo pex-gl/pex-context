@@ -1,13 +1,17 @@
 var unpack = require('../util/unpack-array');
+var log = require('debug')('pex/glu/VertexBuffer');
 
 //VBO implementation
 //Example usage new Buffer(gl, vertices, { usage: gl.STATIC_DRAW, target: gl.ARRAY_BUFFER, type: Float32Array})
 function VertexBuffer(gl, data, opts) {
   this.gl = gl;
   opts = opts || {};
+  log(opts)
   this.usage = opts.usage || gl.STATIC_DRAW; //DYNAMIC_DRAW
   this.target = opts.target; //ELEMENT_ARRAY_BUFFER
   this.type = opts.type || Float32Array; //Uint16Array, Uint32Array in WebGL2.0?
+  this.stride = opts.stride || 0;
+  this.offset = opts.offset || 0;
   this.size = opts.size;
   //FIXME: refactor attrib size guessing code
   if (!this.size && Array.isArray(data) && Array.isArray(data[0])) {
@@ -16,6 +20,7 @@ function VertexBuffer(gl, data, opts) {
   if (!this.size) {
     throw new Error('Couldn\t guess attribute size');
   }
+  log(this.size);
 
   if (Array.isArray(data)) {
     //array of arrays -> flat typed array

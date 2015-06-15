@@ -1,6 +1,6 @@
 //VBO & VAO implementation
 var VertexBuffer = require('./VertexBuffer');
-var log = require('debug')('pex/VertexArray');
+var log = require('debug')('pex/glu/VertexArray');
 
 var Ext = {
   createVertexArray: null,
@@ -45,8 +45,8 @@ VertexArray.prototype.addAttribute = function(name, data, opts) {
   return this;
 }
 
-VertexArray.prototype.updateAttribute = function(name, data) {
-  this.attributes[name].update(data);
+VertexArray.prototype.updateAttribute = function(name, data, opts) {
+  this.attributes[name].update(data, opts);
 }
 
 VertexArray.prototype.addIndexBuffer = function(data, opts) {
@@ -80,7 +80,8 @@ VertexArray.prototype.bindBuffers = function(program) {
     if (program.attributes[attributeName] !== undefined) {
       gl.bindBuffer(gl.ARRAY_BUFFER, attribute.handle);
       //TODO: check if program has attribute
-      gl.vertexAttribPointer(program.attributes[attributeName], attribute.size, gl.FLOAT, false, 0, 0);
+      //log(attribute.stride, attribute.offset);
+      gl.vertexAttribPointer(program.attributes[attributeName], attribute.size, gl.FLOAT, false, attribute.stride, attribute.offset);
       gl.enableVertexAttribArray(program.attributes[attributeName]);
     }
   }
