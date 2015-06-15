@@ -40,58 +40,14 @@
  * @constructor
  */
 
-function Matrix44() {
+function Matrix44Wrap(matrix) {
     /**
      * @member {Array} m - The underlying flat data
      */
-    this.m = [
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1 ];
+    this.m = matrix;
 }
 
-
-/**
- * Copies another matrix into the matrix.
- * @param matrix
- * @returns {Matrix44}
- */
-
-Matrix44.prototype.set = function(matrix){
-    var m = matrix.m;
-    return this.setf(m[ 0],m[ 1],m[ 2],m[ 3],
-                     m[ 4],m[ 5],m[ 6],m[ 7],
-                     m[ 8],m[ 9],m[10],m[11],
-                     m[12],m[13],m[14],m[15]);
-};
-
-/**
- * Sets the matrix from 16 components – row major
- * @param {Number} m00 - row 0 column 0
- * @param {Number} m01 - row 0 column 1
- * @param {Number} m02 - row 0 column 2
- * @param {Number} m03 - row 0 column 3
- * ------------------------------------
- * @param {Number} m10 - row 1 column 0
- * @param {Number} m11 - row 1 column 1
- * @param {Number} m12 - row 1 column 2
- * @param {Number} m13 - row 1 column 3
- * ------------------------------------
- * @param {Number} m20 - row 2 column 0
- * @param {Number} m21 - row 2 column 1
- * @param {Number} m22 - row 2 column 2
- * @param {Number} m23 - row 2 column 3
- * ------------------------------------
- * @param {Number} m30 - row 3 column 0
- * @param {Number} m31 - row 3 column 1
- * @param {Number} m32 - row 3 column 2
- * @param {Number} m33 - row 3 column 3
- * -----------------------------------
- * @returns {Matrix44}
- */
-
-Matrix44.prototype.setf = function(m00,m01,m02,m03,
+Matrix44Wrap.prototype.setf = function(m00,m01,m02,m03,
                                    m10,m11,m12,m13,
                                    m20,m21,m22,m23,
                                    m30,m31,m32,m33){
@@ -103,6 +59,14 @@ Matrix44.prototype.setf = function(m00,m01,m02,m03,
     return this;
 };
 
+Matrix44Wrap.prototype.set = function(arr){
+    var m = this.m;
+    for(var i = 0, l = 16; i < l; ++i){
+        m[i] = arr[i];
+    }
+    return this;
+};
+
 
 /**
  * Convenience method. Sets column data.
@@ -111,10 +75,10 @@ Matrix44.prototype.setf = function(m00,m01,m02,m03,
  * @param {Number} y
  * @param {Number} z
  * @param {Number} w
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.setColumnf = function(col,x,y,z,w){
+Matrix44Wrap.prototype.setColumnf = function(col,x,y,z,w){
     var m = this.m;
     m[col   ] = x;
     m[col+ 4] = y;
@@ -129,7 +93,7 @@ Matrix44.prototype.setColumnf = function(col,x,y,z,w){
  * @param out
  * @returns {Array}
  */
-Matrix44.prototype.getColumn = function(col,out){
+Matrix44Wrap.prototype.getColumn = function(col,out){
     out = out || new Array(4);
     var m = this.m;
 
@@ -147,10 +111,10 @@ Matrix44.prototype.getColumn = function(col,out){
  * @param {Number} y
  * @param {Number} z
  * @param {Number} w
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.setRowf = function(row,x,y,z,w){
+Matrix44Wrap.prototype.setRowf = function(row,x,y,z,w){
     row *= 4;
     var m = this.m;
     m[row  ] = x;
@@ -166,7 +130,7 @@ Matrix44.prototype.setRowf = function(row,x,y,z,w){
  * @param out
  * @returns {Array}
  */
-Matrix44.prototype.getRow = function(row,out){
+Matrix44Wrap.prototype.getRow = function(row,out){
     row *= 4;
     out = out || new Array(4);
     var m = this.m;
@@ -182,10 +146,10 @@ Matrix44.prototype.getRow = function(row,out){
  * Convenience method. Sets data at index.
  * @param {Number} index
  * @param {Number} x
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.setIndex = function(index,x){
+Matrix44Wrap.prototype.setIndex = function(index,x){
     this.m[index] = x;
     return this;
 };
@@ -195,10 +159,10 @@ Matrix44.prototype.setIndex = function(index,x){
  * @param {Number} col
  * @param {Number} row
  * @param {Number} x
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.setValue = function(col,row,x){
+Matrix44Wrap.prototype.setValue = function(col,row,x){
     this.m[this.getIndex(col,row)] = x;
     return this;
 };
@@ -210,25 +174,25 @@ Matrix44.prototype.setValue = function(col,row,x){
  * @returns {Number}
  */
 
-Matrix44.prototype.getIndex = function(col,row){
+Matrix44Wrap.prototype.getIndex = function(col,row){
     return col + row * 4;
 };
 
 /**
  * Returns a  copy of the matrix.
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.copy = function(out){
-    return (out || new Matrix44()).set(this);
+Matrix44Wrap.prototype.copy = function(out){
+    return (out || new Matrix44Wrap()).set(this);
 };
 
 /**
  * Sets the matrix to identity matrix.
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.identity = function(){
+Matrix44Wrap.prototype.identity = function(){
     var m = this.m;
     m[ 1] = m[ 2] = m[ 3] = m[ 4] = m[ 6] = m[ 7] = m[ 8] = m[ 9] = m[11] = m[12] = m[13] = m[14] =0;
     m[ 0] = m[ 5] = m[10] = m[15] = 1;
@@ -241,10 +205,10 @@ Matrix44.prototype.identity = function(){
  * @param x
  * @param y
  * @param z
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.setScalef = function(x,y,z){
+Matrix44Wrap.prototype.setScalef = function(x,y,z){
     var m = this.m;
 
     m[ 0] = x;
@@ -254,14 +218,14 @@ Matrix44.prototype.setScalef = function(x,y,z){
     return this;
 };
 
-Matrix44.prototype.scalef = function(x,y,z){
+Matrix44Wrap.prototype.scalef = function(x,y,z){
     return this.multf(x,0,0,0,
-                      0,y,0,0,
-                      0,0,z,0,
-                      0,0,0,1);
+        0,y,0,0,
+        0,0,z,0,
+        0,0,0,1);
 };
 
-Matrix44.prototype.scale = function(v){
+Matrix44Wrap.prototype.scale = function(v){
     return this.scalef(v.x, v.y, v.z);
 };
 
@@ -271,10 +235,10 @@ Matrix44.prototype.scale = function(v){
  * @param tx
  * @param ty
  * @param tz
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.setTranslationf = function(tx,ty,tz){
+Matrix44Wrap.prototype.setTranslationf = function(tx,ty,tz){
     var m = this.m;
 
     m[12] = tx;
@@ -288,10 +252,10 @@ Matrix44.prototype.setTranslationf = function(tx,ty,tz){
  * Sets the axes translation values. Replaces previous values.
  * Does not reset to identity matrix.
  * @param v
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.setTranslation = function(v){
+Matrix44Wrap.prototype.setTranslation = function(v){
     var m = this.m;
     m[12] = v.x;
     m[13] = v.y;
@@ -304,18 +268,18 @@ Matrix44.prototype.setTranslation = function(v){
  * @param x
  * @param y
  * @param z
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.translatef = function(x,y,z){
+Matrix44Wrap.prototype.translatef = function(x,y,z){
     return this.multf(1,0,0,0,
-                      0,1,0,0,
-                      0,0,1,0,
-                      x,y,z,1);
+        0,1,0,0,
+        0,0,1,0,
+        x,y,z,1);
 };
 
 
-Matrix44.prototype.translate = function(v){
+Matrix44Wrap.prototype.translate = function(v){
     return this.translatef(v.x, v.y, v.z);
 };
 
@@ -323,10 +287,10 @@ Matrix44.prototype.translate = function(v){
  * Sets the x axes rotation. Replaces previous values.
  * Does not reset to identity matrix.
  * @param a
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.setRotationX = function(a){
+Matrix44Wrap.prototype.setRotationX = function(a){
     var m = this.m;
 
     var sin = Math.sin(a),
@@ -345,26 +309,26 @@ Matrix44.prototype.setRotationX = function(a){
 /**
  * Rotates the matrix on the x axis.
  * @param a
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.rotateX = function(a){
+Matrix44Wrap.prototype.rotateX = function(a){
     var sin = Math.sin(a),
         cos = Math.cos(a);
     return this.multf(1, 0,   0,   0,
-                      0, cos,-sin, 0,
-                      0, sin, cos, 0,
-                      0, 0,   0,   1);
+        0, cos,-sin, 0,
+        0, sin, cos, 0,
+        0, 0,   0,   1);
 };
 
 /**
  * Sets the y axes rotation. Replaces previous values.
  * Does not reset to identity matrix.
  * @param a
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.setRotationY = function(a){
+Matrix44Wrap.prototype.setRotationY = function(a){
     var m = this.m;
 
     var sin = Math.sin(a),
@@ -386,13 +350,13 @@ Matrix44.prototype.setRotationY = function(a){
  * @returns {*}
  */
 
-Matrix44.prototype.rotateY = function(a){
+Matrix44Wrap.prototype.rotateY = function(a){
     var sin = Math.sin(a),
         cos = Math.cos(a);
     return this.multf(cos,  0, sin, 0,
-                      0,    1, 0,   0,
-                      -sin, 0, cos, 0,
-                      0,    0, 0,   1);
+        0,    1, 0,   0,
+        -sin, 0, cos, 0,
+        0,    0, 0,   1);
 
 };
 
@@ -400,10 +364,10 @@ Matrix44.prototype.rotateY = function(a){
  * Sets the z axes rotation. Replaces previous values.
  * Does not reset to identity matrix.
  * @param a
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.setRotationZ = function(a){
+Matrix44Wrap.prototype.setRotationZ = function(a){
     var m = this.m;
 
     var sin = Math.sin(a),
@@ -419,13 +383,13 @@ Matrix44.prototype.setRotationZ = function(a){
     return this;
 };
 
-Matrix44.prototype.rotateZ = function(a){
+Matrix44Wrap.prototype.rotateZ = function(a){
     var sin = Math.sin(a),
         cos = Math.cos(a);
     return this.multf( cos,sin,0,0,
-                      -sin,cos,0,0,
-                       0,  0,  1,0,
-                       0,  0,  0,1);
+        -sin,cos,0,0,
+        0,  0,  1,0,
+        0,  0,  0,1);
 };
 
 /**
@@ -434,10 +398,10 @@ Matrix44.prototype.rotateZ = function(a){
  * @param ax
  * @param ay
  * @param az
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.setRotationf = function(ax,ay,az){
+Matrix44Wrap.prototype.setRotationf = function(ax,ay,az){
     var m = this.m;
 
     var cosx = Math.cos(ax),
@@ -471,10 +435,10 @@ Matrix44.prototype.setRotationf = function(ax,ay,az){
  * @param ax
  * @param ay
  * @param az
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.rotatef = function(ax,ay,az){
+Matrix44Wrap.prototype.rotatef = function(ax,ay,az){
     var cosx = Math.cos(ax),
         sinx = Math.sin(ax),
         cosy = Math.cos(ay),
@@ -493,12 +457,12 @@ Matrix44.prototype.rotatef = function(ax,ay,az){
         m22 = cosx * cosy;
 
     return this.multf(m00,m01,m02,0,
-                      m10,m11,m12,0,
-                      m20,m21,m22,0,
-                      0,  0,  0,  1);
+        m10,m11,m12,0,
+        m20,m21,m22,0,
+        0,  0,  0,  1);
 };
 
-Matrix44.prototype.rotate = function(v){
+Matrix44Wrap.prototype.rotate = function(v){
     return this.rotatef(v.x, v.y, v.z);
 };
 
@@ -508,10 +472,10 @@ Matrix44.prototype.rotate = function(v){
  * @param x
  * @param y
  * @param z
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.setRotationOnAxisf = function(rot,x,y,z){
+Matrix44Wrap.prototype.setRotationOnAxisf = function(rot,x,y,z){
     var len = Math.sqrt(x * x + y * y + z * z);
 
     if (Math.sqrt(x * x + y * y + z * z) < 0.0001) {
@@ -568,7 +532,7 @@ Matrix44.prototype.setRotationOnAxisf = function(rot,x,y,z){
     return this;
 };
 
-Matrix44.prototype.rotateFromAxisf = function(rot,x,y,z){
+Matrix44Wrap.prototype.rotateFromAxisf = function(rot,x,y,z){
     var len = Math.sqrt(x * x + y * y + z * z);
 
     if (Math.sqrt(x * x + y * y + z * z) < 0.0001) {
@@ -623,9 +587,9 @@ Matrix44.prototype.rotateFromAxisf = function(rot,x,y,z){
         m23 = a03 * b20 + a13 * b21 + a23 * b22;
 
     return this.multf(m00,m01,m02,m03,
-                      m10,m11,m12,m13,
-                      m20,m21,m22,m23,
-                      0,  0,  0,  1   );
+        m10,m11,m12,m13,
+        m20,m21,m22,m23,
+        0,  0,  0,  1   );
 }
 
 /**
@@ -633,10 +597,10 @@ Matrix44.prototype.rotateFromAxisf = function(rot,x,y,z){
  * @param u
  * @param v
  * @param w
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.setRotationFromOnB = function(u,v,w){
+Matrix44Wrap.prototype.setRotationFromOnB = function(u,v,w){
     var m = this.m;
 
     m[ 0] = u.x;
@@ -659,25 +623,25 @@ Matrix44.prototype.setRotationFromOnB = function(u,v,w){
  * @param u
  * @param v
  * @param w
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.rotateFromOnB = function(u,v,w){
-  return this.multf(u.x, u.y, u.z, 0,
-                    v.x, v.y, v.z, 0,
-                    w.x, w.y, w.z, 0,
-                    0,   0,   0,   1);
+Matrix44Wrap.prototype.rotateFromOnB = function(u,v,w){
+    return this.multf(u.x, u.y, u.z, 0,
+        v.x, v.y, v.z, 0,
+        w.x, w.y, w.z, 0,
+        0,   0,   0,   1);
 };
 
 /**
  * Multiplies the matrix with another matrix.
  * @param matrix
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.mult = function(matrix) {
+Matrix44Wrap.prototype.mult = function(matrix) {
     var m  = this.m,
-        m_ = matrix.m;
+        m_ = matrix;
 
     var m_00 = m_[ 0], m_01 = m_[ 1], m_02 = m_[ 2], m_03 = m_[ 3],
         m_10 = m_[ 4], m_11 = m_[ 5], m_12 = m_[ 6], m_13 = m_[ 7],
@@ -711,7 +675,7 @@ Matrix44.prototype.mult = function(matrix) {
     return this;
 };
 
-Matrix44.prototype.multf = function(m00,m01,m02,m03,
+Matrix44Wrap.prototype.multf = function(m00,m01,m02,m03,
                                     m10,m11,m12,m13,
                                     m20,m21,m22,m23,
                                     m30,m31,m32,m33){
@@ -746,10 +710,10 @@ Matrix44.prototype.multf = function(m00,m01,m02,m03,
 
 /**
  * Inverts the matrix.
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.invert = function() {
+Matrix44Wrap.prototype.invert = function() {
     var m = this.m;
     var det;
     var m00 = m[ 0], m10 = m[ 1], m20 = m[ 2], m30 = m[ 3],
@@ -760,116 +724,116 @@ Matrix44.prototype.invert = function() {
     //TODO: add caching
 
     m[ 0] = m11 * m22 * m33 -
-        m11 * m32 * m23 -
-        m12 * m21 * m33 +
-        m12 * m31 * m23 +
-        m13 * m21 * m32 -
-        m13 * m31 * m22;
+    m11 * m32 * m23 -
+    m12 * m21 * m33 +
+    m12 * m31 * m23 +
+    m13 * m21 * m32 -
+    m13 * m31 * m22;
 
     m[ 4] = -m01 * m22 * m33 +
-        m01 * m32 * m23 +
-        m02 * m21 * m33 -
-        m02 * m31 * m23 -
-        m03 * m21 * m32 +
-        m03 * m31 * m22;
+    m01 * m32 * m23 +
+    m02 * m21 * m33 -
+    m02 * m31 * m23 -
+    m03 * m21 * m32 +
+    m03 * m31 * m22;
 
     m[ 8] = m01 * m12 * m33 -
-        m01 * m32 * m13 -
-        m02 * m11 * m33 +
-        m02 * m31 * m13 +
-        m03 * m11 * m32 -
-        m03 * m31 * m12;
+    m01 * m32 * m13 -
+    m02 * m11 * m33 +
+    m02 * m31 * m13 +
+    m03 * m11 * m32 -
+    m03 * m31 * m12;
 
     m[12] = -m01 * m12 * m23 +
-        m01 * m22 * m13 +
-        m02 * m11 * m23 -
-        m02 * m21 * m13 -
-        m03 * m11 * m22 +
-        m03 * m21 * m12;
+    m01 * m22 * m13 +
+    m02 * m11 * m23 -
+    m02 * m21 * m13 -
+    m03 * m11 * m22 +
+    m03 * m21 * m12;
 
     m[ 1] = -m10 * m22 * m33 +
-        m10 * m32 * m23 +
-        m12 * m20 * m33 -
-        m12 * m30 * m23 -
-        m13 * m20 * m32 +
-        m13 * m30 * m22;
+    m10 * m32 * m23 +
+    m12 * m20 * m33 -
+    m12 * m30 * m23 -
+    m13 * m20 * m32 +
+    m13 * m30 * m22;
 
     m[ 5] = m00 * m22 * m33 -
-        m00 * m32 * m23 -
-        m02 * m20 * m33 +
-        m02 * m30 * m23 +
-        m03 * m20 * m32 -
-        m03 * m30 * m22;
+    m00 * m32 * m23 -
+    m02 * m20 * m33 +
+    m02 * m30 * m23 +
+    m03 * m20 * m32 -
+    m03 * m30 * m22;
 
     m[ 9] = -m00 * m12 * m33 +
-        m00 * m32 * m13 +
-        m02 * m10 * m33 -
-        m02 * m30 * m13 -
-        m03 * m10 * m32 +
-        m03 * m30 * m12;
+    m00 * m32 * m13 +
+    m02 * m10 * m33 -
+    m02 * m30 * m13 -
+    m03 * m10 * m32 +
+    m03 * m30 * m12;
 
     m[13] = m00 * m12 * m23 -
-        m00 * m22 * m13 -
-        m02 * m10 * m23 +
-        m02 * m20 * m13 +
-        m03 * m10 * m22 -
-        m03 * m20 * m12;
+    m00 * m22 * m13 -
+    m02 * m10 * m23 +
+    m02 * m20 * m13 +
+    m03 * m10 * m22 -
+    m03 * m20 * m12;
 
     m[ 2] = m10 * m21 * m33 -
-        m10 * m31 * m23 -
-        m11 * m20 * m33 +
-        m11 * m30 * m23 +
-        m13 * m20 * m31 -
-        m13 * m30 * m21;
+    m10 * m31 * m23 -
+    m11 * m20 * m33 +
+    m11 * m30 * m23 +
+    m13 * m20 * m31 -
+    m13 * m30 * m21;
 
     m[ 6] = -m00 * m21 * m33 +
-        m00 * m31 * m23 +
-        m01 * m20 * m33 -
-        m01 * m30 * m23 -
-        m03 * m20 * m31 +
-        m03 * m30 * m21;
+    m00 * m31 * m23 +
+    m01 * m20 * m33 -
+    m01 * m30 * m23 -
+    m03 * m20 * m31 +
+    m03 * m30 * m21;
 
     m[10] = m00 * m11 * m33 -
-        m00 * m31 * m13 -
-        m01 * m10 * m33 +
-        m01 * m30 * m13 +
-        m03 * m10 * m31 -
-        m03 * m30 * m11;
+    m00 * m31 * m13 -
+    m01 * m10 * m33 +
+    m01 * m30 * m13 +
+    m03 * m10 * m31 -
+    m03 * m30 * m11;
 
     m[14] = -m00 * m11 * m23 +
-        m00 * m21 * m13 +
-        m01 * m10 * m23 -
-        m01 * m20 * m13 -
-        m03 * m10 * m21 +
-        m03 * m20 * m11;
+    m00 * m21 * m13 +
+    m01 * m10 * m23 -
+    m01 * m20 * m13 -
+    m03 * m10 * m21 +
+    m03 * m20 * m11;
 
     m[ 3] = -m10 * m21 * m32 +
-        m10 * m31 * m22 +
-        m11 * m20 * m32 -
-        m11 * m30 * m22 -
-        m12 * m20 * m31 +
-        m12 * m30 * m21;
+    m10 * m31 * m22 +
+    m11 * m20 * m32 -
+    m11 * m30 * m22 -
+    m12 * m20 * m31 +
+    m12 * m30 * m21;
 
     m[ 7] = m00 * m21 * m32 -
-        m00 * m31 * m22 -
-        m01 * m20 * m32 +
-        m01 * m30 * m22 +
-        m02 * m20 * m31 -
-        m02 * m30 * m21;
+    m00 * m31 * m22 -
+    m01 * m20 * m32 +
+    m01 * m30 * m22 +
+    m02 * m20 * m31 -
+    m02 * m30 * m21;
 
     m[11] = -m00 * m11 * m32 +
-        m00 * m31 * m12 +
-        m01 * m10 * m32 -
-        m01 * m30 * m12 -
-        m02 * m10 * m31 +
-        m02 * m30 * m11;
+    m00 * m31 * m12 +
+    m01 * m10 * m32 -
+    m01 * m30 * m12 -
+    m02 * m10 * m31 +
+    m02 * m30 * m11;
 
     m[15] = m00 * m11 * m22 -
-        m00 * m21 * m12 -
-        m01 * m10 * m22 +
-        m01 * m20 * m12 +
-        m02 * m10 * m21 -
-        m02 * m20 * m11;
+    m00 * m21 * m12 -
+    m01 * m10 * m22 +
+    m01 * m20 * m12 +
+    m02 * m10 * m21 -
+    m02 * m20 * m11;
 
     det = m00 * m[0] + m10 * m[4] + m20 * m[8] + m30 * m[12];
 
@@ -889,10 +853,10 @@ Matrix44.prototype.invert = function() {
 
 /**
  * Transposes the matrix.
- * @returns {Matrix44}
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.transpose = function () {
+Matrix44Wrap.prototype.transpose = function () {
     var m = this.m;
     var m01 = m[ 1], m02 = m[ 2], m03 = m[ 3],
         m12 = m[6], m13 = m[7],
@@ -911,7 +875,7 @@ Matrix44.prototype.transpose = function () {
     return this;
 };
 
-Matrix44.prototype.multVec3 = function(v) {
+Matrix44Wrap.prototype.multVec3 = function(v) {
     var m = this.m;
     var x = v.x, y = v.y, z = v.z;
 
@@ -922,7 +886,7 @@ Matrix44.prototype.multVec3 = function(v) {
     return v;
 };
 
-Matrix44.prototype.multVec3A = function (a, i) {
+Matrix44Wrap.prototype.multVec3A = function (a, i) {
     var m = this.m;
     i *= 3;
 
@@ -933,7 +897,7 @@ Matrix44.prototype.multVec3A = function (a, i) {
     a[i + 2] = m[ 2] * x + m[ 6] * y + m[10] * z + m[14];
 };
 
-Matrix44.prototype.multVec3AI = function (a, i) {
+Matrix44Wrap.prototype.multVec3AI = function (a, i) {
     var m = this.m;
     var x = a[i    ],
         y = a[i + 1],
@@ -944,7 +908,7 @@ Matrix44.prototype.multVec3AI = function (a, i) {
     a[i + 2] = m[ 2] * x + m[ 6] * y + m[10] * z + m[14];
 };
 
-Matrix44.prototype.multVec3Arr = function(arr,offset){
+Matrix44Wrap.prototype.multVec3Arr = function(arr,offset){
     offset = offset || 0 - 1;
 
     var m = this.m;
@@ -968,7 +932,7 @@ Matrix44.prototype.multVec3Arr = function(arr,offset){
     }
 };
 
-Matrix44.prototype.multVec3AArr = function(arr,offset){
+Matrix44Wrap.prototype.multVec3AArr = function(arr,offset){
     offset = offset || 0;
 
     var m = this.m;
@@ -1000,7 +964,7 @@ Matrix44.prototype.multVec3AArr = function(arr,offset){
     }
 };
 
-Matrix44.prototype.multVec4 = function (v) {
+Matrix44Wrap.prototype.multVec4 = function (v) {
     var m = this.m;
     var x = v.x,
         y = v.y,
@@ -1015,7 +979,7 @@ Matrix44.prototype.multVec4 = function (v) {
     return v;
 };
 
-Matrix44.prototype.multVec4A = function (a, i) {
+Matrix44Wrap.prototype.multVec4A = function (a, i) {
     var m = this.m;
     i *= 3;
 
@@ -1030,7 +994,7 @@ Matrix44.prototype.multVec4A = function (a, i) {
     a[i + 3] = m[ 3] * x + m[ 7] * y + m[11] * z + m[15] * w;
 };
 
-Matrix44.prototype.multVec4AI = function (a, i) {
+Matrix44Wrap.prototype.multVec4AI = function (a, i) {
     var m = this.m;
     var x = a[i  ],
         y = a[i + 1],
@@ -1045,33 +1009,46 @@ Matrix44.prototype.multVec4AI = function (a, i) {
 
 /**
  * Returns a multiplied copy of the matrix.
- * @param {Matrix44} matrix
- * @param {Matrix44} [out] - Optional out
- * @returns {Matrix44}
+ * @param {Matrix44Wrap} matrix
+ * @param {Matrix44Wrap} [out] - Optional out
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.multiplied = function(matrix,out){
-    return (out || new Matrix44()).set(matrix).mult(this);
+Matrix44Wrap.prototype.multiplied = function(matrix,out){
+    var m = this.m;
+    if(m.byteLength !== undefined){
+        if(out.byteLength === undefined){
+            throw new Error('Out argument is of wrong type.');
+        }
+        out.set(m);
+        return out;
+    }
+    for(var i = 0, l = 16; i < l; ++i){
+        out[i] = m[i];
+    }
+    MatrixOperator(out).set(m).mult(matrix);
+    return out;
 };
+
 
 /**
  * Returns an inverted copy of the matrix.
- * @param {Matrix44} [out] - Optional out
- * @returns {Matrix44}
+ * @param {Matrix44Wrap} [out] - Optional out
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.inverted = function(out){
-    return (out || new Matrix44()).set(this).invert();
+Matrix44Wrap.prototype.inverted = function(out){
+    return (out || new Matrix44Wrap()).set(this).invert();
 };
 
 /**
  * Returns a transposed copy of the matrix.
- * @param {Matrix44} [out] - Optional out
- * @returns {Matrix44}
+ * @param {Matrix44Wrap} [out] - Optional out
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.prototype.transposed = function(out){
-    return (out || new Matrix44()).set(this).transpose();
+Matrix44Wrap.prototype.transposed = function(out){
+    return (out || new Matrix44Wrap()).set(this).transpose();
 };
 
 ///**
@@ -1079,8 +1056,8 @@ Matrix44.prototype.transposed = function(out){
 // * @param out
 // */
 //
-//Matrix44.prototype.toRotationMatrix = function(out){
-//    out = out || new Matrix44();
+//Matrix44Wrap.prototype.toRotationMatrix = function(out){
+//    out = out || new Matrix44Wrap();
 //    var m = out.m,
 //        m_= this.m;
 //    m[0] = m_[0];m[0] = m_[0];
@@ -1088,41 +1065,15 @@ Matrix44.prototype.transposed = function(out){
 //};
 
 
-
-/**
- * Returns a Float32array copy of the matrix.
- * @param {Float32Array} [out] - Optional out
- * @returns {Float32Array}
- */
-
-Matrix44.prototype.toFloat32Array = function(out){
-    out = out || new Float32Array(16);
-    out.set(this.m);
-    return out;
-};
-
-/**
- * Returns a new matrix from flat float32array data.
- * @param arr
- * @returns {Matrix44}
- */
-
-Matrix44.fromFloat32Array = function(arr){
-    var m = new Matrix44();
-    m.m = arr;
-    return m;
-};
-
-
-Matrix44.prototype.columnToString = function(col){
+Matrix44Wrap.prototype.columnToString = function(col){
     var m = this.m;
     return m[col   ] + '\n' +
-           m[col+ 4] + '\n' +
-           m[col+ 8] + '\n' +
-           m[col+14] + '\n';
+        m[col+ 4] + '\n' +
+        m[col+ 8] + '\n' +
+        m[col+14] + '\n';
 };
 
-Matrix44.prototype.rowToString = function(row){
+Matrix44Wrap.prototype.rowToString = function(row){
     var m = this.m;
     return m[row] + ', ' + m[row+1] + ', ' + m[row+2] + ', ' + m[row+3];
 };
@@ -1132,12 +1083,12 @@ Matrix44.prototype.rowToString = function(row){
  * @returns {string}
  */
 
-Matrix44.prototype.toString = function(){
+Matrix44Wrap.prototype.toString = function(){
     var m = this.m;
     return m[ 0] + ', ' + m[ 1] + ', ' + m[ 2] + ', ' + m[ 3] + '\n' +
-           m[ 4] + ', ' + m[ 5] + ', ' + m[ 6] + ', ' + m[ 7] + '\n' +
-           m[ 8] + ', ' + m[ 9] + ', ' + m[10] + ', ' + m[11] + '\n' +
-           m[12] + ', ' + m[13] + ', ' + m[14] + ', ' + m[15];
+        m[ 4] + ', ' + m[ 5] + ', ' + m[ 6] + ', ' + m[ 7] + '\n' +
+        m[ 8] + ', ' + m[ 9] + ', ' + m[10] + ', ' + m[11] + '\n' +
+        m[12] + ', ' + m[13] + ', ' + m[14] + ', ' + m[15];
 
 };
 
@@ -1146,12 +1097,12 @@ Matrix44.prototype.toString = function(){
  * @param {Number} sx
  * @param {Number} sy
  * @param {Number} sz
- * @param {Matrix44} [out] - Optional out, expects identity matrix
- * @returns {Matrix44}
+ * @param {Matrix44Wrap} [out] - Optional out, expects identity matrix
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.fromScale = function(sx, sy, sz, out){
-    return (out || new Matrix44()).setScalef(sx,sy,sz);
+Matrix44Wrap.fromScale = function(sx, sy, sz, out){
+    return (out || new Matrix44Wrap()).setScalef(sx,sy,sz);
 };
 
 /**
@@ -1159,56 +1110,56 @@ Matrix44.fromScale = function(sx, sy, sz, out){
  * @param {Number} sx
  * @param {Number} sy
  * @param {Number} sz
- * @param {Matrix44} [out] - Optional out, expects identity matrix
- * @returns {Matrix44}
+ * @param {Matrix44Wrap} [out] - Optional out, expects identity matrix
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.fromScalef = Matrix44.fromScale;
+Matrix44Wrap.fromScalef = Matrix44Wrap.fromScale;
 
 /**
  * Returns a new translation matrix.
  * @param {Number} tx
  * @param {Number} ty
  * @param {Number} tz
- * @param {Matrix44} [out] - Optional out, expects identity matrix
- * @returns {Matrix44}
+ * @param {Matrix44Wrap} [out] - Optional out, expects identity matrix
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.fromTranslation = function(tx, ty, tz, out){
-    return (out || new Matrix44()).setTranslationf(tx,ty,tz);
+Matrix44Wrap.fromTranslation = function(tx, ty, tz, out){
+    return (out || new Matrix44Wrap()).setTranslationf(tx,ty,tz);
 };
 
 /**
  * Returns a new x rotation matrix.
  * @param {Number} a
- * @param {Matrix44} [out] - Optional out, expects identity matrix
- * @returns {Matrix44}
+ * @param {Matrix44Wrap} [out] - Optional out, expects identity matrix
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.fromRotationX = function (a, out) {
-    return (out || new Matrix44()).setRotationX(a);
+Matrix44Wrap.fromRotationX = function (a, out) {
+    return (out || new Matrix44Wrap()).setRotationX(a);
 };
 
 /**
  * Returns a new y rotation matrix.
  * @param {Number} a
- * @param {Matrix44} [out] - Optional out, expects identity matrix
- * @returns {Matrix44}
+ * @param {Matrix44Wrap} [out] - Optional out, expects identity matrix
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.fromRotationY = function (a, out) {
-    return (out || new Matrix44()).setRotationY(a);
+Matrix44Wrap.fromRotationY = function (a, out) {
+    return (out || new Matrix44Wrap()).setRotationY(a);
 };
 
 /**
  * Returns a new z rotation matrix.
  * @param {Number} a
- * @param {Matrix44} [out] - Optional out, expects identity matrix
- * @returns {*|Matrix44}
+ * @param {Matrix44Wrap} [out] - Optional out, expects identity matrix
+ * @returns {*|Matrix44Wrap}
  */
 
-Matrix44.fromRotationZ = function (a, out) {
-    return (out || new Matrix44()).setRotationZ(a);
+Matrix44Wrap.fromRotationZ = function (a, out) {
+    return (out || new Matrix44Wrap()).setRotationZ(a);
 };
 
 /**
@@ -1216,12 +1167,12 @@ Matrix44.fromRotationZ = function (a, out) {
  * @param {Number} x
  * @param {Number} y
  * @param {Number} z
- * @param {Matrix44} [out] - Optional out, expects identity matrix
- * @returns {Matrix44}
+ * @param {Matrix44Wrap} [out] - Optional out, expects identity matrix
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.fromRotation = function (x, y, z, out) {
-    return (out || new Matrix44()).setRotationf(x,y,z);
+Matrix44Wrap.fromRotation = function (x, y, z, out) {
+    return (out || new Matrix44Wrap()).setRotationf(x,y,z);
 };
 
 /**
@@ -1230,12 +1181,12 @@ Matrix44.fromRotation = function (x, y, z, out) {
  * @param x
  * @param y
  * @param z
- * @param {Matrix44} [out] - Optional out, expects identity matrix
- * @returns {Matrix44}
+ * @param {Matrix44Wrap} [out] - Optional out, expects identity matrix
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.fromRotationOnAxis = function (rot, x, y, z, out) {
-    return (out || new Matrix44()).setRotationOnAxisf(rot,x,y,z);
+Matrix44Wrap.fromRotationOnAxis = function (rot, x, y, z, out) {
+    return (out || new Matrix44Wrap()).setRotationOnAxisf(rot,x,y,z);
 };
 
 /**
@@ -1243,27 +1194,27 @@ Matrix44.fromRotationOnAxis = function (rot, x, y, z, out) {
  * @param u
  * @param v
  * @param w
- * @param {Matrix44}[out] - Optional out, expects identity matrix
- * @returns {Matrix44}
+ * @param {Matrix44Wrap}[out] - Optional out, expects identity matrix
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.fromOnBAxes = function(u,v,w,out){
-    return (out || new Matrix44()).setRotationFromOnB(u,v,w);
+Matrix44Wrap.fromOnBAxes = function(u,v,w,out){
+    return (out || new Matrix44Wrap()).setRotationFromOnB(u,v,w);
 };
 
 /**
  * Returns a rotation matrix from an orthonormal basis
  * @param {OnB}onb
- * @param {Matrix44}[out] - Optional out, expects identity matrix
- * @returns {Matrix44}
+ * @param {Matrix44Wrap}[out] - Optional out, expects identity matrix
+ * @returns {Matrix44Wrap}
  */
 
-Matrix44.fromOnB = function(onb,out){
-    return Matrix44.fromOnBAxes(onb.u,onb.v,onb.w,out);
+Matrix44Wrap.fromOnB = function(onb,out){
+    return Matrix44Wrap.fromOnBAxes(onb.u,onb.v,onb.w,out);
 };
 
 
-Matrix44.prototype.lookAtf = function(eyex,eyey,eyez,targetx,targety,targetz,upx,upy,upz){
+Matrix44Wrap.prototype.lookAtf = function(eyex,eyey,eyez,targetx,targety,targetz,upx,upy,upz){
     var x0, x1, x2, y0, y1, y2, z0, z1, z2, len;
     var m = this.m;
 
@@ -1331,15 +1282,24 @@ Matrix44.prototype.lookAtf = function(eyex,eyey,eyez,targetx,targety,targetz,upx
     return this;
 };
 
-Matrix44.prototype.lookAt = function(eye,target,up){
+Matrix44Wrap.prototype.lookAt = function(eye,target,up){
     return this.lookAtf(eye.x,eye.y,eye.z,
-                        target.x,target.y,target.z,
-                        up.x,up.y,up.z);
+        target.x,target.y,target.z,
+        up.x,up.y,up.z);
 };
 
-Matrix44.fromLookAt = function(eye,target,up){
-    return new Matrix44().lookAt(eye,target,up);
+Matrix44Wrap.fromLookAt = function(eye,target,up){
+    return new Matrix44Wrap().lookAt(eye,target,up);
 };
 
 
-module.exports = Matrix44;
+Matrix44Wrap.prototype.out = function(){
+    return this.m;
+};
+
+function MatrixOperator(matrix){
+    return new Matrix44Wrap(matrix);
+}
+
+module.exports = MatrixOperator;
+
