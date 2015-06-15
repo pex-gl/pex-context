@@ -4,9 +4,11 @@
   "description": "Draw Command based renderer / architecture",
   "main": "basic.js",
   "dependencies": {
+    "async": "^1.2.1",
     "bluebird": "^2.9.27",
     "browserify": "^10.2.4",
     "bunny": "^1.0.1",
+    "clone": "^1.0.2",
     "debug": "^2.2.0",
     "extend": "^2.0.1",
     "geo-3d-box": "^1.0.3",
