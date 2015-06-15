@@ -1,9 +1,13 @@
 var Window   = require('./sys/Window');
 var glu      = require('./gl/glu');
-var Matrix44 = require('./math/Matrix44');
+var $m       = require('./math/Matrix44Operator');
+
 var Program  = require('./gl/Program');
 var Vao      = require('./gl/Vao');
 var Vbo      = require('./gl/Vbo');
+var State    = require('./gl/State');
+
+var PerspCamera = require('./gl/PerspectiveCamera');
 
 
 var VERT_SRC =
@@ -52,13 +56,17 @@ function init(){
     gl.clearColor(0,0,0,1);
     gl.enable(gl.DEPTH_TEST);
 
-    this._matrixModelView = new Matrix44();
-    this._matrixProjection = new Matrix44();
-    this._matrixTranslationL = new Matrix44();
-    this._matrixTranslationR = new Matrix44();
+    this._camera = new PerspCamera(45);
+    this._camera.setFar(20.0);
 
-    glu.perspective(this._matrixProjection.m,45.0,this.getAspectRatio(),0.001,20.0);
-    glu.lookAt(this._matrixModelView.m, 0,-1,0, 0,0,0, 0,1,0);
+    //
+    //this._matrixModelView = new Matrix44();
+    //this._matrixProjection = new Matrix44();
+    this._matrixTranslationL = new Float32Array(16);
+    this._matrixTranslationR = new Float32Array(16);
+
+    //glu.perspective(this._matrixProjection.m,45.0,this.getAspectRatio(),0.001,20.0);
+    //glu.lookAt(this._matrixModelView.m, 0,-1,0, 0,0,0, 0,1,0);
 
     gl.clearColor(0.15,0.15,0.15,1);
     gl.enable(gl.DEPTH_TEST);
@@ -134,47 +142,53 @@ function init(){
     this._vao0.bind();
     this._vboCubeVertices0.bind();
     this._iboCube0.bind();
-    this._vao0.enableVertexAttribArray(0);
-    this._vao0.vertexAttribPointer(0,3,gl.FLOAT,false, 6 * 4, 0);
-    this._vao0.enableVertexAttribArray(1);
-    this._vao0.vertexAttribPointer(1,3, gl.FLOAT, false, 6 * 4, 3 * 4);
+    this._vao0.enableVertexAttribArray(0);                               //state saved relative to vbo 0
+    this._vao0.vertexAttribPointer(0,3,gl.FLOAT,false, 6 * 4, 0);        //state saved relative to vbo 0
+    this._vao0.enableVertexAttribArray(1);                               //state saved relative to vbo 0
+    this._vao0.vertexAttribPointer(1,3, gl.FLOAT, false, 6 * 4, 3 * 4);  //state saved relative to vbo 0
+
+    console.log(State.getParameter(State.PEX_VERTEX_ARRAY_BINDING).getId());
+    console.log(State.getParameter(State.PEX_ARRAY_BUFFER_BINDING).getId());
+    console.log(State.getParameter(State.PEX_ELEMENT_ARRAY_BUFFER_BINDING).getId());
 
     this._vao1 = new Vao();
     this._vao1.bind();
     this._vboCubeVertices0.bind();
     this._iboCube1.bind();
-    this._vao1.enableVertexAttribArray(0);
-    this._vao1.vertexAttribPointer(0,3,gl.FLOAT,false, 6 * 4, 0);
-    this._vao1.disableVertexAttribArray(1);
+    this._vao1.enableVertexAttribArray(0);                          //state saved relative to vbo 0
+    this._vao1.vertexAttribPointer(0,3,gl.FLOAT,false, 6 * 4, 0);   //state saved relative to vbo 0
+    this._vao1.disableVertexAttribArray(1);                         //state saved relative to vbo 0
+
+    console.log(State.getParameter(State.PEX_VERTEX_ARRAY_BINDING).getId());
+    console.log(State.getParameter(State.PEX_ARRAY_BUFFER_BINDING).getId());
+    console.log(State.getParameter(State.PEX_ELEMENT_ARRAY_BUFFER_BINDING).getId());
 
 }
 
 var t = 0.0; //no time added atm
 
 function draw(){
-    var gl = this._gl;
+    var gl      = this._gl;
     var program = this._program;
+    var camera  = this._camera;
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     var vaoIndexBuffer;
-    var matrixModelView = this._matrixModelView;
     var scale;
+
     var d = 2.25 + (0.5 + Math.sin(t) * 0.5) * 7.75;
+    camera.lookAt3(Math.cos(t) * d, Math.sin(t * 0.125) * 1.25,Math.sin(t) * d, 0,0,0);
 
-    glu.lookAt(matrixModelView.m,
-        Math.cos(t) * d, Math.sin(t * 0.125) * 1.25,Math.sin(t) * d,
-        0,0,0,
-        0,1,0
-    );
-
-    this._matrixTranslationL.set(this._matrixModelView).translatef(-2,0,0);
-    this._matrixTranslationR.set(this._matrixModelView).translatef( 2,0,0);
+    //whatever this will look int the end
+    //temporary wraps flat data
+    $m(this._matrixTranslationL).set(camera.getViewMatrix()).translatef(-2,0,0);
+    $m(this._matrixTranslationR).set(camera.getViewMatrix()).translatef( 2,0,0);
 
     program.bind();
-    program.uniform('uProjectionMatrix',this._matrixProjection.toFloat32Array());
+    program.uniform('uProjectionMatrix',camera.getProjectionMatrix());
 
-    program.uniform('uModelViewMatrix', this._matrixTranslationL.toFloat32Array());
+    program.uniform('uModelViewMatrix', this._matrixTranslationL);
     scale = 0.5 + (0.5 + Math.sin(t * 2 + Math.PI) * 0.5) * 0.5;
     program.uniform('uScale',scale,scale,scale);
 
@@ -182,7 +196,7 @@ function draw(){
     vaoIndexBuffer = this._vao0.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING);
     gl.drawElements(gl.TRIANGLES, vaoIndexBuffer.getLength(), vaoIndexBuffer.getDataFormat(), 0);
 
-    program.uniform('uModelViewMatrix', this._matrixTranslationR.toFloat32Array());
+    program.uniform('uModelViewMatrix', this._matrixTranslationR);
     scale = 0.5 + (0.5 + Math.sin(t * 2) * 0.5) * 0.5;
     program.uniform('uScale',scale,scale,scale);
 

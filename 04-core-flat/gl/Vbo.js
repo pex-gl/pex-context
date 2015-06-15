@@ -1,13 +1,18 @@
 var Window = require('../sys/Window');
 var Id     = require('../sys/Id');
 var Stack  = require('./Stack');
-var Vao    = require('./Vao');
+var State  = require('./State');
 
 var stack = {};
 
 function Vbo(target,sizeOrData,usage){
     var gl = Window.getCurrentContext();
-    stack[gl.id] = stack[gl.id] === undefined ? new Stack() : stack[gl.id];
+    var glid = gl.id;
+    if(stack[glid] === undefined){
+        stack[glid] = {};
+        stack[glid][gl.ARRAY_BUFFER] = new Stack();
+        stack[glid][gl.ELEMENT_ARRAY_BUFFER] = new Stack();
+    }
 
     this._gl         = gl;
     this._target     = target === undefined ? gl.ARRAY_BUFFER : target;
@@ -75,13 +80,12 @@ Vbo.prototype._bindInternal = function(){
 };
 
 Vbo.prototype.bind = function(){
-    var glid = this._gl.id;
-    var stack_ = stack[glid];
-    var vao = Vao.__getStack()[glid];
+    var stack_ = stack[this._gl.id][this._target];
+    var vao = State.getParameter(State.PEX_VERTEX_ARRAY_BINDING);
 
     //associate vao.vertexAttrib... with buffer
-    if(vao !== undefined && !vao.isEmpty()){
-        vao.peek()._bindBuffer(this);
+    if(vao !== undefined){
+        vao._bindBuffer(this);
     }
 
     if(stack_.peek() == this){
@@ -93,16 +97,15 @@ Vbo.prototype.bind = function(){
 };
 
 Vbo.prototype.unbind = function(){
-    var glid = this._gl.id;
-    var stack_ = stack[glid];
-    var vao = Vao.__getStack()[glid];
+    var stack_ = stack[this._gl.id][this._target];
+    var vao = State.getParameter(State.PEX_VERTEX_ARRAY_BINDING);
 
     if(stack_.peek() != this){
         throw new Error('Vbo previously not bound.');
     }
 
-    if(vao !== undefined && !vao.isEmpty()){
-        vao.peek()._unbindBuffer(this);
+    if(vao !== undefined){
+        vao._unbindBuffer(this);
     }
 
     stack_.pop();
@@ -156,4 +159,4 @@ Vbo.__getStack = function(){
     return stack;
 };
 
-module.exports = Vbo;
+State._obj.Vbo = module.exports = Vbo;

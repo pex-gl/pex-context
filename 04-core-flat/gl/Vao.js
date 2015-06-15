@@ -1,6 +1,7 @@
 var Window = require('../sys/Window');
 var Id     = require('../sys/Id');
 var Stack  = require('./Stack');
+var State  = require('./State');
 
 var stack  = {};
 var active = {};
@@ -71,6 +72,7 @@ function Vao(){
 
     this._id = Id.get();
 }
+
 
 Vao.prototype.copy = function(){
     var gl  = this._gl;
@@ -395,4 +397,4 @@ Vao.__getStack = function(){
     return stack;
 };
 
-module.exports = Vao;
+/*hook to State*/ State._obj.Vao = module.exports = Vao;

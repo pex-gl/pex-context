@@ -4,7 +4,6 @@ var Stack  = require('./Stack');
 
 var stack = {};
 
-
 var STR_ERROR_UNIFORM_UNDEFINED = 'Uniform "%s" is not defined.';
 var STR_ERROR_WRONG_NUM_ARGS = 'Wrong number of arguments.';
 var STR_ERROR_INVALID_UNIFORM_TYPE = 'Invalid uniform type "%s".';
@@ -339,6 +338,10 @@ Program.prototype.dispose = function(){
     this._gl.deleteProgram(this._handle);
     this._handle = null;
     return this;
+};
+
+Program.__getStack = function(){
+    return stack;
 };
 
 module.exports = Program;
