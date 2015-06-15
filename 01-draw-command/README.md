@@ -91,3 +91,58 @@ Designing a Data-Driven Renderer in GPU Pro 3
 
 - Where to put texture sampler state?
 - How to do FBO PingPong -  draw commands that are identical but with FBO changing multiple times during the frame
+
+## VertexArray thoughts
+
+- buffes length and attribute sizes (Vec2, Vec3)
+- vertex attribute layout (their positions from the shader)
+
+That brings question of Geometry attributes naming Currently pex/Geometry accepts two names for attribute:
+- property name (e.g. positions)
+- attribute name (e.g. position)
+
+It also has indices in form of
+- faces
+- edges
+
+stack-gl simplical complex attributes are named
+- positions
+- cells (for edges / faces)
+
+Ideally all geometry would have property names matching pex vertex shader conventions
+so we can automatically infer vertex layout (attrib locations)
+- position
+- normal
+- texCoord
+- indices
+
+But is it work the effort?
+- It becomes automagic (call your coords `texCoord` not `texCoord0` or `uv`)
+- Some people name attributes with prefixes anyway `a_position`
+
+Additionally VAO binding needs to be invalidated every time we add or remove attribute. How often that happens? It would be much easier if we could just pass attrib map object on VertexArray creation
+
+Istead of:
+```javascript
+var va = new VertexArray(gl)
+va.addAttribute('position', mesh.positions, { size: 3, dynamic: true })
+va.addAttribute('texCood', mesh.texCoords, { size: 2, dynamic: false })
+va.addIndexBuffer(mesh.indices)
+```
+
+We would:
+```javascript
+var va = new VertexArray(gl, {
+	position: { data: mesh.positions, size: 3, dynamic: true },
+	texCood: { data: mesh.texCoords, size: 2, dynamic: false }
+	indices: { data: mesh.indices, length: mesh.indices.length }
+})
+```
+
+Finally is the question how geometry relates to that. Do we have `Geometry` and `VBOGeometry`? `Geometry` and `Mesh`? §
+
+## Geometry thoughts
+
+Possible API behaviours:
+- in place - currently genNormals(), genEdges()
+- immutable (returns new Geometry) - currently triangulate, catmullClark, dooSabin etc
