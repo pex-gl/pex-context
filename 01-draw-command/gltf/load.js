@@ -227,6 +227,7 @@ function handleNode(gl, json, basePath, nodeName, nodeInfo, callback) {
   log('handleNode', nodeName);
   //FIXME: solve that with Ramda partial
   nodeInfo.children = nodeInfo.children.map(function(childNodeName) {
+    json.nodes[childNodeName].parent = nodeInfo;
     return json.nodes[childNodeName];
   })
   callback(null, nodeInfo);

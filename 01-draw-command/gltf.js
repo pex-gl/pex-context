@@ -43,6 +43,7 @@ var translate       = require('gl-mat4/translate');
 var rotateY         = require('gl-mat4/rotateY');
 var mult44          = require('gl-mat4/multiply');
 var copy44          = require('gl-mat4/copy');
+var scale44         = require('gl-mat4/scale');
 var invert          = require('gl-mat4/invert');
 var transpose       = require('gl-mat4/transpose');
 var scale44         = require('gl-mat4/scale');
@@ -100,7 +101,7 @@ createWindow({
   initResources: function() {
     var gl          = this.gl;
     this.context    = new Context(gl);
-    this.eye        = [54, 52, 54];
+    this.eye        = [14, 12, 14];
     this.target     = [0, 0, 0];
     this.up         = [0, 1, 0];
 
@@ -262,27 +263,63 @@ createWindow({
             }
           }
 
-          var cmd = new DrawCommand({
+          meshInfo._cmd = {
             vertexArray : primitiveInfo.vertexArray,
             program     : program,
             uniforms    : uniforms,
             renderState : {
               depthTest: true
-            }
-          });
-          commands.push(cmd);
+            },
+            bbox: bbox
+          }
+
+          //var cmd = new DrawCommand({
+          //  vertexArray : primitiveInfo.vertexArray,
+          //  program     : program,
+          //  uniforms    : uniforms,
+          //  renderState : {
+          //    depthTest: true
+          //  }
+          //});
+          //commands.push(cmd);
         });
       });
+
+      forEachKeyValue(json.nodes, function(nodeName, nodeInfo, nodeIndex) {
+        var localMatrix = createMat4();
+        scale44(localMatrix, localMatrix, [2, -2, 2])
+        translate(localMatrix, localMatrix, [-2, 0, 0])
+        var matrixStack = [nodeInfo.matrix];
+        var parent = nodeInfo.parent;
+        while(parent) {
+          if (parent.matrix) {
+            matrixStack.unshift(parent.matrix);
+          }
+          parent = parent.parent;
+        }
+        matrixStack.forEach(function(mat) {
+          mult44(localMatrix, localMatrix, mat);
+        })
+        if (nodeInfo.meshes) {
+          nodeInfo.meshes.forEach(function(meshId) {
+            var mesh = json.meshes[meshId];
+            var cmd = new DrawCommand(mesh._cmd);
+            mult44(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, localMatrix);
+            commands.push(cmd);
+          })
+        }
+      });
+
       var size = sub3([0,0,0], bbox.max, bbox.min);
       var maxScale = Math.max(size[0], Math.max(size[1], size[2]))
       //console.log(maxScale)
-      maxScale = 0.1;
+      //maxScale = 0.05;
       var tmp = createMat4();
       commands.forEach(function(cmd, cmdIndex) {
         if (!cmd.uniforms) return;
-        translate(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, [-size[0]/2, -size[1]/2, -size[2]/2]);
+        //translate(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, [-size[0]/2, -size[1]/2, -size[2]/2]);
         //translate(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, [-0.1, 0, 0]);
-        scale44(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, [1/maxScale, 1/maxScale,1/maxScale]);
+        //scale44(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, [1/maxScale, 1/maxScale,1/maxScale]);
         //console.log('cmd', cmdIndex, cmd.vertexArray.indexBuffer.dataBuf.length)
       })
     });
@@ -299,7 +336,7 @@ createWindow({
 
     this.commands.forEach(function(cmd) {
       if (cmd.uniforms && cmd.uniforms.u_modelViewMatrix) {
-        rotateY(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, Math.PI/2/50);
+        //rotateY(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, Math.PI/2/50);
       }
       this.context.submit(cmd);
     }.bind(this));
