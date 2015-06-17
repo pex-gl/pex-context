@@ -70,6 +70,8 @@ function Vao(){
     this._vertexAttribPointers = {};
     this._vertexAttribDivisors = {};
 
+    this._dirty = false;
+
     this._id = Id.get();
 }
 
@@ -181,6 +183,8 @@ Vao.prototype.enableVertexAttribArray = function(index){
     var vertexAttribArrays = this._vertexAttribArrays[bufferIndex];
     var array = safeResolve(vertexAttribArrays,index,VertexAttribArray);
     array.enabled = true;
+
+    this._dirty = true;
 };
 
 Vao.prototype.disableVertexAttribArray = function(index){
@@ -197,6 +201,8 @@ Vao.prototype.disableVertexAttribArray = function(index){
     var vertexAttribArrays = this._vertexAttribArrays[bufferIndex];
     var array = safeResolve(vertexAttribArrays,index,VertexAttribArray);
     array.enabled = false;
+
+    this._dirty = true;
 };
 
 Vao.prototype.vertexAttribPointer = function(index,size,type,normalized,stride,offset){
@@ -218,6 +224,8 @@ Vao.prototype.vertexAttribPointer = function(index,size,type,normalized,stride,o
     pointer.stride = stride;
     pointer.offset = offset;
     pointer.isDirty = true;
+
+    this._dirty = true;
 };
 
 Vao.prototype.vertexAttribDivisor = function(index,divisor){
@@ -229,6 +237,8 @@ Vao.prototype.vertexAttribDivisor = function(index,divisor){
     var divisor_ = safeResolve(vertexAttribDivisors,index,VertexAttribDivisor);
     divisor_.divisor = divisor;
     divisor_.isDirty = true;
+
+    this._dirty = true;
 };
 
 Vao.prototype.getVertexAttribArrays = function(buffer){
@@ -286,6 +296,10 @@ Vao.prototype.getVertexAttribDivisors = function(buffer){
 };
 
 Vao.prototype.apply = function(){
+    if(!this._dirty){
+        return;
+    }
+
     var gl = this._gl;
     var glid = gl.id;
 
