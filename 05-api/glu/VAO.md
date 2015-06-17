@@ -164,3 +164,29 @@ geometryInstances : new Cesium.GeometryInstance({
 }),
 appearance : new Cesium.PerInstanceColorAppearance()
 ```
+
+## ThreeJS BufferGeometry
+
+https://github.com/mrdoob/three.js/blob/5c7e0df9b100ba40cdcaaf530196290e16c34858/examples/webgl_buffergeometry_drawcalls.html#L128
+
+```javascript
+particles = new THREE.BufferGeometry();
+particlePositions = new Float32Array( maxParticleCount * 3 );
+particles.addAttribute( 'position', new THREE.DynamicBufferAttribute( particlePositions, 3 ) );
+particles.drawcalls.push( {
+	start: 0,
+	count: particleCount,
+	index: 0
+} );
+```
+
+THREE.js creates and updates buffers [on the fly](https://github.com/mrdoob/three.js/blob/5c7e0df9b100ba40cdcaaf530196290e16c34858/src/renderers/WebGLRenderer.js#L3913)
+
+```javascript
+if ( attribute.buffer === undefined ) {
+	attribute.buffer = _gl.createBuffer();
+	_gl.bindBuffer( bufferType, attribute.buffer );
+	_gl.bufferData( bufferType, attribute.array, ( attribute instanceof THREE.DynamicBufferAttribute ) ? _gl.DYNAMIC_DRAW : _gl.STATIC_DRAW );
+	attribute.needsUpdate = false;
+}
+```
