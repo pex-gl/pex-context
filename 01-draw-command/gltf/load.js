@@ -40,6 +40,7 @@ function handleBuffer(gl, json, basePath, bufferName, bufferInfo, callback) {
 }
 
 function handleBufferView(gl, json, basePath, bufferViewName, bufferViewInfo, callback) {
+  log('handleBufferView', bufferViewName);
   var buffer = json.buffers[bufferViewInfo.buffer];
   bufferViewInfo._typedArray = null;
   if (bufferViewInfo.target == 34963) { //ELEMENT_ARRAY_BUFFER
@@ -153,6 +154,7 @@ function buildMeshes(gl, json, callback) {
 }
 
 function handleShader(gl, json, basePath, shaderName, shaderInfo, callback) {
+  log('handleShader', shaderName);
   if (shaderInfo.uri) {
     loadText(basePath + '/' + shaderInfo.uri, function(err, srcStr) {
       log('handleShader');
@@ -205,6 +207,7 @@ function handleTexture(gl, json, basePath, textureName, textureInfo, callback) {
 }
 
 function handleProgram(gl, json, basePath, programName, programInfo, callback) {
+  log('handleProgram', programName);
   var vertSrc = json.shaders[programInfo.vertexShader]._src;
   var fragSrc = json.shaders[programInfo.fragmentShader]._src;
   //FIXME: hardcoded

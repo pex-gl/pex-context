@@ -25,9 +25,7 @@ function createWindow(opts) {
           }
           opts._draw();
         };
-        console.log('init resources', resources.length);
-          opts._init();
-        console.log('init end');
+        opts._init();
       }).done();
     }
   }

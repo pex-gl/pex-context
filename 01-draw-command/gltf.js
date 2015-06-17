@@ -180,7 +180,6 @@ createWindow({
           var defaultPass = techniqueInfo.passes.defaultPass;
           var instanceProgramInfo = defaultPass.instanceProgram;
           var program = json.programs[instanceProgramInfo.program]._program;
-          console.log(program.attributes)
 
           var uniforms = {};
 
