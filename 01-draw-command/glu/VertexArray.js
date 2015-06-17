@@ -28,7 +28,7 @@ function VertexArray(gl) {
       Ext.deleteVertexArray = vaoExt.deleteVertexArrayOES.bind(vaoExt);
     }
   }
-
+  Ext.createVertexArray = null; //FIXME: remove that reset
   if (Ext.createVertexArray) {
     this.vao = Ext.createVertexArray();
     this.vaoValid = true;
@@ -80,9 +80,12 @@ VertexArray.prototype.bindBuffers = function(program) {
     if (program.attributes[attributeName] !== undefined) {
       gl.bindBuffer(gl.ARRAY_BUFFER, attribute.handle);
       //TODO: check if program has attribute
-      //log(attribute.stride, attribute.offset);
+      log(attributeName, attribute.stride, attribute.offset);
       gl.vertexAttribPointer(program.attributes[attributeName], attribute.size, gl.FLOAT, false, attribute.stride, attribute.offset);
       gl.enableVertexAttribArray(program.attributes[attributeName]);
+    }
+    else {
+      log(attributeName, attribute.stride, attribute.offset, 'MISSING in the program');
     }
   }
 
@@ -124,7 +127,6 @@ VertexArray.prototype.draw = function(opts) {
   var primitiveType = (opts && opts.primitiveType) || gl.TRIANGLES;
   //FIXME: all attributes keep their data in memory, should be dropped if not dynamic
   var num = this.attributes.position.dataBuf.length / this.attributes.position.size;
-
   if (this.indexBuffer) {
     this.gl.drawElements(primitiveType, this.indexBuffer.dataBuf.length, this.gl.UNSIGNED_SHORT, 0);
   }

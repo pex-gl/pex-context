@@ -47,7 +47,7 @@ function Program(gl, vertSrc, fragSrc, debug) {
   }
   else {
     this.addSources(vertSrc, fragSrc);
-    this.ready = false;
+    this.ready = true;
     if (this.vertShader && this.fragShader) {
       this.link();
     }
@@ -88,6 +88,14 @@ Program.prototype.addFragmentSource = function(fragSrc) {
   }
 };
 
+function glConstToString(gl, c) {
+  var result = '';
+  Object.keys(gl).forEach(function(keyName) {
+    if (gl[keyName] == c) result = keyName;
+  })
+  return result;
+}
+
 Program.prototype.link = function() {
   this.gl.attachShader(this.handle, this.vertShader);
   this.gl.attachShader(this.handle, this.fragShader);
@@ -109,6 +117,7 @@ Program.prototype.link = function() {
       }
     } else {
       var location = this.gl.getUniformLocation(this.handle, info.name);
+      console.log('uniform', info.name, glConstToString(this.gl, info.type));
       this.uniforms[info.name] = Program.makeUniformSetter(this.gl, info.type, location);
     }
   }
@@ -172,6 +181,21 @@ Program.makeUniformSetter = function(gl, type, location) {
         gl.uniform4f(location, v[0], v[1], v[2], v[3]);
       };
       break;
+    case gl.FLOAT_MAT3:
+      var mv = new Float32Array(9);
+      setterFun = function(m) {
+        mv[0]  = m[0];
+        mv[1]  = m[1];
+        mv[2]  = m[2];
+        mv[3]  = m[3];
+        mv[4]  = m[4];
+        mv[5]  = m[5];
+        mv[6]  = m[6];
+        mv[7]  = m[7];
+        mv[8]  = m[8];
+        gl.uniformMatrix3fv(location, false, mv);
+      };
+      break;
     case gl.FLOAT_MAT4:
       var mv = new Float32Array(16);
       setterFun = function(m) {
@@ -193,6 +217,7 @@ Program.makeUniformSetter = function(gl, type, location) {
         mv[15] = m[15];
         return gl.uniformMatrix4fv(location, false, mv);
       };
+      break;
   }
   if (setterFun) {
     setterFun.type = type;

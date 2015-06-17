@@ -87,7 +87,10 @@ Context.prototype.render = function() {
 
     if (!prevCmd || prevCmd.program != cmd.program) {
       if (cmd.program) {
-        if (!cmd.program.ready) continue;
+        if (!cmd.program.ready) {
+          log('skipping program - not ready');
+          continue;
+        }
         cmd.program.bind();
       }
     }

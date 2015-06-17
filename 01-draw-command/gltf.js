@@ -1,5 +1,5 @@
 //utils
-var debug           = require('debug').enable('pex/gltf pex/gltf-app pex/glu/VertexBuffer pex/glu/VertexArray');
+var debug           = require('debug').enable('');
 var log             = require('debug')('pex/gltf-app');
 var extend          = require('extend');
 
@@ -41,6 +41,9 @@ var lookAt          = require('gl-mat4/lookAt');
 var perspective     = require('gl-mat4/perspective');
 var translate       = require('gl-mat4/translate');
 var rotateY         = require('gl-mat4/rotateY');
+var mult44          = require('gl-mat4/multiply');
+var invert          = require('gl-mat4/invert');
+var transpose       = require('gl-mat4/transpose');
 var copy3           = require('gl-vec3/copy');
 
 //shaders
@@ -142,71 +145,112 @@ createWindow({
     var projectionMatrix = this.camProjectionMatrix;
     var viewMatrix = this.viewMatrix;
     var modelMatrix = this.boxModelMatrix;
+    var modelViewMatrix = mult44(createMat4(), viewMatrix, modelMatrix);
+    var normalMatrix = createMat4();
+    //invert(normalMatrix, modelViewMatrix);
+    //transpose(normalMatrix, normalMatrix);
+    normalMatrix = [
+      normalMatrix[0], normalMatrix[1], normalMatrix[2],
+      normalMatrix[4], normalMatrix[5], normalMatrix[6],
+      normalMatrix[8], normalMatrix[9], normalMatrix[10]
+    ];
 
-    //loadGLTF(gl, __dirname + '/assets/gltf/duck/duck.gltf', function(err, json) {
+    loadGLTF(gl, __dirname + '/assets/model/duck/duck.gltf', function(err, json) {
     //loadGLTF(gl, __dirname + '/assets/model/wine/wine.gltf', function(err, json) {
     //loadGLTF(gl, __dirname + '/assets/model/SuperMurdoch/SuperMurdoch.gltf', function(err, json) {
     //loadGLTF(gl, __dirname + '/assets/model/rambler/Rambler.gltf', function(err, json) {
     //loadGLTF(gl, __dirname + '/assets/model/box/box.gltf', function(err, json) {
-      log('load done', 'err:', err, '' + json);
-
-      var AttributeNameMap = {
-        "NORMAL": "normal",
-        "POSITION": "position",
-        "TEXCOORD_0": "texCoord"
+      if (err) {
+        log('load done', 'err:', err);
+      }
+      else {
+        log('load done',  '' + json);
       }
 
-      log('buildMesh AttributeNameMap');
-
-      var AttributeSizeMap = {
-        "SCALAR": 1,
-        "VEC3": 3,
-        "VEC2": 2
-      }
-
-      function buildBufferInfo(accessorName) {
-        var accessorInfo = json.accessors[accessorName];
-        var bufferInfo = {
-          data: json.bufferViews[accessorInfo.bufferView].typedArray,
-          opts: {
-            offset: accessorInfo.byteOffset,
-            stride: accessorInfo.byteStride,
-            size: AttributeSizeMap[accessorInfo.type]
-          }
-        };
-        return bufferInfo;
-      }
 
       log('buildMesh');
-      forEachKeyValue(json.meshes, function(meshName, meshInfo) {
-        log('buildMesh', meshName);
+      forEachKeyValue(json.meshes, function(meshName, meshInfo, meshIndex) {
         meshInfo.primitives.forEach(function(primitiveInfo, primitiveIndex) {
-          log('buildPrimitive', primitiveIndex);
+          if (!primitiveInfo.vertexArray) return; //FIXME: TEMP!
 
-          var va = new VertexArray(gl);
+          var materialInfo = json.materials[primitiveInfo.material];
+          var instanceValues = materialInfo.instanceTechnique.values;
+          var techniqueInfo = json.techniques[materialInfo.instanceTechnique.technique];
+          var parameters = techniqueInfo.parameters;
+          var defaultPass = techniqueInfo.passes.defaultPass;
+          var instanceProgramInfo = defaultPass.instanceProgram;
+          var program = json.programs[instanceProgramInfo.program]._program;
+          console.log(program.attributes)
 
-          forEachKeyValue(primitiveInfo.attributes, function(attributeSemantic, accessorName) {
-            var attributeInfo = buildBufferInfo(accessorName);
-            var attributeName = AttributeNameMap[attributeSemantic];
-            log('buildAttribute', attributeName, attributeInfo.opts);
-            va.addAttribute(attributeName, attributeInfo.data, attributeInfo.opts);
+          var uniforms = {};
+
+          //projectionMatrix: projectionMatrix,
+          //viewMatrix: viewMatrix,
+          //modelMatrix: modelMatrix
+
+          forEachKeyValue(instanceProgramInfo.uniforms, function(uniformName, valueName) {
+            var parameter = parameters[valueName];
+            var value = instanceValues[valueName] || parameter.value;
+            uniforms[valueName] = null;
+            //log('uniform', uniformName, valueName, value, parameter);
+            if (!value) {
+              if (parameter.source) {
+                  log('uniform source found', parameter.source);  //TODO: uniform source
+                  //TODO: is source refering only to node matrices?
+                  value = json.nodes[parameter.source].matrix;
+              }
+              else if (parameter.semantic) {
+                switch(parameter.semantic) {
+                  case 'MODELVIEW':
+                    value = modelViewMatrix;
+                    break;
+                  case 'PROJECTION':
+                    value = projectionMatrix;
+                    break;
+                  case 'MODELVIEWINVERSETRANSPOSE':
+                    value = normalMatrix;
+                    break;
+                  default:
+                    throw new Error('Unknown uniform semantic found ' + parameter.semantic);
+                }
+              }
+              else {
+                throw new Error('No value for uniform:' + valueName);
+              }
+            }
+            if (instanceValues[valueName]) {
+              switch(parameters[valueName].type) {
+                case gl.SAMPLER_2D:
+                  value = json.textures[value]._texture;//TODO: check if this is not null (eg. texture loading failed)
+                  break;
+                case gl.FLOAT_VEC2: break;
+                case gl.FLOAT_VEC3: break;
+                case gl.FLOAT_VEC4: break;
+                case gl.FLOAT_MAT4: break;
+                case gl.FLOAT: break;
+                default:
+                  throw new Error('Unknown uniform type:' + parameters[valueName].type);
+              }
+            }
+
+            if (value === null || value === undefined) {
+              throw new Error('Uniform ' + valueName + ' is missing');
+            }
+            uniforms[valueName] = value;
           });
 
-          var indexBufferInfo = buildBufferInfo(primitiveInfo.indices);
-          log('buildIndexBuffer', indexBufferInfo.opts, 'len:', indexBufferInfo.data.length);
-          va.addIndexBuffer(indexBufferInfo.data, indexBufferInfo.opts);
+          //program = showNormalsProgram;
+
+          forEachKeyValue(uniforms, function(name, value) {
+            uniforms['u_' + name] = value;
+            delete uniforms[name];
+          })
 
           var modelMatrix = createMat4();
-          rotateY(modelMatrix, modelMatrix, Math.PI/2);
-
           var cmd = new DrawCommand({
-            vertexArray : va,
-            program     : showNormalsProgram,
-            uniforms    : {
-              projectionMatrix: projectionMatrix,
-              viewMatrix: viewMatrix,
-              modelMatrix: modelMatrix
-            },
+            vertexArray : primitiveInfo.vertexArray,
+            program     : program,
+            uniforms    : uniforms,
             renderState : {
               depthTest: true
             }
@@ -227,8 +271,8 @@ createWindow({
     var gl = this.gl;
 
     this.commands.forEach(function(cmd) {
-      if (cmd.uniforms && cmd.uniforms.modelMatrix) {
-        rotateY(cmd.uniforms.modelMatrix, cmd.uniforms.modelMatrix, Math.PI/2/50);
+      if (cmd.uniforms && cmd.uniforms.u_modelViewMatrix) {
+        rotateY(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, Math.PI/2/50);
       }
       this.context.submit(cmd);
     }.bind(this));

@@ -18,6 +18,7 @@ var loadImage    = require('./sys/loadImage');
 var Time         = require('./sys/Time');
 var Platform         = require('./sys/Platform');
 var loadDDSCubemap = require('./sys/loadDDSCubemap');
+var PBRProgram   = require('pex-shaders').PBRProgram;
 
 var targetBounds = [
   [-1, -1, -1],
@@ -25,6 +26,8 @@ var targetBounds = [
 ];
 
 var ASSETS_PATH = Platform.isBrowser ? 'assets' : __dirname + '/assets'
+
+Scene.prototype = Object.create(events.EventEmitter.prototype)
 
 createWindow({
   settings: {
@@ -37,7 +40,7 @@ createWindow({
   //-might need gl context
   //-loading files one by one is pita
   resources: {
-    showNormalsVert: glslify(__dirname + '/sh/materials/ShowNormals.vert'),
+    showNormalsVert: { type: 'text', uri:glslify(__dirname + '/sh/materials/ShowNormals.vert') },
     showNormalsFrag: glslify(__dirname + '/sh/materials/ShowNormals.frag'),
     skyboxVert: glslify(__dirname + '/sh/materials/Skybox.vert'),
     skyboxFrag: glslify(__dirname + '/sh/materials/Skybox.frag'),

@@ -56,6 +56,19 @@ Texture2D.create = function(gl, w, h, options) {
   return texture;
 };
 
+//FIXME: plask only
+Texture2D.prototype.update = function(canvas, flip) {
+  var gl = this.gl;
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, this.handle);
+  if (flip) {
+    gl.texImage2DSkCanvas(gl.TEXTURE_2D, 0, canvas);
+  }
+  else {
+    gl.texImage2DSkCanvasNoFlip(gl.TEXTURE_2D, 0, canvas);
+  }
+}
+
 //Texture2D.prototype.anisotropy = function(level) {
 //  var gl = Context.currentContext;
 //  this.bind();
