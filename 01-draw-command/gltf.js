@@ -1,5 +1,5 @@
 //utils
-var debug           = require('debug').enable('-pex/gltf-app -pex/gltf');
+var debug           = require('debug').enable('pex/gltf-app -pex/gltf');
 var log             = require('debug')('pex/gltf-app');
 var extend          = require('extend');
 
@@ -161,8 +161,8 @@ createWindow({
     //loadGLTF(gl, __dirname + '/assets/model/box/box.gltf', function(err, json) {
     //loadGLTF(gl, __dirname + '/assets/model/duck/duck.gltf', function(err, json) {
     //loadGLTF(gl, __dirname + '/assets/model/wine/wine.gltf', function(err, json) {
-    loadGLTF(gl, __dirname + '/assets/model/SuperMurdoch/SuperMurdoch.gltf', function(err, json) {
-    //loadGLTF(gl, __dirname + '/assets/model/rambler/Rambler.gltf', function(err, json) {
+    //loadGLTF(gl, __dirname + '/assets/model/SuperMurdoch/SuperMurdoch.gltf', function(err, json) {
+    loadGLTF(gl, __dirname + '/assets/model/rambler/Rambler.gltf', function(err, json) {
       if (err) {
         log('load done', 'err:', err);
       }
@@ -275,14 +275,14 @@ createWindow({
       });
       var size = sub3([0,0,0], bbox.max, bbox.min);
       var maxScale = Math.max(size[0], Math.max(size[1], size[2]))
-      //maxScale = 2;
+      //console.log(maxScale)
+      maxScale = 0.1;
       var tmp = createMat4();
       commands.forEach(function(cmd, cmdIndex) {
         if (!cmd.uniforms) return;
-        cmd.uniforms.u_modelViewMatrix
-        //translate(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, [-size[0]/2, -size[1]/2, -size[2]/2]);
+        translate(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, [-size[0]/2, -size[1]/2, -size[2]/2]);
         //translate(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, [-0.1, 0, 0]);
-        //scale44(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, [1/maxScale, 1/maxScale,1/maxScale]);
+        scale44(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, [1/maxScale, 1/maxScale,1/maxScale]);
         //console.log('cmd', cmdIndex, cmd.vertexArray.indexBuffer.dataBuf.length)
       })
     });
@@ -299,7 +299,7 @@ createWindow({
 
     this.commands.forEach(function(cmd) {
       if (cmd.uniforms && cmd.uniforms.u_modelViewMatrix) {
-        //rotateY(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, Math.PI/2/50);
+        rotateY(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, Math.PI/2/50);
       }
       this.context.submit(cmd);
     }.bind(this));
