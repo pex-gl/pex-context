@@ -1,5 +1,5 @@
 //utils
-var debug           = require('debug').enable('');
+var debug           = require('debug').enable('-pex/gltf-app -pex/gltf');
 var log             = require('debug')('pex/gltf-app');
 var extend          = require('extend');
 
@@ -42,9 +42,12 @@ var perspective     = require('gl-mat4/perspective');
 var translate       = require('gl-mat4/translate');
 var rotateY         = require('gl-mat4/rotateY');
 var mult44          = require('gl-mat4/multiply');
+var copy44          = require('gl-mat4/copy');
 var invert          = require('gl-mat4/invert');
 var transpose       = require('gl-mat4/transpose');
+var scale44         = require('gl-mat4/scale');
 var copy3           = require('gl-vec3/copy');
+var sub3            = require('gl-vec3/subtract');
 
 //shaders
 var glslify         = require('glslify-promise');
@@ -97,11 +100,11 @@ createWindow({
   initResources: function() {
     var gl          = this.gl;
     this.context    = new Context(gl);
-    this.eye        = [4, 2, 4];
+    this.eye        = [54, 52, 54];
     this.target     = [0, 0, 0];
     this.up         = [0, 1, 0];
 
-    this.camProjectionMatrix   = perspective(createMat4(), Math.PI/4, this.width/this.height, 0.1, 100);
+    this.camProjectionMatrix   = perspective(createMat4(), Math.PI/4, this.width/this.height, 0.1, 500);
     this.viewMatrix            = lookAt(createMat4(), this.eye, this.target, this.up);
     this.boxModelMatrix        = createMat4();
 
@@ -147,19 +150,19 @@ createWindow({
     var modelMatrix = this.boxModelMatrix;
     var modelViewMatrix = mult44(createMat4(), viewMatrix, modelMatrix);
     var normalMatrix = createMat4();
-    //invert(normalMatrix, modelViewMatrix);
-    //transpose(normalMatrix, normalMatrix);
+    invert(normalMatrix, modelViewMatrix);
+    transpose(normalMatrix, normalMatrix);
     normalMatrix = [
       normalMatrix[0], normalMatrix[1], normalMatrix[2],
       normalMatrix[4], normalMatrix[5], normalMatrix[6],
       normalMatrix[8], normalMatrix[9], normalMatrix[10]
     ];
 
-    loadGLTF(gl, __dirname + '/assets/model/duck/duck.gltf', function(err, json) {
-    //loadGLTF(gl, __dirname + '/assets/model/wine/wine.gltf', function(err, json) {
-    //loadGLTF(gl, __dirname + '/assets/model/SuperMurdoch/SuperMurdoch.gltf', function(err, json) {
-    //loadGLTF(gl, __dirname + '/assets/model/rambler/Rambler.gltf', function(err, json) {
     //loadGLTF(gl, __dirname + '/assets/model/box/box.gltf', function(err, json) {
+    //loadGLTF(gl, __dirname + '/assets/model/duck/duck.gltf', function(err, json) {
+    //loadGLTF(gl, __dirname + '/assets/model/wine/wine.gltf', function(err, json) {
+    loadGLTF(gl, __dirname + '/assets/model/SuperMurdoch/SuperMurdoch.gltf', function(err, json) {
+    //loadGLTF(gl, __dirname + '/assets/model/rambler/Rambler.gltf', function(err, json) {
       if (err) {
         log('load done', 'err:', err);
       }
@@ -167,6 +170,10 @@ createWindow({
         log('load done',  '' + json);
       }
 
+      var bbox = {
+        min: [Infinity, Infinity, Infinity],
+        max: [-Infinity, -Infinity, -Infinity]
+      };
 
       log('buildMesh');
       forEachKeyValue(json.meshes, function(meshName, meshInfo, meshIndex) {
@@ -182,6 +189,7 @@ createWindow({
           var program = json.programs[instanceProgramInfo.program]._program;
 
           var uniforms = {};
+          var localModelViewMatrix = createMat4();
 
           //projectionMatrix: projectionMatrix,
           //viewMatrix: viewMatrix,
@@ -201,7 +209,8 @@ createWindow({
               else if (parameter.semantic) {
                 switch(parameter.semantic) {
                   case 'MODELVIEW':
-                    value = modelViewMatrix;
+                    copy44(localModelViewMatrix, modelViewMatrix);
+                    value = localModelViewMatrix;
                     break;
                   case 'PROJECTION':
                     value = projectionMatrix;
@@ -245,7 +254,14 @@ createWindow({
             delete uniforms[name];
           })
 
-          var modelMatrix = createMat4();
+          var positions = primitiveInfo.vertexArray.attributes['position'].dataBuf;
+          for(var i=0; i<positions.length; i+=3) {
+            for(var j=0; j<3; j++) {
+              bbox.min[j] = Math.min(bbox.min[j], positions[i+j]);
+              bbox.max[j] = Math.max(bbox.max[j], positions[i+j]);
+            }
+          }
+
           var cmd = new DrawCommand({
             vertexArray : primitiveInfo.vertexArray,
             program     : program,
@@ -257,6 +273,18 @@ createWindow({
           commands.push(cmd);
         });
       });
+      var size = sub3([0,0,0], bbox.max, bbox.min);
+      var maxScale = Math.max(size[0], Math.max(size[1], size[2]))
+      //maxScale = 2;
+      var tmp = createMat4();
+      commands.forEach(function(cmd, cmdIndex) {
+        if (!cmd.uniforms) return;
+        cmd.uniforms.u_modelViewMatrix
+        //translate(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, [-size[0]/2, -size[1]/2, -size[2]/2]);
+        //translate(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, [-0.1, 0, 0]);
+        //scale44(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, [1/maxScale, 1/maxScale,1/maxScale]);
+        //console.log('cmd', cmdIndex, cmd.vertexArray.indexBuffer.dataBuf.length)
+      })
     });
   },
   onResize: function(e) {
@@ -271,13 +299,17 @@ createWindow({
 
     this.commands.forEach(function(cmd) {
       if (cmd.uniforms && cmd.uniforms.u_modelViewMatrix) {
-        rotateY(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, Math.PI/2/50);
+        //rotateY(cmd.uniforms.u_modelViewMatrix, cmd.uniforms.u_modelViewMatrix, Math.PI/2/50);
       }
       this.context.submit(cmd);
     }.bind(this));
 
     try {
+      //gl.finish();
+      //console.time('render');
       this.context.render();
+      //gl.finish();
+      //console.timeEnd('render');
     }
     catch(e) {
       console.log(e);

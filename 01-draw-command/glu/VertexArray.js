@@ -80,7 +80,7 @@ VertexArray.prototype.bindBuffers = function(program) {
     if (program.attributes[attributeName] !== undefined) {
       gl.bindBuffer(gl.ARRAY_BUFFER, attribute.handle);
       //TODO: check if program has attribute
-      log(attributeName, attribute.stride, attribute.offset);
+      //log(attributeName, attribute.stride, attribute.offset);
       gl.vertexAttribPointer(program.attributes[attributeName], attribute.size, gl.FLOAT, false, attribute.stride, attribute.offset);
       gl.enableVertexAttribArray(program.attributes[attributeName]);
     }

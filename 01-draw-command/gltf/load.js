@@ -47,7 +47,7 @@ function handleBufferView(gl, json, basePath, bufferViewName, bufferViewInfo, ca
     //TODO: Slice or not to slice the buffer
     bufferViewInfo.buffer = buffer.arrayBuffer.slice(bufferViewInfo.byteOffset, bufferViewInfo.byteOffset + bufferViewInfo.byteLength);
     info('slice', bufferViewName, bufferViewInfo.byteOffset, bufferViewInfo.byteOffset + bufferViewInfo.byteLength, '=', bufferViewInfo.buffer.byteLength);
-    //bufferViewInfo.buffer = buffer.arrayBuffer;
+    bufferViewInfo._buffer = bufferViewInfo.buffer;
     bufferViewInfo._typedArray = new Uint16Array(bufferViewInfo.buffer);
   }
   if (bufferViewInfo.target == 34962) { //ARRAY_BUFFER
@@ -107,7 +107,12 @@ function buildMeshes(gl, json, callback) {
     var data = json.bufferViews[accessorInfo.bufferView]._typedArray;//.subarray(0, accessorInfo.count * size);
     var buffer = json.bufferViews[accessorInfo.bufferView]._buffer;
     if (buffer) {
-      data = new Float32Array(buffer.slice(accessorInfo.byteOffset, accessorInfo.byteOffset + accessorInfo.count * size * 4));
+      if (json.bufferViews[accessorInfo.bufferView].target == 34963) {
+        data = new Uint16Array(buffer.slice(accessorInfo.byteOffset, accessorInfo.byteOffset + accessorInfo.count * size * 2));
+      }
+      else {
+        data = new Float32Array(buffer.slice(accessorInfo.byteOffset, accessorInfo.byteOffset + accessorInfo.count * size * 4));
+      }
       info('subarray', accessorName, accessorInfo.byteOffset, accessorInfo.byteOffset + accessorInfo.count * size * 4);
     }
     else {
