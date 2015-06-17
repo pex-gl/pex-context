@@ -1,6 +1,6 @@
 //Program implementation
-
 var Promise = require('bluebird');
+var log = require('debug')('pex/Program');
 
 var kVertexShaderPrefix = '' +
   '#ifdef GL_ES\n' +
@@ -18,7 +18,7 @@ var kFragmentShaderPrefix = '' +
   '#endif\n' +
   '#define FRAG\n';
 
-function Program(gl, vertSrc, fragSrc, debug) {
+function Program(gl, vertSrc, fragSrc) {
   this.gl = gl;
   this.handle = this.gl.createProgram();
   this.uniforms = {};
@@ -26,8 +26,8 @@ function Program(gl, vertSrc, fragSrc, debug) {
 
   if (vertSrc && vertSrc.then && fragSrc && fragSrc.then) {
     Promise.all([vertSrc, fragSrc]).then(function(sources) {
-      if (debug) console.log(sources[0]);
-      if (debug) console.log(sources[1]);
+      log(sources[0]);
+      log(sources[1]);
       this.addSources(sources[0], sources[1]);
       this.ready = false;
       if (this.vertShader && this.fragShader) {
@@ -37,7 +37,7 @@ function Program(gl, vertSrc, fragSrc, debug) {
   }
   else if (vertSrc && vertSrc.then) {
     Promise.all([vertSrc]).then(function(sources) {
-      if (debug) console.log(sources[0]);
+      log(sources[0]);
       this.addSources(sources[0], sources[0]);
       this.ready = false;
       if (this.vertShader && this.fragShader) {
@@ -117,7 +117,7 @@ Program.prototype.link = function() {
       }
     } else {
       var location = this.gl.getUniformLocation(this.handle, info.name);
-      console.log('uniform', info.name, glConstToString(this.gl, info.type));
+      log('uniform', info.name, glConstToString(this.gl, info.type));
       this.uniforms[info.name] = Program.makeUniformSetter(this.gl, info.type, location);
     }
   }
