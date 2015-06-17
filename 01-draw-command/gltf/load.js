@@ -25,7 +25,8 @@ var WebGLConstants = {
    5126: 'FLOAT'                  //0x1406
 }
 
-function handleBuffer(bufferInfo, basePath, callback) {
+function handleBuffer(gl, json, basePath, bufferName, bufferInfo, callback) {
+  log('handleBuffer', bufferName, bufferInfo.uri);
   if (bufferInfo.uri) {
     loadBinary(basePath + '/' + bufferInfo.uri, function(err, data) {
       bufferInfo.arrayBuffer = data;
@@ -38,28 +39,7 @@ function handleBuffer(bufferInfo, basePath, callback) {
   }
 }
 
-function handleBuffers(json, basePath, callback) {
-  log('handleBuffers', Object.keys(json.buffers));
-
-  var bufferNames = Object.keys(json.buffers);
-  async.map(
-    bufferNames,
-    function(name, callback) {
-      handleBuffer(json.buffers[name], basePath, callback);
-    },
-    function(err, buffers) {
-      if (err) {
-        log(err);
-      }
-      else {
-        log('handleBuffers done', buffers.length);
-      }
-      callback(err, buffers);
-    }
-  )
-}
-
-function handleBufferView(json, bufferViewName, bufferViewInfo) {
+function handleBufferView(gl, json, basePath, bufferViewName, bufferViewInfo, callback) {
   var buffer = json.buffers[bufferViewInfo.buffer];
   bufferViewInfo._typedArray = null;
   if (bufferViewInfo.target == 34963) { //ELEMENT_ARRAY_BUFFER
@@ -78,59 +58,28 @@ function handleBufferView(json, bufferViewName, bufferViewInfo) {
     bufferViewInfo._typedArray = new Float32Array(bufferViewInfo.buffer);
   }
   log('handleBufferView', bufferViewName, WebGLConstants[bufferViewInfo.target], bufferViewInfo.byteOffset, '..', bufferViewInfo.byteLength, '/', buffer.arrayBuffer.byteLength)
+  callback(null, bufferViewInfo);
 }
 
-function handleBufferViews(json, callback) {
-  log('handleBufferViews', Object.keys(json.bufferViews));
-  Object.keys(json.bufferViews).forEach(function(bufferViewName) {
-    var bufferViewInfo = json.bufferViews[bufferViewName];
-    log('handleBufferView', bufferViewName);
-    handleBufferView(json, bufferViewName, bufferViewInfo);
-  })
-
-  callback(null, null);
-}
-
-function handleAccessor(json, accessorName, accessorInfo) {
+function handleAccessor(gl, json, basePath, accessorName, accessorInfo, callback) {
   log('handleAccessor', accessorName);
-
+  callback(null, accessorInfo);
 }
 
-function handleAccessors(json, callback) {
-  log('handleAccessors', Object.keys(json.accessors));
-  Object.keys(json.accessors).forEach(function(accessorName) {
-    handleAccessor(json, accessorName, json.accessors[accessorName]);
-  })
-  callback(null, null);
-}
-
-function handlePrimitive(json, primitiveInfo) {
-  log('handlePrimitive', primitiveInfo.indices)
+function linkPrimitive(json, primitiveName, primitiveInfo) {
+  log('handlePrimitive', primitiveName)
   primitiveInfo.indices.accessor = json.accessors[primitiveInfo.indices];
   Object.keys(primitiveInfo.attributes).forEach(function(attribute) {
     primitiveInfo.attributes[attribute].accessor = json.accessors[primitiveInfo.attributes[attribute]];
   })
-  return primitiveInfo;
 }
 
-function handleMesh(json, meshInfo) {
+function handleMesh(gl, json, basePath, meshName, meshInfo, callback) {
   log('handleMesh', meshInfo.name);
-  meshInfo.primitives.forEach(function(primitiveInfo) {
-    handlePrimitive(json, primitiveInfo);
+  meshInfo.primitives.forEach(function(primitiveInfo, primitiveIndex) {
+    linkPrimitive(json, primitiveIndex, primitiveInfo);
   })
-  return meshInfo;
-}
-
-function handleMeshes(json, callback) {
-  log('handleMeshes', Object.keys(json.meshes));
-  var meshes = [];
-  Object.keys(json.meshes).forEach(function(meshName) {
-    var meshInfo = json.meshes[meshName];
-    var mesh = handleMesh(json, meshInfo);
-    meshes.push(mesh);
-  })
-
-  callback(null, meshes);
+  callback(null, meshInfo);
 }
 
 function buildMeshes(gl, json, callback) {
@@ -200,16 +149,16 @@ function buildMeshes(gl, json, callback) {
     })
   })
 
-  callback(null, null);
+  callback(null, json);
 }
 
-function handleShader(shaderInfo, basePath, callback) {
+function handleShader(gl, json, basePath, shaderName, shaderInfo, callback) {
   if (shaderInfo.uri) {
     loadText(basePath + '/' + shaderInfo.uri, function(err, srcStr) {
       log('handleShader');
       //precision is already added in Program class
       shaderInfo._src = srcStr.replace('precision highp float;', '');
-      callback(err, null);
+      callback(err, shaderInfo);
     });
   }
   else {
@@ -217,28 +166,7 @@ function handleShader(shaderInfo, basePath, callback) {
   }
 }
 
-function handleShaders(gl, json, basePath, callback) {
-  log('handleShaders', Object.keys(json.shaders));
-
-  var shaderNames = Object.keys(json.shaders);
-  async.map(
-    shaderNames,
-    function(name, callback) {
-      handleShader(json.shaders[name], basePath, callback);
-    },
-    function(err, shaders) {
-      if (err) {
-        log(err);
-      }
-      else {
-        log('handleShaders done', shaders.length);
-      }
-      callback(err, shaders);
-    }
-  )
-}
-
-function handleImage(imageInfo, basePath, callback) {
+function handleImage(gl, json, basePath, imageName, imageInfo, callback) {
   log('handleImage', imageInfo.uri);
   if (imageInfo.uri) {
     var url = basePath + '/' + imageInfo.uri;
@@ -255,32 +183,10 @@ function handleImage(imageInfo, basePath, callback) {
   }
 }
 
-function handleImages(json, basePath, callback) {
-  log('handleImages', Object.keys(json.images));
-
-  var imageNames = Object.keys(json.images);
-  async.map(
-    imageNames,
-    function(name, callback) {
-      handleImage(json.images[name], basePath, callback);
-    },
-    function(err, images) {
-      if (err) {
-        log(err);
-      }
-      else {
-        log('handleImages done', images.length);
-      }
-      callback(err, images);
-    }
-  )
-}
-
-function handleTexture(gl, json, textureInfo, callback) {
+function handleTexture(gl, json, basePath, textureName, textureInfo, callback) {
   log('handleTexture', textureInfo.source)
   if (textureInfo.source) {
     var img = json.images[textureInfo.source]._img;
-    console.log('img', img.width, img.height)
     //textureInfo._texture = new Texture2D(gl, )
     var plask = require('plask');
     textureInfo._texture = new Texture2D(gl, img.width, img.height);
@@ -291,35 +197,14 @@ function handleTexture(gl, json, textureInfo, callback) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.bindTexture(gl.TEXTURE_2D, null);
     //textureInfo._texture = Texture2D.genNoise(gl, 256, 256);
-    callback(null, null); //TODO: what to return here?
+    callback(null, textureInfo);
   }
   else {
     throw new Error('gltf/handleTexture missing uri in ' + JSON.stringify(textureInfo));
   }
 }
 
-function handleTextures(gl, json, callback) {
-  log('handleTextures', Object.keys(json.textures));
-
-  var textureNames = Object.keys(json.textures);
-  async.map(
-    textureNames,
-    function(name, callback) {
-      handleTexture(gl, json, json.textures[name], callback);
-    },
-    function(err, textures) {
-      if (err) {
-        log(err);
-      }
-      else {
-        log('handleTextures done', textures.length);
-      }
-      callback(err, textures);
-    }
-  )
-}
-
-function handleProgram(gl, json, programInfo, callback) {
+function handleProgram(gl, json, basePath, programName, programInfo, callback) {
   var vertSrc = json.shaders[programInfo.vertexShader]._src;
   var fragSrc = json.shaders[programInfo.fragmentShader]._src;
   //FIXME: hardcoded
@@ -327,31 +212,10 @@ function handleProgram(gl, json, programInfo, callback) {
   vertSrc = vertSrc.replace(/a_normal/g, 'normal');
   vertSrc = vertSrc.replace(/a_texcoord0/g, 'texcoord');
   programInfo._program = new Program(gl, vertSrc, fragSrc);
-  callback(null, programInfo._program);
+  callback(null, programInfo);
 }
 
-function handlePrograms(gl, json, callback) {
-  log('handlePrograms', Object.keys(json.programs));
-
-  var shaderNames = Object.keys(json.programs);
-  async.map(
-    shaderNames,
-    function(name, callback) {
-      handleProgram(gl, json, json.programs[name], callback);
-    },
-    function(err, programs) {
-      if (err) {
-        log(err);
-      }
-      else {
-        log('handlePrograms done', programs.length);
-      }
-      callback(err, programs);
-    }
-  )
-}
-
-function handleNode(gl, json, nodeName, nodeInfo, callback) {
+function handleNode(gl, json, basePath, nodeName, nodeInfo, callback) {
   log('handleNode', nodeName);
   //FIXME: solve that with Ramda partial
   nodeInfo.children = nodeInfo.children.map(function(childNodeName) {
@@ -362,10 +226,14 @@ function handleNode(gl, json, nodeName, nodeInfo, callback) {
 
 function handleAll(typeName, handler, gl, json, basePath, callback) {
   log('handleAll', typeName);
+  if (!json[typeName]) {
+    log('missing', typeName);
+    return callback(null, null);
+  }
   async.map(
     Object.keys(json[typeName]),
     function(nodeName, callback) {
-      handler(gl, json, nodeName, json[typeName][nodeName], callback);
+      handler(gl, json, basePath, nodeName, json[typeName][nodeName], callback);
     },
     callback
   )
@@ -379,16 +247,16 @@ function load(gl, file, callback) {
       return callback(err);
     }
     async.series([
-      function(callback) { handleBuffers(json, basePath, callback); },
-      function(callback) { handleBufferViews(json, callback); },
-      function(callback) { handleAccessors(json, callback); },
-      function(callback) { handleMeshes(json, callback); },
-      function(callback) { handleImages(json, basePath, callback); },
-      function(callback) { handleTextures(gl, json, callback); },
-      function(callback) { handleShaders(gl, json, basePath, callback); },
-      function(callback) { handlePrograms(gl, json, callback); },
+      function(callback) { handleAll('buffers'    , handleBuffer    , gl, json, basePath, callback); },
+      function(callback) { handleAll('bufferViews', handleBufferView, gl, json, basePath, callback); },
+      function(callback) { handleAll('accessors'  , handleAccessor  , gl, json, basePath, callback); },
+      function(callback) { handleAll('meshes'     , handleMesh      , gl, json, basePath, callback); },
+      function(callback) { handleAll('images'     , handleImage     , gl, json, basePath, callback); },
+      function(callback) { handleAll('textures'   , handleTexture   , gl, json, basePath, callback); },
+      function(callback) { handleAll('shaders'    , handleShader    , gl, json, basePath, callback); },
+      function(callback) { handleAll('programs'   , handleProgram   , gl, json, basePath, callback); },
+      function(callback) { handleAll('nodes'      , handleNode      , gl, json, basePath, callback); },
       function(callback) { buildMeshes(gl, json, callback); },
-      function(callback) { handleAll('nodes', handleNode, gl, json, basePath, callback); }
     ], function(err, results) {
       if (err) log('load done errors', err);
       else log('load done');
