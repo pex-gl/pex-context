@@ -61,24 +61,20 @@ Window.create = function(obj){
         var init = window.init;
         window.init = function() {
             this.framerate(60);
-
             this._ctx = new Context3d(this.gl);
             delete this.gl;
-
-            init();
+            init.call(this);
         };
-
         var draw = window.draw;
         window.draw = function () {
             current = window;
             //this is were plask simplewindow should be unrolled
             draw.call(this);
         };
-
-    } else {
+    }
+    else {
         //other context
     }
-
     plask.simpleWindow(window);
 };
 
