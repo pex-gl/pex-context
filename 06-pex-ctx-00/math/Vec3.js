@@ -32,15 +32,11 @@ function copy(a,out){
 }
 
 var Vec3 = {
-<<<<<<< HEAD
+    create  : create,
     set3    : set3,
     copy    : copy,
     equals  : equals,
     equals3 : equals3
-=======
-    create : create,
-    equals : equals
->>>>>>> origin/master
 };
 
 module.exports = Vec3;

@@ -36,15 +36,11 @@ function copy(a,out){
 }
 
 var Vec4 = {
-<<<<<<< HEAD
-    set4    : set4,
-    copy    : copy,
-    equals  : equals,
-    equals4 : equals4
-=======
-    create : create,
-    equals : equals
->>>>>>> origin/master
+    create: create,
+    set4: set4,
+    copy: copy,
+    equals: equals,
+    equals4: equals4
 };
 
 module.exports = Vec4;
