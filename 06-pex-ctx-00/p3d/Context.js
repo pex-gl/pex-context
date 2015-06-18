@@ -66,7 +66,7 @@ function Context(gl){
 
     this._depthStack = [[
         this._depthTest, this._depthMask, this._depthFunc,
-        this._depthClearValue, this._depthRange, Vec2.copy(this._polygonOffset)
+        this._depthClearValue, this._depthRange.slice(0), Vec2.copy(this._polygonOffset)
     ]];
 
     this.COLOR_BIT   = COLOR_BIT;
@@ -145,7 +145,9 @@ Context.prototype.push = function(mask){
     mask = mask === undefined ? ALL_BIT : mask;
 
     if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
-
+        //this._depthStack.push([
+        //    this._depthTest,this._depthMask,this._depthFunc,this._depthClearValue,this._depthRange.slice(0),Vec2.copy(this._polygonOffset)
+        //]);
     }
 
     if(mask == ALL_BIT || (mask & COLOR_BIT) == COLOR_BIT){
@@ -299,11 +301,11 @@ Context.prototype.getScissor = function(out){
 };
 
 Context.prototype.setClearColor = function(r,g,b,a){
-    if(Vec4.equals4(r,g,b,a)){
+    if(Vec4.equals4(this._clearColor,r,g,b,a)){
         return;
     }
-    Vec4.set4(this._clearColor,r,g,b,a);
     this._gl.clearColor(r,g,b,a);
+    Vec4.set4(this._clearColor,r,g,b,a);
 };
 
 Context.prototype.getClearColor = function(out){
@@ -311,11 +313,82 @@ Context.prototype.getClearColor = function(out){
 };
 
 Context.prototype.setDepthTest = function(depthTest){
+    if(depthTest ===this._depthTest){
+        return;
+    }
+    if(depthTest){
+        this._gl.enable(this._gl.DEPTH_TEST);
+    }
+    else {
+        this._gl.disable(this._gl.DEPTH_TEST);
+    }
     this._depthTest = depthTest;
 };
 
 Context.prototype.getDepthTest = function(){
     return this._depthTest;
+};
+
+Context.prototype.setDepthMask = function(flag){
+    if(flag == this._depthMask){
+        return;
+    }
+    this._gl.depthMask(flag);
+    this._depthMask = flag;
+};
+
+Context.prototype.getDepthMask = function(){
+    return this._depthMask;
+};
+
+Context.prototype.setDepthFunc = function(func){
+    if(func == this._depthFunc){
+        return;
+    }
+    this._gl.depthFunc(func);
+    this._depthFunc = func;
+};
+
+Context.prototype.getDepthFunc = function(){
+    return this._depthFunc;
+};
+
+Context.prototype.setClearDepth = function(depth){
+    if(depth == this._depthClearValue){
+        return;
+    }
+    this._gl.clearDepth(depth);
+    this._depthClearValue = depth;
+};
+
+Context.prototype.getClearDepth = function(){
+    return this._depthClearValue;
+};
+
+Context.prototype.setDepthRange = function(znear,zfar){
+    if(Vec2.equals2(this._depthRange,znear,zfar)){
+        return;
+    }
+    this._gl.depthRange(znear,zfar);
+    this._depthRange[0] = znear;
+    this._depthRange[1] = zfar;
+};
+
+Context.prototype.getDepthRange = function(out){
+    return Vec2.copy(this._depthRange,out);
+};
+
+Context.prototype.setPolygonOffset = function(factor,units){
+    if(Vec2.equals(this._polygonOffset,factor,units)){
+        return;
+    }
+    this._gl.polygonOffset(factor,units);
+    this._polygonOffset[0] = factor;
+    this._polygonOffset[1] = units;
+};
+
+Context.prototype.getPolygonOffset = function(out){
+    return Vec2.copy(this._polygonOffset,out);
 };
 
 Context.prototype.clear = function(mask){
