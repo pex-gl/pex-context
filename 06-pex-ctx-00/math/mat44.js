@@ -1,10 +1,10 @@
 function create(){
-    return new Array([
+    return new Array(
         1,0,0,0,
         0,1,0,0,
         0,0,1,0,
         0,0,0,1
-    ]);
+    );
 }
 
 function copy(a,b){
