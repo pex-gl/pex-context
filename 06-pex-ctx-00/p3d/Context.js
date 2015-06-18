@@ -205,7 +205,6 @@ Context.prototype.setScissorTest = function(scissor){
     }
     scissor ? this._gl.enable(this._gl.SCISSOR_TEST) : this._gl.disable(this._gl.SCISSOR_TEST);
     this._scissorTest = scissor;
-    console.log(this._scissorTest);
 };
 
 Context.prototype.getScissorTest = function(){
@@ -213,6 +212,10 @@ Context.prototype.getScissorTest = function(){
 };
 
 Context.prototype.setScissor = function(x,y,w,h){
+    if(Vec4.equals4(this._scissorBox,x,y,w,h)){
+        return;
+    }
+    this._gl.scissor(x,y,w,h);
     Vec4.set4(this._scissorBox,x,y,w,h);
 };
 
