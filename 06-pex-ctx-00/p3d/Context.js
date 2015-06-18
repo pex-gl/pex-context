@@ -9,21 +9,29 @@ var STR_ERROR_STACK_POP_BIT = 'Invalid pop. Bit %s stack is empty.';
 
 //STATE BITS
 
-var ALL_BIT          = 1 << 0;
-var DEPTH_BIT        = 1 << 1;
-var COLOR_BIT        = 1 << 2;
-var STENCIL_BIT      = 1 << 3;
-var VIEWPORT_BIT     = 1 << 4;
-var SCISSOR_BIT      = 1 << 5;
-
-var COLOR_BUFFER_BIT = null;
-var DEPTH_BUFFER_BIT = null;
+var ALL_BIT        = 1 << 0;
+var DEPTH_BIT      = 1 << 1;
+var COLOR_BIT      = 1 << 2;
+var STENCIL_BIT    = 1 << 3;
+var VIEWPORT_BIT   = 1 << 4;
+var SCISSOR_BIT    = 1 << 5;
+var CULL_BIT       = 1 << 6;
+var BLEND_BIT      = 1 << 7;
+var ALPHA_BIT      = 1 << 8;
+var LINE_WIDTH_BIT = 1 << 9;
 
 var MATRIX_PROJECTION_BIT = 1 << 16;
 var MATRIX_VIEW_BIT       = 1 << 17;
 var MATRIX_MODEL_BIT      = 1 << 18;
+var FBO_BIT               = 1 << 19;
+var VBO_BIT               = 1 << 20;
+var VAO_BIT               = 1 << 21;
+var PROGRAM_BIT           = 1 << 22;
+var TEXTURE_BIT           = 1 << 23;
+var XBO_BIT               = 1 << 24;
 
-//
+//UITLS
+
 function glObjToArray(obj){
     if(Array.isArray(obj)){
         return obj;
@@ -38,7 +46,7 @@ function glObjToArray(obj){
 function Context(gl){
     this._gl = gl;
 
-    this._mask = -1;
+    this._mask      = -1;
     this._maskStack = [];
 
     this._bitMap = {};
@@ -46,6 +54,9 @@ function Context(gl){
     this._bitMap[COLOR_BIT] = gl.COLOR_BUFFER_BIT;
     this._bitMap[DEPTH_BIT | COLOR_BIT] = gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT;
 
+    this.ALL_BIT = ALL_BIT;
+
+    this.DEPTH_BIT        = DEPTH_BIT;
     this._depthTest       = false;
     this._depthMask       = gl.getParameter(gl.DEPTH_WRITEMASK);
     this._depthFunc       = gl.getParameter(gl.DEPTH_FUNC);
@@ -58,20 +69,55 @@ function Context(gl){
         this._depthClearValue, this._depthRange, Vec2.copy(this._polygonOffset)
     ]];
 
+    this.COLOR_BIT   = COLOR_BIT;
     this._clearColor = [0, 0, 0, 1];
     this._colorMask  = gl.getParameter(gl.COLOR_WRITEMASK);
-    this._colorStack = [[ Vec4.copy(this._clearColor), Vec4.copy(this._colorMask)
+    this._colorStack = [[
+        Vec4.copy(this._clearColor), Vec4.copy(this._colorMask)
     ]];
 
+    this.SCISSOR_BIT   = SCISSOR_BIT;
     this._scissorTest  = gl.getParameter(gl.SCISSOR_TEST);
     this._scissorBox   = glObjToArray(gl.getParameter(gl.SCISSOR_BOX)).slice(0,4);
     this._scissorStack = [[
         this._scissorTest, Vec4.copy(this._scissorBox)
     ]];
 
+    this.VIEWPORT_BIT   = VIEWPORT_BIT;
     this._viewport      = [0,0,0,0];
     this._viewportStack = [[ Vec4.copy(this._viewport) ]];
 
+    this.STENCIL_BIT          = STENCIL_BIT;
+    this._stencilTest         = gl.getParameter(gl.STENCIL_TEST);
+    this._stencilFunc         = gl.getParameter(gl.STENCIL_FUNC);
+    this._stencilFuncSeparate = null;
+    this._stencilOp           = null;
+    this._stencilOpSeparate   = null;
+    this._stenciStack = [[
+        this._stencilTest, this._stencilFunc, this._stencilFuncSeparate, this._stencilOp, this._stencilOpSeparate
+    ]];
+
+    this.CULL_BIT = CULL_BIT;
+
+    this.BLEND_BIT              = BLEND_BIT;
+    this._blend                 = gl.getParameter(gl.BLEND);
+    this._blendColor            = gl.getParameter(gl.BLEND_COLOR);
+    this._blendEquation         = gl.getParameter(gl.BLEND_EQUATION);
+    this._blendEquationSeparate = [gl.getParameter(gl.BLEND_EQUATION_RGB),gl.getParameter(gl.BLEND_EQUATION_ALPHA)];
+    this._blendFunc             = null;
+    this._blendStack = [[
+        this._blend,this._blendColor,this._blendEquation,Vec2.copy(this._blendEquationSeparate),this._blendFunc
+    ]];
+
+    this.ALPHA_BIT = ALPHA_BIT;
+
+    this.LINE_WIDTH_BIT  = LINE_WIDTH_BIT;
+    this._lineWidth      = gl.getParameter(gl.LINE_WIDTH);
+    this._lineWidthStack = [this._lineWidth];
+
+    this.MATRIX_PROJECTION_BIT = MATRIX_PROJECTION_BIT;
+    this.MATRIX_VIEW_BIT       = MATRIX_VIEW_BIT;
+    this.MATRIX_MODEL_BIT      = MATRIX_MODEL_BIT;
     this._matrix = {};
     this._matrix[MATRIX_PROJECTION_BIT] = Mat4.create();
     this._matrix[MATRIX_VIEW_BIT]       = Mat4.create();
@@ -90,36 +136,36 @@ function Context(gl){
     this._matrixMode    = MATRIX_MODEL_BIT;
     this._matrixF32Temp = new Float32Array(16);
 
+    this.PROGAM_BIT = PROGRAM_BIT;
     this._program = null;
     this._programUniformLocations = null;
-
-
-
-    this.ALL_BIT      = ALL_BIT;
-    this.DEPTH_BIT    = DEPTH_BIT;
-    this.COLOR_BIT    = COLOR_BIT;
-    this.STENCIL_BIT  = STENCIL_BIT;
-    this.VIEWPORT_BIT = VIEWPORT_BIT;
-    this.SCISSOR_BIT  = SCISSOR_BIT;
-
-    this.MATRIX_PROJECTION_BIT = MATRIX_PROJECTION_BIT;
-    this.MATRIX_VIEW_BIT       = MATRIX_VIEW_BIT;
-    this.MATRIX_MODEL_BIT      = MATRIX_MODEL_BIT;
 }
 
 Context.prototype.push = function(mask){
     mask = mask === undefined ? ALL_BIT : mask;
 
-    if((mask & COLOR_BIT) == COLOR_BIT || mask == ALL_BIT){
+    if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
+
+    }
+
+    if(mask == ALL_BIT || (mask & COLOR_BIT) == COLOR_BIT){
         this._colorStack.push([Vec4.copy(this._clearColor), Vec4.copy(this._colorMask)]);
     }
 
-    if((mask & VIEWPORT_BIT) == VIEWPORT_BIT || mask == ALL_BIT){
-        this._viewportStack.push(Vec4.copy(this._viewport.slice(0)));
+    if(mask == ALL_BIT || (mask & STENCIL_BIT) == STENCIL_BIT){
+
     }
 
-    if((mask & SCISSOR_BIT) == SCISSOR_BIT || mask == ALL_BIT){
+    if(mask == ALL_BIT || (mask & VIEWPORT_BIT) == VIEWPORT_BIT){
+        this._viewportStack.push(Vec4.copy(this._viewport));
+    }
+
+    if(mask == ALL_BIT || (mask & SCISSOR_BIT) == SCISSOR_BIT){
         this._scissorStack.push([this._scissorTest, this._scissorStack]);
+    }
+
+    if(mask == ALL_BIT || (mask & CULL_BIT) == CULL_BIT){
+
     }
 
     this._mask = mask;
@@ -132,7 +178,11 @@ Context.prototype.pop = function(){
     var prev;
     var stack;
 
-    if((mask & COLOR_BIT) == COLOR_BIT || mask == ALL_BIT){
+    if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
+
+    }
+
+    if(mask == ALL_BIT || (mask & COLOR_BIT) == COLOR_BIT){
         if(this._colorStack.length == 1){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','COLOR_BIT'));
         }
@@ -150,13 +200,17 @@ Context.prototype.pop = function(){
         }
     }
 
-    if((mask & DEPTH_BIT) == DEPTH_BIT){
-        if(this._depthStack.length == 1){
-            throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','DEPTH_BIT'));
-        }
+    if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
+        //if(this._depthStack.length == 1){
+        //    throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','DEPTH_BIT'));
+        //}
     }
 
-    if((mask & VIEWPORT_BIT) == VIEWPORT_BIT || mask == ALL_BIT){
+    if(mask == ALL_BIT || (mask & STENCIL_BIT) == STENCIL_BIT){
+
+    }
+
+    if(mask == ALL_BIT || (mask & VIEWPORT_BIT) == VIEWPORT_BIT){
         if(this._viewportStack.length == 1){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','VIEWPORT_BIT'));
         }
@@ -168,7 +222,7 @@ Context.prototype.pop = function(){
         }
     }
 
-    if((mask && SCISSOR_BIT) == SCISSOR_BIT || mask == ALL_BIT){
+    if(mask == ALL_BIT || (mask && SCISSOR_BIT) == SCISSOR_BIT){
         if(this._scissorStack.length == 1){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','SCISSOR_BIT'));
         }
@@ -179,11 +233,32 @@ Context.prototype.pop = function(){
         this._scissorBox  = stack[1];
 
         if(this._scissorTest != prev[0]){
-            this._scissorTest ? gl.enable(gl.SCISSOR_TEST) : gl.disable(gl.SCISSOR_TEST);
+            if(this._scissorTest){
+                gl.enable(gl.SCISSOR_TEST)
+            }
+            else {
+                gl.disable(gl.SCISSOR_TEST);
+            }
         }
         if(!Vec4.equals(this._scissorBox,prev[1])){
             gl.scissor(this._scissorBox[0],this._scissorBox[1],this._scissorBox[2],this._scissorBox[3]);
         }
+    }
+
+    if(mask == ALL_BIT || (mask & CULL_BIT) == CULL_BIT){
+
+    }
+
+    if(mask == ALL_BIT || (mask & BLEND_BIT) == BLEND_BIT){
+
+    }
+
+    if(mask == ALL_BIT || (mask & ALPHA_BIT) == ALPHA_BIT){
+
+    }
+
+    if(mask == ALL_BIT || (mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
+
     }
 };
 
