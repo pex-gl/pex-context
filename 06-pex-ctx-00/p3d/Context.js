@@ -2,41 +2,63 @@ var mat44 = require('../math/mat44');
 
 var ProgramUniform = require('./ProgramUniform');
 
+//STATE BITS
 
-var MATRIX_PROJECTION = 0; // for now
-var MATRIX_VIEW       = 1;
-var MATRIX_MODEL      = 2;
+var DEPTH_BIT        = 1 << 0;
+var COLOR_BIT        = 1 << 1;
+var STENCIL_BIT      = 1 << 2;
+var VIEWPORT_BIT     = 1 << 3;
+var SCISSOR_BIT      = 1 << 4;
 
-var VIEWPORT_BIT     = 1 << 0;
 var COLOR_BUFFER_BIT = null;
 var DEPTH_BUFFER_BIT = null;
+
+var MATRIX_PROJECTION_BIT = 1 << 16;
+var MATRIX_VIEW_BIT       = 1 << 17;
+var MATRIX_MODEL_BIT      = 1 << 18;
+
+//
+
 
 function Context(gl){
     this._gl = gl;
 
+    this._mask = -1;
+
+    this._depthTest       = false;
+    this._depthMask       = gl.getParameter(gl.DEPTH_WRITEMASK);
+    this._depthFunc       = gl.getParameter(gl.DEPTH_FUNC);
+    this._depthClearValue = gl.getParameter(gl.DEPTH_CLEAR_VALUE);
+    this._depthRange      = gl.getParameter(gl.DEPTH_RANGE);
+    this._polygonOffset   = [gl.getParameter(gl.POLYGON_OFFSET_FACTOR),gl.getParameter(gl.POLYGON_OFFSET_UNITS)];
+    this._depthStack      = [];
+
+    this._clearColor      = [0,0,0,1];
+    //this._clear
+
     this._viewport   = [0,0,0,0];
     this._viewportStack = [];
 
+
+
     this._clearColor = [0,0,0,0];
 
-    this._depthTest = false;
-
     this._matrix = {};
-    this._matrix[MATRIX_PROJECTION] = mat44.create();
-    this._matrix[MATRIX_VIEW]       = mat44.create();
-    this._matrix[MATRIX_MODEL]      = mat44.create();
+    this._matrix[MATRIX_PROJECTION_BIT] = mat44.create();
+    this._matrix[MATRIX_VIEW_BIT]       = mat44.create();
+    this._matrix[MATRIX_MODEL_BIT]      = mat44.create();
 
     this._matrixStack = {};
-    this._matrixStack[MATRIX_PROJECTION] = [];
-    this._matrixStack[MATRIX_VIEW]       = [];
-    this._matrixStack[MATRIX_MODEL]      = [];
+    this._matrixStack[MATRIX_PROJECTION_BIT] = [];
+    this._matrixStack[MATRIX_VIEW_BIT]       = [];
+    this._matrixStack[MATRIX_MODEL_BIT]      = [];
 
     this._matrixUnifomMap = {};
-    this._matrixUnifomMap[MATRIX_PROJECTION] = ProgramUniform.PROJECTION_MATRIX;
-    this._matrixUnifomMap[MATRIX_VIEW]       = ProgramUniform.VIEW_MATRIX;
-    this._matrixUnifomMap[MATRIX_MODEL]      = ProgramUniform.MODEL_MATRIX;
+    this._matrixUnifomMap[MATRIX_PROJECTION_BIT] = ProgramUniform.PROJECTION_MATRIX;
+    this._matrixUnifomMap[MATRIX_VIEW_BIT]       = ProgramUniform.VIEW_MATRIX;
+    this._matrixUnifomMap[MATRIX_MODEL_BIT]      = ProgramUniform.MODEL_MATRIX;
 
-    this._matrixMode    = MATRIX_MODEL;
+    this._matrixMode    = MATRIX_MODEL_BIT;
     this._matrixF32Temp = new Float32Array(16);
 
     this._program = null;
@@ -48,14 +70,33 @@ Context.prototype.push = function(mask){
         this._viewportStack.push(this._viewport.slice(0));
     }
 
+    this._mask = mask;
 };
 
 Context.prototype.pop = function(){
+    var mask = this._mask;
     var prev;
+
+    if((mask && DEPTH_BIT) == DEPTH_BIT){
+
+    }
+
+    if((mask && COLOR_BIT) == COLOR_BIT){
+
+    }
+
+    if((mask && STENCIL_BIT) == STENCIL_BIT){
+
+    }
+
     if((mask & VIEWPORT_BIT) == VIEWPORT_BIT){
         prev = this._viewportStack.pop();
         this._viewport = this._viewportStack.pop();
         this._gl.viewport(this._viewport[0])
+    }
+
+    if((mask && SCISSOR_BIT) == SCISSOR_BIT){
+
     }
 };
 
@@ -139,54 +180,38 @@ Context.prototype.getGL = function(){
 };
 
 Context.prototype.setProjectionMatrix = function(matrix){
-    var _matrix = mat44.copy(matrix,this._matrix[MATRIX_PROJECTION]);
+    var _matrix = mat44.copy(matrix,this._matrix[MATRIX_PROJECTION_BIT]);
     this._matrixF32Temp.set(_matrix);
     this._gl.uniformMatrix4fv(this._programUniformLocations[ProgramUniform.PROJECTION_MATRIX],false,this._matrixF32Temp);
 };
 
 Context.prototype.setViewMatrix = function(matrix){
-    var _matrix = mat44.copy(matrix,this._matrix[MATRIX_VIEW]);
+    var _matrix = mat44.copy(matrix,this._matrix[MATRIX_VIEW_BIT]);
     this._matrixF32Temp.set(_matrix);
     this._gl.uniformMatrix4fv(this._programUniformLocations[ProgramUniform.VIEW_MATRIX],false,this._matrixF32Temp);
 };
 
 Context.prototype.setModelMatrix = function(matrix){
-    var _matrix = mat44.copy(matrix,this._matrix[MATRIX_MODEL]);
+    var _matrix = mat44.copy(matrix,this._matrix[MATRIX_MODEL_BIT]);
     this._matrixF32Temp.set(_matrix);
     this._gl.uniformMatrix4fv(this._programUniformLocations[ProgramUniform.MODEL_MATRIX],false,this._matrixF32Temp);
 };
 
 Context.prototype.getProjectionMatrix = function(out){
-    return mat44.copy(this._matrix[MATRIX_PROJECTION],out);
+    return mat44.copy(this._matrix[MATRIX_PROJECTION_BIT],out);
 };
 
 Context.prototype.getViewMatrix = function(out){
-    return mat44.copy(this._matrix[MATRIX_VIEW],out);
+    return mat44.copy(this._matrix[MATRIX_VIEW_BIT],out);
 };
 
 Context.prototype.getModelMatrix = function(out){
-    return mat44.copy(this._matrix[MATRIX_MODEL],out);
+    return mat44.copy(this._matrix[MATRIX_MODEL_BIT],out);
 };
 
 Context.prototype.setMatrixMode = function(matrixMode){
     this._matrixMode = matrixMode;
 };
-
-gl.push(gl.MODEL_MATRIX);
-
-gl.setMatrixMode(gl.MODEL_MATRIX);
-gl.pushMatrix();
-
-gl.pushModelMatrix();
-
-gl.multMatrix();
-gl.translate
-gl.scale
-gl.rotate(Array|xzy')
-gl.rotateY
-
-
-
 
 
 Context.prototype.getMatrixMode = function(){
@@ -209,6 +234,10 @@ Context.prototype.pushMatrix = function(){
 
 Context.prototype.popMatrix = function(){
     this._matrix[this._matrixMode] = this._matrixStack[this._matrixMode].pop();
+};
+
+Context.prototype.identity = function(){
+    mat44.identity(this._matrix[this._matrixMode]);
 };
 
 
