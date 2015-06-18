@@ -1,4 +1,6 @@
-var mat44 = require('../math/mat44');
+var Mat4 = require('../math/Mat4');
+var Vec3 = require('../math/Vec3');
+var Vec4 = require('../math/Vec4');
 
 var ProgramUniform = require('./ProgramUniform');
 
@@ -34,19 +36,16 @@ function Context(gl){
     this._depthStack      = [];
 
     this._clearColor      = [0,0,0,1];
-    //this._clear
+    this._colorMask       = gl.getParameter(gl.COLOR_WRITEMASK);
+    this._colorStack      = [];
 
     this._viewport   = [0,0,0,0];
     this._viewportStack = [];
 
-
-
-    this._clearColor = [0,0,0,0];
-
     this._matrix = {};
-    this._matrix[MATRIX_PROJECTION_BIT] = mat44.create();
-    this._matrix[MATRIX_VIEW_BIT]       = mat44.create();
-    this._matrix[MATRIX_MODEL_BIT]      = mat44.create();
+    this._matrix[MATRIX_PROJECTION_BIT] = Mat4.create();
+    this._matrix[MATRIX_VIEW_BIT]       = Mat4.create();
+    this._matrix[MATRIX_MODEL_BIT]      = Mat4.create();
 
     this._matrixStack = {};
     this._matrixStack[MATRIX_PROJECTION_BIT] = [];
@@ -70,22 +69,42 @@ Context.prototype.push = function(mask){
         this._viewportStack.push(this._viewport.slice(0));
     }
 
+    if((mask & COLOR_BIT) == COLOR_BIT){
+        this._colorStack.push([
+            this._clearColor.slice(0),
+            this._colorMask.slice(0)
+        ]);
+    }
+
     this._mask = mask;
 };
 
 Context.prototype.pop = function(){
+    var gl   = this._gl;
     var mask = this._mask;
     var prev;
+    var stack;
 
-    if((mask && DEPTH_BIT) == DEPTH_BIT){
-
-    }
-
-    if((mask && COLOR_BIT) == COLOR_BIT){
+    if((mask & DEPTH_BIT) == DEPTH_BIT){
 
     }
 
-    if((mask && STENCIL_BIT) == STENCIL_BIT){
+    if((mask & COLOR_BIT) == COLOR_BIT){
+        prev  = this._colorStack.pop();
+        stack = this._colorStack[this._colorStack.length - 1];
+        this._clearColor = stack[0];
+        this._colorMask  = stack[1];
+
+        if(!Vec4.equals(this._clearColor,prev){
+            gl
+        }
+
+    )
+
+        this._clearColor = this._colorStack[this._co]
+    }
+
+    if((mask & STENCIL_BIT) == STENCIL_BIT){
 
     }
 
@@ -180,33 +199,33 @@ Context.prototype.getGL = function(){
 };
 
 Context.prototype.setProjectionMatrix = function(matrix){
-    var _matrix = mat44.copy(matrix,this._matrix[MATRIX_PROJECTION_BIT]);
+    var _matrix = Mat4.copy(matrix,this._matrix[MATRIX_PROJECTION_BIT]);
     this._matrixF32Temp.set(_matrix);
     this._gl.uniformMatrix4fv(this._programUniformLocations[ProgramUniform.PROJECTION_MATRIX],false,this._matrixF32Temp);
 };
 
 Context.prototype.setViewMatrix = function(matrix){
-    var _matrix = mat44.copy(matrix,this._matrix[MATRIX_VIEW_BIT]);
+    var _matrix = Mat4.copy(matrix,this._matrix[MATRIX_VIEW_BIT]);
     this._matrixF32Temp.set(_matrix);
     this._gl.uniformMatrix4fv(this._programUniformLocations[ProgramUniform.VIEW_MATRIX],false,this._matrixF32Temp);
 };
 
 Context.prototype.setModelMatrix = function(matrix){
-    var _matrix = mat44.copy(matrix,this._matrix[MATRIX_MODEL_BIT]);
+    var _matrix = Mat4.copy(matrix,this._matrix[MATRIX_MODEL_BIT]);
     this._matrixF32Temp.set(_matrix);
     this._gl.uniformMatrix4fv(this._programUniformLocations[ProgramUniform.MODEL_MATRIX],false,this._matrixF32Temp);
 };
 
 Context.prototype.getProjectionMatrix = function(out){
-    return mat44.copy(this._matrix[MATRIX_PROJECTION_BIT],out);
+    return Mat4.copy(this._matrix[MATRIX_PROJECTION_BIT],out);
 };
 
 Context.prototype.getViewMatrix = function(out){
-    return mat44.copy(this._matrix[MATRIX_VIEW_BIT],out);
+    return Mat4.copy(this._matrix[MATRIX_VIEW_BIT],out);
 };
 
 Context.prototype.getModelMatrix = function(out){
-    return mat44.copy(this._matrix[MATRIX_MODEL_BIT],out);
+    return Mat4.copy(this._matrix[MATRIX_MODEL_BIT],out);
 };
 
 Context.prototype.setMatrixMode = function(matrixMode){
@@ -219,17 +238,17 @@ Context.prototype.getMatrixMode = function(){
 };
 
 Context.prototype.setMatrix = function(matrix){
-    var _matrix = mat44.copy(matrix,this._matrix[this._matrixMode]);
+    var _matrix = Mat4.copy(matrix,this._matrix[this._matrixMode]);
     this._matrixF32Temp.set(_matrix);
     this._gl.uniformMatrix4fv(this._programUniformLocations[this._matrixUnifomMap[this._matrixMode]],this._matrixF32Temp);
 };
 
 Context.prototype.getMatrix = function(out){
-    return mat44.copy(this._matrix[this._matrixMode],out);
+    return Mat4.copy(this._matrix[this._matrixMode],out);
 };
 
 Context.prototype.pushMatrix = function(){
-    this._matrixStack[this._matrixMode].push(mat44.copy(this._matrix[this._matrixMode]));
+    this._matrixStack[this._matrixMode].push(Mat4.copy(this._matrix[this._matrixMode]));
 };
 
 Context.prototype.popMatrix = function(){
@@ -237,7 +256,7 @@ Context.prototype.popMatrix = function(){
 };
 
 Context.prototype.identity = function(){
-    mat44.identity(this._matrix[this._matrixMode]);
+    Mat4.identity(this._matrix[this._matrixMode]);
 };
 
 
