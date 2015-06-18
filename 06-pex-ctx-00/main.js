@@ -26,7 +26,9 @@ Window.create({
             //ctx.setProjectionMatrix(
             //    Mat4.perspective(this._matrixProjection,45,windowWidth_2 / windowHeight, 0.001,10.0)
             //);
-            //ctx.setScissor(true);
+            ctx.setScissorTest(true);
+            ctx.setScissor(0,0,windowWidth_2,windowHeight);
+
             ctx.setClearColor(1,0,0,1);
             ctx.clear(ctx.COLOR_BIT);
 

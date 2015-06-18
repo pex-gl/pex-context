@@ -199,6 +199,27 @@ Context.prototype.getViewport = function(out){
     return Vec4.copy(this._viewport,out);
 };
 
+Context.prototype.setScissorTest = function(scissor){
+    if(scissor == this._scissorTest){
+        return;
+    }
+    scissor ? this._gl.enable(this._gl.SCISSOR_TEST) : this._gl.disable(this._gl.SCISSOR_TEST);
+    this._scissorTest = scissor;
+    console.log(this._scissorTest);
+};
+
+Context.prototype.getScissorTest = function(){
+    return this._scissorTest
+};
+
+Context.prototype.setScissor = function(x,y,w,h){
+    Vec4.set4(this._scissorBox,x,y,w,h);
+};
+
+Context.prototype.getScissor = function(out){
+    return Vec4.copy(this._scissorBox,out);
+};
+
 Context.prototype.setClearColor = function(r,g,b,a){
     if(Vec4.equals4(r,g,b,a)){
         return;
