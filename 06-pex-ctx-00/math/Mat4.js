@@ -1,3 +1,23 @@
+/*
+*  Row major memory layout
+*
+*   0   1   2   3
+*   4   5   6   7
+*   8   9  10  11
+*  12  13  14  15
+*
+*  equivalent to the column major OpenGL spec
+*
+*   0   4   8  12
+*   1   5   9  13
+*   2   6  10  14
+*   3   7  11  15
+*
+*  m00 m10 m20 m30
+*  m01 m11 m21 m31
+*  m02 m12 m22 m32
+*  m03 m13 m23 m33
+*/
 function create() {
     return [
         1,0,0,0,
