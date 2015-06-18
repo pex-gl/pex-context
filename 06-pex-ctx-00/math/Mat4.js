@@ -1,4 +1,4 @@
-function create(){
+function create() {
     return [
         1,0,0,0,
         0,1,0,0,
@@ -7,7 +7,7 @@ function create(){
     ];
 }
 
-function copy(a,b){
+function copy(a,b) {
     if(b !== undefined){
         for(var i = a.length - 1; 0 <= i; --i){
             b[i] = a[i];
@@ -17,7 +17,7 @@ function copy(a,b){
     return a.slice(0);
 }
 
-function identity(a){
+function identity(a) {
     a[0] = a[5] = a[10] = a[15] = 1;
     a[1] = a[2] = a[3] = a[4] = a[6] = a[7] = a[8] = a[9] = a[11] = a[12] = a[13] = a[14] = 0;
     return a;
