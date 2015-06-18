@@ -34,10 +34,12 @@ function Program(context, vertSrc, fragSrc, attributeLocationsMap) {
 }
 
 Program.prototype.bind = function() {
-  gl.useProgram(this._handle);
+    var gl = this._gl;
+    gl.useProgram(this._handle);
 }
 
 Program.prototype.unbind = function() {
+    var gl = this._gl;
     //TODO: How Program.unbind works? We no longer have bind()/unbind() at all? And we do ctx.bindProgram(program);
     gl.useProgram(null);
 };
@@ -115,15 +117,15 @@ Program.prototype._compileVertexSource = function(vertSrc) {
     var gl = this._gl;
 
     var vertShader = gl.createShader(gl.VERTEX_SHADER);
-    gl.shaderSource(this.vertShader, vertSrc + '\n');
-    gl.compileShader(this.vertShader);
-    if (!gl.getShaderParameter(this.vertShader, gl.COMPILE_STATUS)) {
+    gl.shaderSource(vertShader, vertSrc + '\n');
+    gl.compileShader(vertShader);
+    if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
         throw new Error('VERTEX: ' + gl.getShaderInfoLog(this.vertShader));
     }
     return vertShader;
 };
 
-Program.prototype._compileVertexSource = function(fragSrc) {
+Program.prototype._compileFragmentSource = function(fragSrc) {
     var gl = this._gl;
     var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragShader, fragSrc + '\n');
@@ -133,6 +135,92 @@ Program.prototype._compileVertexSource = function(fragSrc) {
     }
     return fragShader;
 };
+
+Program.prototype.setUniform = function(name, args) {
+    var uniform = this._uniforms[name];
+    if (uniform === undefined){
+        throw new Error(STR_ERROR_UNIFORM_UNDEFINED.replace('%s',name));
+    }
+    var type     = uniform.type;
+    var location = uniform.location;
+    var numArgs  = arguments.length - 1;
+    var gl       = this._gl;
+
+    switch (type){
+        case gl.INT:
+        case gl.BOOL:
+            if(numArgs != 1){
+                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+            }
+            gl.uniform1i(location,arguments[1]);
+            break;
+        case gl.SAMPLER_2D:
+        case gl.SAMPLER_CUBE:
+            if(numArgs != 1){
+                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+            }
+            gl.uniform1i(location,arguments[1]);
+            //but could also be texture
+            break;
+        case gl.FLOAT:
+            if(numArgs != 1){
+                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+            }
+            gl.uniform1f(location,arguments[1]);
+            break;
+        case gl.FLOAT_VEC2:
+            if(numArgs != 1 && numArgs != 2){
+                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+            }
+            if(numArgs == 1){
+                gl.uniform2fv(location,arguments[1]);
+            } else {
+                gl.uniform2f(location,arguments[1],arguments[2]);
+            }
+            break;
+        case gl.FLOAT_VEC3:
+            if(numArgs != 1 && numArgs != 3){
+                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+            }
+            if(numArgs == 1){
+                gl.uniform3fv(location,arguments[1]);
+            } else {
+                gl.uniform3f(location,arguments[1],arguments[2],arguments[3]);
+            }
+            break;
+        case gl.FLOAT_VEC4:
+            if(numArgs != 1 && numArgs != 4){
+                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+            }
+            if(numArgs == 1){
+                gl.uniform4fv(location,arguments[1]);
+            } else {
+                gl.uniform4f(location,arguments[1],arguments[2],arguments[3],arguments[4]);
+            }
+            break;
+        case gl.FLOAT_MAT2:
+            if(numArgs != 1){
+                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+            }
+            gl.uniformMatrix2fv(location,false,arguments[1]);
+            break;
+        case gl.FLOAT_MAT3:
+            if(numArgs != 1){
+                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+            }
+            gl.uniformMatrix3fv(location,false,arguments[1]);
+            break;
+        case gl.FLOAT_MAT4:
+            if(numArgs != 1){
+                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+            }
+            gl.uniformMatrix4fv(location,false,arguments[1]);
+            break;
+        default :
+            throw new Error(STR_ERROR_INVALID_UNIFORM_TYPE.replace('%s',type));
+            break;
+    }
+}
 
 Program.prototype.dispose = function(){
     if(!this._handle) {
