@@ -7,6 +7,11 @@ function equals(a,b) {
            a[1] == b[1];
 }
 
+function equals2(a,x,y){
+    return a[0] == x &&
+           a[1] == y;
+}
+
 function copy(a,out){
     if(out !== undefined){
         out[0] = a[0];
@@ -17,9 +22,10 @@ function copy(a,out){
 }
 
 var Vec2 = {
-    create : create,
-    copy   : copy,
-    equals : equals
+    create  : create,
+    copy    : copy,
+    equals  : equals,
+    equals2 : equals2
 };
 
 module.exports = Vec2;
