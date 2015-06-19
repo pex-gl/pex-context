@@ -502,6 +502,22 @@ Context.prototype.identity = function(){
     Mat4.identity(this._matrix[this._matrixMode]);
 };
 
+Context.prototype.scale = function(v){
+    Mat4.scale(this._matrix[this._matrixMode],v);
+};
+
+Context.prototype.translate = function(v){
+    Mat4.translate(this._matrix[this._matrixMode],v);
+};
+
+Context.prototype.rotate = function(r,v){
+    Mat4.rotate(this._matrix[this._matrixMode],r,v);
+};
+
+Context.prototype.rotateXYZ = function(v){
+    Mat4.rotateXYZ(this._matrix[this._matrixMode],v);
+};
+
 Context.prototype.createProgram = function(vertSrc, fragSrc, attributeLocationMap){
     return new Program(this, vertSrc, fragSrc, attributeLocationMap);
 };
