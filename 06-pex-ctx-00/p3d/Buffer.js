@@ -1,5 +1,6 @@
 function Buffer(ctx, target, sizeOrData, usage, preserveData) {
-    this._gl           = ctx.getGL();
+    var gl             = ctx.getGL();
+    this._gl           = gl;
     this._target       = target === undefined ? gl.ARRAY_BUFFER : target;
     this._usage        = usage  === undefined ? gl.STATIC_DRAW  : usage;
     this._length       = 0;
@@ -10,9 +11,7 @@ function Buffer(ctx, target, sizeOrData, usage, preserveData) {
     this._handle       = gl.createBuffer();
 
     if(sizeOrData !== undefined && sizeOrData != 0){
-        this.bind();
         this.bufferData(sizeOrData);
-        this.unbind();
     }
 }
 
@@ -52,6 +51,8 @@ Buffer.prototype.getData = function(){
     return this._data;
 };
 
+//FIXME: _bindInternal is tricky as it can modifie Context state if we have VAO active
+//TODO: move Buffer._bindInternal to Context
 Buffer.prototype._bindInternal = function(){
     this._gl.bindBuffer(this._target,this._handle);
 };
@@ -100,6 +101,8 @@ Buffer.prototype.bufferData = function(sizeOrData){
         this._data       = null;
     }
     gl.bufferData(this._target,sizeOrData,this._usage);
+
+    //FIXME: Buffer.unbind(); should through Context
 };
 
 Buffer.prototype.bufferSubData = function(offset,data){
@@ -116,4 +119,3 @@ Buffer.prototype.dispose = function(){
 };
 
 module.exports = Buffer;
-
