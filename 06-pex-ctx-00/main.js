@@ -21,7 +21,7 @@ Window.create({
         var windowHeight  = this.getHeight();
 
         //
-        ctx.push();
+        ctx.pushState();
             ctx.setViewport(0,0,windowWidth_2,windowHeight);
             //ctx.setProjectionMatrix(
             //    Mat4.perspective(this._matrixProjection,45,windowWidth_2 / windowHeight, 0.001,10.0)
@@ -34,14 +34,14 @@ Window.create({
 
             //ctx.setClearColor(1,0,0,1);
             //ctx.setScissor(0,0,windowWidth_2,windowHeight);
-        ctx.pop();
-        ctx.push();
+        ctx.popState();
+        ctx.pushState();
             ctx.setViewport(0,0,windowWidth_2,windowHeight);
             ctx.setScissorTest(true);
             ctx.setScissor(windowWidth_2,0,windowWidth_2,windowHeight);
             ctx.setClearColor(0,1,0,1);
             ctx.clear(ctx.COLOR_BIT);
-        ctx.pop();
+        ctx.popState();
         //ctx.push();
         //  //  ctx.setViewport(windowWidth_2,0,windowWidth_2,windowHeight);
         //    //ctx.setProjectionMatrix(
