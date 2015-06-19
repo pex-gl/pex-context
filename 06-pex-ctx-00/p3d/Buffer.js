@@ -1,4 +1,4 @@
-function Vbo(ctx, target, sizeOrData, usage, preserveData) {
+function Buffer(ctx, target, sizeOrData, usage, preserveData) {
     this._gl           = ctx.getGL();
     this._target       = target === undefined ? gl.ARRAY_BUFFER : target;
     this._usage        = usage  === undefined ? gl.STATIC_DRAW  : usage;
@@ -16,47 +16,47 @@ function Vbo(ctx, target, sizeOrData, usage, preserveData) {
     }
 }
 
-Vbo.prototype.setTarget = function(target){
+Buffer.prototype.setTarget = function(target){
     this._target = target;
 };
 
-Vbo.prototype.getTarget = function(){
+Buffer.prototype.getTarget = function(){
     return this._target;
 };
 
-Vbo.prototype.setUsage = function(usage){
+Buffer.prototype.setUsage = function(usage){
     this._usage = usage;
 };
 
-Vbo.prototype.getUsage = function(){
+Buffer.prototype.getUsage = function(){
     return this._usage;
 };
 
-Vbo.prototype.getLength = function(){
+Buffer.prototype.getLength = function(){
     return this._length;
 };
 
-Vbo.prototype.getByteLength = function(){
+Buffer.prototype.getByteLength = function(){
     return this._byteLength;
 };
 
-Vbo.prototype.getDataType = function(){
+Buffer.prototype.getDataType = function(){
     return this._dataType;
 };
 
-Vbo.prototype.getDataFormat = function(){
+Buffer.prototype.getDataFormat = function(){
     return this._dataFormat;
 };
 
-Vbo.prototype.getData = function(){
+Buffer.prototype.getData = function(){
     return this._data;
 };
 
-Vbo.prototype._bindInternal = function(){
+Buffer.prototype._bindInternal = function(){
     this._gl.bindBuffer(this._target,this._handle);
 };
 
-Vbo.prototype.bufferData = function(sizeOrData){
+Buffer.prototype.bufferData = function(sizeOrData){
     this._bindInternal();
 
     var gl = this._gl;
@@ -102,18 +102,18 @@ Vbo.prototype.bufferData = function(sizeOrData){
     gl.bufferData(this._target,sizeOrData,this._usage);
 };
 
-Vbo.prototype.bufferSubData = function(offset,data){
+Buffer.prototype.bufferSubData = function(offset,data){
     this._gl.bufferSubData(this._target,offset,data);
 };
 
-Vbo.prototype.dispose = function(){
+Buffer.prototype.dispose = function(){
     if(!this._handle){
-        throw new Error('Vbo already disposed.');
+        throw new Error('Buffer already disposed.');
     }
     this._gl.deleteBuffer(this._handle);
     this._handle = null;
     this._data = null;
 };
 
-module.exports = Vbo;
+module.exports = Buffer;
 
