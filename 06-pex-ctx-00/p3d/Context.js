@@ -5,6 +5,7 @@ var Vec4 = require('../math/Vec4');
 
 var Program        = require('./Program');
 var ProgramUniform = require('./ProgramUniform');
+var ProgramAttributeLocation = require('./ProgramAttributeLocation');
 
 var Buffer      = require('./Buffer');
 var VertexArray = require('./VertexArray');
@@ -29,7 +30,7 @@ var LINE_WIDTH_BIT = 1 << 9;
 var MATRIX_PROJECTION_BIT = 1 << 16;
 var MATRIX_VIEW_BIT       = 1 << 17;
 var MATRIX_MODEL_BIT      = 1 << 18;
-var FRAME_BUFFER_BIT      = 1 << 19;
+var FRAMEBUFFER_BIT       = 1 << 19;
 var BUFFER_BIT            = 1 << 20;
 var VERTEX_ARRAY_BIT      = 1 << 21;
 var PROGRAM_BIT           = 1 << 22;
@@ -145,6 +146,42 @@ function Context(gl){
     this.PROGAM_BIT = PROGRAM_BIT;
     this._program = null;
     this._programUniformLocations = null;
+
+    this.ATTRIB_POSITION    = ProgramAttributeLocation.POSITION;
+    this.ATTRIB_COLOR       = ProgramAttributeLocation.COLOR;
+    this.ATTRIB_TEX_COORD_0 = ProgramAttributeLocation.TEX_COORD_0;
+    this.ATTRIB_TEX_COORD_1 = ProgramAttributeLocation.TEX_COORD_1;
+    this.ATTRIB_TEX_COORD_2 = ProgramAttributeLocation.TEX_COORD_2;
+    this.ATTRIB_TEX_COORD_3 = ProgramAttributeLocation.TEX_COORD_3;
+    this.ATTRIB_NORMAL      = ProgramAttributeLocation.NORMAL;
+    this.ATTRIB_TANGENT     = ProgramAttributeLocation.TANGENT;
+    this.ATTRIB_BITANGENT   = ProgramAttributeLocation.BITANGENT;
+    this.ATTRIB_BONE_INDEX  = ProgramAttributeLocation.BONE_INDEX;
+    this.ATTRIB_BONE_WEIGHT = ProgramAttributeLocation.BONE_WEIGHT;
+    this.ATTRIB_CUSTOM_0    = ProgramAttributeLocation.CUSTOM_0;
+    this.ATTRIB_CUSTOM_1    = ProgramAttributeLocation.CUSTOM_1;
+    this.ATTRIB_CUSTOM_2    = ProgramAttributeLocation.CUSTOM_2;
+    this.ATTRIB_CUSTOM_3    = ProgramAttributeLocation.CUSTOM_3;
+    this.ATTRIB_CUSTOM_4    = ProgramAttributeLocation.CUSTOM_4;
+
+    //Data Types
+    this.FLOAT          = gl.FLOAT;
+    this.UNSIGNED_SHORT = gl.UNSIGNED_SHORT;
+
+    //Vertex Array
+    this.STATIC_DRAW    = gl.STATIC_DRAW;
+    this.DYNAMIC_DRAW   = gl.DYNAMIC_DRAW;
+    this.ARRAY_BUFFER   = gl.ARRAY_BUFFER;
+    this.ELEMENT_BUFFER = gl.ELEMENT_BUFFER;
+
+    //Primitive Types
+    this.POINTS         = gl.POINTS;
+    this.LINES          = gl.LINES;
+    this.LINE_STRIP     = gl.LINE_STRIP;
+    this.LINE_LOOP      = gl.LINE_LOOP;
+    this.TRIANGLES      = gl.TRIANGLES;
+    this.TRIANGLE_STRIP = gl.TRIANGLE_STRIP;
+    this.TRIANGLE_FAN   = gl.TRIANGLE_FAN;
 }
 
 Context.prototype.getGL = function(){
@@ -469,23 +506,25 @@ Context.prototype.createProgram = function(vertSrc, fragSrc, attributeLocationMa
     return new Program(this, vertSrc, fragSrc, attributeLocationMap);
 };
 
-Context.prototype.bindProgram = function(program){
-
+Context.prototype.bindProgram = function(program) {
 };
 
-Context.prototype.createBuffer = function(target, sizeOrData, usage, preserveData){
+Context.prototype.bindBuffer = function(buffer) {
+};
+
+Context.prototype.createBuffer = function(target, sizeOrData, usage, preserveData) {
     return new Buffer(this, target, sizeOrData, usage, preserveData);
 };
 
-Context.prototype.createVertexArray = function(){
+Context.prototype.createVertexArray = function(attributes, indexBuffer) {
+    return new VertexArray(this, attributes, indexBuffer);
+};
+
+Context.prototype.bindVertexArray = function(vertexArray) {
 
 };
 
-Context.prototype.bindVertexArray = function(vertexArray){
-
-};
-
-Context.prototype.draw = function(mode,first,count){
+Context.prototype.draw = function(mode, first, count){
 
 };
 

@@ -1,26 +1,9 @@
-var DefaultAttributeLocationMap = {
-    0 : 'aPosition',
-    1 : 'aColor',
-    2 : 'aTexCoord0',
-    3 : 'aTexCoord1',
-    4 : 'aTexCoord2',
-    5 : 'aTexCoord3',
-    6 : 'aNormal',
-    7 : 'aBitangent',
-    8 : 'aBoneIndex',
-    9 : 'aBoneWeight',
-    10 : 'aCustom0',
-    11 : 'aCustom1',
-    12 : 'aCustom2',
-    13 : 'aCustom3',
-    14 : 'aCustom4',
-    15 : 'aCustom5'
-}
+var DefaultAttributeLocationBinding = require('./ProgramAttributeLocationBinding');
 
 //TODO: this is true in 99% of cases, might be implementation specific
 var MaxVertexAttributes = 16;
 
-function Program(context, vertSrc, fragSrc, attributeLocationsMap) {
+function Program(context, vertSrc, fragSrc, attributeLocationBinding) {
     var gl = this._gl = context.getGL();
 
     //TODO: creating program once like Pex or on every load like Foam
@@ -29,7 +12,7 @@ function Program(context, vertSrc, fragSrc, attributeLocationsMap) {
     this._attributes = {};
     this._uniforms = {};
     if (vertSrc) {
-        this.update(vertSrc, fragSrc, attributeLocationsMap);
+        this.update(vertSrc, fragSrc, attributeLocationBinding);
     }
 }
 
@@ -48,9 +31,9 @@ Program.prototype.unbind = function() {
  * updates ahders sources and links the program
  * @param  {String} vertSrc                 - vert shader source (or combined vert/fragShader)
  * @param  {String} [fragSrc]               - frag shader source
- * @param  {String} [attributeLocationsMap] - attribute locations map { 0: 'aPositon', 1: 'aNormal', 2: 'aColor' }
+ * @param  {String} [attributeLocationBinding] - attribute locations map { 0: 'aPositon', 1: 'aNormal', 2: 'aColor' }
  */
-Program.prototype.update = function(vertSrc, fragSrc, attributeLocationsMap) {
+Program.prototype.update = function(vertSrc, fragSrc, attributeLocationBinding) {
     var gl = this._gl;
     var program = this._handle;
 
@@ -61,7 +44,7 @@ Program.prototype.update = function(vertSrc, fragSrc, attributeLocationsMap) {
     gl.attachShader(program, fragShader);
 
     for(var location = 0; location < MaxVertexAttributes; location++) {
-        var attributeName = (attributeLocationsMap && attributeLocationsMap[location]) || DefaultAttributeLocationMap[location];
+        var attributeName = (attributeLocationBinding && attributeLocationBinding[location]) || DefaultAttributeLocationBinding[location];
         gl.bindAttribLocation(program, location, attributeName);
     }
 
