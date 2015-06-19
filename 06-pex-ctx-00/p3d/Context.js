@@ -68,7 +68,7 @@ function Context(gl){
     this._depthMask       = gl.getParameter(gl.DEPTH_WRITEMASK);
     this._depthFunc       = gl.getParameter(gl.DEPTH_FUNC);
     this._depthClearValue = gl.getParameter(gl.DEPTH_CLEAR_VALUE);
-    this._depthRange      = glObjToArray(gl.getParameter(gl.DEPTH_RANGE));
+    this._depthRange      = glObjToArray(gl.getParameter(gl.DEPTH_RANGE)).slice(0,2);
     this._polygonOffset   = [gl.getParameter(gl.POLYGON_OFFSET_FACTOR),gl.getParameter(gl.POLYGON_OFFSET_UNITS)];
 
     this._depthStack = [[
@@ -167,6 +167,7 @@ function Context(gl){
     //Data Types
     this.FLOAT          = gl.FLOAT;
     this.UNSIGNED_SHORT = gl.UNSIGNED_SHORT;
+    this.UNSIGNED_INT   = gl.UNSIGNED_INT;
 
     //Vertex Array
     this.STATIC_DRAW    = gl.STATIC_DRAW;
@@ -188,13 +189,13 @@ Context.prototype.getGL = function(){
     return this._gl;
 };
 
-Context.prototype.push = function(mask){
+Context.prototype.pushState = function(mask){
     mask = mask === undefined ? ALL_BIT : mask;
 
     if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
-        //this._depthStack.push([
-        //    this._depthTest,this._depthMask,this._depthFunc,this._depthClearValue,this._depthRange.slice(0),Vec2.copy(this._polygonOffset)
-        //]);
+        this._depthStack.push([
+            this._depthTest, this._depthMask, this._depthFunc, this._depthClearValue, Vec2.copy(this._depthRange), Vec2.copy(this._polygonOffset)
+        ]);
     }
 
     if(mask == ALL_BIT || (mask & COLOR_BIT) == COLOR_BIT){
@@ -221,7 +222,7 @@ Context.prototype.push = function(mask){
     this._maskStack.push(this._mask);
 };
 
-Context.prototype.pop = function(){
+Context.prototype.popState = function(){
     var gl   = this._gl;
     var mask = this._mask = this._maskStack.pop();
     var prev;
@@ -250,9 +251,42 @@ Context.prototype.pop = function(){
     }
 
     if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
-        //if(this._depthStack.length == 1){
-        //    throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','DEPTH_BIT'));
-        //}
+        if(this._depthStack.length == 1){
+            throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','DEPTH_BIT'));
+        }
+        prev  = this._depthStack.pop();
+        stack = this._depthStack[this._depthStack.length - 1];
+
+        this._depthTest       = stack[0];
+        this._depthMask       = stack[1];
+        this._depthFunc       = stack[2];
+        this._depthClearValue = stack[3];
+        this._depthRange      = stack[4];
+        this._polygonOffset   = stack[5];
+
+        if(this._depthTest != prev[0]){
+            if(this._depthTest){
+                gl.enable(gl.DEPTH_TEST);
+            }
+            else {
+                gl.disable(gl.DEPTH_TEST);
+            }
+        }
+        if(this._depthMask != prev[1]){
+            gl.depthMask(this._depthMask);
+        }
+        if(this._depthFunc != prev[2]){
+            gl.depthFunc(this._depthFunc);
+        }
+        if(this._depthClearValue != prev[3]){
+            gl.clearDepth(this._depthClearValue);
+        }
+        if(Vec2.equals(this._depthRange,prev[4])){
+            gl.depthRange(this._depthRange[0],this._depthRange[1]);
+        }
+        if(Vec2.equals(this._polygonOffset,prev[5])){
+            gl.polygonOffset(this._polygonOffset[0],this._polygonOffset[1]);
+        }
     }
 
     if(mask == ALL_BIT || (mask & STENCIL_BIT) == STENCIL_BIT){
@@ -309,6 +343,57 @@ Context.prototype.pop = function(){
     if(mask == ALL_BIT || (mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
 
     }
+};
+
+Context.prototype.getState = function(mask){
+    mask = mask === undefined ? ALL_BIT : mask;
+
+    var state = [];
+
+    if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
+        this._depthStack.push([
+            this._depthTest, this._depthMask, this._depthFunc, this._depthClearValue, Vec2.copy(this._depthRange), Vec2.copy(this._polygonOffset)
+        ]);
+    }
+
+    if(mask == ALL_BIT || (mask & COLOR_BIT) == COLOR_BIT){
+        this._colorStack.push([Vec4.copy(this._clearColor), Vec4.copy(this._colorMask)]);
+    }
+
+    if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
+
+    }
+
+    if(mask == ALL_BIT || (mask & STENCIL_BIT) == STENCIL_BIT){
+
+    }
+
+    if(mask == ALL_BIT || (mask & VIEWPORT_BIT) == VIEWPORT_BIT){
+        this._viewportStack.push(Vec4.copy(this._viewport));
+    }
+
+    if(mask == ALL_BIT || (mask && SCISSOR_BIT) == SCISSOR_BIT){
+        this._scissorStack.push([this._scissorTest, this._scissorStack]);
+    }
+
+    if(mask == ALL_BIT || (mask & CULL_BIT) == CULL_BIT){
+
+    }
+
+    if(mask == ALL_BIT || (mask & BLEND_BIT) == BLEND_BIT){
+
+    }
+
+    if(mask == ALL_BIT || (mask & ALPHA_BIT) == ALPHA_BIT){
+
+    }
+
+    if(mask == ALL_BIT || (mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
+
+    }
+
+    return state.length > 1 ? state : state[0];
+
 };
 
 Context.prototype.setViewport = function(x,y,width,height){
