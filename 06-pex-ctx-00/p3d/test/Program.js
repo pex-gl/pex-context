@@ -22,11 +22,9 @@ Window.create({
   },
   init: function() {
     var ctx = this.getContext();
-    //TODO: new Program(ctx, VERT_SRC, FRAG_SRC) -> ctx.createProgram(VERT_SRC, FRAG_SRC)
-    var program = new Program(ctx, VERT_SRC, FRAG_SRC);
-    program.bind();
-    program.setUniform('uColor', [1, 0, 0, 1]);
-    program.unbind();
+    var program = ctx.createProgram(VERT_SRC, FRAG_SRC);
+    ctx.bindProgram(program);
+    program.setUniform('uColor', [1, 0, 0, 1])
   },
   update: function() {
 
