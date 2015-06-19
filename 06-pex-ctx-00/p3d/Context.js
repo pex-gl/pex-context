@@ -3,7 +3,13 @@ var Vec2 = require('../math/Vec2');
 var Vec3 = require('../math/Vec3');
 var Vec4 = require('../math/Vec4');
 
+var Program        = require('./Program');
 var ProgramUniform = require('./ProgramUniform');
+
+var Buffer      = require('./Buffer');
+var VertexArray = require('./VertexArray');
+
+var FrameBuffer = require('./FrameBuffer');
 
 var STR_ERROR_STACK_POP_BIT = 'Invalid pop. Bit %s stack is empty.';
 
@@ -140,6 +146,10 @@ function Context(gl){
     this._program = null;
     this._programUniformLocations = null;
 }
+
+Context.prototype.getGL = function(){
+    return this._gl;
+};
 
 Context.prototype.push = function(mask){
     mask = mask === undefined ? ALL_BIT : mask;
@@ -395,23 +405,6 @@ Context.prototype.clear = function(mask){
     this._gl.clear(this._bitMap[mask]);
 };
 
-Context.prototype.bindProgram = function(program){
-    //this._programUniformLocations = program.getUniformLocations();
-
-};
-
-Context.prototype.bindVao = function(vao){
-
-};
-
-Context.prototype.draw = function(mode,first,count){
-
-};
-
-Context.prototype.getGL = function(){
-    return this._gl;
-};
-
 Context.prototype.setProjectionMatrix = function(matrix){
     var _matrix = Mat4.copy(matrix,this._matrix[MATRIX_PROJECTION_BIT]);
     this._matrixF32Temp.set(_matrix);
@@ -470,6 +463,30 @@ Context.prototype.popMatrix = function(){
 
 Context.prototype.identity = function(){
     Mat4.identity(this._matrix[this._matrixMode]);
+};
+
+Context.prototype.createProgram = function(vertSrc, fragSrc, attributeLocationMap){
+    return new Program(this, vertSrc, fragSrc, attributeLocationMap);
+};
+
+Context.prototype.bindProgram = function(program){
+
+};
+
+Context.prototype.createBuffer = function(target, sizeOrData, usage, preserveData){
+    return new Buffer(this, target, sizeOrData, usage, preserveData);
+};
+
+Context.prototype.createVertexArray = function(){
+
+};
+
+Context.prototype.bindVertexArray = function(vertexArray){
+
+};
+
+Context.prototype.draw = function(mode,first,count){
+
 };
 
 
