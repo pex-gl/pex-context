@@ -104,12 +104,29 @@ var fsq = createRect2D();
 
 var vertexVBO = c.createVBO(ctx.ARRAY_BUFFER, new Float32Array(cube.positions), ctx.DYNAMIC_DRAW));
 var normalVBO = c.createVBO(ctx.ARRAY_BUFFER, new Float32Array(cube.normals), ctx.DYNAMIC_DRAW));
+var indicesVBO = c.createVBO(ctx.ELEMENT_BUFFER, new Uint16Array(cube.faces), ctx.STATIC);
 
 var vao = c.createVAO([
-    c.createAttribute(vertexVBO, ctx.POSITION, 3, ctx.FLOAT, 0, 12),
-    c.createAttribute(normalVBO, ctx.NORMAL, 3, ctx.FLOAT, 0, 12),
+    c.createAttribute(vertexVBO, ctx.POSITION, 3, ctx.FLOAT, 0, 12, 1),
+    c.createAttribute(normalVBO, ctx.NORMAL, 3, ctx.FLOAT, 0, 12, 1),
   ],
   c.createVBO(ctx.ELEMENT_BUFFER, new Uint16Array(cube.faces), ctx.STATIC)
+)
+
+var vao = c.createVao([
+    { buffer: vertexVo, location: ctx.POSITION, size: 3, type: ctx.FLOAT, offset: 0, stride: 12, divisor: 0),
+    { buffer: vormalVbo, location: ctx.NORMAL, size: 3, type: ctx.FLOAT, offset: 0, stride: 12, divisor: 0),
+    { buffer: vertexVBO, location: ctx.POSITION),
+  ],
+  indicesVBO
+)
+
+var vao = c.createVAO([
+    { buffer: vertexVBO, location: ctx.POSITION, size: 3, type: ctx.FLOAT, offset: 0, stride: 12, divisor: 0),
+    { buffer: vormalVBO, location: ctx.NORMAL, size: 3, type: ctx.FLOAT, offset: 0, stride: 12, divisor: 0),
+    { buffer: vertexVBO, location: ctx.POSITION),
+  ],
+  indicesVBO
 )
 
 var vao = c.createVAO([
