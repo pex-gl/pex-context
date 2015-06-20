@@ -110,7 +110,7 @@ VertexArray.prototype._bindInternal = function(){
     var gl  = ctx.getGL();
 
     var prevVertexArray    = ctx.getVertexArray();
-    var vertexArrayDiffers = prevVertexArray == this;
+    var vertexArrayDiffers = (prevVertexArray != this);
 
     var arrayBuffers = this._arrayBuffers;
     var attributes   = this._attributes;
