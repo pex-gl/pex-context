@@ -83,7 +83,7 @@ function VertexArray(ctx,attributes,indexBuffer){
         attribCopy.type = buffer.getDataType();
         delete attribCopy.buffer;
 
-        this._hasDivisor = this._hasDivisor || attribCopy.divisor !==
+        this._hasDivisor = this._hasDivisor || attribCopy.divisor !== null;
         this._attributes[bufferIndex].push(attribCopy);
     }
 }
