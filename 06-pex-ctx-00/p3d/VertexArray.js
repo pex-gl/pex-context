@@ -66,6 +66,13 @@ function VertexArray(ctx,attributes,indexBuffer){
             }
             attribCopy[property] = attrib[property];
         }
+        //Assign default values
+        for(var property in DEFAULT_VERTEX_ATTRIB){
+            defaultProp = DEFAULT_VERTEX_ATTRIB[property];
+            if (attribCopy[property] === undefined) {
+                attribCopy[property] = defaultProp;
+            }
+         }
 
         //Check if location for that attribute is not taken already
         if(this._attributes[attribCopy.location] !== undefined){
