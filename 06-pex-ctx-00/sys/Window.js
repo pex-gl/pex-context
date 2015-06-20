@@ -1,5 +1,7 @@
-var plask     = require('plask');
-var Context3d = require('../p3d/Context');
+var Platform        = require('./Platform');
+var Context3d       = require('../p3d/Context');
+var WindowBrowser   = require('./WindowBrowser');
+var plask           = Platform.isPlask ? require('plask') : {};
 
 var current = null;
 
@@ -48,6 +50,7 @@ Window.prototype.getContext = function(){
     return this._ctx;
 };
 
+//TODO: add default window options
 Window.create = function(obj){
     var window = new Window();
     for (var p in obj) {
@@ -60,7 +63,9 @@ Window.create = function(obj){
         //sure...
         var init = window.init;
         window.init = function() {
-            this.framerate(60);
+            if (Platform.isPlask) {
+                this.framerate(60);
+            }
             this._ctx = new Context3d(this.gl);
             delete this.gl;
             init.call(this);
@@ -75,7 +80,13 @@ Window.create = function(obj){
     else {
         //other context
     }
-    plask.simpleWindow(window);
+
+    if (Platform.isPlask) {
+        plask.simpleWindow(window);
+    }
+    else {
+        WindowBrowser.simpleWindow(window);
+    }
 };
 
 Window.getCurrent = function(){
