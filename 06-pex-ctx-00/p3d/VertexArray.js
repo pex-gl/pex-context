@@ -44,7 +44,7 @@ function VertexArray(ctx,attributes,indexBuffer){
     var attrib, attribCopy, defaultProp, buffer;
     var bufferIndex;
 
-    for(var i = 0, l = attributes.length; i < l; ++i){
+    for(var i = 0, numAttributes = attributes.length; i < numAttributes; ++i){
         attrib = attributes[i];
 
         if(attrib['location'] === undefined){
@@ -117,12 +117,14 @@ VertexArray.prototype._bindInternal = function(){
 
     var bufferAttributes, attribute, location;
 
-    for(var i = 0, l = arrayBuffers.length, j, k; i < l; ++i){
+    //NOTE: No idea how faster variables declared in loops are but this is super hard to read
+    //NOTE: So renamed for now for debugging, as these are 1-2 interation long loops anyway
+    for(var i = 0, numArrayBuffers = arrayBuffers.length; i < numArrayBuffers; ++i) {
         arrayBuffers[i]._bindInternal();
         bufferAttributes = attributes[i];
 
-        for(j = 0, k = bufferAttributes.length; j < k; ++j){
-            attribute = bufferAttributes[i];
+        for(var j = 0, numBufferAttribs = bufferAttributes.length; j < numBufferAttribs; ++j){
+            attribute = bufferAttributes[j];
             location  = attribute.location;
 
             if(!attribute.enabled && (attribute.prevEnabled || vertexArrayDiffers)){
