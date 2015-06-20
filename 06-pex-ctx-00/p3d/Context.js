@@ -16,7 +16,7 @@ var STR_ERROR_STACK_POP_BIT = 'Invalid pop. Bit %s stack is empty.';
 
 //STATE BITS
 
-var ALL_BIT        = 1 << 0;
+var ALL_BIT        = (1 << 30) - 1;
 var DEPTH_BIT      = 1 << 1;
 var COLOR_BIT      = 1 << 2;
 var STENCIL_BIT    = 1 << 3;
@@ -205,33 +205,33 @@ Context.prototype.getGL = function(){
 Context.prototype.pushState = function(mask){
     mask = mask === undefined ? ALL_BIT : mask;
 
-    if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
+    if((mask & DEPTH_BIT) == DEPTH_BIT){
         this._depthStack.push([
             this._depthTest, this._depthMask, this._depthFunc, this._depthClearValue, Vec2.copy(this._depthRange), Vec2.copy(this._polygonOffset)
         ]);
     }
 
-    if(mask == ALL_BIT || (mask & COLOR_BIT) == COLOR_BIT){
+    if((mask & COLOR_BIT) == COLOR_BIT){
         this._colorStack.push([Vec4.copy(this._clearColor), Vec4.copy(this._colorMask)]);
     }
 
-    if(mask == ALL_BIT || (mask & STENCIL_BIT) == STENCIL_BIT){
+    if((mask & STENCIL_BIT) == STENCIL_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask & VIEWPORT_BIT) == VIEWPORT_BIT){
+    if((mask & VIEWPORT_BIT) == VIEWPORT_BIT){
         this._viewportStack.push(Vec4.copy(this._viewport));
     }
 
-    if(mask == ALL_BIT || (mask & SCISSOR_BIT) == SCISSOR_BIT){
+    if((mask & SCISSOR_BIT) == SCISSOR_BIT){
         this._scissorStack.push([this._scissorTest, this._scissorStack]);
     }
 
-    if(mask == ALL_BIT || (mask & CULL_BIT) == CULL_BIT){
+    if((mask & CULL_BIT) == CULL_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask & PROGRAM_BIT) == PROGRAM_BIT){
+    if((mask & PROGRAM_BIT) == PROGRAM_BIT){
         this._programStack.push(this._program);
     }
 
@@ -245,11 +245,11 @@ Context.prototype.popState = function(){
     var prev;
     var stack;
 
-    if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
+    if((mask & DEPTH_BIT) == DEPTH_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask & COLOR_BIT) == COLOR_BIT){
+    if((mask & COLOR_BIT) == COLOR_BIT){
         if(this._colorStack.length == 1){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','COLOR_BIT'));
         }
@@ -267,7 +267,7 @@ Context.prototype.popState = function(){
         }
     }
 
-    if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
+    if((mask & DEPTH_BIT) == DEPTH_BIT){
         if(this._depthStack.length == 1){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','DEPTH_BIT'));
         }
@@ -306,11 +306,11 @@ Context.prototype.popState = function(){
         }
     }
 
-    if(mask == ALL_BIT || (mask & STENCIL_BIT) == STENCIL_BIT){
+    if((mask & STENCIL_BIT) == STENCIL_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask & VIEWPORT_BIT) == VIEWPORT_BIT){
+    if((mask & VIEWPORT_BIT) == VIEWPORT_BIT){
         if(this._viewportStack.length == 1){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','VIEWPORT_BIT'));
         }
@@ -322,7 +322,7 @@ Context.prototype.popState = function(){
         }
     }
 
-    if(mask == ALL_BIT || (mask && SCISSOR_BIT) == SCISSOR_BIT){
+    if((mask && SCISSOR_BIT) == SCISSOR_BIT){
         if(this._scissorStack.length == 1){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','SCISSOR_BIT'));
         }
@@ -345,23 +345,23 @@ Context.prototype.popState = function(){
         }
     }
 
-    if(mask == ALL_BIT || (mask & CULL_BIT) == CULL_BIT){
+    if((mask & CULL_BIT) == CULL_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask & BLEND_BIT) == BLEND_BIT){
+    if((mask & BLEND_BIT) == BLEND_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask & ALPHA_BIT) == ALPHA_BIT){
+    if((mask & ALPHA_BIT) == ALPHA_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
+    if((mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask & PROGRAM_BIT) == PROGRAM_BIT){
+    if((mask & PROGRAM_BIT) == PROGRAM_BIT){
         prev = this._programStack.pop();
         this._program = this._programStack[this._programStack.length - 1];
 
@@ -376,49 +376,49 @@ Context.prototype.getState = function(mask){
 
     var state = [];
 
-    if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
+    if((mask & DEPTH_BIT) == DEPTH_BIT){
         state.push([
             this._depthTest, this._depthMask, this._depthFunc, this._depthClearValue, Vec2.copy(this._depthRange), Vec2.copy(this._polygonOffset)
         ]);
     }
 
-    if(mask == ALL_BIT || (mask & COLOR_BIT) == COLOR_BIT){
+    if((mask & COLOR_BIT) == COLOR_BIT){
         state.push([Vec4.copy(this._clearColor), Vec4.copy(this._colorMask)]);
     }
 
-    if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
+    if((mask & DEPTH_BIT) == DEPTH_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask & STENCIL_BIT) == STENCIL_BIT){
+    if((mask & STENCIL_BIT) == STENCIL_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask & VIEWPORT_BIT) == VIEWPORT_BIT){
+    if((mask & VIEWPORT_BIT) == VIEWPORT_BIT){
         state.push(Vec4.copy(this._viewport));
     }
 
-    if(mask == ALL_BIT || (mask && SCISSOR_BIT) == SCISSOR_BIT){
+    if((mask && SCISSOR_BIT) == SCISSOR_BIT){
         state.push([this._scissorTest, this._scissorStack]);
     }
 
-    if(mask == ALL_BIT || (mask & CULL_BIT) == CULL_BIT){
+    if((mask & CULL_BIT) == CULL_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask & BLEND_BIT) == BLEND_BIT){
+    if((mask & BLEND_BIT) == BLEND_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask & ALPHA_BIT) == ALPHA_BIT){
+    if((mask & ALPHA_BIT) == ALPHA_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
+    if((mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
 
     }
 
-    if(mask == ALL_BIT || (mask && PROGRAM_BIT) == PROGRAM_BIT){
+    if((mask && PROGRAM_BIT) == PROGRAM_BIT){
         state.push(this._program);
     }
 
