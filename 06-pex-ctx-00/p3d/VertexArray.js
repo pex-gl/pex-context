@@ -2,7 +2,7 @@ var DEFAULT_VERTEX_ATTRIB = {
     enabled    : true,
     location   : -1,
     size       : -1,
-    format     : null,
+    type       : null,
     normalized : false,
     stride     : 0,
     offset     : 0,
@@ -53,7 +53,11 @@ function VertexArray(ctx,attributes,indexBuffer){
         if(attrib['size'] === undefined){
             throw new Error(STR_ERROR_ATTRIB_PROPERTY_MISSING.replace('%s','size'));
         }
+        if(attrib['buffer'] === undefined){
+            throw new Error(STR_ERROR_ATTRIB_PROPERTY_MISSING.replace('%s','buffer'));
+        }
 
+        //Check if all passed parameters are valid (e.g. no typos)
         attribCopy = {};
         for(var property in attrib){
             defaultProp = DEFAULT_VERTEX_ATTRIB[property];
@@ -63,6 +67,7 @@ function VertexArray(ctx,attributes,indexBuffer){
             attribCopy[property] = attrib[property];
         }
 
+        //Check if location for that attribute is not taken already
         if(this._attributes[attribCopy.location] !== undefined){
             throw new Error(STR_ERROR_ATTRIB_LOCATION_DUPLICATE.replace('%s',attrib.location));
         }
@@ -75,7 +80,7 @@ function VertexArray(ctx,attributes,indexBuffer){
             this._attributes[bufferIndex] = [];
         }
 
-        attribCopy.format = buffer.getDataType();
+        attribCopy.type = buffer.getDataType();
         delete attribCopy.buffer;
 
         this._hasDivisor = this._hasDivisor || attribCopy.divisor !==
@@ -89,7 +94,11 @@ function VertexArray(ctx,attributes,indexBuffer){
  */
 
 VertexArray.prototype.hasIndexBuffer = function(){
-    return this._arrayBuffers[this.ELEMENT_BUFFER] !== null;
+    return this._indexBuffer !== null;
+};
+
+VertexArray.prototype.getIndexBuffer = function(){
+    return this._indexBuffer;
 };
 
 VertexArray.prototype.hasDivisor = function(){
