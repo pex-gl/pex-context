@@ -155,11 +155,6 @@ function Context(gl){
     this._vertexArray = null;
     this._vertexArrayStack = [this._vertexArray];
 
-    this._drawFuncMap = {};
-    this._drawFuncMap[gl.ARRAY_BUFFER] = gl.draw;
-    this._drawFuncMap[gl.ELEMENT_ARRAY_BUFFER] = gl.drawElements;
-    this._drawFunc = null;
-
     this.ATTRIB_POSITION    = ProgramAttributeLocation.POSITION;
     this.ATTRIB_COLOR       = ProgramAttributeLocation.COLOR;
     this.ATTRIB_TEX_COORD_0 = ProgramAttributeLocation.TEX_COORD_0;
@@ -660,7 +655,6 @@ Context.prototype.createVertexArray = function(attributes, indexBuffer) {
 Context.prototype.bindVertexArray = function(vertexArray) {
     vertexArray._bindInternal();
     this._vertexArray = vertexArray;
-    this._drawFunc = this._drawFuncMap[vertexArray.hasIndexBuffer() ? this._gl.ELEMENT_ARRAY_BUFFER : this._gl.ARRAY_BUFFER];
 };
 
 Context.prototype.getVertexArray = function(){
@@ -668,7 +662,12 @@ Context.prototype.getVertexArray = function(){
 };
 
 Context.prototype.draw = function(mode, first, count){
-    this._drawFunc(mode,first,count);
+    if (this._vertexArray.hasIndexBuffer()) {
+        //this._gl.drawElements(mode, count, this._vertexArray.getIndexBuffer().getDataType(), first);
+    }
+    else {
+        this._gl.drawArrays(mode, first, count);
+    }
 };
 
 
