@@ -6,7 +6,6 @@ function Buffer(ctx, target, sizeOrData, usage, preserveData) {
     this._length       = 0;
     this._byteLength   = 0;
     this._dataType     = null;
-    this._dataFormat   = null;
     this._preserveData = preserveData === undefined ? false : preserveData;
     this._handle       = gl.createBuffer();
 
@@ -43,10 +42,6 @@ Buffer.prototype.getDataType = function(){
     return this._dataType;
 };
 
-Buffer.prototype.getDataFormat = function(){
-    return this._dataFormat;
-};
-
 Buffer.prototype.getData = function(){
     return this._data;
 };
@@ -72,17 +67,17 @@ Buffer.prototype.bufferData = function(sizeOrData){
     if(sizeOrData.byteLength !== undefined){
         this._length     = sizeOrData.length;
         this._byteLength = sizeOrData.byteLength;
-        this._dataType   = sizeOrData.constructor;
+        var data_ctor    = sizeOrData.constructor;
 
-        switch(this._dataType){
+        switch(data_ctor){
             case Float32Array:
-                this._dataFormat = gl.FLOAT;
+                this._dataType = gl.FLOAT;
                 break;
             case Uint16Array:
-                this._dataFormat = gl.UNSIGNED_SHORT;
+                this._dataType = gl.UNSIGNED_SHORT;
                 break;
             case Uint32Array:
-                this._dataFormat = gl.UNSIGNED_INT;
+                this._dataType = gl.UNSIGNED_INT;
                 break;
             default:
                 throw new TypeError('Unsupported data type.');
@@ -90,14 +85,13 @@ Buffer.prototype.bufferData = function(sizeOrData){
         }
 
         if(this._preserveData){
-            this._data = sizeOrData.constructor(sizeOrData);
+            this._data = new data_ctor(sizeOrData);
         }
 
     } else {
         this._length     = sizeOrData;
         this._byteLength = null;
         this._dataType   = null;
-        this._dataFormat = null;
         this._data       = null;
     }
     gl.bufferData(this._target,sizeOrData,this._usage);
