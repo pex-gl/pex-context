@@ -144,8 +144,21 @@ function Context(gl){
     this._matrixF32Temp = new Float32Array(16);
 
     this.PROGAM_BIT = PROGRAM_BIT;
-    this._program = null;
+    this._program     = null;
     this._programUniformLocations = null;
+    this._programStack = [this._program];
+
+    this.BUFFER_BIT = BUFFER_BIT;
+    this._buffer = null;
+
+    this.VERTEX_ARRAY_BIT = VERTEX_ARRAY_BIT;
+    this._vertexArray = null;
+    this._vertexArrayStack = [this._vertexArray];
+
+    this._drawFuncMap = {};
+    this._drawFuncMap[gl.ARRAY_BUFFER] = gl.draw;
+    this._drawFuncMap[gl.ELEMENT_ARRAY_BUFFER] = gl.drawElements;
+    this._drawFunc = null;
 
     this.ATTRIB_POSITION    = ProgramAttributeLocation.POSITION;
     this.ATTRIB_COLOR       = ProgramAttributeLocation.COLOR;
@@ -216,6 +229,10 @@ Context.prototype.pushState = function(mask){
 
     if(mask == ALL_BIT || (mask & CULL_BIT) == CULL_BIT){
 
+    }
+
+    if(mask == ALL_BIT || (mask & PROGRAM_BIT) == PROGRAM_BIT){
+        this._programStack.push(this._program);
     }
 
     this._mask = mask;
@@ -343,6 +360,15 @@ Context.prototype.popState = function(){
     if(mask == ALL_BIT || (mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
 
     }
+
+    if(mask == ALL_BIT || (mask & PROGRAM_BIT) == PROGRAM_BIT){
+        prev = this._programStack.pop();
+        this._program = this._programStack[this._programStack.length - 1];
+
+        if(this._program != prev){
+
+        }
+    }
 };
 
 Context.prototype.getState = function(mask){
@@ -351,13 +377,13 @@ Context.prototype.getState = function(mask){
     var state = [];
 
     if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
-        this._depthStack.push([
+        state.push([
             this._depthTest, this._depthMask, this._depthFunc, this._depthClearValue, Vec2.copy(this._depthRange), Vec2.copy(this._polygonOffset)
         ]);
     }
 
     if(mask == ALL_BIT || (mask & COLOR_BIT) == COLOR_BIT){
-        this._colorStack.push([Vec4.copy(this._clearColor), Vec4.copy(this._colorMask)]);
+        state.push([Vec4.copy(this._clearColor), Vec4.copy(this._colorMask)]);
     }
 
     if(mask == ALL_BIT || (mask & DEPTH_BIT) == DEPTH_BIT){
@@ -369,11 +395,11 @@ Context.prototype.getState = function(mask){
     }
 
     if(mask == ALL_BIT || (mask & VIEWPORT_BIT) == VIEWPORT_BIT){
-        this._viewportStack.push(Vec4.copy(this._viewport));
+        state.push(Vec4.copy(this._viewport));
     }
 
     if(mask == ALL_BIT || (mask && SCISSOR_BIT) == SCISSOR_BIT){
-        this._scissorStack.push([this._scissorTest, this._scissorStack]);
+        state.push([this._scissorTest, this._scissorStack]);
     }
 
     if(mask == ALL_BIT || (mask & CULL_BIT) == CULL_BIT){
@@ -390,6 +416,10 @@ Context.prototype.getState = function(mask){
 
     if(mask == ALL_BIT || (mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
 
+    }
+
+    if(mask == ALL_BIT || (mask && PROGRAM_BIT) == PROGRAM_BIT){
+        state.push(this._program);
     }
 
     return state.length > 1 ? state : state[0];
@@ -608,9 +638,15 @@ Context.prototype.createProgram = function(vertSrc, fragSrc, attributeLocationMa
 };
 
 Context.prototype.bindProgram = function(program) {
+    if(program === this._program){
+        return;
+    }
+    program._bindInternal();
+    this._program = program;
 };
 
-Context.prototype.bindBuffer = function(buffer) {
+Context.prototype.getProgram = function(){
+    return this._program;
 };
 
 Context.prototype.createBuffer = function(target, sizeOrData, usage, preserveData) {
@@ -622,11 +658,17 @@ Context.prototype.createVertexArray = function(attributes, indexBuffer) {
 };
 
 Context.prototype.bindVertexArray = function(vertexArray) {
+    vertexArray._bindInternal();
+    this._vertexArray = vertexArray;
+    this._drawFunc = this._drawFuncMap[vertexArray.hasIndexBuffer() ? this._gl.ELEMENT_ARRAY_BUFFER : this._gl.ARRAY_BUFFER];
+};
 
+Context.prototype.getVertexArray = function(){
+    return this._vertexArray;
 };
 
 Context.prototype.draw = function(mode, first, count){
-
+    this._drawFunc(mode,first,count);
 };
 
 
