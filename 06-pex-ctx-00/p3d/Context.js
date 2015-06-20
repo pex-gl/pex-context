@@ -181,7 +181,7 @@ function Context(gl){
     this.STATIC_DRAW    = gl.STATIC_DRAW;
     this.DYNAMIC_DRAW   = gl.DYNAMIC_DRAW;
     this.ARRAY_BUFFER   = gl.ARRAY_BUFFER;
-    this.ELEMENT_BUFFER = gl.ELEMENT_BUFFER;
+    this.ELEMENT_ARRAY_BUFFER = gl.ELEMENT_ARRAY_BUFFER;
 
     //Primitive Types
     this.POINTS         = gl.POINTS;
@@ -663,7 +663,7 @@ Context.prototype.getVertexArray = function(){
 
 Context.prototype.draw = function(mode, first, count){
     if (this._vertexArray.hasIndexBuffer()) {
-        //this._gl.drawElements(mode, count, this._vertexArray.getIndexBuffer().getDataType(), first);
+        this._gl.drawElements(mode, count, this._vertexArray.getIndexBuffer().getDataType(), first);
     }
     else {
         this._gl.drawArrays(mode, first, count);
