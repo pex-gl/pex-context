@@ -149,7 +149,7 @@ VertexArray.prototype._bindInternal = function(){
                 gl.vertexAttribPointer(
                     location,
                     attribute.size,
-                    attribute.format,
+                    attribute.type,
                     attribute.normalized,
                     attribute.stride,
                     attribute.offset
@@ -159,7 +159,6 @@ VertexArray.prototype._bindInternal = function(){
             if(attribute.divisor === null || !vertexArrayDiffers){
                 continue;
             }
-
             gl.vertexAttribDivisor(location,attribute.divisor);
         }
     }
