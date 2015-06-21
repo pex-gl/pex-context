@@ -154,7 +154,12 @@ function Context(gl){
     this._programStack = [this._program];
 
     this.BUFFER_BIT = BUFFER_BIT;
-    this._buffer = null;
+    this._bufferPrev = {};
+    this._bufferPrev[gl.ARRAY_BUFFER] = null;
+    this._bufferPrev[gl.ELEMENT_ARRAY_BUFFER] = null;
+    this._buffer = {};
+    this._buffer[gl.ARRAY_BUFFER] = null;
+    this._buffer[gl.ELEMENT_ARRAY_BUFFER] = null;
 
     this.VERTEX_ARRAY_BIT = VERTEX_ARRAY_BIT;
     this._vertexArray = null;
@@ -667,8 +672,34 @@ Context.prototype.createBuffer = function(target, sizeOrData, usage, preserveDat
     return new Buffer(this, target, sizeOrData, usage, preserveData);
 };
 
+Context.prototype._bindBuffer = function(buffer){
+    var target = buffer.getTarget();
+    this._bufferPrev[target] = this._buffer[target];
+
+    if(buffer !== this._buffer[target]){
+        this._gl.bindBuffer(target,buffer._getHandle());
+    }
+
+    this._buffer[target] = buffer;
+};
+
+Context.prototype._unbindBuffer = function(buffer){
+    var target = buffer.getTarget();
+    var bufferPrev = this._bufferPrev[target];
+
+    if(this._buffer[target] !== bufferPrev){
+        this._gl.bindBuffer(target, bufferPrev !== null ? bufferPrev._getHandle() : bufferPrev);
+    }
+
+    this._buffer[target] = bufferPrev;
+};
+
 Context.prototype.createVertexArray = function(attributes, indexBuffer) {
     return new VertexArray(this, attributes, indexBuffer);
+};
+
+Context.prototype._vertexArrayDiffers = function(vertexArray){
+    return vertexArray == this._vertexArray;
 };
 
 Context.prototype.bindVertexArray = function(vertexArray) {
