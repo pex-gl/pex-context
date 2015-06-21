@@ -1,6 +1,7 @@
 function Buffer(ctx, target, sizeOrData, usage, preserveData) {
-    var gl             = ctx.getGL();
-    this._gl           = gl;
+    var gl = ctx.getGL();
+
+    this._ctx          = ctx;
     this._target       = target === undefined ? gl.ARRAY_BUFFER : target;
     this._usage        = usage  === undefined ? gl.STATIC_DRAW  : usage;
     this._length       = 0;
@@ -13,6 +14,10 @@ function Buffer(ctx, target, sizeOrData, usage, preserveData) {
         this.bufferData(sizeOrData);
     }
 }
+
+Buffer.prototype._getHandle = function(){
+    return this._handle;
+};
 
 Buffer.prototype.setTarget = function(target){
     this._target = target;
@@ -46,16 +51,12 @@ Buffer.prototype.getData = function(){
     return this._data;
 };
 
-//FIXME: _bindInternal is tricky as it can modifie Context state if we have VAO active
-//TODO: move Buffer._bindInternal to Context
-Buffer.prototype._bindInternal = function(){
-    this._gl.bindBuffer(this._target,this._handle);
-};
-
 Buffer.prototype.bufferData = function(sizeOrData){
-    this._bindInternal();
+    var ctx = this._ctx;
+    var gl  = ctx.getGL();
 
-    var gl = this._gl;
+    ctx._bindBuffer(this);
+
     if(sizeOrData === undefined){
         if(this._data !== null){
             gl.bufferData(this._target,this._data,this._usage);
@@ -64,6 +65,7 @@ Buffer.prototype.bufferData = function(sizeOrData){
             throw new Error('No size or data passed. Or no preserved data set.');
         }
     }
+
     if(sizeOrData.byteLength !== undefined){
         this._length     = sizeOrData.length;
         this._byteLength = sizeOrData.byteLength;
@@ -96,7 +98,7 @@ Buffer.prototype.bufferData = function(sizeOrData){
     }
     gl.bufferData(this._target,sizeOrData,this._usage);
 
-    //FIXME: Buffer.unbind(); should through Context
+    ctx._unbindBuffer(this);
 };
 
 Buffer.prototype.bufferSubData = function(offset,data){
