@@ -214,6 +214,10 @@ Program.prototype.setUniform = function(name, args){
     }
 };
 
+Program.prototype.hasUniform = function(name){
+    return this._uniforms[name] !== undefined;
+};
+
 Program.prototype.dispose = function(){
     if(!this._handle){
         return this;
