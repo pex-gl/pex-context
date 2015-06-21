@@ -28,10 +28,10 @@ function create() {
 }
 
 function set(a,b){
-    a[ 0] = b[ 0]; a[ 1] = b[ 1]; a[ 2] = b[ 2]; a[ 3] = a[ 3];
-    a[ 4] = b[ 4]; a[ 5] = b[ 5]; a[ 6] = b[ 6]; a[ 7] = a[ 7];
-    a[ 8] = b[ 8]; a[ 9] = b[ 9]; a[10] = b[10]; a[11] = a[11];
-    a[12] = b[12]; a[13] = b[13]; a[14] = b[14]; a[15] = a[15];
+    a[ 0] = b[ 0]; a[ 1] = b[ 1]; a[ 2] = b[ 2]; a[ 3] = b[ 3];
+    a[ 4] = b[ 4]; a[ 5] = b[ 5]; a[ 6] = b[ 6]; a[ 7] = b[ 7];
+    a[ 8] = b[ 8]; a[ 9] = b[ 9]; a[10] = b[10]; a[11] = b[11];
+    a[12] = b[12]; a[13] = b[13]; a[14] = b[14]; a[15] = b[15];
     return a;
 }
 
@@ -520,6 +520,80 @@ function ortho(a, left, right, bottom, top , near, far) {
     return a;
 }
 
+function lookAt(a, eyex, eyey, eyez, targetx, targety, targetz, upx, upy, upz) {
+    var x0, x1, x2, y0, y1, y2, z0, z1, z2, len;
+
+    if (Math.abs(eyex - targetx) < 0.000001 &&
+        Math.abs(eyey - targety) < 0.000001 &&
+        Math.abs(eyez - targetz) < 0.000001) {
+
+        a[ 0] = 1;
+        a[ 1] = a[ 2] = a[ 3] = 0;
+        a[ 5] = 1;
+        a[ 4] = a[ 6] = a[ 7] = 0;
+        a[10] = 1;
+        a[ 8] = a[ 9] = a[11] = 0;
+        a[15] = 1;
+        a[12] = a[13] = a[14] = 0;
+
+        return;
+    }
+
+    z0 = eyex - targetx;
+    z1 = eyey - targety;
+    z2 = eyez - targetz;
+
+    len = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
+    z0 *= len;
+    z1 *= len;
+    z2 *= len;
+
+    x0 = upy * z2 - upz * z1;
+    x1 = upz * z0 - upx * z2;
+    x2 = upx * z1 - upy * z0;
+
+    len = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
+
+    if(len){
+        len = 1.0 / len;
+        x0 *= len;
+        x1 *= len;
+        x2 *= len;
+    }
+
+    y0 = z1 * x2 - z2 * x1;
+    y1 = z2 * x0 - z0 * x2;
+    y2 = z0 * x1 - z1 * x0;
+
+    len = Math.sqrt(y0 * y0 + y1 * y1 + y2 * y2);
+
+    if(len){
+        len = 1.0 / len;
+        x0 *= len;
+        x1 *= len;
+        x2 *= len;
+    }
+
+    a[ 0] = x0;
+    a[ 1] = y0;
+    a[ 2] = z0;
+    a[ 3] = 0;
+    a[ 4] = x1;
+    a[ 5] = y1;
+    a[ 6] = z1;
+    a[ 7] = 0;
+    a[ 8] = x2;
+    a[ 9] = y2;
+    a[10] = z2;
+    a[11] = 0;
+    a[12] = -(x0 * eyex + x1 * eyey + x2 * eyez);
+    a[13] = -(y0 * eyex + y1 * eyey + y2 * eyez);
+    a[14] = -(z0 * eyex + z1 * eyey + z2 * eyez);
+    a[15] = 1;
+
+    return a;
+}
+
 var Mat4 = {
     create : create,
     set    : set,
@@ -560,7 +634,8 @@ var Mat4 = {
     createFromOnB9 : createFromOnB9,
     createFromOnB  : createFromOnB,
     perspective : perspective,
-    ortho       : ortho
+    ortho       : ortho,
+    lookAt : lookAt
 };
 
 module.exports = Mat4;
