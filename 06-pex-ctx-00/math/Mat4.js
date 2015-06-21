@@ -520,7 +520,7 @@ function ortho(a, left, right, bottom, top , near, far) {
     return a;
 }
 
-function lookAt(a, eyex, eyey, eyez, targetx, targety, targetz, upx, upy, upz) {
+function lookAt9(a, eyex, eyey, eyez, targetx, targety, targetz, upx, upy, upz) {
     var x0, x1, x2, y0, y1, y2, z0, z1, z2, len;
 
     if (Math.abs(eyex - targetx) < 0.000001 &&
@@ -594,6 +594,10 @@ function lookAt(a, eyex, eyey, eyez, targetx, targety, targetz, upx, upy, upz) {
     return a;
 }
 
+function lookAt(a,from,to,up){
+    return lookAt9(a,from[0],from[1],from[2],to[0],to[1],to[2],up[0],up[1],up[2]);
+}
+
 var Mat4 = {
     create : create,
     set    : set,
@@ -635,7 +639,8 @@ var Mat4 = {
     createFromOnB  : createFromOnB,
     perspective : perspective,
     ortho       : ortho,
-    lookAt : lookAt
+    lookAt9 : lookAt9,
+    lookAt  : lookAt
 };
 
 module.exports = Mat4;
