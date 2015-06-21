@@ -2,6 +2,18 @@ function create() {
     return [0, 0];
 }
 
+function set(a,b){
+    a[0] = b[0];
+    a[1] = b[1];
+    return a;
+}
+
+function set2(a,x,y){
+    a[0] = x;
+    a[1] = y;
+    return a;
+}
+
 function equals(a,b) {
     return a[0] == b[0] &&
            a[1] == b[1];
@@ -23,6 +35,8 @@ function copy(a,out){
 
 var Vec2 = {
     create  : create,
+    set     : set,
+    set2    : set2,
     copy    : copy,
     equals  : equals,
     equals2 : equals2
