@@ -135,17 +135,22 @@ function Context(gl){
     this._matrixStack[MATRIX_VIEW_BIT]       = [];
     this._matrixStack[MATRIX_MODEL_BIT]      = [];
 
-    this._matrixUnifomMap = {};
-    this._matrixUnifomMap[MATRIX_PROJECTION_BIT] = ProgramUniform.PROJECTION_MATRIX;
-    this._matrixUnifomMap[MATRIX_VIEW_BIT]       = ProgramUniform.VIEW_MATRIX;
-    this._matrixUnifomMap[MATRIX_MODEL_BIT]      = ProgramUniform.MODEL_MATRIX;
+    this._matrixUniformBitMap = {};
+    this._matrixUniformBitMap[ProgramUniform.PROJECTION_MATRIX] = MATRIX_PROJECTION_BIT;
+    this._matrixUniformBitMap[ProgramUniform.VIEW_MATRIX]       = MATRIX_VIEW_BIT;
+    this._matrixUniformBitMap[ProgramUniform.MODEL_MATRIX]      = MATRIX_MODEL_BIT;
 
     this._matrixMode    = MATRIX_MODEL_BIT;
     this._matrixF32Temp = new Float32Array(16);
 
+    this._matrixSend = {};
+    this._matrixSend[MATRIX_PROJECTION_BIT] = false;
+    this._matrixSend[MATRIX_VIEW_BIT]       = false;
+    this._matrixSend[MATRIX_MODEL_BIT]      = false;
+
     this.PROGAM_BIT = PROGRAM_BIT;
-    this._program     = null;
-    this._programUniformLocations = null;
+    this._program = null;
+    this._programMatrixUniformBits = {};
     this._programStack = [this._program];
 
     this.BUFFER_BIT = BUFFER_BIT;
@@ -153,6 +158,8 @@ function Context(gl){
 
     this.VERTEX_ARRAY_BIT = VERTEX_ARRAY_BIT;
     this._vertexArray = null;
+    this._vertexArrayHasIndexBuffer = false;
+    this._vertexArrayIndexBufferDataType = null;
     this._vertexArrayStack = [this._vertexArray];
 
     this.ATTRIB_POSITION    = ProgramAttributeLocation.POSITION;
@@ -553,21 +560,18 @@ Context.prototype.clear = function(mask){
 };
 
 Context.prototype.setProjectionMatrix = function(matrix){
-    var _matrix = Mat4.copy(matrix,this._matrix[MATRIX_PROJECTION_BIT]);
-    this._matrixF32Temp.set(_matrix);
-    this._gl.uniformMatrix4fv(this._programUniformLocations[ProgramUniform.PROJECTION_MATRIX],false,this._matrixF32Temp);
+    Mat4.set(this._matrix[MATRIX_PROJECTION_BIT],matrix);
+    this._matrixSend[MATRIX_PROJECTION_BIT] = false;
 };
 
 Context.prototype.setViewMatrix = function(matrix){
-    var _matrix = Mat4.copy(matrix,this._matrix[MATRIX_VIEW_BIT]);
-    this._matrixF32Temp.set(_matrix);
-    this._gl.uniformMatrix4fv(this._programUniformLocations[ProgramUniform.VIEW_MATRIX],false,this._matrixF32Temp);
+    Mat4.set(this._matrix[MATRIX_VIEW_BIT],matrix);
+    this._matrixSend[MATRIX_VIEW_BIT] = false;
 };
 
 Context.prototype.setModelMatrix = function(matrix){
-    var _matrix = Mat4.copy(matrix,this._matrix[MATRIX_MODEL_BIT]);
-    this._matrixF32Temp.set(_matrix);
-    this._gl.uniformMatrix4fv(this._programUniformLocations[ProgramUniform.MODEL_MATRIX],false,this._matrixF32Temp);
+    Mat4.set(this._matrix[MATRIX_MODEL_BIT],matrix);
+    this._matrixSend[MATRIX_MODEL_BIT] = false;
 };
 
 Context.prototype.getProjectionMatrix = function(out){
@@ -591,9 +595,8 @@ Context.prototype.getMatrixMode = function(){
 };
 
 Context.prototype.setMatrix = function(matrix){
-    var _matrix = Mat4.copy(matrix,this._matrix[this._matrixMode]);
-    this._matrixF32Temp.set(_matrix);
-    this._gl.uniformMatrix4fv(this._programUniformLocations[this._matrixUnifomMap[this._matrixMode]],this._matrixF32Temp);
+    Mat4.set(this._matrix[this._matrixMode],matrix);
+    this._matrixSend[this._matrixMode] = false;
 };
 
 Context.prototype.getMatrix = function(out){
@@ -610,22 +613,27 @@ Context.prototype.popMatrix = function(){
 
 Context.prototype.identity = function(){
     Mat4.identity(this._matrix[this._matrixMode]);
+    this._matrixSend[this._matrixMode] = false;
 };
 
 Context.prototype.scale = function(v){
     Mat4.scale(this._matrix[this._matrixMode],v);
+    this._matrixSend[this._matrixMode] = false;
 };
 
 Context.prototype.translate = function(v){
     Mat4.translate(this._matrix[this._matrixMode],v);
+    this._matrixSend[this._matrixMode] = false;
 };
 
 Context.prototype.rotate = function(r,v){
     Mat4.rotate(this._matrix[this._matrixMode],r,v);
+    this._matrixSend[this._matrixMode] = false;
 };
 
 Context.prototype.rotateXYZ = function(v){
     Mat4.rotateXYZ(this._matrix[this._matrixMode],v);
+    this._matrixSend[this._matrixMode] = false;
 };
 
 Context.prototype.createProgram = function(vertSrc, fragSrc, attributeLocationMap){
@@ -638,6 +646,17 @@ Context.prototype.bindProgram = function(program) {
     }
     program._bindInternal();
     this._program = program;
+    this._matrixSend[MATRIX_PROJECTION_BIT] = false;
+    this._matrixSend[MATRIX_VIEW_BIT]       = false;
+    this._matrixSend[MATRIX_MODEL_BIT]      = false;
+
+    this._programMatrixUniformBits = {};
+    for(var entry in ProgramUniform){
+        var uniformName = ProgramUniform[entry];
+        if(program.hasUniform(uniformName)){
+            this._programMatrixUniformBits[uniformName] = this._matrixUniformBitMap[uniformName];
+        }
+    }
 };
 
 Context.prototype.getProgram = function(){
@@ -655,6 +674,8 @@ Context.prototype.createVertexArray = function(attributes, indexBuffer) {
 Context.prototype.bindVertexArray = function(vertexArray) {
     vertexArray._bindInternal();
     this._vertexArray = vertexArray;
+    this._vertexArrayHasIndexBuffer = vertexArray.hasIndexBuffer();
+    this._vertexArrayIndexBufferDataType = this._vertexArrayHasIndexBuffer ? vertexArray.getIndexBuffer().getDataType() : null;
 };
 
 Context.prototype.getVertexArray = function(){
@@ -662,8 +683,19 @@ Context.prototype.getVertexArray = function(){
 };
 
 Context.prototype.draw = function(mode, first, count){
-    if (this._vertexArray.hasIndexBuffer()) {
-        this._gl.drawElements(mode, count, this._vertexArray.getIndexBuffer().getDataType(), first);
+    var programMatrixBitUniforms = this._programMatrixUniformBits;
+
+    for(var uniformName in programMatrixBitUniforms){
+        var matrixBit = programMatrixBitUniforms[uniformName];
+        if(!this._matrixSend[matrixBit]){
+            this._matrixF32Temp.set(this._matrix[matrixBit]);
+            this._program.setUniform(uniformName,this._matrixF32Temp);
+            this._matrixSend[matrixBit] = true;
+        }
+    }
+
+    if (this._vertexArrayHasIndexBuffer) {
+        this._gl.drawElements(mode, count, this._vertexArrayIndexBufferDataType, first);
     }
     else {
         this._gl.drawArrays(mode, first, count);
