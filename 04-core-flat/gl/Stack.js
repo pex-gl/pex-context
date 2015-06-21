@@ -4,6 +4,7 @@ function Stack(){
     this._arr = [];
 }
 
+//TODO: how this is supposed to work in practice? Should't it throw instead? It's very dangerous that it suddenly starts loosing data. Any example when it's OK?
 Stack.prototype.push = function(obj){
     if(this._arr.length >= MAX_CAPACITY){
         this._arr.shift();

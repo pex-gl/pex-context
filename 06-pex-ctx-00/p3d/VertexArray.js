@@ -140,6 +140,7 @@ VertexArray.prototype._bindInternal = function(){
                 continue;
             }
 
+            //TODO: Need an example when disabling attributes is beneficial
             if(!attribute.prevEnabled || vertexArrayDiffers){
                 gl.enableVertexAttribArray(location);
                 attribute.prevEnabled = true;
