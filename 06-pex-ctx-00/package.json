@@ -9,6 +9,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "browserify": "^10.2.4"
+    "browserify": "^10.2.4",
+    "electron-prebuilt": "^0.28.2"
   }
 }
