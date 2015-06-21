@@ -115,9 +115,8 @@ VertexArray.prototype.hasDivisor = function(){
 VertexArray.prototype._bindInternal = function(){
     var ctx = this._ctx;
     var gl  = ctx.getGL();
-
-    var prevVertexArray    = ctx.getVertexArray();
-    var vertexArrayDiffers = (prevVertexArray != this);
+    
+    var vertexArrayDiffers = ctx._vertexArrayDiffers();
 
     var arrayBuffers = this._arrayBuffers;
     var attributes   = this._attributes;
@@ -127,7 +126,7 @@ VertexArray.prototype._bindInternal = function(){
     //NOTE: No idea how faster variables declared in loops are but this is super hard to read
     //NOTE: So renamed for now for debugging, as these are 1-2 interation long loops anyway
     for(var i = 0, numArrayBuffers = arrayBuffers.length; i < numArrayBuffers; ++i) {
-        arrayBuffers[i]._bindInternal();
+        ctx._bindBuffer(arrayBuffers[i]);
         bufferAttributes = attributes[i];
 
         for(var j = 0, numBufferAttribs = bufferAttributes.length; j < numBufferAttribs; ++j){
@@ -165,7 +164,7 @@ VertexArray.prototype._bindInternal = function(){
     }
 
     if(this._indexBuffer !== null){
-        this._indexBuffer._bindInternal();
+        ctx._bindBuffer(this._indexBuffer);
     }
 };
 
