@@ -75,9 +75,10 @@ function VertexArray(ctx,attributes,indexBuffer){
          }
 
         //Check if location for that attribute is not taken already
-        if(this._attributes[attribCopy.location] !== undefined){
-            throw new Error(STR_ERROR_ATTRIB_LOCATION_DUPLICATE.replace('%s',attrib.location));
-        }
+        //FIXME: This is currently broken, we check by location but assign by buffer index below
+        //if(this._attributes[attribCopy.location] !== undefined){
+        //    throw new Error(STR_ERROR_ATTRIB_LOCATION_DUPLICATE.replace('%s',attrib.location));
+        //}
 
         buffer      = attribCopy.buffer;
         bufferIndex = this._arrayBuffers.indexOf(buffer);

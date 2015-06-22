@@ -5,3 +5,4 @@ node_modules/
 .temp/
 01-draw-command/*.web.js
 01-draw-command/assets/model/
+06-pex-ctx-00/p3d/test/assets/gltf

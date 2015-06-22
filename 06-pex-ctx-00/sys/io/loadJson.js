@@ -1,4 +1,4 @@
-var loadText = require('./load-text');
+var loadText = require('./loadText');
 
 function loadJSON(url, callback) {
   loadText(url, function(err, data) {
