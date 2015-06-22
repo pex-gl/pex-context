@@ -593,54 +593,58 @@ Context.prototype.getModelMatrix = function(out){
     return Mat4.copy(this._matrix[MATRIX_MODEL_BIT],out);
 };
 
-Context.prototype.setMatrixMode = function(matrixMode){
-    this._matrixMode = matrixMode;
+Context.prototype.pushProjectionMatrix = function(){
+    this._matrixStack[MATRIX_PROJECTION_BIT].push(Mat4.copy(this._matrix[MATRIX_PROJECTION_BIT]));
 };
 
-Context.prototype.getMatrixMode = function(){
-    return this._matrixMode;
+Context.prototype.popProjectionMatrix = function(){
+    this._matrix[MATRIX_PROJECTION_BIT] = this._matrixStack[MATRIX_PROJECTION_BIT].pop();
 };
 
-Context.prototype.setMatrix = function(matrix){
-    Mat4.set(this._matrix[this._matrixMode],matrix);
-    this._matrixSend[this._matrixMode] = false;
+Context.prototype.pushViewMatrix = function(){
+    this._matrixStack[MATRIX_VIEW_BIT].push(Mat4.copy(this._matrix[MATRIX_VIEW_BIT]));
 };
 
-Context.prototype.getMatrix = function(out){
-    return Mat4.copy(this._matrix[this._matrixMode],out);
+Context.prototype.popViewMatrix = function(){
+    this._matrix[MATRIX_VIEW_BIT] = this._matrixStack[MATRIX_VIEW_BIT].pop();
 };
 
-Context.prototype.pushMatrix = function(){
-    this._matrixStack[this._matrixMode].push(Mat4.copy(this._matrix[this._matrixMode]));
+Context.prototype.pushModelMatrix = function(){
+    this._matrixStack[MATRIX_MODEL_BIT].push(Mat4.copy(this._matrix[MATRIX_MODEL_BIT]));
 };
 
-Context.prototype.popMatrix = function(){
-    this._matrix[this._matrixMode] = this._matrixStack[this._matrixMode].pop();
+Context.prototype.popModelMatrix = function(){
+    this._matrix[MATRIX_MODEL_BIT] = this._matrixStack[MATRIX_MODEL_BIT].pop();
 };
 
 Context.prototype.identity = function(){
-    Mat4.identity(this._matrix[this._matrixMode]);
-    this._matrixSend[this._matrixMode] = false;
+    Mat4.identity(this._matrix[MATRIX_MODEL_BIT]);
+    this._matrixSend[MATRIX_MODEL_BIT] = false;
 };
 
 Context.prototype.scale = function(v){
-    Mat4.scale(this._matrix[this._matrixMode],v);
-    this._matrixSend[this._matrixMode] = false;
+    Mat4.scale(this._matrix[MATRIX_MODEL_BIT],v);
+    this._matrixSend[MATRIX_MODEL_BIT] = false;
 };
 
 Context.prototype.translate = function(v){
-    Mat4.translate(this._matrix[this._matrixMode],v);
-    this._matrixSend[this._matrixMode] = false;
+    Mat4.translate(this._matrix[MATRIX_MODEL_BIT],v);
+    this._matrixSend[MATRIX_MODEL_BIT] = false;
 };
 
 Context.prototype.rotate = function(r,v){
-    Mat4.rotate(this._matrix[this._matrixMode],r,v);
-    this._matrixSend[this._matrixMode] = false;
+    Mat4.rotate(this._matrix[MATRIX_MODEL_BIT],r,v);
+    this._matrixSend[MATRIX_MODEL_BIT] = false;
 };
 
 Context.prototype.rotateXYZ = function(v){
-    Mat4.rotateXYZ(this._matrix[this._matrixMode],v);
-    this._matrixSend[this._matrixMode] = false;
+    Mat4.rotateXYZ(this._matrix[MATRIX_MODEL_BIT],v);
+    this._matrixSend[MATRIX_MODEL_BIT] = false;
+};
+
+Context.prototype.multMatrix = function(m){
+    Mat4.mult(this._matrix[MATRIX_MODEL_BIT],m);
+    this._matrixSend[MATRIX_MODEL_BIT] = false;
 };
 
 Context.prototype.createProgram = function(vertSrc, fragSrc, attributeLocationMap){
