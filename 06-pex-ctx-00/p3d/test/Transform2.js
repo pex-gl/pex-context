@@ -2,6 +2,7 @@ var Platform = require('../../sys/Platform');
 var Window = require('../../sys/Window');
 var Program = require('../Program');
 var Mat4 = require('../../math/Mat4');
+var Vec2 = require('../../math/Vec2');
 var Vec3 = require('../../math/Vec3');
 
 var VERT_SRC = '\
@@ -24,14 +25,22 @@ void main() { \
 } \
 ';
 
+var windowSize = Vec2.create();
 if (Platform.isBrowser) {
     FRAG_SRC = 'precision highp float; \n' + FRAG_SRC;
+    Vec2.set2(windowSize,window.innerWidth,window.innerHeight);
 }
+else {
+    Vec2.set2(windowSize,800,600);
+}
+
+
+
 
 Window.create({
     settings: {
-        width: 800,
-        height: 600,
+        width:  windowSize[0],
+        height: windowSize[1],
         type: '3d'
     },
     init: function() {
@@ -94,7 +103,7 @@ Window.create({
         ];
         this.vao = ctx.createVertexArray(attributes,indexBuffer);
 
-        this.projectionMatrix = Mat4.perspective(Mat4.create(),45,800 / 600,0.001,10.0);
+        this.projectionMatrix = Mat4.perspective(Mat4.create(),45,windowSize[0] / windowSize[1],0.001,10.0);
         this.viewMatrix       = Mat4.create();
 
         this.t = 0;
@@ -137,12 +146,12 @@ Window.create({
                     a = (0.5 + Math.sin(time * 4.0 + Math.PI * index / total));
                     scale[0] = scale[1] = scale[2] = 1 / (size * 2) * a;
                     rotation[0] = Math.PI * time;
-                    ctx.pushMatrix();
+                    ctx.pushModelMatrix();
                         ctx.translate(pos);
                         ctx.scale(scale);
                         ctx.rotateXYZ(rotation);
                         ctx.draw(ctx.TRIANGLES, 0, bufferLength);
-                    ctx.popMatrix();
+                    ctx.popModelMatrix();
                 }
             }
         }
