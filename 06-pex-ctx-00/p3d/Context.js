@@ -700,12 +700,13 @@ Context.prototype.createVertexArray = function(attributes, indexBuffer) {
     return new VertexArray(this, attributes, indexBuffer);
 };
 
-Context.prototype._vertexArrayDiffers = function(vertexArray){
-    return vertexArray == this._vertexArray;
-};
-
 Context.prototype.bindVertexArray = function(vertexArray) {
+    if(vertexArray === this._vertexArray){
+        return;
+    }
+    
     vertexArray._bindInternal();
+
     this._vertexArray = vertexArray;
     this._vertexArrayHasIndexBuffer = vertexArray.hasIndexBuffer();
     this._vertexArrayIndexBufferDataType = this._vertexArrayHasIndexBuffer ? vertexArray.getIndexBuffer().getDataType() : null;
@@ -717,7 +718,7 @@ Context.prototype.getVertexArray = function(){
 
 Context.prototype.createTexture2D = function(data, width, height, dataFormat, options) {
     return new Texture2D(this, data, width, height, dataFormat, options);
-}
+};
 
 Context.prototype.bindTexture = function(texture, textureUnit) {
     var gl = this._gl;
