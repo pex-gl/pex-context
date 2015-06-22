@@ -115,8 +115,6 @@ VertexArray.prototype.hasDivisor = function(){
 VertexArray.prototype._bindInternal = function(){
     var ctx = this._ctx;
     var gl  = ctx.getGL();
-    
-    var vertexArrayDiffers = ctx._vertexArrayDiffers();
 
     var arrayBuffers = this._arrayBuffers;
     var attributes   = this._attributes;
@@ -133,30 +131,23 @@ VertexArray.prototype._bindInternal = function(){
             attribute = bufferAttributes[j];
             location  = attribute.location;
 
-            if(!attribute.enabled && (attribute.prevEnabled || vertexArrayDiffers)){
+            if(!attribute.enabled){
                 gl.disableVertexAttribArray(location);
-                attribute.enabled = attribute.prevEnabled = false;
                 continue;
             }
 
-            //TODO: Need an example when disabling attributes is beneficial
-            if(!attribute.prevEnabled || vertexArrayDiffers){
-                gl.enableVertexAttribArray(location);
-                attribute.prevEnabled = true;
-            }
+            gl.enableVertexAttribArray(location);
 
-            if(vertexArrayDiffers){
-                gl.vertexAttribPointer(
-                    location,
-                    attribute.size,
-                    attribute.type,
-                    attribute.normalized,
-                    attribute.stride,
-                    attribute.offset
-                )
-            }
+            gl.vertexAttribPointer(
+                location,
+                attribute.size,
+                attribute.type,
+                attribute.normalized,
+                attribute.stride,
+                attribute.offset
+            );
 
-            if(attribute.divisor === null || !vertexArrayDiffers){
+            if(attribute.divisor === null){
                 continue;
             }
             gl.vertexAttribDivisor(location,attribute.divisor);
