@@ -1,6 +1,7 @@
 var Platform = require('../../sys/Platform');
 var Window = require('../../sys/Window');
 var Program = require('../Program');
+var loadImage = require('../../sys/io/loadImage');
 
 var VERT_SRC = '\
 attribute vec2 aPosition; \
@@ -22,22 +23,6 @@ void main() { \
 
 if (Platform.isBrowser) {
     FRAG_SRC = 'precision highp float; \n' + FRAG_SRC;
-}
-
-function loadImage(url, callback) {
-    if (Platform.isPlask) {
-        var plask = require('plask');
-        var img = plask.SkCanvas.createFromImage(__dirname + '/' + url);
-        callback(null, img);
-    }
-    else if (Platform.isBrowser) {
-        var img = new Image();
-        img.onload = function() {
-            callback(null, img);
-        }
-        img.src = url;
-    }
-
 }
 
 Window.create({
@@ -81,7 +66,10 @@ Window.create({
         ];
         this.vao = ctx.createVertexArray(attributes, indexBuffer);
 
-        loadImage('assets/octocat.png', function(err, img) {
+        var assetsPath = Platform.isBrowser ? 'assets' : __dirname + '/assets';
+        var file = assetsPath + '/img/octocat.png'
+        console.log(file);
+        loadImage(file, function(err, img) {
             this.img = img;
         }.bind(this))
 
