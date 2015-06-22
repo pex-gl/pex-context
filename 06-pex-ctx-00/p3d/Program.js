@@ -53,14 +53,13 @@ Program.prototype.update = function(vertSrc, fragSrc, attributeLocationBinding){
 
     gl.linkProgram(program);
 
-    gl.detachShader(program, vertShader);
-    gl.detachShader(program, fragShader);
-    gl.deleteShader(vertShader);
-    gl.deleteShader(fragShader);
-
     if(!gl.getProgramParameter(program, gl.LINK_STATUS)){
         throw new Error('PROGRAM: ' + gl.getProgramInfoLog(program));
     }
+
+    //Mark for deletion, they are not actually deleted until you call deleteProgram() in dispose()
+    gl.deleteShader(vertShader);
+    gl.deleteShader(fragShader);
 
     this._updateUniforms();
     this._updateAttributes();
