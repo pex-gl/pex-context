@@ -10,7 +10,7 @@ var ProgramAttributeLocation = require('./ProgramAttributeLocation');
 var Buffer      = require('./Buffer');
 var VertexArray = require('./VertexArray');
 
-var FrameBuffer = require('./FrameBuffer');
+var Framebuffer = require('./Framebuffer');
 
 var Texture2D   = require('./Texture2D');
 
@@ -704,7 +704,7 @@ Context.prototype.bindVertexArray = function(vertexArray) {
     if(vertexArray === this._vertexArray){
         return;
     }
-    
+
     vertexArray._bindInternal();
 
     this._vertexArray = vertexArray;
