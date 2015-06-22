@@ -2,5 +2,6 @@
 .atom-build.json
 .idea
 node_modules/
+.temp/
 01-draw-command/*.web.js
 01-draw-command/assets/model/
