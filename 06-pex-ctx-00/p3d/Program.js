@@ -40,8 +40,8 @@ Program.prototype.update = function(vertSrc, fragSrc, attributeLocationBinding){
     var gl = this._gl;
     var program = this._handle;
 
-    var vertShader = this._compileVertexSource(vertSrc);
-    var fragShader = this._compileFragmentSource(fragSrc);
+    var vertShader = this._compileSource(gl.VERTEX_SHADER, vertSrc);
+    var fragShader = this._compileSource(gl.FRAGMENT_SHADER, fragSrc);
 
     gl.attachShader(program, vertShader);
     gl.attachShader(program, fragShader);
@@ -104,27 +104,16 @@ Program.prototype._updateAttributes = function(){
     }
 };
 
-Program.prototype._compileVertexSource = function(vertSrc){
+Program.prototype._compileSource = function(type, src){
     var gl = this._gl;
-    var vertShader = gl.createShader(gl.VERTEX_SHADER);
+    var shader = gl.createShader(type);
 
-    gl.shaderSource(vertShader, vertSrc + '\n');
-    gl.compileShader(vertShader);
-    if(!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)){
-        throw new Error('VERTEX: ' + gl.getShaderInfoLog(vertShader));
+    gl.shaderSource(shader, src + '\n');
+    gl.compileShader(shader);
+    if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
+        throw new Error('Program: ' + gl.getShaderInfoLog(shader));
     }
-    return vertShader;
-};
-
-Program.prototype._compileFragmentSource = function(fragSrc){
-    var gl = this._gl;
-    var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(fragShader, fragSrc + '\n');
-    gl.compileShader(fragShader);
-    if(!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)){
-        throw new Error('FRAGMENT: ' + gl.getShaderInfoLog(fragShader));
-    }
-    return fragShader;
+    return shader;
 };
 
 Program.prototype.setUniform = function(name, args){
