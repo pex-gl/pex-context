@@ -60,6 +60,7 @@ Buffer.prototype.bufferData = function(sizeOrData){
     if(sizeOrData === undefined){
         if(this._data !== null){
             gl.bufferData(this._target,this._data,this._usage);
+            ctx._unbindBuffer(this);
             return;
         } else {
             throw new Error('No size or data passed. Or no preserved data set.');
