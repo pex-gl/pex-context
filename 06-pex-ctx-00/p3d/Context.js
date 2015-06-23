@@ -595,6 +595,7 @@ Context.prototype.setLineWidth = function(lineWidth){
         return;
     }
     this._gl.lineWidth(lineWidth);
+    this._lineWidth = lineWidth;
 };
 
 Context.prototype.getLineWidth = function(){
