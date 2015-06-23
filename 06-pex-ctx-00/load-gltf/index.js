@@ -182,7 +182,7 @@ function buildMeshes(ctx, json, callback) {
 
       var va = ctx.createVertexArray(attributes, indexBuffer);
 
-      primitiveInfo.vertexArray = va;
+      primitiveInfo._vertexArray = va;
     })
   })
 
