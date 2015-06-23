@@ -52,13 +52,20 @@ Window.create({
     init: function() {
         var ctx = this.getContext();
 
-        loadGLTF(ctx, ASSETS_PATH + '/gltf/duck/duck.gltf', this.onSceneLoaded.bind(this));
-        //loadGLTF(ctx, ASSETS_PATH + '/gltf/rambler/rambler.gltf', this.onSceneLoaded.bind(this));
+        //loadGLTF(ctx, ASSETS_PATH + '/gltf/duck/duck.gltf', this.onSceneLoaded.bind(this));
+        loadGLTF(ctx, ASSETS_PATH + '/gltf/rambler/rambler.gltf', this.onSceneLoaded.bind(this));
+        //loadGLTF(ctx, ASSETS_PATH + '/gltf/wine/wine.gltf', this.onSceneLoaded.bind(this));
         //loadGLTF(ctx, ASSETS_PATH + '/gltf/SuperMurdoch/SuperMurdoch.gltf', this.onSceneLoaded.bind(this));
+        //loadGLTF(ctx, ASSETS_PATH + '/gltf/Bus/WuZhouLong_Shenzhen_Bus.gltf', this.onSceneLoaded.bind(this));
+        //loadGLTF(ctx, ASSETS_PATH + '/gltf/DisneyCastle/DLP-castle-4-light.gltf', this.onSceneLoaded.bind(this));
+        //loadGLTF(ctx, ASSETS_PATH + '/gltf/CesiumMilkTruck/CesiumMilkTruck.gltf', this.onSceneLoaded.bind(this));
+        //loadGLTF(ctx, ASSETS_PATH + '/gltf/CesiumMan/Cesium_Man.gltf', this.onSceneLoaded.bind(this));
 
-        this.projectionMatrix = Mat4.perspective(Mat4.create(), 60, this.width/this.height, 0.1, 100);
-        this.viewMatrix       = Mat4.create();
-        this._tempModelViewMatrix = Mat4.create();;
+        this.projectionMatrix       = Mat4.perspective(Mat4.create(), 60, this.width/this.height, 0.1, 1000);
+        this.viewMatrix             = Mat4.create();
+        this._tempModelViewMatrix   = Mat4.create();
+        this._tmpVec3               = Vec3.create();
+        this._flipYAxis             = false;
 
         this.t = 0;
 
@@ -86,7 +93,8 @@ Window.create({
                     switch(parameter.semantic) {
                         case 'MODELVIEW': value = Mat4.create(); break; //TODO: handle custom variable names in the shader
                         case 'PROJECTION': value = Mat4.create(); break; //TODO: handle custom variable names in the shader
-                        case 'MODELVIEWINVERSETRANSPOSE': value = Mat3.create(); console.log('WARN', 'MODELVIEWINVERSETRANSPOSE semantic need to be implemented'); break;
+                        case 'MODELVIEWINVERSETRANSPOSE': value = Mat3.create(); break; //TODO: handle MODELVIEWINVERSETRANSPOSE matrix
+                        case 'JOINTMATRIX': value = Mat4.create(); break;  //TODO: handle JOINTMATRIX matrix
                         default:
                             throw new Error('Unknown uniform semantic found ' + parameter.semantic);
                     }
@@ -126,10 +134,15 @@ Window.create({
     prepareScene: function(json) {
         this.json = json;
         var self = this;
-        var sceneBoundingBox = {
-            min: [ Infinity,  Infinity,  Infinity],
-            max: [-Infinity, -Infinity, -Infinity]
-        }
+
+        this.sceneCenter = Vec3.create();
+        this.sceneMaxSize = 0;
+
+        forEachKeyValue(json.nodes, function(nodeName, nodeInfo, nodeIndex) {
+            if (nodeInfo.name == 'Y_UP_Transform') {
+                this._flipYAxis = (nodeInfo.matrix[9] == -1) ? true : false;
+            }
+        }.bind(this));
         forEachKeyValue(json.meshes, function(meshName, meshInfo, meshIndex) {
             meshInfo.primitives.forEach(function(primitiveInfo, primitiveIndex) {
                 //if (!primitiveInfo.vertexArray) return; //FIXME: TEMP!
@@ -152,24 +165,17 @@ Window.create({
                     uniforms    : uniforms
                 }
 
+                meshInfo._renderInfo.bbox = {
+                    min: Vec3.create(),
+                    max: Vec3.create(),
+                }
                 meshInfo.primitives.forEach(function(primitiveInfo) {
                     var posAccessor = json.accessors[primitiveInfo.attributes.POSITION];
-                    sceneBoundingBox.min[0] = Math.min(sceneBoundingBox.min[0], posAccessor.min[0]);
-                    sceneBoundingBox.min[1] = Math.min(sceneBoundingBox.min[1], posAccessor.min[1]);
-                    sceneBoundingBox.min[2] = Math.min(sceneBoundingBox.min[2], posAccessor.min[2]);
-                    sceneBoundingBox.max[0] = Math.max(sceneBoundingBox.max[0], posAccessor.max[0]);
-                    sceneBoundingBox.max[1] = Math.max(sceneBoundingBox.max[1], posAccessor.max[1]);
-                    sceneBoundingBox.max[2] = Math.max(sceneBoundingBox.max[2], posAccessor.max[2]);
+                    Vec3.set(meshInfo._renderInfo.bbox.min, posAccessor.min);
+                    Vec3.set(meshInfo._renderInfo.bbox.max, posAccessor.max);
                 })
             });
         });
-
-        var sceneCenter = this.sceneCenter = Vec3.create();
-        Vec3.add(sceneCenter, sceneBoundingBox.min);
-        Vec3.add(sceneCenter, sceneBoundingBox.max);
-        Vec3.scale(sceneCenter, 0.5);
-        var sceneSize = Vec3.sub(Vec3.copy(sceneBoundingBox.max), sceneBoundingBox.min);
-        var sceneMaxSize = this.sceneMaxSize = Math.max(sceneSize[0], Math.max(sceneSize[1], sceneSize[2]));
 
         //TODO: get main camera name from scene
         //FIXME: giving up on gltf camera for now
@@ -189,47 +195,82 @@ Window.create({
         //    }
         //}.bind(this))
     },
-    drawNodes: function(ctx, json, nodes) {
+    drawNodes: function(ctx, json, nodes, boundingBoxToUpdate) {
         var projectionMatrix = this.projectionMatrix;
         var viewMatrix = this.viewMatrix;
-        var modelMatrix = ctx.getModelMatrix();
         var modelViewMatrix = this._tempModelViewMatrix;
+        var tmpVec3 = this._tmpVec3;
+
         //FIXME: change to for loops
-        nodes.forEach(function(nodeName) {
-            var node = json.nodes[nodeName];
-            if (!node.meshes) {
-                //skip camera and lights
-                return;
+        nodes.forEach(function(node) {
+            ctx.pushModelMatrix();
+            var localTransform = node.matrix;
+            if (node.matrix) {
+                ctx.multMatrix(localTransform);
             }
-            node.meshes.forEach(function(meshName) {
-                var meshInfo = json.meshes[meshName];
-                var vao = meshInfo._renderInfo.vertexArray;
-                var program = meshInfo._renderInfo.program;
-                var uniforms = meshInfo._renderInfo.uniforms;
-                ctx.bindVertexArray(vao);
-                ctx.bindProgram(program);
-                var numActiveTextures = 0;
-                forEachKeyValue(uniforms, function(name, value) {
-                    //FIXME: ugly uniform._handle texture detection
-                    if (value._handle) {
-                        ctx.bindTexture(value, numActiveTextures);
-                        program.setUniform(name, numActiveTextures);
-                        numActiveTextures++;
+            if (node.meshes) {
+                node.meshes.forEach(function(meshName) {
+                    var meshInfo = json.meshes[meshName];
+                    var vao = meshInfo._renderInfo.vertexArray;
+                    var program = meshInfo._renderInfo.program;
+                    var uniforms = meshInfo._renderInfo.uniforms;
+                    ctx.bindVertexArray(vao);
+                    ctx.bindProgram(program);
+                    var numActiveTextures = 0;
+                    forEachKeyValue(uniforms, function(name, value) {
+                        //FIXME: ugly uniform._handle texture detection
+                        if (value._handle) {
+                            ctx.bindTexture(value, numActiveTextures);
+                            program.setUniform(name, numActiveTextures);
+                            numActiveTextures++;
+                        }
+                        else {
+                            if (!value) {
+                                console.log('WARN. Missing value for uniform ' + name + '');
+                                return;
+                            }
+                            if (program._uniforms[name]) {
+                                program.setUniform(name, value);
+                            }
+                            else {
+                                console.log('WARN. Mesh material has ' + name + ' but program is not using it');
+                            }
+                        }
+                    })
+
+                    program.setUniform('u_projectionMatrix', projectionMatrix);
+
+                    var modelMatrix = ctx.getModelMatrix();
+
+                    if (boundingBoxToUpdate) {
+                        Vec3.set(tmpVec3, meshInfo._renderInfo.bbox.min);
+                        Vec3.multMat4(tmpVec3, modelMatrix);
+                        boundingBoxToUpdate.min[0] = Math.min(boundingBoxToUpdate.min[0], tmpVec3[0]);
+                        boundingBoxToUpdate.min[1] = Math.min(boundingBoxToUpdate.min[1], tmpVec3[1]);
+                        boundingBoxToUpdate.min[2] = Math.min(boundingBoxToUpdate.min[2], tmpVec3[2]);
+                        boundingBoxToUpdate.max[0] = Math.max(boundingBoxToUpdate.max[0], tmpVec3[0]);
+                        boundingBoxToUpdate.max[1] = Math.max(boundingBoxToUpdate.max[1], tmpVec3[1]);
+                        boundingBoxToUpdate.max[2] = Math.max(boundingBoxToUpdate.max[2], tmpVec3[2]);
+                        Vec3.set(tmpVec3, meshInfo._renderInfo.bbox.max);
+                        Vec3.multMat4(tmpVec3, modelMatrix);
+                        boundingBoxToUpdate.min[0] = Math.min(boundingBoxToUpdate.min[0], tmpVec3[0]);
+                        boundingBoxToUpdate.min[1] = Math.min(boundingBoxToUpdate.min[1], tmpVec3[1]);
+                        boundingBoxToUpdate.min[2] = Math.min(boundingBoxToUpdate.min[2], tmpVec3[2]);
+                        boundingBoxToUpdate.max[0] = Math.max(boundingBoxToUpdate.max[0], tmpVec3[0]);
+                        boundingBoxToUpdate.max[1] = Math.max(boundingBoxToUpdate.max[1], tmpVec3[1]);
+                        boundingBoxToUpdate.max[2] = Math.max(boundingBoxToUpdate.max[2], tmpVec3[2]);
                     }
-                    else {
-                        program.setUniform(name, value);
-                    }
+
+                    Mat4.set(modelViewMatrix, viewMatrix);
+                    Mat4.mult(modelViewMatrix, modelMatrix);
+                    program.setUniform('u_modelViewMatrix', modelViewMatrix);
+
+                    ctx.draw(ctx.TRIANGLES, 0, vao.getIndexBuffer().getLength());
                 })
-
-                program.setUniform('u_projectionMatrix', projectionMatrix);
-
-                Mat4.set(modelViewMatrix, viewMatrix);
-                Mat4.mult(modelViewMatrix, modelMatrix);
-                program.setUniform('u_modelViewMatrix', modelViewMatrix);
-
-                ctx.draw(ctx.TRIANGLES, 0, vao.getIndexBuffer().getLength());
-            })
-        })
+            }
+            this.drawNodes(ctx, json, node.children, boundingBoxToUpdate)
+            ctx.popModelMatrix();
+        }.bind(this))
     },
     draw: function() {
         var ctx = this.getContext();
@@ -238,21 +279,42 @@ Window.create({
         ctx.clear(ctx.COLOR_BIT | ctx.DEPTH_BIT);
 
         if (this.json) {
-            ctx.setViewMatrix(Mat4.lookAt9(this.viewMatrix,
-                    this.sceneCenter[0] + this.sceneMaxSize * 2 * Math.cos(time * Math.PI),
-                    this.sceneCenter[1] + this.sceneMaxSize * 2 * Math.sin(time * 0.5),
-                    this.sceneCenter[2] + this.sceneMaxSize * 2 * Math.sin(time * Math.PI),
-                    this.sceneCenter[0],
-                    this.sceneCenter[1],
-                    this.sceneCenter[2],
-                    0,
-                    1,
-                    0
+            try {
+                var up = this._flipYAxis ? -1 : 1;
+                var dist = 1;
+                var newViewMatrix = ctx.setViewMatrix(Mat4.lookAt9(this.viewMatrix,
+                        this.sceneCenter[0] + this.sceneMaxSize * dist * Math.cos(time * Math.PI),
+                        this.sceneCenter[1] + up * this.sceneMaxSize * dist * Math.sin(time * 0.5),
+                        this.sceneCenter[2] + this.sceneMaxSize * dist * Math.sin(time * Math.PI),
+                        this.sceneCenter[0],
+                        this.sceneCenter[1],
+                        this.sceneCenter[2],
+                        0,
+                        up,
+                        0
+                    )
                 )
-            );
+            }
+            catch(e) {
+                console.log(e.stack)
+            }
 
             var rootNodes = this.json.scenes[this.json.scene].nodes;
-            this.drawNodes(ctx, this.json, rootNodes);
+            var sceneBoundingBoxIsDirty = (this.sceneMaxSize == 0);
+            if (sceneBoundingBoxIsDirty) {
+                this.sceneBoundingBox = {
+                    min: [ Infinity,  Infinity,  Infinity],
+                    max: [-Infinity, -Infinity, -Infinity]
+                }
+            }
+            this.drawNodes(ctx, this.json, rootNodes, sceneBoundingBoxIsDirty ? this.sceneBoundingBox : null);
+            if (sceneBoundingBoxIsDirty) {
+                var sceneSize = Vec3.sub(Vec3.copy(this.sceneBoundingBox.max), this.sceneBoundingBox.min);
+                this.sceneMaxSize = Math.max(sceneSize[0], Math.max(sceneSize[1], sceneSize[2]));
+                Vec3.set(this.sceneCenter, this.sceneBoundingBox.min);
+                Vec3.add(this.sceneCenter, this.sceneBoundingBox.max);
+                Vec3.scale(this.sceneCenter, 0.5);
+            }
         }
 
         this.t += 1 / 60;

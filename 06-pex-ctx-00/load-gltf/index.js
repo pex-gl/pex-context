@@ -81,6 +81,7 @@ function linkPrimitive(json, primitiveName, primitiveInfo) {
 
 function handleMesh(ctx, json, basePath, meshName, meshInfo, callback) {
   log('handleMesh', meshInfo.name);
+
   meshInfo.primitives.forEach(function(primitiveInfo, primitiveIndex) {
     linkPrimitive(json, primitiveIndex, primitiveInfo);
   })
@@ -100,9 +101,10 @@ function buildMeshes(ctx, json, callback) {
 
   var AttributeSizeMap = {
     "SCALAR": 1,
+    "VEC2": 2,
     "VEC3": 3,
-    "VEC2": 2
-  }
+    "VEC4": 4,
+    };
 
   function buildBufferInfo(accessorName) {
     var accessorInfo = json.accessors[accessorName];
@@ -160,7 +162,10 @@ function buildMeshes(ctx, json, callback) {
             case 'POSITION': location = ctx.ATTRIB_POSITION; break;
             case 'NORMAL': location = ctx.ATTRIB_NORMAL; break;
             case 'TEXCOORD_0': location = ctx.ATTRIB_TEX_COORD_0; break;
-            default: throw new Error('GLTF: Unknown attribute semantic:' + attributeSemantic);
+            default: console.log('WARN: GLTF: Unknown attribute semantic:' + attributeSemantic);
+        }
+        if (!attributeInfo.size) {
+            console.log('WARN: GLTF: Attribute size is missing for :' + accessorName, attributeInfo);
         }
         attributes.push({
             buffer: buffer,
@@ -247,6 +252,15 @@ function handleNode(ctx, json, basePath, nodeName, nodeInfo, callback) {
   callback(null, nodeInfo);
 }
 
+function handleScene(ctx, json, basePath, sceneName, sceneInfo, callback) {
+  log('handleScene', sceneName);
+  //FIXME: solve that with Ramda partial
+  sceneInfo.nodes = sceneInfo.nodes.map(function(childNodeName) {
+    return json.nodes[childNodeName];
+  })
+  callback(null, sceneInfo);
+}
+
 function handleAll(typeName, handler, ctx, json, basePath, callback) {
   log('handleAll', typeName);
   if (!json[typeName]) {
@@ -279,6 +293,7 @@ function load(ctx, file, callback) {
       function(callback) { handleAll('shaders'    , handleShader    , ctx, json, basePath, callback); },
       function(callback) { handleAll('programs'   , handleProgram   , ctx, json, basePath, callback); },
       function(callback) { handleAll('nodes'      , handleNode      , ctx, json, basePath, callback); },
+      function(callback) { handleAll('scenes'     , handleScene     , ctx, json, basePath, callback); },
       function(callback) { buildMeshes(ctx, json, callback); },
     ], function(err, results) {
       if (err) log('load done errors', err);
