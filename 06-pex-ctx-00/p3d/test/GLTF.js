@@ -26,12 +26,13 @@ function forEachKeyValue(obj, cb) {
     })
 }
 
-
+var setUniformCount = 0;
+var drawCount = 0;
 
 Window.create({
     settings: {
-        width: 800 * 2,
-        height: 600 * 2,
+        width: 800 * 4,
+        height: 600 * 4,
         type: '3d',
         highdpi: 2
     },
@@ -52,6 +53,8 @@ Window.create({
         this.projectionMatrix       = Mat4.perspective(Mat4.create(), 60, this.getWidth()/this.getHeight(), 0.1, 1000);
         this.viewMatrix             = Mat4.create();
         this._tempModelViewMatrix   = Mat4.create();
+        this._tempNormalMatrix4     = Mat4.create();
+        this._tempNormalMatrix3     = Mat3.create();
         this._tmpVec3               = Vec3.create();
         this._flipYAxis             = false;
 
@@ -157,6 +160,10 @@ Window.create({
                         offset      : primitiveInfo._indexBufferOffset,
                         count       : primitiveInfo._indexBufferCount
                     };
+                    primitiveInfo._renderInfo.uniformList = [];
+                    forEachKeyValue(primitiveInfo._renderInfo.uniforms, function(name, value) {
+                        primitiveInfo._renderInfo.uniformList.push([name, value]);
+                    });
                     primitiveInfo._renderInfo.bbox = {
                         min: Vec3.create(),
                         max: Vec3.create(),
@@ -198,6 +205,8 @@ Window.create({
         var projectionMatrix = this.projectionMatrix;
         var viewMatrix = this.viewMatrix;
         var modelViewMatrix = this._tempModelViewMatrix;
+        var normalMatrix4 = this._tempNormalMatrix4;
+        var normalMatrix3 = this._tempNormalMatrix3;
         var tmpVec3 = this._tmpVec3;
 
         //FIXME: change to for loops
@@ -220,27 +229,32 @@ Window.create({
             if (node.meshes) {
                 node.meshes.forEach(function(meshName) {
                     var meshInfo = json.meshes[meshName];
-
-
                     var modelMatrix = ctx.getModelMatrix();
 
                     Mat4.set(modelViewMatrix, viewMatrix);
                     Mat4.mult(modelViewMatrix, modelMatrix);
 
-                    meshInfo.primitives.forEach(function(primitiveInfo) {
+                    //meshInfo.primitives.forEach(function(primitiveInfo) {
+                    for(var i=0; i<meshInfo.primitives.length; i++) {
+                        var primitiveInfo = meshInfo.primitives[i];
                         var vao = primitiveInfo._vertexArray;
                         var offset = primitiveInfo._renderInfo.offset;
                         var count = primitiveInfo._renderInfo.count;
                         var program = primitiveInfo._renderInfo.program;
                         var uniforms = primitiveInfo._renderInfo.uniforms;
+                        var uniformList = primitiveInfo._renderInfo.uniformList;
                         ctx.bindVertexArray(vao);
                         ctx.bindProgram(program);
                         var numActiveTextures = 0;
-                        forEachKeyValue(uniforms, function(name, value) {
+                        //forEachKeyValue(uniforms, function(name, value) {
+                        for(var j=0; j<uniformList.length; j++) {
+                            var name = uniformList[j][0];
+                            var value = uniformList[j][1];
                             //FIXME: ugly uniform._handle texture detection
                             if (value && value._handle) {
                                 ctx.bindTexture(value, numActiveTextures);
                                 program.setUniform(name, numActiveTextures);
+                                setUniformCount++;
                                 numActiveTextures++;
                             }
                             else {
@@ -251,15 +265,27 @@ Window.create({
                                 }
                                 if (program._uniforms[name]) {
                                     program.setUniform(name, value);
+                                    setUniformCount++;
                                 }
                                 else {
                                     logOnce('WARN. Mesh material has ' + name + ' but program is not using it');
                                 }
                             }
-                        })
+                        }
 
                         program.setUniform('u_projectionMatrix', projectionMatrix);
                         program.setUniform('u_modelViewMatrix', modelViewMatrix);
+                        Mat4.set(normalMatrix4, modelViewMatrix);
+                        Mat4.invert(normalMatrix4);
+                        Mat4.transpose(normalMatrix4);
+                        //Mat3.fromMat4(normalMatrix3, normalMatrix4);
+                        normalMatrix3[ 0] = normalMatrix4[ 0]; normalMatrix3[ 1] = normalMatrix4[ 1];  normalMatrix3[ 2] = normalMatrix4[ 2];
+                        normalMatrix3[ 3] = normalMatrix4[ 4]; normalMatrix3[ 4] = normalMatrix4[ 5];  normalMatrix3[ 5] = normalMatrix4[ 6];
+                        normalMatrix3[ 6] = normalMatrix4[ 8]; normalMatrix3[ 7] = normalMatrix4[ 9];  normalMatrix3[ 8] = normalMatrix4[10];
+                        if (program._uniforms['u_normalMatrix'])
+                            program.setUniform('u_normalMatrix', normalMatrix3);
+                        setUniformCount++;
+                        setUniformCount++;
 
                         if (boundingBoxToUpdate) {
                             Vec3.set(tmpVec3, primitiveInfo._renderInfo.bbox.min);
@@ -281,10 +307,9 @@ Window.create({
                         }
                         else {
                             ctx.draw(ctx.TRIANGLES, offset, count);
+                            drawCount++;
                         }
-                    })
-
-
+                    }
                 })
             }
             this.drawNodes(ctx, json, node.children, boundingBoxToUpdate)
@@ -300,7 +325,7 @@ Window.create({
         if (this.json) {
             try {
                 var up = this._flipYAxis ? -1 : 1;
-                var dist = 1.5;
+                var dist = 0.5;
                 ctx.setViewMatrix(Mat4.lookAt9(this.viewMatrix,
                         this.sceneCenter[0] + this.sceneMaxSize * dist * Math.cos(time * Math.PI),
                         this.sceneCenter[1] + 0.5 * up * this.sceneMaxSize * dist * Math.sin(time * 0.5),
@@ -330,7 +355,10 @@ Window.create({
                 var gl = ctx.getGL();
                 //gl.finish();
                 //console.time('drawNodes');
+                //setUniformCount = 0;
+                //drawCount = 0;
                 this.drawNodes(ctx, this.json, rootNodes, sceneBoundingBoxIsDirty ? this.sceneBoundingBox : null);
+                //console.log('draws:' + drawCount, 'uniforms:' + setUniformCount);
                 //gl.flush();
                 //gl.finish();
                 //console.timeEnd('drawNodes');
