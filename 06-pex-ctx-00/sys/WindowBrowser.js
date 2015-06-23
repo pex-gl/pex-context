@@ -60,11 +60,6 @@ function simpleWindow(obj) {
     //TODO: add premultipliedAlpha support
     //TODO: add preserveDrawingBuffer support
     var contextOptions = DefaultWebGLContextOptions;
-    obj.gl = getWebGLContext(canvas, contextOptions);
-
-    if (obj.gl === null) {
-        throw new Error('WindowBrowser: No WebGL context is available.');
-    }
 
     function drawloop() {
         obj.draw();
@@ -73,6 +68,12 @@ function simpleWindow(obj) {
 
     //TODO: add framerate support?
     function go() {
+        obj.gl = getWebGLContext(canvas, contextOptions);
+
+        if (obj.gl === null) {
+            throw new Error('WindowBrowser: No WebGL context is available.');
+        }
+
         obj.init();
         requestAnimFrame(drawloop);
     }
