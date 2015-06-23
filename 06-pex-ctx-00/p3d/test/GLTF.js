@@ -8,28 +8,13 @@ var Vec3 = require('../../math/Vec3');
 var loadGLTF = require('../../load-gltf');
 var log = require('debug')('example/GLTF');
 
-var VERT_SRC = '\
-attribute vec3 aPosition; \
-attribute vec3 aColor; \
-varying vec3 vColor; \
-uniform mat4 uProjectionMatrix;\
-uniform mat4 uViewMatrix;\
-uniform mat4 uModelMatrix;\
-void main() { \
-    gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aPosition, 1.0); \
-    vColor = aColor; \
-} \
-';
-
-var FRAG_SRC = '\
-varying vec3 vColor; \
-void main() { \
-    gl_FragColor = vec4(vColor, 1.0); \
-} \
-';
-
-if (Platform.isBrowser) {
-    FRAG_SRC = 'precision highp float; \n' + FRAG_SRC;
+var logOnceCache = {};
+function logOnce() {
+    var msg = Array.prototype.slice.call(arguments).join(' ');
+    if (!logOnceCache[msg]) {
+        logOnceCache[msg] = msg;
+        console.log(msg);
+    }
 }
 
 var ASSETS_PATH = Platform.isBrowser ? 'assets' : __dirname + '/assets';
@@ -45,9 +30,10 @@ function forEachKeyValue(obj, cb) {
 
 Window.create({
     settings: {
-        width: 800,
-        height: 600,
-        type: '3d'
+        width: 800 * 2,
+        height: 600 * 2,
+        type: '3d',
+        highdpi: 2
     },
     init: function() {
         var ctx = this.getContext();
@@ -57,13 +43,13 @@ Window.create({
         //loadGLTF(ctx, ASSETS_PATH + '/gltf/wine/wine.gltf', this.onSceneLoaded.bind(this));
         //loadGLTF(ctx, ASSETS_PATH + '/gltf/SuperMurdoch/SuperMurdoch.gltf', this.onSceneLoaded.bind(this));
         //loadGLTF(ctx, ASSETS_PATH + '/gltf/Bus/WuZhouLong_Shenzhen_Bus.gltf', this.onSceneLoaded.bind(this));
-        //loadGLTF(ctx, ASSETS_PATH + '/gltf/DisneyCastle/DLP-castle-4-light.gltf', this.onSceneLoaded.bind(this));
+        loadGLTF(ctx, ASSETS_PATH + '/gltf/DisneyCastle/DLP-castle-4-light.gltf', this.onSceneLoaded.bind(this));
         //loadGLTF(ctx, ASSETS_PATH + '/gltf/CesiumMilkTruck/CesiumMilkTruck.gltf', this.onSceneLoaded.bind(this));
         //loadGLTF(ctx, ASSETS_PATH + '/gltf/CesiumMan/Cesium_Man.gltf', this.onSceneLoaded.bind(this));
         //loadGLTF(ctx, ASSETS_PATH + '/gltf/CesiumAir/Cesium_Air.gltf', this.onSceneLoaded.bind(this));
         //loadGLTF(ctx, ASSETS_PATH + '/gltf/CesiumGround/Cesium_Ground.gltf', this.onSceneLoaded.bind(this));
-
-        this.projectionMatrix       = Mat4.perspective(Mat4.create(), 60, this.width/this.height, 0.1, 1000);
+        //loadGLTF(ctx, ASSETS_PATH + '/gltf/Oceanarium/steps.gltf', this.onSceneLoaded.bind(this));
+        this.projectionMatrix       = Mat4.perspective(Mat4.create(), 60, this.getWidth()/this.getHeight(), 0.1, 1000);
         this.viewMatrix             = Mat4.create();
         this._tempModelViewMatrix   = Mat4.create();
         this._tmpVec3               = Vec3.create();
@@ -71,7 +57,7 @@ Window.create({
 
         this.t = 0;
 
-        ctx.setClearColor(0.2,0.2,0.2,1.0);
+        ctx.setClearColor(0.82,0.82,0.82,1.0);
         ctx.setDepthTest(true);
         ctx.setProjectionMatrix(this.projectionMatrix);
     },
@@ -102,7 +88,7 @@ Window.create({
                     }
                 }
                 else {
-                  throw new Error('No value for uniform:' + valueName);
+                  logOnce('WARN: No value for uniform:' + valueName);
                 }
             }
             if (instanceValues[valueName]) {
@@ -119,21 +105,25 @@ Window.create({
             }
 
             if (value === null || value === undefined) {
-                throw new Error('Uniform ' + valueName + ' is missing');
+                logOnce('WARN: Uniform ' + valueName + ' is missing');
             }
             uniforms[uniformName] = value;
         });
         return uniforms;
     },
     onSceneLoaded: function(err, json) {
+        console.log('onSceneLoaded')
         if (err) {
             console.log(err);
             console.log(err.stack);
             return;
         }
-        this.prepareScene(json);
+        else {
+            this.prepareScene(json);
+        }
     },
     prepareScene: function(json) {
+        console.log('prepareScene')
         this.json = json;
         var self = this;
 
@@ -173,12 +163,16 @@ Window.create({
                     var posAccessor = json.accessors[primitiveInfo.attributes.POSITION];
                     Vec3.set(primitiveInfo._renderInfo.bbox.min, posAccessor.min);
                     Vec3.set(primitiveInfo._renderInfo.bbox.max, posAccessor.max);
+
+                    //console.log('renderInfo', primitiveInfo._renderInfo)
                 }
                 catch(e) {
                     console.log(e.stack)
                 }
             });
         });
+
+        console.log('prepareScene', 'done')
 
         //TODO: get main camera name from scene
         //FIXME: giving up on gltf camera for now
@@ -240,21 +234,22 @@ Window.create({
                         var numActiveTextures = 0;
                         forEachKeyValue(uniforms, function(name, value) {
                             //FIXME: ugly uniform._handle texture detection
-                            if (value._handle) {
+                            if (value && value._handle) {
                                 ctx.bindTexture(value, numActiveTextures);
                                 program.setUniform(name, numActiveTextures);
                                 numActiveTextures++;
                             }
                             else {
                                 if (!value) {
-                                    console.log('WARN. Missing value for uniform ' + name + '');
+                                    logOnce('WARN. Missing value for uniform ' + name + '');
+                                    value = 1.0;
                                     return;
                                 }
                                 if (program._uniforms[name]) {
                                     program.setUniform(name, value);
                                 }
                                 else {
-                                    console.log('WARN. Mesh material has ' + name + ' but program is not using it');
+                                    logOnce('WARN. Mesh material has ' + name + ' but program is not using it');
                                 }
                             }
                         })
@@ -280,9 +275,9 @@ Window.create({
                             boundingBoxToUpdate.max[1] = Math.max(boundingBoxToUpdate.max[1], tmpVec3[1]);
                             boundingBoxToUpdate.max[2] = Math.max(boundingBoxToUpdate.max[2], tmpVec3[2]);
                         }
-
-
-                        ctx.draw(ctx.TRIANGLES, 0, vao.getIndexBuffer().getLength());
+                        else {
+                            ctx.draw(ctx.TRIANGLES, 0, vao.getIndexBuffer().getLength());
+                        }
                     })
 
 
@@ -301,8 +296,8 @@ Window.create({
         if (this.json) {
             try {
                 var up = this._flipYAxis ? -1 : 1;
-                var dist = 1;
-                var newViewMatrix = ctx.setViewMatrix(Mat4.lookAt9(this.viewMatrix,
+                var dist = 1.5;
+                ctx.setViewMatrix(Mat4.lookAt9(this.viewMatrix,
                         this.sceneCenter[0] + this.sceneMaxSize * dist * Math.cos(time * Math.PI),
                         this.sceneCenter[1] + 0.5 * up * this.sceneMaxSize * dist * Math.sin(time * 0.5),
                         this.sceneCenter[2] + this.sceneMaxSize * dist * Math.sin(time * Math.PI),
@@ -327,7 +322,13 @@ Window.create({
                     max: [-Infinity, -Infinity, -Infinity]
                 }
             }
-            this.drawNodes(ctx, this.json, rootNodes, sceneBoundingBoxIsDirty ? this.sceneBoundingBox : null);
+            try {
+                this.drawNodes(ctx, this.json, rootNodes, sceneBoundingBoxIsDirty ? this.sceneBoundingBox : null);
+            }
+            catch(e) {
+                console.log(e.stack);
+                //this.draw = function() {}
+            }
             if (sceneBoundingBoxIsDirty) {
                 var sceneSize = Vec3.sub(Vec3.copy(this.sceneBoundingBox.max), this.sceneBoundingBox.min);
                 this.sceneMaxSize = Math.max(sceneSize[0], Math.max(sceneSize[1], sceneSize[2]));

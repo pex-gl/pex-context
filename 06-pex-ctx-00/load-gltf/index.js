@@ -139,7 +139,7 @@ function buildMeshes(ctx, json, callback) {
       stride: accessorInfo.byteStride,
       size: size
     };
-    log(bufferInfo.opts);
+    log('bufferInfo', bufferInfo);
     return bufferInfo;
   }
 
@@ -178,7 +178,7 @@ function buildMeshes(ctx, json, callback) {
       });
 
       var indexBufferInfo = buildBufferInfo(primitiveInfo.indices);
-      log('buildIndexBuffer', indexBufferInfo.opts, 'len:', indexBufferInfo.data.length);
+      log('buildIndexBuffer', indexBufferInfo, 'len:', indexBufferInfo.data.length);
       indexBuffer = ctx.createBuffer(ctx.ELEMENT_ARRAY_BUFFER, indexBufferInfo.data, ctx.STATIC_DRAW);
 
       var va = ctx.createVertexArray(attributes, indexBuffer);
@@ -191,13 +191,14 @@ function buildMeshes(ctx, json, callback) {
 }
 
 function handleShader(gl, json, basePath, shaderName, shaderInfo, callback) {
-  log('handleShader', shaderName);
   if (shaderInfo.uri) {
     loadText(basePath + '/' + shaderInfo.uri, function(err, srcStr) {
-      log('handleShader');
       //precision is already added in Program class
       if (Platform.isPlask) {
           shaderInfo._src = srcStr.replace('precision highp float;', '');
+      }
+      else {
+          shaderInfo._src = srcStr;
       }
       callback(err, shaderInfo);
     });
