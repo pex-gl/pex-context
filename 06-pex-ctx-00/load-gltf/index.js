@@ -6,6 +6,7 @@ var loadBinary      = require('../sys/io/loadBinary');
 var loadText        = require('../sys/io/loadText');
 var loadImage       = require('../sys/io/loadImage');
 var path            = require('path');
+var Platform        = require('../sys/Platform');
 
 var WebGLConstants = {
   34963: 'ELEMENT_ARRAY_BUFFER',  //0x8893
@@ -195,7 +196,9 @@ function handleShader(gl, json, basePath, shaderName, shaderInfo, callback) {
     loadText(basePath + '/' + shaderInfo.uri, function(err, srcStr) {
       log('handleShader');
       //precision is already added in Program class
-      shaderInfo._src = srcStr.replace('precision highp float;', '');
+      if (Platform.isPlask) {
+          shaderInfo._src = srcStr.replace('precision highp float;', '');
+      }
       callback(err, shaderInfo);
     });
   }
