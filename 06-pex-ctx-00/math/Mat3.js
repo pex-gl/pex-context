@@ -37,9 +37,17 @@ function equals(a,b) {
            a[ 9] == b[ 9];
 }
 
+function fromMat4(a,b){
+    a[ 0] = b[ 0]; a[ 1] = b[ 1]; a[ 2] = b[ 2];
+    a[ 3] = b[ 4]; a[ 4] = b[ 5]; a[ 5] = b[ 6];
+    a[ 6] = b[ 8]; a[ 7] = b[ 9]; a[ 8] = b[10];
+    return a;
+}
+
 var Mat3 = {
     create : create,
-    equals : equals
+    equals : equals,
+    fromMat4 : fromMat4
 };
 
 module.exports = Mat3;
