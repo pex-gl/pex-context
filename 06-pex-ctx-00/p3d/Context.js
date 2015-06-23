@@ -93,8 +93,8 @@ function Context(gl){
     ]];
 
     this.VIEWPORT_BIT   = VIEWPORT_BIT;
-    this._viewport      = [0,0,0,0];
-    this._viewportStack = [[ Vec4.copy(this._viewport) ]];
+    this._viewport      = glObjToArray(gl.getParameter(gl.VIEWPORT)).slice(0,4);
+    this._viewportStack = [Vec4.copy(this._viewport)];
 
     this.STENCIL_BIT          = STENCIL_BIT;
     this._stencilTest         = gl.getParameter(gl.STENCIL_TEST);
@@ -133,9 +133,9 @@ function Context(gl){
     this._matrix[MATRIX_MODEL_BIT]      = Mat4.create();
 
     this._matrixStack = {};
-    this._matrixStack[MATRIX_PROJECTION_BIT] = [];
-    this._matrixStack[MATRIX_VIEW_BIT]       = [];
-    this._matrixStack[MATRIX_MODEL_BIT]      = [];
+    this._matrixStack[MATRIX_PROJECTION_BIT] = [this._matrix[MATRIX_PROJECTION_BIT]];
+    this._matrixStack[MATRIX_VIEW_BIT]       = [this._matrix[MATRIX_VIEW_BIT]];
+    this._matrixStack[MATRIX_MODEL_BIT]      = [this._matrix[MATRIX_MODEL_BIT]];
 
     this._matrixUniformBitMap = {};
     this._matrixUniformBitMap[ProgramUniform.PROJECTION_MATRIX] = MATRIX_PROJECTION_BIT;
@@ -233,7 +233,7 @@ Context.prototype.pushState = function(mask){
     }
 
     if((mask & SCISSOR_BIT) == SCISSOR_BIT){
-        this._scissorStack.push([this._scissorTest, this._scissorStack]);
+        this._scissorStack.push([this._scissorTest, Vec4.copy(this._scissorBox)]);
     }
 
     if((mask & CULL_BIT) == CULL_BIT){
@@ -242,6 +242,10 @@ Context.prototype.pushState = function(mask){
 
     if((mask & PROGRAM_BIT) == PROGRAM_BIT){
         this._programStack.push(this._program);
+    }
+
+    if((mask & VERTEX_ARRAY_BIT) == VERTEX_ARRAY_BIT){
+        this._vertexArrayStack.push(this._vertexArray);
     }
 
     this._mask = mask;
@@ -262,16 +266,17 @@ Context.prototype.popState = function(){
         if(this._colorStack.length == 1){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','COLOR_BIT'));
         }
-        prev  = this._colorStack.pop();
         stack = this._colorStack[this._colorStack.length - 1];
 
+        prev = this._clearColor;
         this._clearColor = stack[0];
-        this._colorMask  = stack[1];
-
-        if(!Vec4.equals(this._clearColor,prev[0])){
+        if(!Vec4.equals(this._clearColor,prev)){
             gl.clearColor(this._clearColor[0],this._clearColor[1],this._clearColor[2],this._clearColor[3]);
         }
-        if(!Vec4.equals(this._colorMask,prev[1])){
+
+        prev = this._colorMask;
+        this._colorMask = stack[1];
+        if(!Vec4.equals(this._colorMask,prev)){
             gl.colorMask(this._colorMask[0],this._colorMask[1],this._colorMask[2],this._colorMask[3]);
         }
     }
@@ -280,17 +285,11 @@ Context.prototype.popState = function(){
         if(this._depthStack.length == 1){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','DEPTH_BIT'));
         }
-        prev  = this._depthStack.pop();
-        stack = this._depthStack[this._depthStack.length - 1];
+        stack = this._depthStack.pop();
 
-        this._depthTest       = stack[0];
-        this._depthMask       = stack[1];
-        this._depthFunc       = stack[2];
-        this._depthClearValue = stack[3];
-        this._depthRange      = stack[4];
-        this._polygonOffset   = stack[5];
-
-        if(this._depthTest != prev[0]){
+        prev = this._depthTest;
+        this._depthTest = stack[0];
+        if(this._depthTest != prev){
             if(this._depthTest){
                 gl.enable(gl.DEPTH_TEST);
             }
@@ -298,19 +297,34 @@ Context.prototype.popState = function(){
                 gl.disable(gl.DEPTH_TEST);
             }
         }
-        if(this._depthMask != prev[1]){
+
+        prev = this._depthMask;
+        this._depthMask = stack[1];
+        if(this._depthMask != prev){
             gl.depthMask(this._depthMask);
         }
-        if(this._depthFunc != prev[2]){
+
+        prev = this._depthFunc;
+        this._depthFunc = stack[2];
+        if(this._depthFunc != prev){
             gl.depthFunc(this._depthFunc);
         }
-        if(this._depthClearValue != prev[3]){
+
+        prev = this._depthClearValue;
+        this._depthClearValue = stack[3];
+        if(this._depthClearValue != prev){
             gl.clearDepth(this._depthClearValue);
         }
-        if(Vec2.equals(this._depthRange,prev[4])){
+
+        prev = this._depthRange;
+        this._depthRange = stack[4];
+        if(Vec2.equals(this._depthRange,prev)){
             gl.depthRange(this._depthRange[0],this._depthRange[1]);
         }
-        if(Vec2.equals(this._polygonOffset,prev[5])){
+
+        prev = this._polygonOffset;
+        this._polygonOffset = stack[5];
+        if(Vec2.equals(this._polygonOffset,prev)){
             gl.polygonOffset(this._polygonOffset[0],this._polygonOffset[1]);
         }
     }
@@ -323,9 +337,9 @@ Context.prototype.popState = function(){
         if(this._viewportStack.length == 1){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','VIEWPORT_BIT'));
         }
-        prev = this._viewportStack.pop();
-        this._viewport = this._viewportStack[this._viewportStack.length - 1];
 
+        prev = this._viewport;
+        this._viewport = this._viewportStack.pop();
         if(!Vec4.equals(this._viewport,prev)){
             this._gl.viewport(this._viewport[0],this._viewport[1],this._viewport[2],this._viewport[3]);
         }
@@ -335,13 +349,12 @@ Context.prototype.popState = function(){
         if(this._scissorStack.length == 1){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','SCISSOR_BIT'));
         }
-        prev  = this._scissorStack.pop();
-        stack = this._scissorStack[this._scissorStack.length - 1];
+        stack = this._scissorStack.pop();
 
+        prev = this._scissorTest;
         this._scissorTest = stack[0];
-        this._scissorBox  = stack[1];
 
-        if(this._scissorTest != prev[0]){
+        if(this._scissorTest != prev){
             if(this._scissorTest){
                 gl.enable(gl.SCISSOR_TEST)
             }
@@ -349,7 +362,11 @@ Context.prototype.popState = function(){
                 gl.disable(gl.SCISSOR_TEST);
             }
         }
-        if(!Vec4.equals(this._scissorBox,prev[1])){
+
+        prev = this._scissorBox;
+        this._scissorBox  = stack[1];
+
+        if(!Vec4.equals(this._scissorBox,prev)){
             gl.scissor(this._scissorBox[0],this._scissorBox[1],this._scissorBox[2],this._scissorBox[3]);
         }
     }
@@ -371,12 +388,11 @@ Context.prototype.popState = function(){
     }
 
     if((mask & PROGRAM_BIT) == PROGRAM_BIT){
-        prev = this._programStack.pop();
-        this._program = this._programStack[this._programStack.length - 1];
 
-        if(this._program != prev){
+    }
 
-        }
+    if((mask & VERTEX_ARRAY_BIT) == VERTEX_ARRAY_BIT){
+        this.bindVertexArray(this._vertexArrayStack.pop());
     }
 };
 
@@ -599,6 +615,7 @@ Context.prototype.pushProjectionMatrix = function(){
 
 Context.prototype.popProjectionMatrix = function(){
     this._matrix[MATRIX_PROJECTION_BIT] = this._matrixStack[MATRIX_PROJECTION_BIT].pop();
+    this._matrixSend[MATRIX_PROJECTION_BIT] = false;
 };
 
 Context.prototype.pushViewMatrix = function(){
@@ -607,6 +624,7 @@ Context.prototype.pushViewMatrix = function(){
 
 Context.prototype.popViewMatrix = function(){
     this._matrix[MATRIX_VIEW_BIT] = this._matrixStack[MATRIX_VIEW_BIT].pop();
+    this._matrixSend[MATRIX_VIEW_BIT] = false;
 };
 
 Context.prototype.pushModelMatrix = function(){
@@ -615,6 +633,7 @@ Context.prototype.pushModelMatrix = function(){
 
 Context.prototype.popModelMatrix = function(){
     this._matrix[MATRIX_MODEL_BIT] = this._matrixStack[MATRIX_MODEL_BIT].pop();
+    this._matrixSend[MATRIX_MODEL_BIT] = false;
 };
 
 Context.prototype.identity = function(){
