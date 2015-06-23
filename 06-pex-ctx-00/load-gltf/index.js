@@ -54,6 +54,7 @@ function handleBufferView(ctx, json, basePath, bufferViewName, bufferViewInfo, c
     info('slice', bufferViewName, bufferViewInfo.byteOffset, bufferViewInfo.byteOffset + bufferViewInfo.byteLength, '=', bufferViewInfo.buffer.byteLength);
     bufferViewInfo._buffer = bufferViewInfo.buffer;
     bufferViewInfo._typedArray = new Uint16Array(bufferViewInfo.buffer);
+    bufferViewInfo._glBuffer = ctx.createBuffer(ctx.ELEMENT_ARRAY_BUFFER, bufferViewInfo._typedArray, ctx.STATIC_DRAW);
   }
   if (bufferViewInfo.target == 34962) { //ARRAY_BUFFER
     //TODO: Slice or not to slice the buffer
@@ -62,6 +63,7 @@ function handleBufferView(ctx, json, basePath, bufferViewName, bufferViewInfo, c
     //bufferViewInfo.buffer = buffer.arrayBuffer;
     bufferViewInfo._buffer = bufferViewInfo.buffer;
     bufferViewInfo._typedArray = new Float32Array(bufferViewInfo.buffer);
+    bufferViewInfo._glBuffer = ctx.createBuffer(ctx.ARRAY_BUFFER, bufferViewInfo._typedArray, ctx.STATIC_DRAW);
   }
   log('handleBufferView', bufferViewName, WebGLConstants[bufferViewInfo.target], bufferViewInfo.byteOffset, '..', bufferViewInfo.byteLength, '/', buffer.arrayBuffer.byteLength)
   callback(null, bufferViewInfo);
@@ -111,32 +113,32 @@ function buildMeshes(ctx, json, callback) {
     var accessorInfo = json.accessors[accessorName];
     var size = AttributeSizeMap[accessorInfo.type];
     //TODO: any other way to limit attrib count?
-    var data = json.bufferViews[accessorInfo.bufferView]._typedArray;//.subarray(0, accessorInfo.count * size);
+    var bufferView = json.bufferViews[accessorInfo.bufferView];
+    //var data = json.bufferViews[accessorInfo.bufferView]._typedArray;//.subarray(0, accessorInfo.count * size);
     var buffer = json.bufferViews[accessorInfo.bufferView]._buffer;
-
+//
     var isIndexBuffer = (json.bufferViews[accessorInfo.bufferView].target == 34963);
     if (buffer) {
       if (isIndexBuffer) {
-        data = new Uint16Array(buffer.slice(accessorInfo.byteOffset, accessorInfo.byteOffset + accessorInfo.count * size * 2));
+          console.log('indexBuffer count ' + accessorInfo.count, bufferView._glBuffer.getLength());
+    //    data = new Uint16Array(buffer.slice(accessorInfo.byteOffset, accessorInfo.byteOffset + accessorInfo.count * size * 2));
       }
       else {
-        data = new Float32Array(buffer.slice(accessorInfo.byteOffset, accessorInfo.byteOffset + accessorInfo.count * size * 4));
+    //    data = new Float32Array(buffer.slice(accessorInfo.byteOffset, accessorInfo.byteOffset + accessorInfo.count * size * 4));
       }
-      info('subarray', accessorName, accessorInfo.byteOffset, accessorInfo.byteOffset + accessorInfo.count * size * 4);
+    //  info('subarray', accessorName, accessorInfo.byteOffset, accessorInfo.byteOffset + accessorInfo.count * size * 4);
     }
-    else {
-      info('subarray', accessorName, accessorInfo.byteOffset, accessorInfo.byteOffset + accessorInfo.count * size * 2);
-    }
-
+    //else {
+    //  info('subarray', accessorName, accessorInfo.byteOffset, accessorInfo.byteOffset + accessorInfo.count * size * 2);
+    //}
+    //
+    //accessorInfo.byteOffset, accessorInfo.byteOffset + accessorInfo.count * size * 2
 
     var bufferInfo = {
-
-    }
-
-    var bufferInfo = {
-      data: data,
-      offset: 0,
+      glBuffer: bufferView._glBuffer,
+      offset: accessorInfo.byteOffset,
       stride: accessorInfo.byteStride,
+      count: accessorInfo.count,
       size: size
     };
     log('bufferInfo', bufferInfo);
@@ -157,7 +159,7 @@ function buildMeshes(ctx, json, callback) {
       forEachKeyValue(primitiveInfo.attributes, function(attributeSemantic, accessorName) {
         var attributeInfo = buildBufferInfo(accessorName);
         var attributeName = AttributeNameMap[attributeSemantic];
-        var buffer = ctx.createBuffer(ctx.ARRAY_BUFFER, attributeInfo.data, ctx.STATIC_DRAW);
+        //var buffer = ctx.createBuffer(ctx.ARRAY_BUFFER, attributeInfo.data, ctx.STATIC_DRAW);
         var location = -1; //TODO: find location
         switch(attributeSemantic) {
             case 'POSITION': location = ctx.ATTRIB_POSITION; break;
@@ -169,7 +171,7 @@ function buildMeshes(ctx, json, callback) {
             console.log('WARN: GLTF: Attribute size is missing for :' + accessorName, attributeInfo);
         }
         attributes.push({
-            buffer: buffer,
+            buffer: attributeInfo.glBuffer,
             location: location,
             size: attributeInfo.size,
             offset: attributeInfo.offset,
@@ -178,12 +180,14 @@ function buildMeshes(ctx, json, callback) {
       });
 
       var indexBufferInfo = buildBufferInfo(primitiveInfo.indices);
-      log('buildIndexBuffer', indexBufferInfo, 'len:', indexBufferInfo.data.length);
-      indexBuffer = ctx.createBuffer(ctx.ELEMENT_ARRAY_BUFFER, indexBufferInfo.data, ctx.STATIC_DRAW);
+      //log('buildIndexBuffer', indexBufferInfo, 'len:', indexBufferInfo.data.length);
+      //indexBuffer = ctx.createBuffer(ctx.ELEMENT_ARRAY_BUFFER, indexBufferInfo.data, ctx.STATIC_DRAW);
 
-      var va = ctx.createVertexArray(attributes, indexBuffer);
+      var va = ctx.createVertexArray(attributes, indexBufferInfo.glBuffer);
 
       primitiveInfo._vertexArray = va;
+      primitiveInfo._indexBufferOffset = indexBufferInfo.offset;
+      primitiveInfo._indexBufferCount = indexBufferInfo.count;
     })
   })
 

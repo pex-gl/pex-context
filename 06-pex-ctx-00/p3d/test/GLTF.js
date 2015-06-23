@@ -153,7 +153,9 @@ Window.create({
 
                     primitiveInfo._renderInfo = {
                         program     : program,
-                        uniforms    : uniforms
+                        uniforms    : uniforms,
+                        offset      : primitiveInfo._indexBufferOffset,
+                        count       : primitiveInfo._indexBufferCount
                     };
                     primitiveInfo._renderInfo.bbox = {
                         min: Vec3.create(),
@@ -227,6 +229,8 @@ Window.create({
 
                     meshInfo.primitives.forEach(function(primitiveInfo) {
                         var vao = primitiveInfo._vertexArray;
+                        var offset = primitiveInfo._renderInfo.offset;
+                        var count = primitiveInfo._renderInfo.count;
                         var program = primitiveInfo._renderInfo.program;
                         var uniforms = primitiveInfo._renderInfo.uniforms;
                         ctx.bindVertexArray(vao);
@@ -276,7 +280,7 @@ Window.create({
                             boundingBoxToUpdate.max[2] = Math.max(boundingBoxToUpdate.max[2], tmpVec3[2]);
                         }
                         else {
-                            ctx.draw(ctx.TRIANGLES, 0, vao.getIndexBuffer().getLength());
+                            ctx.draw(ctx.TRIANGLES, offset, count);
                         }
                     })
 
@@ -323,7 +327,13 @@ Window.create({
                 }
             }
             try {
+                var gl = ctx.getGL();
+                //gl.finish();
+                //console.time('drawNodes');
                 this.drawNodes(ctx, this.json, rootNodes, sceneBoundingBoxIsDirty ? this.sceneBoundingBox : null);
+                //gl.flush();
+                //gl.finish();
+                //console.timeEnd('drawNodes');
             }
             catch(e) {
                 console.log(e.stack);
