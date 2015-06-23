@@ -545,7 +545,7 @@ function lookAt9(a, eyex, eyey, eyez, targetx, targety, targetz, upx, upy, upz) 
         a[15] = 1;
         a[12] = a[13] = a[14] = 0;
 
-        return;
+        return a;
     }
 
     z0 = eyex - targetx;
