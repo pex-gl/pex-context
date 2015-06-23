@@ -486,8 +486,17 @@ function createFromOnB(u, v, w) {
     return createFromOnB9(u[0], u[1], u[2], v[0], v[1], v[2], w[0], w[1], w[2]);
 }
 
+/**
+ * Calculate perspective matrix
+ * @param  {Mat4} a        - out matrix
+ * @param  {Number} fov    - field of view in degrees
+ * @param  {Number} aspect - aspect ratio
+ * @param  {Number} near   - near clipping plane
+ * @param  {Number} far    - far clipping plane distance
+ * @return {Mat4}          - returns out matrix
+ */
 function perspective(a,fov, aspect, near, far) {
-    var f  = 1.0 / Math.tan(fov * 0.5);
+    var f  = 1.0 / Math.tan(fov / 180.0 * Math.PI * 0.5);
     var nf = 1.0 / (near - far);
 
     a[1] = a[2] = a[3] = a[4] = a[6] = a[7] = a[8] = a[9] = a[12] = a[13] = a[15] = 0;
