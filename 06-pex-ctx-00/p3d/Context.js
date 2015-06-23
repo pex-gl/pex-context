@@ -169,6 +169,10 @@ function Context(gl){
     this._vertexArrayIndexBufferDataType = null;
     this._vertexArrayStack = [this._vertexArray];
 
+    this.LINE_WIDTH_BIT = LINE_WIDTH_BIT;
+    this._lineWidth = gl.getParameter(gl.LINE_WIDTH);
+    this._lineWidthStack = [this._lineWidth];
+
     this.ATTRIB_POSITION    = ProgramAttributeLocation.POSITION;
     this.ATTRIB_COLOR       = ProgramAttributeLocation.COLOR;
     this.ATTRIB_TEX_COORD_0 = ProgramAttributeLocation.TEX_COORD_0;
@@ -238,6 +242,10 @@ Context.prototype.pushState = function(mask){
 
     if((mask & CULL_BIT) == CULL_BIT){
 
+    }
+
+    if((mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
+        this._lineWidthStack.push(this._lineWidth);
     }
 
     if((mask & PROGRAM_BIT) == PROGRAM_BIT){
@@ -384,7 +392,11 @@ Context.prototype.popState = function(){
     }
 
     if((mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
-
+        prev = this._lineWidth;
+        this._lineWidth = this._lineWidthStack.pop();
+        if(this._lineWidth != prev){
+            gl.lineWidth(this._lineWidth);
+        }
     }
 
     if((mask & PROGRAM_BIT) == PROGRAM_BIT){
@@ -440,7 +452,7 @@ Context.prototype.getState = function(mask){
     }
 
     if((mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
-
+        state.push(this._lineWidth);
     }
 
     if((mask && PROGRAM_BIT) == PROGRAM_BIT){
@@ -576,6 +588,17 @@ Context.prototype.setPolygonOffset = function(factor,units){
 
 Context.prototype.getPolygonOffset = function(out){
     return Vec2.copy(this._polygonOffset,out);
+};
+
+Context.prototype.setLineWidth = function(lineWidth){
+    if(this._lineWidth == lineWidth){
+        return;
+    }
+    this._gl.lineWidth(lineWidth);
+};
+
+Context.prototype.getLineWidth = function(){
+    return this._lineWidth;
 };
 
 Context.prototype.clear = function(mask){
@@ -769,6 +792,5 @@ Context.prototype.draw = function(mode, first, count){
         this._gl.drawArrays(mode, first, count);
     }
 };
-
 
 module.exports = Context;
