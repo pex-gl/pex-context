@@ -56,7 +56,7 @@ Window.create({
         //loadGLTF(ctx, ASSETS_PATH + '/gltf/rambler/rambler.gltf', this.onSceneLoaded.bind(this));
         //loadGLTF(ctx, ASSETS_PATH + '/gltf/SuperMurdoch/SuperMurdoch.gltf', this.onSceneLoaded.bind(this));
 
-        this.projectionMatrix = Mat4.perspective(Mat4.create(),45,this.getAspectRatio(),0.001,10.0);
+        this.projectionMatrix = Mat4.perspective(Mat4.create(), 60, this.width/this.height, 0.1, 100);
         this.viewMatrix       = Mat4.create();
         this._tempModelViewMatrix = Mat4.create();;
 
@@ -126,6 +126,10 @@ Window.create({
     prepareScene: function(json) {
         this.json = json;
         var self = this;
+        var sceneBoundingBox = {
+            min: [ Infinity,  Infinity,  Infinity],
+            max: [-Infinity, -Infinity, -Infinity]
+        }
         forEachKeyValue(json.meshes, function(meshName, meshInfo, meshIndex) {
             meshInfo.primitives.forEach(function(primitiveInfo, primitiveIndex) {
                 //if (!primitiveInfo.vertexArray) return; //FIXME: TEMP!
@@ -147,8 +151,49 @@ Window.create({
                     program     : program,
                     uniforms    : uniforms
                 }
+
+                meshInfo.primitives.forEach(function(primitiveInfo) {
+                    var posAccessor = json.accessors[primitiveInfo.attributes.POSITION];
+                    sceneBoundingBox.min[0] = Math.min(sceneBoundingBox.min[0], posAccessor.min[0]);
+                    sceneBoundingBox.min[1] = Math.min(sceneBoundingBox.min[1], posAccessor.min[1]);
+                    sceneBoundingBox.min[2] = Math.min(sceneBoundingBox.min[2], posAccessor.min[2]);
+                    sceneBoundingBox.max[0] = Math.max(sceneBoundingBox.max[0], posAccessor.max[0]);
+                    sceneBoundingBox.max[1] = Math.max(sceneBoundingBox.max[1], posAccessor.max[1]);
+                    sceneBoundingBox.max[2] = Math.max(sceneBoundingBox.max[2], posAccessor.max[2]);
+                })
             });
         });
+
+        var sceneCenter = Vec3.create();
+        Vec3.add(sceneCenter, sceneBoundingBox.min);
+        Vec3.add(sceneCenter, sceneBoundingBox.max);
+        Vec3.scale(sceneCenter, 0.5);
+        var sceneSize = Vec3.sub(Vec3.copy(sceneBoundingBox.max), sceneBoundingBox.min);
+        var sceneMaxSize = Math.max(sceneSize[0], Math.max(sceneSize[1], sceneSize[2]));
+
+        var camPos = Vec3.create();
+        Vec3.set(camPos, sceneCenter);
+        camPos[2] += sceneMaxSize * 2;
+
+        Mat4.lookAt(this.viewMatrix, camPos, sceneCenter, Vec3.yAxis());
+
+        //TODO: get main camera name from scene
+        //FIXME: giving up on gltf camera for now
+        //get first camera
+        //var mainCameraName = Object.keys(json.cameras)[0];
+        //var camera = json.cameras[mainCameraName];
+        //var perspective = camera.perspective;
+        //var yfov = perspective.yfov;
+        //var znear = perspective.znear;
+        //var zfar = perspective.zfar;
+        //var aspectRatio = this.getAspectRatio();
+        //this.projectionMatrix = Mat4.perspective(Mat4.create(), yfov, aspectRatio, znear, zfar);
+        //var cameraNode = Object.keys(json.nodes).filter(function(nodeName) {
+        //    var node = json.nodes[nodeName];
+        //    if (node.camera == mainCameraName) {
+        //        //this.viewMatrix = node.matrix;
+        //    }
+        //}.bind(this))
     },
     drawNodes: function(ctx, json, nodes) {
         var projectionMatrix = this.projectionMatrix;
@@ -163,10 +208,10 @@ Window.create({
                 return;
             }
             node.meshes.forEach(function(meshName) {
-                var mesh = json.meshes[meshName];
-                var vao = mesh._renderInfo.vertexArray;
-                var program = mesh._renderInfo.program;
-                var uniforms = mesh._renderInfo.uniforms;
+                var meshInfo = json.meshes[meshName];
+                var vao = meshInfo._renderInfo.vertexArray;
+                var program = meshInfo._renderInfo.program;
+                var uniforms = meshInfo._renderInfo.uniforms;
                 ctx.bindVertexArray(vao);
                 ctx.bindProgram(program);
                 forEachKeyValue(uniforms, function(name, value) {
@@ -179,18 +224,6 @@ Window.create({
                 Mat4.mult(modelViewMatrix, modelMatrix);
                 program.setUniform('u_modelViewMatrix', modelViewMatrix);
 
-                //uniform mat3 u_normalMatrix;
-                //uniform mat4 u_modelViewMatrix;
-                //uniform mat4 u_projectionMatrix;
-                //
-                //invert(normalMatrix, modelViewMatrix);
-                //transpose(normalMatrix, normalMatrix);
-                //normalMatrix = [
-                //  normalMatrix[0], normalMatrix[1], normalMatrix[2],
-                //  normalMatrix[4], normalMatrix[5], normalMatrix[6],
-                //  normalMatrix[8], normalMatrix[9], normalMatrix[10]
-                //];
-
                 ctx.draw(ctx.TRIANGLES, 0, vao.getIndexBuffer().getLength());
             })
         })
@@ -201,32 +234,18 @@ Window.create({
 
         ctx.clear(ctx.COLOR_BIT | ctx.DEPTH_BIT);
 
-        ctx.setViewMatrix(Mat4.lookAt9(this.viewMatrix,
-                Math.cos(time * Math.PI) * 5,
-                Math.sin(time * 0.5) * 4,
-                Math.sin(time * Math.PI) * 5,
-                0,0,0,0,1,0
-            )
-        );
-
-        var scale = 0.5;
-
-        ctx.identity();
-        ctx.scale(Vec3.set3(Vec3.create(),scale,scale,scale));
+        //ctx.setViewMatrix(Mat4.lookAt9(this.viewMatrix,
+        //        Math.cos(time * Math.PI) * 5,
+        //        Math.sin(time * 0.5) * 4,
+        //        Math.sin(time * Math.PI) * 5,
+        //        0,0,0,0,1,0
+        //    )
+        //);
 
         if (this.json) {
             var rootNodes = this.json.scenes[this.json.scene].nodes;
             this.drawNodes(ctx, this.json, rootNodes);
         }
-
-        //TODO: Implement semantics
-        //MODELVIEW
-        //PROJECTION
-
-        //
-
-        //ctx.bindVertexArray(this.vao);
-        //ctx.draw(ctx.TRIANGLES, 0, this.vao.getIndexBuffer().getLength());
 
         this.t += 1 / 60;
     }
