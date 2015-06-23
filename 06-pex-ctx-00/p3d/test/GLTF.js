@@ -164,18 +164,12 @@ Window.create({
             });
         });
 
-        var sceneCenter = Vec3.create();
+        var sceneCenter = this.sceneCenter = Vec3.create();
         Vec3.add(sceneCenter, sceneBoundingBox.min);
         Vec3.add(sceneCenter, sceneBoundingBox.max);
         Vec3.scale(sceneCenter, 0.5);
         var sceneSize = Vec3.sub(Vec3.copy(sceneBoundingBox.max), sceneBoundingBox.min);
-        var sceneMaxSize = Math.max(sceneSize[0], Math.max(sceneSize[1], sceneSize[2]));
-
-        var camPos = Vec3.create();
-        Vec3.set(camPos, sceneCenter);
-        camPos[2] += sceneMaxSize * 2;
-
-        Mat4.lookAt(this.viewMatrix, camPos, sceneCenter, Vec3.yAxis());
+        var sceneMaxSize = this.sceneMaxSize = Math.max(sceneSize[0], Math.max(sceneSize[1], sceneSize[2]));
 
         //TODO: get main camera name from scene
         //FIXME: giving up on gltf camera for now
@@ -214,8 +208,17 @@ Window.create({
                 var uniforms = meshInfo._renderInfo.uniforms;
                 ctx.bindVertexArray(vao);
                 ctx.bindProgram(program);
+                var numActiveTextures = 0;
                 forEachKeyValue(uniforms, function(name, value) {
-                    program.setUniform(name, value);
+                    //FIXME: ugly uniform._handle texture detection
+                    if (value._handle) {
+                        ctx.bindTexture(value, numActiveTextures);
+                        program.setUniform(name, numActiveTextures);
+                        numActiveTextures++;
+                    }
+                    else {
+                        program.setUniform(name, value);
+                    }
                 })
 
                 program.setUniform('u_projectionMatrix', projectionMatrix);
@@ -234,15 +237,20 @@ Window.create({
 
         ctx.clear(ctx.COLOR_BIT | ctx.DEPTH_BIT);
 
-        //ctx.setViewMatrix(Mat4.lookAt9(this.viewMatrix,
-        //        Math.cos(time * Math.PI) * 5,
-        //        Math.sin(time * 0.5) * 4,
-        //        Math.sin(time * Math.PI) * 5,
-        //        0,0,0,0,1,0
-        //    )
-        //);
-
         if (this.json) {
+            ctx.setViewMatrix(Mat4.lookAt9(this.viewMatrix,
+                    this.sceneCenter[0] + this.sceneMaxSize * 2 * Math.cos(time * Math.PI),
+                    this.sceneCenter[1] + this.sceneMaxSize * 2 * Math.sin(time * 0.5),
+                    this.sceneCenter[2] + this.sceneMaxSize * 2 * Math.sin(time * Math.PI),
+                    this.sceneCenter[0],
+                    this.sceneCenter[1],
+                    this.sceneCenter[2],
+                    0,
+                    1,
+                    0
+                )
+            );
+
             var rootNodes = this.json.scenes[this.json.scene].nodes;
             this.drawNodes(ctx, this.json, rootNodes);
         }
