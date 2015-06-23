@@ -52,6 +52,8 @@ function simpleWindow(obj) {
     //TODO: add default width, height support
     canvas.width = obj.settings.width;
     canvas.height = obj.settings.height;
+    obj.width = canvas.width;
+    obj.height = canvas.height;
 
     //TODO: add MSAA multisample support
     //TODO: add stencil option support
