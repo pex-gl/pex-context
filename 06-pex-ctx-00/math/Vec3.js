@@ -14,6 +14,13 @@ function equals3(a,x,y,z){
            a[2] == z;
 }
 
+function set(a,b){
+    a[0] = b[0];
+    a[1] = b[1];
+    a[2] = b[2];
+    return a;
+}
+
 function set3(a,x,y,z){
     a[0] = x;
     a[1] = y;
@@ -234,6 +241,7 @@ function copy(a,out){
 
 var Vec3 = {
     create  : create,
+    set     : set,
     set3    : set3,
     copy    : copy,
     equals  : equals,

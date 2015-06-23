@@ -16,6 +16,13 @@ function equals4(a,x,y,z,w){
            a[3] == w;
 }
 
+function set(a,b){
+    a[0] = b[0];
+    a[1] = b[1];
+    a[2] = b[2];
+    a[3] = b[3];
+    return a;
+}
 function set4(a,x,y,z,w){
     a[0] = x;
     a[1] = y;
@@ -37,6 +44,7 @@ function copy(a,out){
 
 var Vec4 = {
     create: create,
+    set: set,
     set4: set4,
     copy: copy,
     equals: equals,
