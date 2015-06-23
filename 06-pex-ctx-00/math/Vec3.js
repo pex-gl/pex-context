@@ -56,6 +56,18 @@ function scale(a,n){
     return a;
 }
 
+function multMat4(a,m){
+    var x = a[0];
+    var y = a[1];
+    var z = a[2];
+
+    a[0] = m[ 0] * x + m[ 4] * y + m[ 8] * z + m[12];
+    a[1] = m[ 1] * x + m[ 5] * y + m[ 9] * z + m[13];
+    a[2] = m[ 2] * x + m[ 6] * y + m[10] * z + m[14];
+
+    return a;
+}
+
 function dot(a,b){
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
@@ -219,6 +231,7 @@ function copy(a,out){
     return a.slice(0);
 }
 
+
 var Vec3 = {
     create  : create,
     set3    : set3,
@@ -230,6 +243,7 @@ var Vec3 = {
     sub  : sub,
     sub3 : sub3,
     scale : scale,
+    multMat4 : multMat4,
     dot : dot,
     cross  : cross,
     cross3 : cross3,
