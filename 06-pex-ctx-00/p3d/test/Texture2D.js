@@ -21,20 +21,30 @@ void main() { \
 } \
 ';
 
+var FRAG_2_SRC = '\
+uniform sampler2D uTexture; \
+uniform sampler2D uTexture2; \
+varying vec2 vTexCoord; \
+void main() { \
+    gl_FragColor = texture2D(uTexture, vTexCoord) + texture2D(uTexture2, vTexCoord); \
+} \
+';
+
 if (Platform.isBrowser) {
     FRAG_SRC = 'precision highp float; \n' + FRAG_SRC;
+    FRAG_2_SRC = 'precision highp float; \n' + FRAG_2_SRC;
 }
 
 Window.create({
     settings: {
-        width: 512,
+        width: 768,
         height: 512,
         type: '3d'
     },
     init: function() {
         var ctx = this.getContext();
-        var program = ctx.createProgram(VERT_SRC, FRAG_SRC);
-        ctx.bindProgram(program);
+        var program = this.program = ctx.createProgram(VERT_SRC, FRAG_SRC);
+        var program2 = this.program2 = ctx.createProgram(VERT_SRC, FRAG_2_SRC);
 
         //FIXME: Weird, sampler2D uniform doesn't work in safari
         //program.setUniform('uTexture', 0);
@@ -67,12 +77,15 @@ Window.create({
         this.vao = ctx.createVertexArray(attributes, indexBuffer);
 
         var assetsPath = Platform.isBrowser ? 'assets' : __dirname + '/assets';
-        var file = assetsPath + '/img/octocat.png'
-        console.log(file);
-        loadImage(file, function(err, img) {
-            this.img = img;
+        loadImage(assetsPath + '/img/octocat.png', function(err, img) {
+            this.octocat = ctx.createTexture2D(img, img.width, img.height)
         }.bind(this))
-
+        loadImage(assetsPath + '/img/plask.png', function(err, img) {
+            this.plask = ctx.createTexture2D(img, img.width, img.height)
+        }.bind(this))
+        loadImage(assetsPath + '/img/checker.png', function(err, img) {
+            this.checker = ctx.createTexture2D(img, img.width, img.height)
+        }.bind(this))
     },
     update: function() {
 
@@ -83,14 +96,43 @@ Window.create({
         ctx.setClearColor(0.92, 0.2, 0.2, 1);
         ctx.clear(ctx.COLOR_BIT | ctx.DEPTH_BIT);
 
-        if (this.img && !this.texture) {
-            this.texture = ctx.createTexture2D(this.img, this.img.width, this.img.height)
+        if (!this.octocat || !this.plask || !this.checker) {
+            return;
         }
 
         ctx.bindVertexArray(this.vao);
-        if (this.texture) {
-            ctx.bindTexture(this.texture, 0);
-        }
+
+        ctx.bindProgram(this.program);
+
+        ctx.bindTexture(this.octocat, 0);
+        this.program.setUniform('uTexture', 0);
+        ctx.setViewport(0, 256, 256, 256);
+        ctx.draw(ctx.TRIANGLES, 0, this.vao.getIndexBuffer().getLength());
+
+        ctx.bindTexture(this.plask, 1);
+        this.program.setUniform('uTexture', 1);
+        ctx.setViewport(256, 256, 256, 256);
+        ctx.draw(ctx.TRIANGLES, 0, this.vao.getIndexBuffer().getLength());
+
+        ctx.bindTexture(this.checker, 2);
+        this.program.setUniform('uTexture', 2);
+        ctx.setViewport(2*256, 256, 256, 256);
+        ctx.draw(ctx.TRIANGLES, 0, this.vao.getIndexBuffer().getLength());
+
+        ctx.bindProgram(this.program2);
+        this.program2.setUniform('uTexture', 0);
+        this.program2.setUniform('uTexture2', 1);
+        ctx.setViewport(0, 0, 256, 256);
+        ctx.draw(ctx.TRIANGLES, 0, this.vao.getIndexBuffer().getLength());
+
+        ctx.pushState(ctx.TEXTURE_BIT);
+            ctx.bindTexture(this.plask, 0);
+            ctx.bindTexture(this.checker, 1);
+            ctx.setViewport(256, 0, 256, 256);
+            ctx.draw(ctx.TRIANGLES, 0, this.vao.getIndexBuffer().getLength());
+        ctx.popState(ctx.TEXTURE_BIT);
+
+        ctx.setViewport(2*256, 0, 256, 256);
         ctx.draw(ctx.TRIANGLES, 0, this.vao.getIndexBuffer().getLength());
     }
 })
