@@ -353,7 +353,7 @@ Context.prototype.popState = function(){
         }
     }
 
-    if((mask && SCISSOR_BIT) == SCISSOR_BIT){
+    if((mask & SCISSOR_BIT) == SCISSOR_BIT){
         if(this._scissorStack.length == 1){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','SCISSOR_BIT'));
         }
