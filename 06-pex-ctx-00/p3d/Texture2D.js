@@ -30,6 +30,8 @@ function Texture2D(ctx, data, width, height, options) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
 
     if (Platform.isBrowser && (format == gl.DEPTH_COMPONENT)) {
+        //TODO: Not required in WebGL 2.0
+        //TODO: Throw on extension not supported?
         gl.getExtension('WEBGL_depth_texture');
     }
 

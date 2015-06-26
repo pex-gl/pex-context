@@ -69,6 +69,7 @@ Window.create({
         var ctx = this.getContext();
         if (Platform.isBrowser) {
             var gl = ctx.getGL();
+            //TODO: do extension check in the Program?
             console.log(gl.getExtension('WEBGL_draw_buffers'));
         }
 

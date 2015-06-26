@@ -19,6 +19,8 @@ function Framebuffer(ctx, colorAttachments, depthAttachment) {
 
     //TODO: how to handle that?
     if (Platform.isBrowser) {
+        //TODO: Not required in WebGL 2.0
+        //TODO: Throw on extension not supported?
         this._webglDrawBuffersExt = gl.getExtension('WEBGL_draw_buffers');
         console.log(this._webglDrawBuffersExt)
     }
