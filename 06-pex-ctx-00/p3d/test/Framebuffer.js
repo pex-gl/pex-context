@@ -20,19 +20,21 @@ void main() { \
 } \
 ';
 
-var MTR_FRAG_SRC = '\
-varying vec3 vColor; \
-varying vec3 vNormal; \
-void main() { \
-    vec3 L = normalize(vec3(5.0, 15.0, 10.0)); \
-    vec3 N = normalize(vNormal); \
-    float NdotL = max(0.2, dot(N, L)); \
-    gl_FragData[0] = vec4(vColor, 1.0); \
-    gl_FragData[1] = vec4(N * 0.5 + 0.5, 1.0); \
-    gl_FragData[2] = vec4(NdotL, NdotL, NdotL, 1.0); \
-    gl_FragData[3] = vec4(NdotL * vColor, 1.0); \
-} \
-';
+var MTR_FRAG_SRC = '' +
+'#ifdef GL_ES\n' +
+'#extension GL_EXT_draw_buffers : require\n' +
+'#endif\n' +
+'varying vec3 vColor;\n' +
+'varying vec3 vNormal;\n' +
+'void main() {\n' +
+'    vec3 L = normalize(vec3(5.0, 15.0, 10.0));\n' +
+'    vec3 N = normalize(vNormal);\n' +
+'    float NdotL = max(0.2, dot(N, L));\n' +
+'    gl_FragData[0] = vec4(vColor, 1.0);\n' +
+'    gl_FragData[1] = vec4(N * 0.5 + 0.5, 1.0);\n' +
+'    gl_FragData[2] = vec4(NdotL, NdotL, NdotL, 1.0);\n' +
+'    gl_FragData[3] = vec4(NdotL * vColor, 1.0);\n' +
+'}\n';
 
 var DRAW_TEXTURE_VERT_SRC = '\
 attribute vec2 aPosition; \
@@ -65,6 +67,11 @@ Window.create({
     },
     init: function() {
         var ctx = this.getContext();
+        if (Platform.isBrowser) {
+            var gl = ctx.getGL();
+            console.log(gl.getExtension('WEBGL_draw_buffers'));
+        }
+
         this.mrtProgram = ctx.createProgram(MTR_VERT_SRC, MTR_FRAG_SRC);
         this.drawTextureProgram = ctx.createProgram(DRAW_TEXTURE_VERT_SRC, DRAW_TEXTURE_FRAG_SRC);
 

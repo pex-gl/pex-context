@@ -17,6 +17,12 @@ function Framebuffer(ctx, colorAttachments, depthAttachment) {
     this._width = 0;
     this._height = 0;
 
+    //TODO: how to handle that?
+    if (Platform.isBrowser) {
+        this._webglDrawBuffersExt = gl.getExtension('WEBGL_draw_buffers');
+        console.log(this._webglDrawBuffersExt)
+    }
+
     if (colorAttachments && colorAttachments[0]) {
         this._width = colorAttachments[0].texture.getWidth();
         this._height = colorAttachments[0].texture.getHeight();
@@ -66,7 +72,7 @@ Framebuffer.prototype._bindInternal = function() {
 
     if (this._colorAttachmentsPositions) {
         if (Platform.isBrowser) {
-          //this.webglDrawBuffersExt.drawBuffersWEBGL(this._colorAttachmentsPositions);
+          this._webglDrawBuffersExt.drawBuffersWEBGL(this._colorAttachmentsPositions);
         }
         else {
             gl.drawBuffers(this._colorAttachmentsPositions);
