@@ -1,6 +1,6 @@
 var Platform = require('../sys/Platform');
 
-function Texture2D(ctx, data, width, height, dataType, options) {
+function Texture2D(ctx, data, width, height, options) {
     var gl = this._gl = ctx.getGL();
     this._handle     = gl.createTexture();
     this._target     = gl.TEXTURE_2D;
@@ -8,11 +8,11 @@ function Texture2D(ctx, data, width, height, dataType, options) {
     this._height     = height;
 
     //TODO: implement options / sampler object
-    var internalFormat  = gl.RGBA;
-    var format          = gl.RGBA;
-    var repeat          = false;
-    var dataType        = gl.UNSIGNED_BYTE;
-    var flip            = false;
+    var internalFormat  = (options && options.format) || gl.RGBA;
+    var format          = (options && options.format) || gl.RGBA;
+    var repeat          = (options && options.repeat) || false;
+    var dataType        = (options && options.type  ) || gl.UNSIGNED_BYTE;
+    var flip            = (options && options.flip  ) || false;
     var lod             = 0;
 
     //FIXME: use context to bind texture

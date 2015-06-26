@@ -763,8 +763,8 @@ Context.prototype.getVertexArray = function(){
     return this._vertexArray;
 };
 
-Context.prototype.createTexture2D = function(data, width, height, dataFormat, options) {
-    return new Texture2D(this, data, width, height, dataFormat, options);
+Context.prototype.createTexture2D = function(data, width, height, options) {
+    return new Texture2D(this, data, width, height, options);
 };
 
 Context.prototype.bindTexture = function(texture, textureUnit) {
