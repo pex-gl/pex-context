@@ -392,6 +392,9 @@ Context.prototype.popState = function(){
     }
 
     if((mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
+        if(this._lineWidthStack.length == 1){
+            throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','LINE_WIDTH_BIT'));
+        }
         prev = this._lineWidth;
         this._lineWidth = this._lineWidthStack.pop();
         if(this._lineWidth != prev){
@@ -404,6 +407,9 @@ Context.prototype.popState = function(){
     }
 
     if((mask & VERTEX_ARRAY_BIT) == VERTEX_ARRAY_BIT){
+        if(this._vertexArrayStack.length == 1){
+            throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','VERTEX_ARRAY_BIT'));
+        }
         this.bindVertexArray(this._vertexArrayStack.pop());
     }
 };
