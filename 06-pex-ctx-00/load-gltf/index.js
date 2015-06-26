@@ -230,7 +230,7 @@ function handleTexture(ctx, json, basePath, textureName, textureInfo, callback) 
   log('handleTexture', textureInfo.source)
   if (textureInfo.source) {
     var img = json.images[textureInfo.source]._img;
-    textureInfo._texture = ctx.createTexture2D(img, img.width, img.height);
+    textureInfo._texture = ctx.createTexture2D(img, img.width, img.height, { repeat: true });
     callback(null, textureInfo);
   }
   else {
