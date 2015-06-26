@@ -169,6 +169,11 @@ function Context(gl){
     this._vertexArrayIndexBufferDataType = null;
     this._vertexArrayStack = [this._vertexArray];
 
+    this.TEXTURE_BIT = TEXTURE_BIT;
+    this._maxTextureImageUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+    this._textures = new Array(this._maxTextureImageUnits);
+    this._textureStack = [ this._textures.slice(0) ];
+
     this.LINE_WIDTH_BIT = LINE_WIDTH_BIT;
     this._lineWidth = gl.getParameter(gl.LINE_WIDTH);
     this._lineWidthStack = [this._lineWidth];
@@ -254,6 +259,10 @@ Context.prototype.pushState = function(mask){
 
     if((mask & VERTEX_ARRAY_BIT) == VERTEX_ARRAY_BIT){
         this._vertexArrayStack.push(this._vertexArray);
+    }
+
+    if((mask & TEXTURE_BIT) == TEXTURE_BIT){
+        this._textureStack.push(this._textures.slice(0));
     }
 
     this._mask = mask;
@@ -411,6 +420,20 @@ Context.prototype.popState = function(){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','VERTEX_ARRAY_BIT'));
         }
         this.bindVertexArray(this._vertexArrayStack.pop());
+    }
+
+    if((mask & TEXTURE_BIT) == TEXTURE_BIT){
+        if(this._textureStack.length == 1){
+            throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','TEXTURE_BIT'));
+        }
+        prev = this._textures;
+        stack = this._textureStack.pop();
+        for(var i = 0; i < stack.length; i++) {
+            if (prev[i] && (prev[i] != stack[i])) {
+                gl.activeTexture(gl.TEXTURE0 + i);
+                stack[i]._bindInternal();
+            }
+        }
     }
 };
 
@@ -775,9 +798,12 @@ Context.prototype.createTexture2D = function(data, width, height, options) {
 
 Context.prototype.bindTexture = function(texture, textureUnit) {
     var gl = this._gl;
-    gl.activeTexture(gl.TEXTURE0 + textureUnit);
-    texture._bindInternal();
-    //TODO: finish texture bind
+    textureUnit = textureUnit || 0; //TODO: What about this check?
+    if (this._textures[textureUnit] != texture) {
+        this._textures[textureUnit] = texture;
+        gl.activeTexture(gl.TEXTURE0 + textureUnit);
+        texture._bindInternal();
+    }
 };
 
 Context.prototype.draw = function(mode, first, count){
