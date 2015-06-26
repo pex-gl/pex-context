@@ -1,8 +1,9 @@
 var Platform = require('../sys/Platform');
 
+//TODO: update width and height if not passed but data is Image or Canvas
 function Texture2D(ctx, data, width, height, options) {
     this._ctx        = ctx;
-    var gl           = this._gl = ctx.getGL();
+    var gl           = ctx.getGL();
     this._handle     = gl.createTexture();
     this._target     = gl.TEXTURE_2D;
     this._width      = width;
@@ -31,9 +32,10 @@ function Texture2D(ctx, data, width, height, options) {
     this.update(data, width, height, options);
 }
 
+//TODO: update width and height if not passed but data is Image or Canvas
 Texture2D.prototype.update = function(data, width, height, options) {
     var ctx = this._ctx;
-    var gl  = this._gl;
+    var gl  = ctx.getGL();
 
     //TODO: Should we push stack here?
     ctx.bindTexture(this, 0);
@@ -46,7 +48,10 @@ Texture2D.prototype.update = function(data, width, height, options) {
     var flip            = (options && options.flip  ) || false;
     var lod             = (options && options.lod   ) || 0;
 
-    if (Platform.isPlask) {
+    if (!data) {
+        gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, null);
+    }
+    else if (Platform.isPlask) {
         if (flip) {
           gl.texImage2DSkCanvas(this._target, lod, data);
         }
@@ -68,11 +73,30 @@ Texture2D.prototype.update = function(data, width, height, options) {
 }
 
 Texture2D.prototype._bindInternal = function() {
-    this._gl.bindTexture(this._target, this._handle);
+    var gl  = this._ctx.getGL();
+    gl.bindTexture(this._target, this._handle);
 }
 
+Texture2D.prototype.getHandle = function() {
+    return this._handle;
+}
+
+Texture2D.prototype.getTarget = function() {
+    return this._target;
+}
+
+Texture2D.prototype.getWidth = function() {
+    return this._width;
+}
+
+Texture2D.prototype.getHeight = function() {
+    return this._height;
+}
+
+
 Texture2D.prototype.dispose = function(){
-    this._gl.deleteTexture(this._handle);
+    var gl  = this._ctx.getGL();
+    gl.deleteTexture(this._handle);
     this._width = 0;
     this._height = 0;
 };

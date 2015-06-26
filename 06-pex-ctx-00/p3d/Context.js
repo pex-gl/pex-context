@@ -200,6 +200,10 @@ function Context(gl){
     this.UNSIGNED_SHORT = gl.UNSIGNED_SHORT;
     this.UNSIGNED_INT   = gl.UNSIGNED_INT;
 
+    //Texture Formats
+    this.RGBA           = gl.RGBA;
+    this.DEPTH_COMPONENT= gl.DEPTH_COMPONENT;
+
     //Vertex Array
     this.STATIC_DRAW    = gl.STATIC_DRAW;
     this.DYNAMIC_DRAW   = gl.DYNAMIC_DRAW;
@@ -803,6 +807,21 @@ Context.prototype.bindTexture = function(texture, textureUnit) {
         this._textures[textureUnit] = texture;
         gl.activeTexture(gl.TEXTURE0 + textureUnit);
         texture._bindInternal();
+    }
+};
+
+Context.prototype.createFramebuffer = function(colorAttachments, depthAttachment) {
+    return new Framebuffer(this, colorAttachments, depthAttachment);
+};
+
+Context.prototype.bindFramebuffer = function(framebuffer) {
+    //TODO: implement framebuffer state stack
+    if (framebuffer) {
+        framebuffer._bindInternal();
+    }
+    else {
+        var gl = this._gl;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 };
 
