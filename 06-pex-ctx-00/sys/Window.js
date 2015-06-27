@@ -81,6 +81,11 @@ Window.create = function(obj){
         //other context
     }
 
+    //defaults
+    if (window.settings.multisample === undefined) {
+        window.settings.multisample = true;
+    }
+
     if (Platform.isPlask) {
         plask.simpleWindow(window);
     }
