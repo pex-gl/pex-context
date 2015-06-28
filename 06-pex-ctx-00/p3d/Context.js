@@ -203,6 +203,12 @@ function Context(gl){
     //Texture Formats
     this.RGBA           = gl.RGBA;
     this.DEPTH_COMPONENT= gl.DEPTH_COMPONENT;
+    this.NEAREST        = gl.NEAREST;
+    this.LINEAR         = gl.LINEAR;
+    this.NEAREST_MIPMAP_NEAREST = gl.NEAREST_MIPMAP_NEAREST;
+    this.NEAREST_MIPMAP_LINEAR  = gl.NEAREST_MIPMAP_LINEAR;
+    this.LINEAR_MIPMAP_NEAREST  = gl.LINEAR_MIPMAP_NEAREST;
+    this.LINEAR_MIPMAP_LINEAR   = gl.LINEAR_MIPMAP_LINEAR;
 
     //Vertex Array
     this.STATIC_DRAW    = gl.STATIC_DRAW;
