@@ -1,4 +1,5 @@
 var Platform = require('../sys/Platform');
+var plask = require('plask');
 
 //TODO: update width and height if not passed but data is Image or Canvas
 function Texture2D(ctx, data, width, height, options) {
@@ -14,15 +15,15 @@ function Texture2D(ctx, data, width, height, options) {
     var repeat          = (options && options.repeat) || false;
     var dataType        = (options && options.type  ) || gl.UNSIGNED_BYTE;
     var flip            = (options && options.flip  ) || false;
-    var lod             = 0;
+    var magFilter       = (options && options.magFilter  ) || gl.LINEAR;
+    var minFilter       = (options && options.minFilter  ) || gl.LINEAR;
+    var lod            = 0;
 
     //TODO: Should we push stack here?
     ctx.bindTexture(this, 0);
 
     var wrapS = repeat ? gl.REPEAT : gl.CLAMP_TO_EDGE;
     var wrapT = repeat ? gl.REPEAT : gl.CLAMP_TO_EDGE;
-    var magFilter = gl.LINEAR;
-    var minFilter = gl.LINEAR;
 
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, magFilter);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter);
@@ -58,11 +59,16 @@ Texture2D.prototype.update = function(data, width, height, options) {
         gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, null);
     }
     else if (Platform.isPlask) {
-        if (flip) {
-          gl.texImage2DSkCanvas(this._target, lod, data);
+        if (data instanceof plask.SkCanvas) {
+            if (flip) {
+              gl.texImage2DSkCanvas(this._target, lod, data);
+            }
+            else {
+              gl.texImage2DSkCanvasNoFlip(this._target, lod, data);
+            }
         }
         else {
-          gl.texImage2DSkCanvasNoFlip(this._target, lod, data);
+            gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
         }
     }
     else if (Platform.isBrowser) {
@@ -73,6 +79,7 @@ Texture2D.prototype.update = function(data, width, height, options) {
         }
         //Array buffer
         else {
+            //TODO: set flip flag
             gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
         }
     }
