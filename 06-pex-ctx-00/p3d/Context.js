@@ -13,6 +13,7 @@ var VertexArray = require('./VertexArray');
 var Framebuffer = require('./Framebuffer');
 
 var Texture2D   = require('./Texture2D');
+var TextureCube   = require('./TextureCube');
 
 var STR_ERROR_STACK_POP_BIT = 'Invalid pop. Bit %s stack is empty.';
 
@@ -804,6 +805,10 @@ Context.prototype.getVertexArray = function(){
 
 Context.prototype.createTexture2D = function(data, width, height, options) {
     return new Texture2D(this, data, width, height, options);
+};
+
+Context.prototype.createTextureCube = function(facesData, width, height, options) {
+    return new TextureCube(this, facesData, width, height, options);
 };
 
 Context.prototype.bindTexture = function(texture, textureUnit) {
