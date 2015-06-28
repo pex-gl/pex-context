@@ -1,8 +1,8 @@
-var Platform = require('../sys/Platform');
-var Window = require('../sys/Window');
-var Program = require('../p3d/Program');
-var Mat4 = require('../math/Mat4');
-var Vec3 = require('../math/Vec3');
+var Platform = require('../../sys/Platform');
+var Window = require('../../sys/Window');
+var Program = require('../../p3d/Program');
+var Mat4 = require('../../math/Mat4');
+var Vec3 = require('../../math/Vec3');
 var material = require('./BasicMateria.js');
 var torus = require('torus-mesh')({ majorRadius: 1, minorRadius: 0.5 });
 var R = require('ramda');
