@@ -1,12 +1,12 @@
 var log             = require('debug')('pex/gltf');
 var info            = require('debug')('pex/gltf/info');
 var async           = require('async');
-var loadJSON        = require('../sys/io/loadJson');
-var loadBinary      = require('../sys/io/loadBinary');
-var loadText        = require('../sys/io/loadText');
-var loadImage       = require('../sys/io/loadImage');
+var loadJSON        = require('../../sys/io/loadJson');
+var loadBinary      = require('../../sys/io/loadBinary');
+var loadText        = require('../../sys/io/loadText');
+var loadImage       = require('../../sys/io/loadImage');
 var path            = require('path');
-var Platform        = require('../sys/Platform');
+var Platform        = require('../../sys/Platform');
 
 var WebGLConstants = {
   34963: 'ELEMENT_ARRAY_BUFFER',  //0x8893
