@@ -59,7 +59,10 @@ uniform mat4 uInvViewMatrix; \
 uniform vec2 uRepeat; \
 void main() { \
   gl_FragColor = 0.5 * texture2D(uAlbedoMap, vTexCoord0 * uRepeat); \
+  /* all calculation in eye / camera space, doing it in world space would save some trouble but would require wcCamPos */ \
+  /* incident vector */ \
   vec3 I = normalize(ecPosition); \
+  /* surface normal */ \
   vec3 N = normalize(ecNormal); \
   vec3 ecReflection = reflect(I, N); \
   /* w = 0 because we are transforming direction, not position */ \

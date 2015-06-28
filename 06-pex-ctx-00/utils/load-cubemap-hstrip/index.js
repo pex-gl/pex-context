@@ -14,7 +14,12 @@ function cropImagePlask(img, x, y, w, h) {
 }
 
 function cropImageBrowser(img, x, y, w, h) {
-
+    var canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(img, x, y, w, h, 0, 0, w, h);
+    return canvas;
 }
 
 /**
