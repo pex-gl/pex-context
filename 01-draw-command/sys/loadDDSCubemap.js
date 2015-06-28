@@ -121,14 +121,19 @@ function loadDDSCubemap(gl, file) {
     }
 
     //http://msdn.microsoft.com/en-us/library/windows/desktop/bb205577(v=vs.85).aspx
+    console.log('mips', mips);
     for(var j=0; j<6; j++) {
-      for(var i=0; i<mips; i++) {
+      for(var i=0; i<10; i++) {
+          if (mips == 1 && i > 0) break;
         var mipWidth = width / Math.pow(2, i);
         var mipHeight = height / Math.pow(2, i);
         var bpp = floating ? 4 * 4 : 4;
         mipSize = mipWidth * mipHeight * bpp;
         var offset = headerSize;
-        offset += width * height * bpp * (1 - Math.pow(0.25, i)) / (1 - 0.25);
+        var mipIndex = i;
+        if (mipIndex > mips - 1) mipIndex = mips - 1;
+        console.log(mipIndex, mipWidth);
+        offset += width * height * bpp * (1 - Math.pow(0.25, mipIndex)) / (1 - 0.25);
         offset += j * width * height * bpp * (1 - Math.pow(0.25, mips)) / (1 - 0.25);
         var texDataSize = mipWidth * mipHeight * 4;
         var texData = floating ? new Float32Array(buf.slice(offset, offset + mipSize)) : new Uint8Array(buf.slice(offset, offset + mipSize));

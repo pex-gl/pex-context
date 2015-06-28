@@ -32,6 +32,8 @@ vec3 getSkybox(samplerCube reflectionMap, vec3 reflectionWorld) {
   float lod = roughness * maxMipMapLevel;
   float upLod = floor(lod);
   float downLod = ceil(lod);
+  upLod = 0.0;
+  downLod = 0.0;
   vec4 a = textureCubeLod(reflectionMap, fixSeams(reflectionWorld, upLod, cubemapSize), upLod);
   vec4 b = textureCubeLod(reflectionMap, fixSeams(reflectionWorld, downLod, cubemapSize), downLod);
 

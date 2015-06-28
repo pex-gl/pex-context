@@ -18,7 +18,7 @@ var loadImage    = require('./sys/loadImage');
 var Time         = require('./sys/Time');
 var Platform         = require('./sys/Platform');
 var loadDDSCubemap = require('./sys/loadDDSCubemap');
-var PBRProgram   = require('pex-shaders').PBRProgram;
+//var PBRProgram   = require('pex-shaders').PBRProgram;
 
 var targetBounds = [
   [-1, -1, -1],
@@ -27,7 +27,7 @@ var targetBounds = [
 
 var ASSETS_PATH = Platform.isBrowser ? 'assets' : __dirname + '/assets'
 
-Scene.prototype = Object.create(events.EventEmitter.prototype)
+//Scene.prototype = Object.create(events.EventEmitter.prototype)
 
 createWindow({
   settings: {
@@ -85,8 +85,15 @@ createWindow({
     this.bunnyMesh.addAttribute('normal', normals.vertexNormals(bunny.cells, bunny.positions), { size: 3 });
     this.bunnyMesh.addIndexBuffer(bunny.cells);
 
-    this.reflectionTexture = loadDDSCubemap(gl, ASSETS_PATH + '/cubemaps/pmrem_dds/ForestReflection.dds');
-    this.skyBoxTexture = loadDDSCubemap(gl, ASSETS_PATH + '/cubemaps/pmrem_dds/ForestIrradiance.dds');
+    //
+    //this.skyBoxTexture = loadDDSCubemap(gl, ASSETS_PATH + '/cubemaps/pmrem_dds/ForestIrradiance.dds');
+    //this.skyBoxTexture = loadDDSCubemap(gl, ASSETS_PATH + '/cubemaps/pmrem_dds/output_pmrem.dds');
+    //this.skyBoxTexture = loadDDSCubemap(gl, ASSETS_PATH + '/cubemaps/pmrem_dds/park_skybox32f.dds');
+    this.skyBoxTexture = loadDDSCubemap(gl, ASSETS_PATH + '/cubemaps/pmrem_dds/park_irr32f.dds');
+    this.reflectionTexture = loadDDSCubemap(gl, ASSETS_PATH + '/cubemaps/pmrem_dds/park_pmrem32f.dds');
+    //this.reflectionTexture = loadDDSCubemap(gl, ASSETS_PATH + '/cubemaps/pmrem_dds/output_pmrem.dds');
+    //this.reflectionTexture = loadDDSCubemap(gl, ASSETS_PATH + '/cubemaps/pmrem_dds/output_cubemap_rgb8_prem.dds');
+    //this.skyBoxTexture = loadDDSCubemap(gl, ASSETS_PATH + '/cubemaps/pmrem_dds/output_iem.dds');
 
     //
     try {

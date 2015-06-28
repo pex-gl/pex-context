@@ -6,7 +6,7 @@ varying vec3 normalWorld;
 varying vec3 positionWorld;
 varying vec3 positionView;
 
-float maxMipMapLevel = 7.0;
+float maxMipMapLevel = 6.0;
 float roughness = 0.9;
 float cubemapSize = 256.0;
 
