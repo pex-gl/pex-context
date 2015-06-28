@@ -72,7 +72,7 @@ Framebuffer.prototype._bindInternal = function() {
     var gl  = this._ctx.getGL();
     gl.bindFramebuffer(gl.FRAMEBUFFER, this._handle);
 
-    if (this._colorAttachmentsPositions) {
+    if (this._colorAttachmentsPositions.length > 1) {
         if (Platform.isBrowser) {
           this._webglDrawBuffersExt.drawBuffersWEBGL(this._colorAttachmentsPositions);
         }
