@@ -5,17 +5,16 @@ var NUM_VERTEX_ATTRIBUTES_MAX = 16;
 
 var STR_ERROR_UNIFORM_UNDEFINED = 'Uniform "%s" is not defined.';
 var STR_ERROR_WRONG_NUM_ARGS = 'Wrong number of arguments.';
-var STR_ERROR_INVALID_UNIFORM_TYPE = 'Invalid uniform type "%s".';
+var STR_ERROR_INVALID_UNIFORM_TYPE = 'Unsupported uniform type "%s".';
 var STR_ERROR_ATTRIBUTE_BINDING_UNDEFINED = 'Attribute "%s" is not present in program.';
 
 function Program(context, vertSrc, fragSrc, attributeLocationBinding){
     var gl = this._gl = context.getGL();
 
-    //TODO: creating program once like Pex or on every load like Foam
-    //If we don't do this in init then bind() can be invalid and it should throw
-    this._handle     = gl.createProgram();
-    this._attributes = {};
-    this._uniforms   = {};
+    this._handle           = gl.createProgram();
+    this._attributes       = {};
+    this._uniforms         = {};
+    this._uniformSetterMap = {};
     if(vertSrc){
         this.update(vertSrc, fragSrc, attributeLocationBinding);
     }
@@ -26,12 +25,11 @@ Program.prototype.getHandle = function(){
 };
 
 Program.prototype._bindInternal = function(){
-
     this._gl.useProgram(this._handle);
 };
 
 /**
- * updates ahders sources and links the program
+ * updates shaders sources and links the program
  * @param  {String} vertSrc                 - vert shader source (or combined vert/fragShader)
  * @param  {String} [fragSrc]               - frag shader source
  * @param  {String} [attributeLocationBinding] - attribute locations map { 0: 'aPositon', 1: 'aNormal', 2: 'aColor' }
@@ -70,6 +68,8 @@ Program.prototype.update = function(vertSrc, fragSrc, attributeLocationBinding){
             throw new Error(STR_ERROR_ATTRIBUTE_BINDING_UNDEFINED.replace('%s', attributeName));
         }
     }
+
+    this._updateUniformSetterMap();
 };
 
 Program.prototype._updateUniforms = function(){
@@ -116,90 +116,112 @@ Program.prototype._compileSource = function(type, src){
     return shader;
 };
 
-Program.prototype.setUniform = function(name, args){
+Program.prototype._updateUniformSetterMap = function(){
+    var gl = this._gl;
+
+    this._uniformSetterMap = {};
+    for(var entry in this._uniforms){
+        var type = this._uniforms[entry].type;
+        if(this._uniformSetterMap[type] === undefined){
+            switch (type){
+                case gl.INT:
+                case gl.BOOL:
+                case gl.SAMPLER_2D:
+                case gl.SAMPLER_CUBE:
+                    this._uniformSetterMap[gl.INT] = this._uniformSetterMap[gl.INT] || function(location,x,y,z,w){
+                        if(x === undefined || y !== undefined){
+                            throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+                        }
+                        gl.uniform1i(location,x);
+                    };
+                    this._uniformSetterMap[type] = this._uniformSetterMap[gl.INT];
+                    break;
+                case gl.FLOAT:
+                    this._uniformSetterMap[type] = function(location,x,y,z,w){
+                        if(x === undefined || y !== undefined){
+                            throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+                        }
+                        gl.uniform1f(location,x);
+                    };
+                    break;
+                case gl.FLOAT_VEC2:
+                    this._uniformSetterMap[type] = function(location,x,y,z,w){
+                        if(x === undefined || z !== undefined){
+                            throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+                        }
+                        if(y === undefined){
+                            gl.uniform2fv(location,x);
+                        }
+                        else {
+                            gl.uniform2f(location,x,y);
+                        }
+                    };
+                    break;
+                case gl.FLOAT_VEC3:
+                    this._uniformSetterMap[type] = function(location,x,y,z,w){
+                        if(x === undefined || w !== undefined || (y !== undefined && z === undefined)){
+                            throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+                        }
+                        if(y === undefined){
+                            gl.uniform3fv(location,x);
+                        }
+                        else {
+                            gl.uniform3f(location,x,y,z);
+                        }
+                    };
+                    break;
+                case gl.FLOAT_VEC4:
+                    this._uniformSetterMap[type] = function(location,x,y,z,w){
+                        if(x === undefined || (y !== undefined && z === undefined) || (z !== undefined && w === undefined)){
+                            throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+                        }
+                        if(y === undefined){
+                            gl.uniform4fv(location,x);
+                        }
+                        else {
+                            gl.uniform4f(location,x,y,z,w);
+                        }
+                    };
+                    break;
+                case gl.FLOAT_MAT2:
+                    this._uniformSetterMap[type] = function(location,x,y,z,w){
+                        if(x === undefined || y !== undefined){
+                            throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+                        }
+                        gl.uniformMatrix2fv(location,false,x);
+                    };
+                    break;
+                case gl.FLOAT_MAT3:
+                    this._uniformSetterMap[type] = function(location,x,y,z,w){
+                        if(x === undefined || y !== undefined){
+                            throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+                        }
+                        gl.uniformMatrix3fv(location,false,x);
+                    };
+                    break;
+                case gl.FLOAT_MAT4:
+                    this._uniformSetterMap[type] = function(location,x,y,z,w){
+                        if(x === undefined || y !== undefined){
+                            throw new Error(STR_ERROR_WRONG_NUM_ARGS);
+                        }
+                        gl.uniformMatrix4fv(location,false,x);
+                    };
+                    break;
+                default:
+                    throw new Error(STR_ERROR_INVALID_UNIFORM_TYPE.replace('%s',type));
+                    break;
+            }
+        }
+    }
+
+};
+
+Program.prototype.setUniform = function(name, x, y, z, w){
     var uniform = this._uniforms[name];
     if(uniform === undefined){
         throw new Error(STR_ERROR_UNIFORM_UNDEFINED.replace('%s', name));
     }
-    var type     = uniform.type;
-    var location = uniform.location;
-    var numArgs  = arguments.length - 1;
-    var gl       = this._gl;
-
-    switch(type){
-        case gl.INT:
-        case gl.BOOL:
-            if(numArgs != 1){
-                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
-            }
-            gl.uniform1i(location, arguments[1]);
-            break;
-        case gl.SAMPLER_2D:
-        case gl.SAMPLER_CUBE:
-            if(numArgs != 1){
-                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
-            }
-            gl.uniform1i(location, arguments[1]);
-            //but could also be texture
-            break;
-        case gl.FLOAT:
-            if(numArgs != 1){
-                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
-            }
-            gl.uniform1f(location, arguments[1]);
-            break;
-        case gl.FLOAT_VEC2:
-            if(numArgs != 1 && numArgs != 2){
-                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
-            }
-            if(numArgs == 1){
-                gl.uniform2fv(location, arguments[1]);
-            }else{
-                gl.uniform2f(location, arguments[1], arguments[2]);
-            }
-            break;
-        case gl.FLOAT_VEC3:
-            if(numArgs != 1 && numArgs != 3){
-                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
-            }
-            if(numArgs == 1){
-                gl.uniform3fv(location, arguments[1]);
-            }else{
-                gl.uniform3f(location, arguments[1], arguments[2], arguments[3]);
-            }
-            break;
-        case gl.FLOAT_VEC4:
-            if(numArgs != 1 && numArgs != 4){
-                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
-            }
-            if(numArgs == 1){
-                gl.uniform4fv(location, arguments[1]);
-            }else{
-                gl.uniform4f(location, arguments[1], arguments[2], arguments[3], arguments[4]);
-            }
-            break;
-        case gl.FLOAT_MAT2:
-            if(numArgs != 1){
-                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
-            }
-            gl.uniformMatrix2fv(location, false, arguments[1]);
-            break;
-        case gl.FLOAT_MAT3:
-            if(numArgs != 1){
-                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
-            }
-            gl.uniformMatrix3fv(location, false, arguments[1]);
-            break;
-        case gl.FLOAT_MAT4:
-            if(numArgs != 1){
-                throw new Error(STR_ERROR_WRONG_NUM_ARGS);
-            }
-            gl.uniformMatrix4fv(location, false, arguments[1]);
-            break;
-        default :
-            throw new Error(STR_ERROR_INVALID_UNIFORM_TYPE.replace('%s', type));
-            break;
-    }
+    this._uniformSetterMap[uniform.type](uniform.location,x,y,z,w);
 };
 
 Program.prototype.hasUniform = function(name){
