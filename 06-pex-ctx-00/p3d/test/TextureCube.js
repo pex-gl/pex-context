@@ -5,7 +5,7 @@ var Mat3 = require('../../math/Mat3');
 var Mat4 = require('../../math/Mat4');
 var Vec3 = require('../../math/Vec3');
 var torus = require('torus-mesh')({ majorRadius: 1, minorRadius: 0.5 });
-var skybox = require('../../utils/primitive-cube')(20, 20, 20);
+var skybox = require('../../utils/primitive-cube')(50, 50, 50);
 var R = require('ramda');
 var loadCubemapHStrip = require('../../utils/load-cubemap-hstrip');
 
@@ -58,7 +58,7 @@ uniform samplerCube uEnvMap; \
 uniform mat4 uInvViewMatrix; \
 uniform vec2 uRepeat; \
 void main() { \
-  gl_FragColor = 0.5 * texture2D(uAlbedoMap, vTexCoord0 * uRepeat); \
+  gl_FragColor = texture2D(uAlbedoMap, vTexCoord0 * uRepeat); \
   /* all calculation in eye / camera space, doing it in world space would save some trouble but would require wcCamPos */ \
   /* incident vector */ \
   vec3 I = normalize(ecPosition); \
@@ -67,7 +67,7 @@ void main() { \
   vec3 ecReflection = reflect(I, N); \
   /* w = 0 because we are transforming direction, not position */ \
   vec3 wcReflection = vec3(uInvViewMatrix * vec4(ecReflection, 0.0)); \
-  gl_FragColor += textureCube(uEnvMap, wcReflection); \
+  gl_FragColor = textureCube(uEnvMap, wcReflection); \
 }';
 
 if (Platform.isBrowser) {
@@ -116,7 +116,7 @@ Window.create({
         var ctx = this.getContext();
 
         this.modelMatrix = Mat4.create();
-        this.projectionMatrix = Mat4.perspective(Mat4.create(), 90, this.getAspectRatio(), 0.01, 100.0);
+        this.projectionMatrix = Mat4.perspective(Mat4.create(), 90, this.getAspectRatio()/2, 0.01, 100.0);
         this.viewMatrix = Mat4.lookAt([], [4, 3, 4], [0, 0, 0], [0, 1, 0]);
         this.invViewMatrix = Mat4.lookAt([], [4, 3, 4], [0, 0, 0], [0, 1, 0]);
         this.normalMatrixTemp4 = Mat4.create();
@@ -147,8 +147,12 @@ Window.create({
         })
 
         var assetsPath = Platform.isBrowser ? 'assets' : __dirname + '/assets';
-        loadCubemapHStrip(assetsPath + '/cubemaps/test_cubemap_hstrip.png', function(err, images) {
-            this.envMap = ctx.createTextureCube(images);
+
+        loadCubemapHStrip(assetsPath + '/cubemaps/Hamarikyu_Bridge_hstrip_400.jpg', function(err, images) {
+            this.envMap1 = ctx.createTextureCube(images);
+        }.bind(this));
+        loadCubemapHStrip(assetsPath + '/cubemaps/Hamarikyu_Bridge_irr_hstrip.jpg', function(err, images) {
+            this.envMap2 = ctx.createTextureCube(images);
         }.bind(this));
     },
     seconds: 0,
@@ -192,16 +196,28 @@ Window.create({
         Mat3.fromMat4(this.normalMatrix, this.normalMatrixTemp4);
 
         ctx.bindTexture(this.albedoMap, 0);
-        ctx.bindTexture(this.envMap, 1);
         ctx.bindProgram(this.reflectionProgram);
         this.reflectionProgram.setUniform('uNormalMatrix', this.normalMatrix);
         this.reflectionProgram.setUniform('uInvViewMatrix', this.invViewMatrix);
 
+        ctx.pushState(ctx.VIEWPORT_BIT);
+
+        ctx.setViewport(0, 0, this.getWidth()/2, this.getHeight());
+        ctx.bindTexture(this.envMap1, 1);
         ctx.bindVertexArray(this.torusVao);
         ctx.draw(ctx.TRIANGLES, 0, this.torusVao.getIndexBuffer().getLength())
-
         ctx.bindProgram(this.skyboxProgram);
         ctx.bindVertexArray(this.skyboxVao);
         ctx.draw(ctx.TRIANGLES, 0, this.skyboxVao.getIndexBuffer().getLength())
+
+        ctx.setViewport(this.getWidth()/2, 0, this.getWidth()/2, this.getHeight());
+        ctx.bindTexture(this.envMap2, 1);
+        ctx.bindVertexArray(this.torusVao);
+        ctx.draw(ctx.TRIANGLES, 0, this.torusVao.getIndexBuffer().getLength());
+        ctx.bindProgram(this.skyboxProgram);
+        ctx.bindVertexArray(this.skyboxVao);
+        ctx.draw(ctx.TRIANGLES, 0, this.skyboxVao.getIndexBuffer().getLength());
+
+        ctx.popState(ctx.VIEWPORT_BIT);
     }
 })
