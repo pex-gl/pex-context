@@ -235,6 +235,35 @@ function Context(gl){
     this.TRIANGLES      = gl.TRIANGLES;
     this.TRIANGLE_STRIP = gl.TRIANGLE_STRIP;
     this.TRIANGLE_FAN   = gl.TRIANGLE_FAN;
+
+    //extensions
+    //ANGLE_instanced_arrays
+    if (!gl.drawElementsInstanced) {
+        var ext = gl.getExtension("ANGLE_instanced_arrays");
+        if (!ext) {
+            gl.drawElementsInstanced = function() {
+                throw new Error('ANGLE_instanced_arrays not supported');
+            }
+            gl.drawArraysInstanced = function() {
+                throw new Error('ANGLE_instanced_arrays not supported');
+            }
+            gl.vertexAttribDivisor = function() {
+                throw new Error('ANGLE_instanced_arrays not supported');
+            }
+        }
+        else {
+            gl.drawElementsInstanced = function() {
+                ext.drawElementsInstancedANGLE.apply(ext, arguments);
+            }
+            gl.drawArraysInstanced = function() {
+                ext.drawArraysInstancedANGLE.apply(ext, arguments);
+            }
+            gl.vertexAttribDivisor = function() {
+                ext.vertexAttribDivisorANGLE.apply(ext, arguments);
+            }
+        }
+        //gl = drawElementsInstancedANGLE
+    }
 }
 
 Context.prototype.getGL = function(){
