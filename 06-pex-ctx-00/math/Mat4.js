@@ -446,6 +446,46 @@ function setRotationFromOnB(a, u, v, w){
     return setRotationFromOnB9(a, u[0], u[1], u[2], v[0], v[1], v[2], w[0], w[1], w[2]);
 }
 
+function fromQuat(a,b){
+    var x = b[0];
+    var y = b[1];
+    var z = b[2];
+    var w = b[3];
+
+    var x2 = x + x;
+    var y2 = y + y;
+    var z2 = z + z;
+
+    var xx = x * x2;
+    var xy = x * y2;
+    var xz = x * z2;
+
+    var yy = y * y2;
+    var yz = y * z2;
+    var zz = z * z2;
+
+    var wx = w * x2;
+    var wy = w * y2;
+    var wz = w * z2;
+
+    a[ 0] = 1 - ( yy + zz );
+    a[ 4] = xy - wz;
+    a[ 8] = xz + wy;
+
+    a[ 1] = xy + wz;
+    a[ 5] = 1 - ( xx + zz );
+    a[ 9] = yz - wx;
+
+    a[ 2] = xz - wy;
+    a[ 6] = yz + wx;
+    a[10] = 1 - ( xx + yy );
+
+    a[ 3] = a[ 7] = a[11] = a[12] = a[13] = a[14] = 0;
+    a[15] = 1;
+
+    return a;
+}
+
 function createFromScale3(x,y,z){
     return setScale3(create(),x ,y ,z);
 }
@@ -635,6 +675,7 @@ var Mat4 = {
     rotate       : rotate,
     setRotationFromOnB9 : setRotationFromOnB9,
     setRotationFromOnB  : setRotationFromOnB,
+    fromQuat : fromQuat,
     identity : identity,
     createFromScale3 : createFromScale3,
     createFromScale  : createFromScale,
