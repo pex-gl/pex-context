@@ -54,13 +54,21 @@ Window.create({
         var indexBuffer = ctx.createBuffer(ctx.ELEMENT_ARRAY_BUFFER, indices, ctx.STATIC_DRAW);
         var positionBuffer = ctx.createBuffer(ctx.ARRAY_BUFFER, vertices, ctx.DYNAMIC_DRAW);
         var colorBuffer = ctx.createBuffer(ctx.ARRAY_BUFFER, colors, ctx.STATIC_DRAW);
+
         var attributes = [
             { buffer: positionBuffer, location: ctx.ATTRIB_POSITION, size: 2, offset: 0, stride: 8 },
             { buffer: colorBuffer, location: ctx.ATTRIB_COLOR, size: 4, offset: 0, stride: 16 }
         ];
-        var vao = ctx.createVertexArray(attributes, indexBuffer);
 
-        this.vao   = vao;
+        //Throws error for already defined layout at same attribute location
+        //var attributes = [
+        //    { buffer: positionBuffer, location: ctx.ATTRIB_POSITION, size: 2, offset: 0, stride: 8 },
+        //    { buffer: colorBuffer, location: ctx.ATTRIB_POSITION, size: 4, offset: 0, stride: 16 }
+        //];
+
+
+        this.vao = ctx.createVertexArray(attributes, indexBuffer);
+
     },
     update: function() {
 
