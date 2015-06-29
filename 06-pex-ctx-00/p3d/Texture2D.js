@@ -72,32 +72,10 @@ Texture2D.prototype.update = function(data, width, height, options) {
         else {
             if (compressed) {
                 if (compressed == 'dxt1') {
-                    //var ext = gl.getExtension('WEBGL_compressed_texture_s3tc');
-                    //console.log('compressed', compressed, width, height, ext)
-
-                    //var blockSize = 8;
-                    //var size2 = Math.ceil((width+3)/4)*((height+3)/4)*blockSize;
-                    //var size = ((width)/4)*((height)/4)*blockSize;
-                    //console.log(size2, size);
-                    //size = data.byteLength;
-
-                    console.log('COMPRESSED_RGB_S3TC_DXT1', gl.COMPRESSED_RGB_S3TC_DXT1_EXT, gl.COMPRESSED_RGB_S3TC_DXT1, height, 'data:', data.byteLength);
-
-                    gl.compressedTexImage2D(gl.TEXTURE_2D, 0, 0x83F0, width, height, 0, data);
-
-                    //blockSize = (ddsimage->format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
-
-                    var err = gl.getError();
-                    Object.keys(gl).forEach(function(name) {
-                        if (gl[name] == err && err != 0) {
-                            console.log('ERR', name, gl.COMPRESSED_RGB_S3TC_DXT1_EXT);
-                        }
-                    })
+                    gl.compressedTexImage2D(gl.TEXTURE_2D, 0, gl.COMPRESSED_RGB_S3TC_DXT1_EXT, width, height, 0, data);
                 }
                 if (compressed == 'dxt5') {
-                    //var ext = gl.getExtension('WEBGL_compressed_texture_s3tc');
-                    //console.log('compressed', compressed, width, height, ext)
-                    //gl.compressedTexImage2D(gl.TEXTURE_2D, lod, gl.COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, data);
+                    gl.compressedTexImage2D(gl.TEXTURE_2D, lod, gl.COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, data);
                 }
             }
             else {
@@ -108,12 +86,10 @@ Texture2D.prototype.update = function(data, width, height, options) {
     else if (Platform.isBrowser) {
         if (compressed == 'dxt1') {
             var ext = gl.getExtension('WEBGL_compressed_texture_s3tc');
-            console.log('compressed', compressed, width, height, ext)
             gl.compressedTexImage2D(gl.TEXTURE_2D, lod, ext.COMPRESSED_RGB_S3TC_DXT1_EXT, width, height, 0, data);
         }
         if (compressed == 'dxt5') {
             var ext = gl.getExtension('WEBGL_compressed_texture_s3tc');
-            console.log('compressed', compressed, width, height, ext)
             gl.compressedTexImage2D(gl.TEXTURE_2D, lod, ext.COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, data);
         }
         else {
