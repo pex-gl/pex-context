@@ -852,7 +852,7 @@ Context.prototype.bindFramebuffer = function(framebuffer) {
     }
 };
 
-Context.prototype.draw = function(mode, first, count){
+Context.prototype._updateMatrixUniforms = function(){
     var programMatrixBitUniforms = this._programMatrixUniformBits;
 
     for(var uniformName in programMatrixBitUniforms){
@@ -863,6 +863,31 @@ Context.prototype.draw = function(mode, first, count){
             this._matrixSend[matrixBit] = true;
         }
     }
+};
+
+Context.prototype.drawArrays = function(mode, first, count){
+    this._updateMatrixUniforms();
+    this._gl.drawArrays(mode, first, count);
+};
+
+Context.prototype.drawArraysInstanced = function(mode, first, count, primcount){
+    this._updateMatrixUniforms();
+    this._gl.drawArraysInstanced(mode, first, count, primcount);
+};
+
+Context.prototype.drawElements = function(mode, count, offset){
+    this._updateMatrixUniforms();
+    this._gl.drawElements(mode, count, this._vertexArrayIndexBufferDataType, offset);
+};
+
+Context.prototype.drawElementsInstanced = function(mode, count, offset, primcount){
+    this._updateMatrixUniforms();
+    this._gl.drawElementsInstanced(mode, count, this._vertexArrayIndexBufferDataType, offset, primcount);
+};
+
+//NOTE: We keep this for a moment to prevent breaking everything atm.
+Context.prototype.draw = function(mode, first, count){
+    this._updateMatrixUniforms();
 
     if (this._vertexArrayHasIndexBuffer) {
         if (this._vertexArrayHasDivisor) {
