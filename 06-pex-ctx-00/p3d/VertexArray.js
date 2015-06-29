@@ -42,6 +42,7 @@ function VertexArray(ctx,attributes,indexBuffer){
     this._hasDivisor   = false;
 
     var attrib, attribCopy, defaultProp, buffer;
+    var attributesPerBuffer;
     var bufferIndex;
 
     for(var i = 0, numAttributes = attributes.length; i < numAttributes; ++i){
@@ -75,10 +76,14 @@ function VertexArray(ctx,attributes,indexBuffer){
          }
 
         //Check if location for that attribute is not taken already
-        //FIXME: This is currently broken, we check by location but assign by buffer index below
-        //if(this._attributes[attribCopy.location] !== undefined){
-        //    throw new Error(STR_ERROR_ATTRIB_LOCATION_DUPLICATE.replace('%s',attrib.location));
-        //}
+        for(var bufferAttributeKey in this._attributes){
+            attributesPerBuffer = this._attributes[bufferAttributeKey];
+            for(var j = 0; j < attributesPerBuffer.length; ++j){
+                if(attributesPerBuffer[j].location === attrib.location){
+                    throw new Error(STR_ERROR_ATTRIB_LOCATION_DUPLICATE.replace('%s',attrib.location));
+                }
+            }
+        }
 
         buffer      = attribCopy.buffer;
         bufferIndex = this._arrayBuffers.indexOf(buffer);
