@@ -142,8 +142,7 @@ function Context(gl){
     this._matrixUniformBitMap[ProgramUniform.PROJECTION_MATRIX] = MATRIX_PROJECTION_BIT;
     this._matrixUniformBitMap[ProgramUniform.VIEW_MATRIX]       = MATRIX_VIEW_BIT;
     this._matrixUniformBitMap[ProgramUniform.MODEL_MATRIX]      = MATRIX_MODEL_BIT;
-
-    this._matrixMode    = MATRIX_MODEL_BIT;
+    
     this._matrixF32Temp = new Float32Array(16);
 
     this._matrixSend = {};
