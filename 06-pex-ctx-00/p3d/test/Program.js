@@ -16,6 +16,24 @@ void main() { \
 } \
 ';
 
+//Vertex source with undefined attribute
+//var VERT_SRC = '\
+//attribute vec2 position; \
+//void main() { \
+//  gl_Position = vec4(positionUndefined, 0.0, 1.0); \
+//} \
+//';
+
+//Fragment source with undefined uniform
+//var FRAG_SRC = '\
+//uniform vec4 uColor; \
+//void main() { \
+//  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \
+//  gl_FragColor = uColorUndefined; \
+//} \
+//';
+
+
 Window.create({
   settings: {
     type: '3d'
