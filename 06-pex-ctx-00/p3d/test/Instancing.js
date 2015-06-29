@@ -99,7 +99,7 @@ Window.create({
             ctx.ARRAY_BUFFER,
             new Float32Array(offsets),
             ctx.STATIC_DRAW
-        )
+        );
 
         var indexBuffer = ctx.createBuffer(
             ctx.ELEMENT_ARRAY_BUFFER,
@@ -113,8 +113,6 @@ Window.create({
             ]),
             ctx.STATIC_DRAW
         );
-
-
 
         var attributes = [
             { buffer : positionColorNormalBuffer, location : ctx.ATTRIB_POSITION, size : 3, stride : 9 * 4, offset : 0     },
@@ -145,8 +143,7 @@ Window.create({
         ctx.bindVertexArray(this.cubeVao);
         ctx.identity();
         ctx.scale([0.2, 0.2, 0.2]);
-        ctx.draw(ctx.TRIANGLES, 0, this.cubeVao.getIndexBuffer().getLength());
-
+        ctx.drawElementsInstanced(ctx.TRIANGLES,this.cubeVao.getIndexBuffer().getLength(),0,5000);
         this.t += 1 / 60;
     }
 });
