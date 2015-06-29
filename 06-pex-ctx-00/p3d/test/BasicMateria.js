@@ -26,6 +26,13 @@ void main() { \
   gl_FragColor = texture2D(iChannel0, vUv * repeat + uvOffset); \
 }';
 
+var Platform = require('../../sys/Platform');
+
+if (Platform.isBrowser) {
+    FRAG = 'precision highp float; \n' + FRAG;
+}
+
+
 module.exports = {
     vert: VERT,
     frag: FRAG
