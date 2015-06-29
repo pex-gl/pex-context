@@ -168,6 +168,7 @@ function Context(gl){
     this._vertexArray = null;
     this._vertexArrayHasIndexBuffer = false;
     this._vertexArrayIndexBufferDataType = null;
+    this._vertexArrayHasDivisor = false;
     this._vertexArrayStack = [this._vertexArray];
 
     this.TEXTURE_BIT = TEXTURE_BIT;
@@ -806,6 +807,7 @@ Context.prototype.bindVertexArray = function(vertexArray) {
     this._vertexArray = vertexArray;
     this._vertexArrayHasIndexBuffer = vertexArray.hasIndexBuffer();
     this._vertexArrayIndexBufferDataType = this._vertexArrayHasIndexBuffer ? vertexArray.getIndexBuffer().getDataType() : null;
+    this._vertexArrayHasDivisor = vertexArray.hasDivisor();
 };
 
 Context.prototype.getVertexArray = function(){
@@ -858,10 +860,23 @@ Context.prototype.draw = function(mode, first, count){
     }
 
     if (this._vertexArrayHasIndexBuffer) {
-        this._gl.drawElements(mode, count, this._vertexArrayIndexBufferDataType, first);
+        if (this._vertexArrayHasDivisor) {
+            //FIXME: Hardcoded num of instances
+            this._gl.drawElementsInstanced(mode, count, this._vertexArrayIndexBufferDataType, 0, 1000);
+        }
+        else {
+            this._gl.drawElements(mode, count, this._vertexArrayIndexBufferDataType, first);
+        }
     }
     else {
-        this._gl.drawArrays(mode, first, count);
+        if (this._vertexArrayHasDivisor) {
+            //FIXME: Hardcoded num of instances
+            this._gl.drawArraysInstanced(mode, first, count, 1000);
+        }
+        else {
+            this._gl.drawArrays(mode, first, count);
+        }
+
     }
 };
 
