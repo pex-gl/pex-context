@@ -1,4 +1,4 @@
-# Context.draw
+    # Context.draw
 
 ## BGFX
 
@@ -10,6 +10,9 @@ Instancing Example
 https://github.com/bkaradzic/bgfx/blob/master/examples/05-instancing/instancing.cpp
 
 ```c++
+//interesting layout is part of VBO
+bgfx::VertexBufferHandle vbh = bgfx::createVertexBuffer(mem, PosColorVertex::ms_decl);
+
 bgfx::setProgram(program);
 
 // Set vertex and index buffer.
