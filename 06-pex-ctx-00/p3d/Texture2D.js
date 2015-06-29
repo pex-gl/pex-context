@@ -17,7 +17,8 @@ function Texture2D(ctx, data, width, height, options) {
     var flip            = (options && options.flip  ) || false;
     var magFilter       = (options && options.magFilter  ) || gl.LINEAR;
     var minFilter       = (options && options.minFilter  ) || gl.LINEAR;
-    var lod            = 0;
+    var lod             = 0;
+    var compressed      = (options && options.compressed) || false;
 
     //TODO: Should we push stack here?
     ctx.bindTexture(this, 0);
@@ -54,6 +55,7 @@ Texture2D.prototype.update = function(data, width, height, options) {
     var dataType        = (options && options.type  ) || gl.UNSIGNED_BYTE;
     var flip            = (options && options.flip  ) || false;
     var lod             = (options && options.lod   ) || 0;
+    var compressed      = (options && options.compressed) || false;
 
     if (!data) {
         gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, null);
@@ -68,20 +70,66 @@ Texture2D.prototype.update = function(data, width, height, options) {
             }
         }
         else {
-            gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
+            if (compressed) {
+                if (compressed == 'dxt1') {
+                    //var ext = gl.getExtension('WEBGL_compressed_texture_s3tc');
+                    //console.log('compressed', compressed, width, height, ext)
+
+                    //var blockSize = 8;
+                    //var size2 = Math.ceil((width+3)/4)*((height+3)/4)*blockSize;
+                    //var size = ((width)/4)*((height)/4)*blockSize;
+                    //console.log(size2, size);
+                    //size = data.byteLength;
+
+                    console.log('COMPRESSED_RGB_S3TC_DXT1', gl.COMPRESSED_RGB_S3TC_DXT1_EXT, gl.COMPRESSED_RGB_S3TC_DXT1, height, 'data:', data.byteLength);
+
+                    gl.compressedTexImage2D(gl.TEXTURE_2D, 0, 0x83F0, width, height, 0, data);
+
+                    //blockSize = (ddsimage->format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
+
+                    var err = gl.getError();
+                    Object.keys(gl).forEach(function(name) {
+                        if (gl[name] == err && err != 0) {
+                            console.log('ERR', name, gl.COMPRESSED_RGB_S3TC_DXT1_EXT);
+                        }
+                    })
+                }
+                if (compressed == 'dxt5') {
+                    //var ext = gl.getExtension('WEBGL_compressed_texture_s3tc');
+                    //console.log('compressed', compressed, width, height, ext)
+                    //gl.compressedTexImage2D(gl.TEXTURE_2D, lod, gl.COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, data);
+                }
+            }
+            else {
+                gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
+            }
         }
     }
     else if (Platform.isBrowser) {
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flip);
-        //Image, ImageData or Canvas
-        if (data.width && data.height) {
-            gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, format, dataType, data);
+        if (compressed == 'dxt1') {
+            var ext = gl.getExtension('WEBGL_compressed_texture_s3tc');
+            console.log('compressed', compressed, width, height, ext)
+            gl.compressedTexImage2D(gl.TEXTURE_2D, lod, ext.COMPRESSED_RGB_S3TC_DXT1_EXT, width, height, 0, data);
         }
-        //Array buffer
+        if (compressed == 'dxt5') {
+            var ext = gl.getExtension('WEBGL_compressed_texture_s3tc');
+            console.log('compressed', compressed, width, height, ext)
+            gl.compressedTexImage2D(gl.TEXTURE_2D, lod, ext.COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, data);
+        }
         else {
-            //TODO: set flip flag
-            gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
+            //gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flip);
+            //Image, ImageData or Canvas
+            if (data.width && data.height) {
+                gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, format, dataType, data);
+            }
+            //Array buffer
+            else {
+                //TODO: set flip flag
+                gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
+            }
         }
+
     }
 }
 
