@@ -39,9 +39,7 @@ uniform mat4 uModelMatrix; \
 uniform mat3 uNormalMatrix; \
 varying vec3 ecNormal; \
 varying vec3 ecPosition; \
-varying vec2 vTexCoord0; \
 void main() { \
-  vTexCoord0 = aTexCoord0; \
   ecNormal = uNormalMatrix * aNormal; \
   vec4 ecPos = uViewMatrix * uModelMatrix * aPosition; \
   ecPosition = ecPos.xyz; \
@@ -50,15 +48,11 @@ void main() { \
 }';
 
 var REFLECTION_FRAG_SRC = ' \
-varying vec2 vTexCoord0; \
 varying vec3 ecNormal; \
 varying vec3 ecPosition; \
-uniform sampler2D uAlbedoMap; \
 uniform samplerCube uEnvMap; \
 uniform mat4 uInvViewMatrix; \
-uniform vec2 uRepeat; \
 void main() { \
-  gl_FragColor = texture2D(uAlbedoMap, vTexCoord0 * uRepeat); \
   /* all calculation in eye / camera space, doing it in world space would save some trouble but would require wcCamPos */ \
   /* incident vector */ \
   vec3 I = normalize(ecPosition); \
@@ -124,27 +118,14 @@ Window.create({
 
         this.skyboxProgram = ctx.createProgram(SKYBOX_VERT_SRC, SKYBOX_FRAG_SRC);
         ctx.bindProgram(this.skyboxProgram);
-        this.skyboxProgram.setUniform('uEnvMap', 1);
+        this.skyboxProgram.setUniform('uEnvMap', 0);
 
         this.reflectionProgram = ctx.createProgram(REFLECTION_VERT_SRC, REFLECTION_FRAG_SRC);
         ctx.bindProgram(this.reflectionProgram);
-        this.reflectionProgram.setUniform('uRepeat', [ 8, 8 ]);
-        this.reflectionProgram.setUniform('uAlbedoMap', 0);
-        this.reflectionProgram.setUniform('uEnvMap', 1);
+        this.reflectionProgram.setUniform('uEnvMap', 0);
 
         this.torusVao = vaoFromMesh(ctx, torus);
         this.skyboxVao = vaoFromMesh(ctx, skybox);
-
-        var img = new Uint8Array(R.flatten([
-            [0xff, 0xff, 0xff, 0xff], [0xcc, 0xcc, 0xcc, 0xff],
-            [0xcc, 0xcc, 0xcc, 0xff], [0xff, 0xff, 0xff, 0xff]
-        ]));
-
-        this.albedoMap = ctx.createTexture2D(img, 2, 2, {
-          repeat: true,
-          minFilter: ctx.NEAREST,
-          magFilter: ctx.NEAREST
-        })
 
         var assetsPath = Platform.isBrowser ? 'assets' : __dirname + '/assets';
 
@@ -195,7 +176,6 @@ Window.create({
         Mat4.transpose(this.normalMatrixTemp4);
         Mat3.fromMat4(this.normalMatrix, this.normalMatrixTemp4);
 
-        ctx.bindTexture(this.albedoMap, 0);
         ctx.bindProgram(this.reflectionProgram);
         this.reflectionProgram.setUniform('uNormalMatrix', this.normalMatrix);
         this.reflectionProgram.setUniform('uInvViewMatrix', this.invViewMatrix);
@@ -203,7 +183,7 @@ Window.create({
         ctx.pushState(ctx.VIEWPORT_BIT);
 
         ctx.setViewport(0, 0, this.getWidth()/2, this.getHeight());
-        ctx.bindTexture(this.envMap1, 1);
+        ctx.bindTexture(this.envMap1, 0);
         ctx.bindVertexArray(this.torusVao);
         ctx.draw(ctx.TRIANGLES, 0, this.torusVao.getIndexBuffer().getLength())
         ctx.bindProgram(this.skyboxProgram);
@@ -211,7 +191,7 @@ Window.create({
         ctx.draw(ctx.TRIANGLES, 0, this.skyboxVao.getIndexBuffer().getLength())
 
         ctx.setViewport(this.getWidth()/2, 0, this.getWidth()/2, this.getHeight());
-        ctx.bindTexture(this.envMap2, 1);
+        ctx.bindTexture(this.envMap2, 0);
         ctx.bindVertexArray(this.torusVao);
         ctx.draw(ctx.TRIANGLES, 0, this.torusVao.getIndexBuffer().getLength());
         ctx.bindProgram(this.skyboxProgram);

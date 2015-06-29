@@ -2,6 +2,13 @@ var Platform = require('../sys/Platform');
 var plask = require('plask');
 
 //TODO: update width and height if not passed but data is Image or Canvas
+//facesData = Array of {
+//  face - face index 0..6 for +x, -x, +y, -y, +z, -z
+//  level - mipmap level
+//  width - faceWidth,
+//  height - faceHeight
+//  data - faceData - SkCanvas, HTMLCanvas, ImageData, TypeArray
+// }
 function TextureCube(ctx, facesData, width, height, options) {
     this._ctx        = ctx;
     var gl           = ctx.getGL();
@@ -57,16 +64,14 @@ TextureCube.prototype.update = function(facesData, options) {
     var flip            = (options && options.flip  ) || false;
     var lod             = (options && options.lod   ) || 0;
 
-    var target = gl.TEXTURE_CUBE_MAP;
 
     for(var i=0; i<facesData.length; i++) {
         var face = facesData[i];
-        console.log('TextureCube.update', i, face.width, face.data[0])
         var data = face.data;
         var width = face.width;
         var height = face.height;
         var lod = face.lod;
-        var target = face.target;
+        var target = ctx.TEXTURE_CUBE_MAP_POSITIVE_X + face.face;
         if (!data) {
             gl.texImage2D(target, lod, internalFormat, width, height, 0, format, dataType, null);
         }

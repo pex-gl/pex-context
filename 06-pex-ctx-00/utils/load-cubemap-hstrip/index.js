@@ -2,8 +2,6 @@ var loadImage = require('../load-image');
 var isPlask = require('../is-plask');
 var plask = isPlask ? require('plask') : {};
 
-var TEXTURE_CUBE_MAP_POSITIVE_X = 0x8515;
-
 var tmpSkPaint = null;
 
 function cropImagePlask(img, x, y, w, h) {
@@ -43,11 +41,11 @@ function loadCubemapHStrip(url, callback) {
         for(var i=0; i<numFaces; i++) {
             var faceData = cropImage(img, i * faceWidth, 0, faceWidth, faceHeight);
             faces.push({
-                data: faceData,
-                target: TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                face: i,
+                level: 0,
                 width: faceWidth,
                 height: faceHeight,
-                level: 0
+                data: faceData
             })
         }
 
