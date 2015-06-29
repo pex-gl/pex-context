@@ -44,10 +44,48 @@ function fromMat4(a,b){
     return a;
 }
 
+function fromQuat(a,b){
+    var x = b[0];
+    var y = b[1];
+    var z = b[2];
+    var w = b[3];
+
+    var x2 = x + x;
+    var y2 = y + y;
+    var z2 = z + z;
+
+    var xx = x * x2;
+    var xy = x * y2;
+    var xz = x * z2;
+
+    var yy = y * y2;
+    var yz = y * z2;
+    var zz = z * z2;
+
+    var wx = w * x2;
+    var wy = w * y2;
+    var wz = w * z2;
+
+    a[0] = 1 - ( yy + zz );
+    a[3] = xy - wz;
+    a[6] = xz + wy;
+
+    a[1] = xy + wz;
+    a[4] = 1 - ( xx + zz );
+    a[7] = yz - wx;
+
+    a[2] = xz - wy;
+    a[5] = yz + wx;
+    a[8] = 1 - ( xx + yy );
+
+    return a;
+}
+
 var Mat3 = {
     create : create,
     equals : equals,
-    fromMat4 : fromMat4
+    fromMat4 : fromMat4,
+    fromQuat : fromQuat
 };
 
 module.exports = Mat3;
