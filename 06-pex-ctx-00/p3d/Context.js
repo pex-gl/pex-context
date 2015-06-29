@@ -142,7 +142,8 @@ function Context(gl){
     this._matrixUniformBitMap[ProgramUniform.PROJECTION_MATRIX] = MATRIX_PROJECTION_BIT;
     this._matrixUniformBitMap[ProgramUniform.VIEW_MATRIX]       = MATRIX_VIEW_BIT;
     this._matrixUniformBitMap[ProgramUniform.MODEL_MATRIX]      = MATRIX_MODEL_BIT;
-    
+
+    this._matrixTemp    = Mat4.create();
     this._matrixF32Temp = new Float32Array(16);
 
     this._matrixSend = {};
@@ -731,6 +732,11 @@ Context.prototype.rotate = function(r,v){
 
 Context.prototype.rotateXYZ = function(v){
     Mat4.rotateXYZ(this._matrix[MATRIX_MODEL_BIT],v);
+    this._matrixSend[MATRIX_MODEL_BIT] = false;
+};
+
+Context.prototype.rotateQuat = function(q){
+    Mat4.mult(this._matrix[MATRIX_MODEL_BIT],Mat4.fromQuat(this._matrixTemp,q));
     this._matrixSend[MATRIX_MODEL_BIT] = false;
 };
 
