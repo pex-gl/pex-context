@@ -108,6 +108,16 @@ bindAttributes(numAttributes, attributes, offset) {
     for (var n = 0; n < numAttributes; n += 1) {
         ....
     }
+
+    //returns mask of enabled attributes
+}
+
+//the attributes are enabled back in Context per pass
+mask = (pass.semanticsMask & attributeMask);
+/* tslint:enable:no-bitwise */
+if (mask !== this.clientStateMask)
+{
+    this.enableClientState(mask);
 }
 ```
 
