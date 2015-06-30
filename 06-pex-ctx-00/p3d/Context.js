@@ -73,29 +73,21 @@ function Context(gl){
     this._depthClearValue = gl.getParameter(gl.DEPTH_CLEAR_VALUE);
     this._depthRange      = glObjToArray(gl.getParameter(gl.DEPTH_RANGE)).slice(0,2);
     this._polygonOffset   = [gl.getParameter(gl.POLYGON_OFFSET_FACTOR),gl.getParameter(gl.POLYGON_OFFSET_UNITS)];
-
-    this._depthStack = [[
-        this._depthTest, this._depthMask, this._depthFunc,
-        this._depthClearValue, this._depthRange.slice(0), Vec2.copy(this._polygonOffset)
-    ]];
+    this._depthStack      = [];
 
     this.COLOR_BIT   = COLOR_BIT;
     this._clearColor = [0, 0, 0, 1];
     this._colorMask  = gl.getParameter(gl.COLOR_WRITEMASK);
-    this._colorStack = [[
-        Vec4.copy(this._clearColor), Vec4.copy(this._colorMask)
-    ]];
+    this._colorStack = [];
 
     this.SCISSOR_BIT   = SCISSOR_BIT;
     this._scissorTest  = gl.getParameter(gl.SCISSOR_TEST);
     this._scissorBox   = glObjToArray(gl.getParameter(gl.SCISSOR_BOX)).slice(0,4);
-    this._scissorStack = [[
-        this._scissorTest, Vec4.copy(this._scissorBox)
-    ]];
+    this._scissorStack = [];
 
     this.VIEWPORT_BIT   = VIEWPORT_BIT;
     this._viewport      = glObjToArray(gl.getParameter(gl.VIEWPORT)).slice(0,4);
-    this._viewportStack = [Vec4.copy(this._viewport)];
+    this._viewportStack = [];
 
     this.STENCIL_BIT          = STENCIL_BIT;
     this._stencilTest         = gl.getParameter(gl.STENCIL_TEST);
@@ -103,9 +95,7 @@ function Context(gl){
     this._stencilFuncSeparate = null;
     this._stencilOp           = null;
     this._stencilOpSeparate   = null;
-    this._stenciStack = [[
-        this._stencilTest, this._stencilFunc, this._stencilFuncSeparate, this._stencilOp, this._stencilOpSeparate
-    ]];
+    this._stenciStack         = [];
 
     this.CULL_BIT = CULL_BIT;
 
@@ -115,15 +105,13 @@ function Context(gl){
     this._blendEquation         = gl.getParameter(gl.BLEND_EQUATION);
     this._blendEquationSeparate = [gl.getParameter(gl.BLEND_EQUATION_RGB),gl.getParameter(gl.BLEND_EQUATION_ALPHA)];
     this._blendFunc             = null;
-    this._blendStack = [[
-        this._blend,this._blendColor,this._blendEquation,Vec2.copy(this._blendEquationSeparate),this._blendFunc
-    ]];
+    this._blendStack            = [];
 
     this.ALPHA_BIT = ALPHA_BIT;
 
     this.LINE_WIDTH_BIT  = LINE_WIDTH_BIT;
     this._lineWidth      = gl.getParameter(gl.LINE_WIDTH);
-    this._lineWidthStack = [this._lineWidth];
+    this._lineWidthStack = [];
 
     this.MATRIX_PROJECTION_BIT = MATRIX_PROJECTION_BIT;
     this.MATRIX_VIEW_BIT       = MATRIX_VIEW_BIT;
@@ -154,7 +142,7 @@ function Context(gl){
     this.PROGAM_BIT = PROGRAM_BIT;
     this._program = null;
     this._programMatrixUniformBits = {};
-    this._programStack = [this._program];
+    this._programStack = [];
 
     this.BUFFER_BIT = BUFFER_BIT;
     this._bufferPrev = {};
@@ -169,16 +157,16 @@ function Context(gl){
     this._vertexArrayHasIndexBuffer = false;
     this._vertexArrayIndexBufferDataType = null;
     this._vertexArrayHasDivisor = false;
-    this._vertexArrayStack = [this._vertexArray];
+    this._vertexArrayStack = [];
 
     this.TEXTURE_BIT = TEXTURE_BIT;
     this._maxTextureImageUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
     this._textures = new Array(this._maxTextureImageUnits);
-    this._textureStack = [ this._textures.slice(0) ];
+    this._textureStack = [];
 
     this.LINE_WIDTH_BIT = LINE_WIDTH_BIT;
     this._lineWidth = gl.getParameter(gl.LINE_WIDTH);
-    this._lineWidthStack = [this._lineWidth];
+    this._lineWidthStack = [];
 
     this.ATTRIB_POSITION    = ProgramAttributeLocation.POSITION;
     this.ATTRIB_COLOR       = ProgramAttributeLocation.COLOR;
@@ -330,7 +318,7 @@ Context.prototype.popState = function(){
     }
 
     if((mask & COLOR_BIT) == COLOR_BIT){
-        if(this._colorStack.length == 1){
+        if(this._colorStack.length == 0){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','COLOR_BIT'));
         }
         stack = this._colorStack[this._colorStack.length - 1];
@@ -349,7 +337,7 @@ Context.prototype.popState = function(){
     }
 
     if((mask & DEPTH_BIT) == DEPTH_BIT){
-        if(this._depthStack.length == 1){
+        if(this._depthStack.length == 0){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','DEPTH_BIT'));
         }
         stack = this._depthStack.pop();
@@ -401,7 +389,7 @@ Context.prototype.popState = function(){
     }
 
     if((mask & VIEWPORT_BIT) == VIEWPORT_BIT){
-        if(this._viewportStack.length == 1){
+        if(this._viewportStack.length == 0){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','VIEWPORT_BIT'));
         }
 
@@ -413,7 +401,7 @@ Context.prototype.popState = function(){
     }
 
     if((mask & SCISSOR_BIT) == SCISSOR_BIT){
-        if(this._scissorStack.length == 1){
+        if(this._scissorStack.length == 0){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','SCISSOR_BIT'));
         }
         stack = this._scissorStack.pop();
@@ -451,7 +439,7 @@ Context.prototype.popState = function(){
     }
 
     if((mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
-        if(this._lineWidthStack.length == 1){
+        if(this._lineWidthStack.length == 0){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','LINE_WIDTH_BIT'));
         }
         prev = this._lineWidth;
@@ -466,14 +454,14 @@ Context.prototype.popState = function(){
     }
 
     if((mask & VERTEX_ARRAY_BIT) == VERTEX_ARRAY_BIT){
-        if(this._vertexArrayStack.length == 1){
+        if(this._vertexArrayStack.length == 0){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','VERTEX_ARRAY_BIT'));
         }
         this.bindVertexArray(this._vertexArrayStack.pop());
     }
 
     if((mask & TEXTURE_BIT) == TEXTURE_BIT){
-        if(this._textureStack.length == 1){
+        if(this._textureStack.length == 0){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','TEXTURE_BIT'));
         }
         prev = this._textures;
