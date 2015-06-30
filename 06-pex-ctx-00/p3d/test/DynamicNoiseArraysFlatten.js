@@ -107,8 +107,21 @@ Window.create({
         console.timeEnd('normals');
 
         console.time('flatten');
-        this.positionArray.set(R.flatten(positions));
-        this.normalArray.set(R.flatten(normals));
+        //R.flatten = 20ms
+        //this.positionArray.set(R.flatten(positions));
+        //this.normalArray.set(R.flatten(normals));
+
+        //for loop = 1-2ms
+        for(var i=0, len=positions.length; i<len; i++) {
+            this.positionArray[i*3  ] = positions[i][0];
+            this.positionArray[i*3+1] = positions[i][1];
+            this.positionArray[i*3+2] = positions[i][2];
+        }
+        for(var i=0, len=normals.length; i<len; i++) {
+            this.normalArray[i*3  ] = normals[i][0];
+            this.normalArray[i*3+1] = normals[i][1];
+            this.normalArray[i*3+2] = normals[i][2];
+        }
         console.timeEnd('flatten');
 
         gl.finish();
