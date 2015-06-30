@@ -17,6 +17,7 @@
     "clone": "^1.0.2",
     "debug": "^2.2.0",
     "ramda": "^0.15.1",
+    "simplex-noise": "^2.2.0",
     "torus-mesh": "^1.0.0"
   }
 }
