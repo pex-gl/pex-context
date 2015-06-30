@@ -231,24 +231,24 @@ function Context(gl){
         if (!ext) {
             gl.drawElementsInstanced = function() {
                 throw new Error('ANGLE_instanced_arrays not supported');
-            }
+            };
             gl.drawArraysInstanced = function() {
                 throw new Error('ANGLE_instanced_arrays not supported');
-            }
+            };
             gl.vertexAttribDivisor = function() {
                 throw new Error('ANGLE_instanced_arrays not supported');
-            }
+            };
         }
         else {
             gl.drawElementsInstanced = function() {
                 ext.drawElementsInstancedANGLE.apply(ext, arguments);
-            }
+            };
             gl.drawArraysInstanced = function() {
                 ext.drawArraysInstancedANGLE.apply(ext, arguments);
-            }
+            };
             gl.vertexAttribDivisor = function() {
                 ext.vertexAttribDivisorANGLE.apply(ext, arguments);
-            }
+            };
         }
         //gl = drawElementsInstancedANGLE
     }
@@ -502,7 +502,7 @@ Context.prototype.getState = function(mask){
         state.push(Vec4.copy(this._viewport));
     }
 
-    if((mask && SCISSOR_BIT) == SCISSOR_BIT){
+    if((mask & SCISSOR_BIT) == SCISSOR_BIT){
         state.push([this._scissorTest, this._scissorStack]);
     }
 
@@ -522,7 +522,7 @@ Context.prototype.getState = function(mask){
         state.push(this._lineWidth);
     }
 
-    if((mask && PROGRAM_BIT) == PROGRAM_BIT){
+    if((mask & PROGRAM_BIT) == PROGRAM_BIT){
         state.push(this._program);
     }
 
