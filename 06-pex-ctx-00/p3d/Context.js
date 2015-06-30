@@ -1,3 +1,4 @@
+var Mat3 = require('../math/Mat3');
 var Mat4 = require('../math/Mat4');
 var Vec2 = require('../math/Vec2');
 var Vec3 = require('../math/Vec3');
@@ -39,6 +40,12 @@ var VERTEX_ARRAY_BIT      = 1 << 21;
 var PROGRAM_BIT           = 1 << 22;
 var TEXTURE_BIT           = 1 << 23;
 var XBO_BIT               = 1 << 24;
+
+var MATRIX_PROJECTION    = 'matrixProjection';
+var MATRIX_VIEW          = 'matrixView';
+var MATRIX_MODEL         = 'matrixModel';
+var MATRIX_NORMAL        = 'matrixNormal';
+var MATRIX_INVERSE_VIEW  = 'matrixInverseView';
 
 //UITLS
 
@@ -117,31 +124,46 @@ function Context(gl){
     this.MATRIX_VIEW_BIT       = MATRIX_VIEW_BIT;
     this.MATRIX_MODEL_BIT      = MATRIX_MODEL_BIT;
     this._matrix = {};
-    this._matrix[MATRIX_PROJECTION_BIT] = Mat4.create();
-    this._matrix[MATRIX_VIEW_BIT]       = Mat4.create();
-    this._matrix[MATRIX_MODEL_BIT]      = Mat4.create();
+    this._matrix[MATRIX_PROJECTION]   = Mat4.create();
+    this._matrix[MATRIX_VIEW]         = Mat4.create();
+    this._matrix[MATRIX_MODEL]        = Mat4.create();
+    this._matrix[MATRIX_NORMAL]       = Mat3.create();
+    this._matrix[MATRIX_INVERSE_VIEW] = Mat4.create();
 
     this._matrixStack = {};
-    this._matrixStack[MATRIX_PROJECTION_BIT] = [this._matrix[MATRIX_PROJECTION_BIT]];
-    this._matrixStack[MATRIX_VIEW_BIT]       = [this._matrix[MATRIX_VIEW_BIT]];
-    this._matrixStack[MATRIX_MODEL_BIT]      = [this._matrix[MATRIX_MODEL_BIT]];
+    this._matrixStack[MATRIX_PROJECTION_BIT] = [];
+    this._matrixStack[MATRIX_VIEW_BIT]       = [];
+    this._matrixStack[MATRIX_MODEL_BIT]      = [];
 
-    this._matrixUniformBitMap = {};
-    this._matrixUniformBitMap[ProgramUniform.PROJECTION_MATRIX] = MATRIX_PROJECTION_BIT;
-    this._matrixUniformBitMap[ProgramUniform.VIEW_MATRIX]       = MATRIX_VIEW_BIT;
-    this._matrixUniformBitMap[ProgramUniform.MODEL_MATRIX]      = MATRIX_MODEL_BIT;
+    this._matrixTypeByUniformNameMap = {};
+    this._matrixTypeByUniformNameMap[ProgramUniform.PROJECTION_MATRIX]   = MATRIX_PROJECTION;
+    this._matrixTypeByUniformNameMap[ProgramUniform.VIEW_MATRIX]         = MATRIX_VIEW;
+    this._matrixTypeByUniformNameMap[ProgramUniform.MODEL_MATRIX]        = MATRIX_MODEL;
+    this._matrixTypeByUniformNameMap[ProgramUniform.NORMAL_MATRIX]       = MATRIX_NORMAL;
+    this._matrixTypeByUniformNameMap[ProgramUniform.INVERSE_VIEW_MATRIX] = MATRIX_INVERSE_VIEW;
 
-    this._matrixTemp    = Mat4.create();
-    this._matrixF32Temp = new Float32Array(16);
+    this._matrix4Temp    = Mat4.create();
+    this._matrix4F32Temp = new Float32Array(16);
+    this._matrix3F32Temp = new Float32Array(9);
+
+    this._matrixTempByTypeMap = {};
+    this._matrixTempByTypeMap[MATRIX_PROJECTION] =
+    this._matrixTempByTypeMap[MATRIX_VIEW] =
+    this._matrixTempByTypeMap[MATRIX_MODEL] =
+    this._matrixTempByTypeMap[MATRIX_INVERSE_VIEW] = this._matrix4F32Temp;
+    this._matrixTempByTypeMap[MATRIX_NORMAL] = this._matrix3F32Temp;
 
     this._matrixSend = {};
-    this._matrixSend[MATRIX_PROJECTION_BIT] = false;
-    this._matrixSend[MATRIX_VIEW_BIT]       = false;
-    this._matrixSend[MATRIX_MODEL_BIT]      = false;
+    this._matrixSend[MATRIX_PROJECTION]  = false;
+    this._matrixSend[MATRIX_VIEW]        = false;
+    this._matrixSend[MATRIX_MODEL]       = false;
+    this._matrixSend[MATRIX_NORMAL]      = false;
+    this._matrixSend[MATRIX_INVERSE_VIEW]= false;
+
+    this._matrixTypesByUniformInProgram = {};
 
     this.PROGAM_BIT = PROGRAM_BIT;
     this._program = null;
-    this._programMatrixUniformBits = {};
     this._programStack = [];
 
     this.BUFFER_BIT = BUFFER_BIT;
@@ -674,92 +696,97 @@ Context.prototype.clear = function(mask){
 };
 
 Context.prototype.setProjectionMatrix = function(matrix){
-    Mat4.set(this._matrix[MATRIX_PROJECTION_BIT],matrix);
-    this._matrixSend[MATRIX_PROJECTION_BIT] = false;
+    Mat4.set(this._matrix[MATRIX_PROJECTION],matrix);
+    this._matrixSend[MATRIX_PROJECTION] = false;
 };
 
 Context.prototype.setViewMatrix = function(matrix){
-    Mat4.set(this._matrix[MATRIX_VIEW_BIT],matrix);
-    this._matrixSend[MATRIX_VIEW_BIT] = false;
+    Mat4.set(this._matrix[MATRIX_VIEW],matrix);
+    this._matrixSend[MATRIX_VIEW] = false;
+
+    if(this._matrixTypesByUniformInProgram[MATRIX_INVERSE_VIEW] !== undefined){
+        Mat4.invert(Mat4.set(this._matrix[MATRIX_INVERSE_VIEW],matrix));
+        this._matrixSend[MATRIX_INVERSE_VIEW] = false;
+    }
 };
 
 Context.prototype.setModelMatrix = function(matrix){
-    Mat4.set(this._matrix[MATRIX_MODEL_BIT],matrix);
-    this._matrixSend[MATRIX_MODEL_BIT] = false;
+    Mat4.set(this._matrix[MATRIX_MODEL],matrix);
+    this._matrixSend[MATRIX_MODEL] = false;
 };
 
 Context.prototype.getProjectionMatrix = function(out){
-    return Mat4.copy(this._matrix[MATRIX_PROJECTION_BIT],out);
+    return Mat4.copy(this._matrix[MATRIX_PROJECTION],out);
 };
 
 Context.prototype.getViewMatrix = function(out){
-    return Mat4.copy(this._matrix[MATRIX_VIEW_BIT],out);
+    return Mat4.copy(this._matrix[MATRIX_VIEW],out);
 };
 
 Context.prototype.getModelMatrix = function(out){
-    return Mat4.copy(this._matrix[MATRIX_MODEL_BIT],out);
+    return Mat4.copy(this._matrix[MATRIX_MODEL],out);
 };
 
 Context.prototype.pushProjectionMatrix = function(){
-    this._matrixStack[MATRIX_PROJECTION_BIT].push(Mat4.copy(this._matrix[MATRIX_PROJECTION_BIT]));
+    this._matrixStack[MATRIX_PROJECTION_BIT].push(Mat4.copy(this._matrix[MATRIX_PROJECTION]));
 };
 
 Context.prototype.popProjectionMatrix = function(){
-    this._matrix[MATRIX_PROJECTION_BIT] = this._matrixStack[MATRIX_PROJECTION_BIT].pop();
-    this._matrixSend[MATRIX_PROJECTION_BIT] = false;
+    this._matrix[MATRIX_PROJECTION] = this._matrixStack[MATRIX_PROJECTION_BIT].pop();
+    this._matrixSend[MATRIX_PROJECTION] = false;
 };
 
 Context.prototype.pushViewMatrix = function(){
-    this._matrixStack[MATRIX_VIEW_BIT].push(Mat4.copy(this._matrix[MATRIX_VIEW_BIT]));
+    this._matrixStack[MATRIX_VIEW_BIT].push(Mat4.copy(this._matrix[MATRIX_VIEW]));
 };
 
 Context.prototype.popViewMatrix = function(){
-    this._matrix[MATRIX_VIEW_BIT] = this._matrixStack[MATRIX_VIEW_BIT].pop();
-    this._matrixSend[MATRIX_VIEW_BIT] = false;
+    this._matrix[MATRIX_VIEW] = this._matrixStack[MATRIX_VIEW_BIT].pop();
+    this._matrixSend[MATRIX_VIEW] = false;
 };
 
 Context.prototype.pushModelMatrix = function(){
-    this._matrixStack[MATRIX_MODEL_BIT].push(Mat4.copy(this._matrix[MATRIX_MODEL_BIT]));
+    this._matrixStack[MATRIX_MODEL_BIT].push(Mat4.copy(this._matrix[MATRIX_MODEL]));
 };
 
 Context.prototype.popModelMatrix = function(){
-    this._matrix[MATRIX_MODEL_BIT] = this._matrixStack[MATRIX_MODEL_BIT].pop();
-    this._matrixSend[MATRIX_MODEL_BIT] = false;
+    this._matrix[MATRIX_MODEL] = this._matrixStack[MATRIX_MODEL_BIT].pop();
+    this._matrixSend[MATRIX_MODEL] = false;
 };
 
 Context.prototype.identity = function(){
-    Mat4.identity(this._matrix[MATRIX_MODEL_BIT]);
-    this._matrixSend[MATRIX_MODEL_BIT] = false;
+    Mat4.identity(this._matrix[MATRIX_MODEL]);
+    this._matrixSend[MATRIX_MODEL] = false;
 };
 
 Context.prototype.scale = function(v){
-    Mat4.scale(this._matrix[MATRIX_MODEL_BIT],v);
-    this._matrixSend[MATRIX_MODEL_BIT] = false;
+    Mat4.scale(this._matrix[MATRIX_MODEL],v);
+    this._matrixSend[MATRIX_MODEL] = false;
 };
 
 Context.prototype.translate = function(v){
-    Mat4.translate(this._matrix[MATRIX_MODEL_BIT],v);
-    this._matrixSend[MATRIX_MODEL_BIT] = false;
+    Mat4.translate(this._matrix[MATRIX_MODEL],v);
+    this._matrixSend[MATRIX_MODEL] = false;
 };
 
 Context.prototype.rotate = function(r,v){
-    Mat4.rotate(this._matrix[MATRIX_MODEL_BIT],r,v);
-    this._matrixSend[MATRIX_MODEL_BIT] = false;
+    Mat4.rotate(this._matrix[MATRIX_MODEL],r,v);
+    this._matrixSend[MATRIX_MODEL] = false;
 };
 
 Context.prototype.rotateXYZ = function(v){
-    Mat4.rotateXYZ(this._matrix[MATRIX_MODEL_BIT],v);
-    this._matrixSend[MATRIX_MODEL_BIT] = false;
+    Mat4.rotateXYZ(this._matrix[MATRIX_MODEL],v);
+    this._matrixSend[MATRIX_MODEL] = false;
 };
 
 Context.prototype.rotateQuat = function(q){
-    Mat4.mult(this._matrix[MATRIX_MODEL_BIT],Mat4.fromQuat(this._matrixTemp,q));
-    this._matrixSend[MATRIX_MODEL_BIT] = false;
+    Mat4.mult(this._matrix[MATRIX_MODEL],Mat4.fromQuat(this._matrix4Temp,q));
+    this._matrixSend[MATRIX_MODEL] = false;
 };
 
 Context.prototype.multMatrix = function(m){
-    Mat4.mult(this._matrix[MATRIX_MODEL_BIT],m);
-    this._matrixSend[MATRIX_MODEL_BIT] = false;
+    Mat4.mult(this._matrix[MATRIX_MODEL],m);
+    this._matrixSend[MATRIX_MODEL] = false;
 };
 
 Context.prototype.createProgram = function(vertSrc, fragSrc, attributeLocationMap){
@@ -770,18 +797,27 @@ Context.prototype.bindProgram = function(program) {
     if(program === this._program){
         return;
     }
-    program._bindInternal();
-    this._program = program;
-    this._matrixSend[MATRIX_PROJECTION_BIT] = false;
-    this._matrixSend[MATRIX_VIEW_BIT]       = false;
-    this._matrixSend[MATRIX_MODEL_BIT]      = false;
+    var prevHadInverseViewMatrix = this._matrixTypesByUniformInProgram[ProgramUniform.INVERSE_VIEW_MATRIX] !== undefined;
 
-    this._programMatrixUniformBits = {};
+    program._bindInternal();
+
+    this._program = program;
+    this._matrixSend[MATRIX_PROJECTION]   = false;
+    this._matrixSend[MATRIX_VIEW]         = false;
+    this._matrixSend[MATRIX_MODEL]        = false;
+    this._matrixSend[MATRIX_NORMAL]       = false;
+    this._matrixSend[MATRIX_INVERSE_VIEW] = false;
+
+    this._matrixTypesByUniformInProgram = {};
     for(var entry in ProgramUniform){
         var uniformName = ProgramUniform[entry];
         if(program.hasUniform(uniformName)){
-            this._programMatrixUniformBits[uniformName] = this._matrixUniformBitMap[uniformName];
+            this._matrixTypesByUniformInProgram[uniformName] = this._matrixTypeByUniformNameMap[uniformName];
         }
+    }
+
+    if(!prevHadInverseViewMatrix && this._matrixTypesByUniformInProgram[ProgramUniform.INVERSE_VIEW_MATRIX] !== undefined){
+        Mat4.invert(Mat4.set(this._matrix[MATRIX_INVERSE_VIEW],this._matrix[MATRIX_VIEW]));
     }
 };
 
@@ -870,14 +906,24 @@ Context.prototype.bindFramebuffer = function(framebuffer) {
 };
 
 Context.prototype._updateMatrixUniforms = function(){
-    var programMatrixBitUniforms = this._programMatrixUniformBits;
+    if(this._matrixTypesByUniformInProgram[ProgramUniform.NORMAL_MATRIX] !== undefined &&
+       (!this._matrixSend[MATRIX_VIEW] || !this._matrixSend[MATRIX_MODEL])){
 
-    for(var uniformName in programMatrixBitUniforms){
-        var matrixBit = programMatrixBitUniforms[uniformName];
-        if(!this._matrixSend[matrixBit]){
-            this._matrixF32Temp.set(this._matrix[matrixBit]);
-            this._program.setUniform(uniformName,this._matrixF32Temp);
-            this._matrixSend[matrixBit] = true;
+        var temp = Mat4.set(this._matrix4Temp,this._matrix[MATRIX_MODEL]);
+        Mat4.mult(temp, this._matrix[MATRIX_VIEW]);
+
+        Mat4.invert(temp);
+        Mat4.transpose(temp);
+        Mat3.fromMat4(this._matrix[MATRIX_NORMAL],temp)
+    }
+
+    for(var uniformName in this._matrixTypesByUniformInProgram){
+        var matrixType = this._matrixTypesByUniformInProgram[uniformName];
+        if(!this._matrixSend[matrixType]){
+            var tempMatrixF32 = this._matrixTempByTypeMap[matrixType];
+                tempMatrixF32.set(this._matrix[matrixType]);
+            this._program.setUniform(uniformName,tempMatrixF32);
+            this._matrixSend[matrixType] = true;
         }
     }
 };
