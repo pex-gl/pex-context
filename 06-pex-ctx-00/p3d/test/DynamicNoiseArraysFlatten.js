@@ -62,8 +62,11 @@ Window.create({
         g = toFlatGeometry(g);
         g.normals = computeNormals(g);
 
+        console.log(g.positions.length)
+
         this.baseGeometry = g;
         this.positions = clone(g.positions);
+        this.normals = clone(g.positions);
         var positionArray   = this.positionArray  = new Float32Array(R.flatten(g.positions));
         var positionBuffer  = this.positionBuffer = ctx.createBuffer(ctx.ARRAY_BUFFER, positionArray, ctx.DYNAMIC_DRAW);
         var normalArray     = this.normalArray    = new Float32Array(R.flatten(g.normals));
@@ -103,7 +106,7 @@ Window.create({
         console.timeEnd('noise');
 
         console.time('normals');
-        var normals = computeNormals({ cells: this.baseGeometry.cells, positions: this.positions });
+        this.normals = computeNormals({ cells: this.baseGeometry.cells, positions: this.positions }, this.normals);
         console.timeEnd('normals');
 
         console.time('flatten');
@@ -117,10 +120,10 @@ Window.create({
             this.positionArray[i*3+1] = positions[i][1];
             this.positionArray[i*3+2] = positions[i][2];
         }
-        for(var i=0, len=normals.length; i<len; i++) {
-            this.normalArray[i*3  ] = normals[i][0];
-            this.normalArray[i*3+1] = normals[i][1];
-            this.normalArray[i*3+2] = normals[i][2];
+        for(var i=0, len=this.normals.length; i<len; i++) {
+            this.normalArray[i*3  ] = this.normals[i][0];
+            this.normalArray[i*3+1] = this.normals[i][1];
+            this.normalArray[i*3+2] = this.normals[i][2];
         }
         console.timeEnd('flatten');
 
@@ -158,7 +161,7 @@ Window.create({
         ctx.bindVertexArray(this.vao);
 
         ctx.bindProgram(this.program);
-        //would that be too much to do manually?
+        //TODO: would that be too much to do manually?
         this.program.setUniform('uProjectionMatrix', ctx.getProjectionMatrix());
         this.program.setUniform('uViewMatrix', ctx.getViewMatrix());
         this.program.setUniform('uModelMatrix', ctx.getModelMatrix());
