@@ -128,7 +128,26 @@ Mesh01ArraysAuto.prototype.getAttribute = function(location) {
 }
 
 Mesh01ArraysAuto.prototype.updateAttribute = function(location, data) {
+    var ctx = this._ctx;
     var attrib = this._attributesMap[location];
+
+    if (!attrib) {
+        throw new Error('Mesh.updateAttribute: invalid attribute loaction');
+    }
+
+    var size = data[0].length;
+    if (data.length * size != attrib.data.length * attrib.size) {
+        attrib.size = size;
+        attrib.dataArray = new Float32Array(data.length * size);
+    }
+
+    unpack(data, attrib.dataArray, attrib.size);
+    attrib.buffer.setUsage(ctx.DYNAMIC_DRAW);
+    attrib.buffer.bufferData(attrib.dataArray);
+}
+
+Mesh01ArraysAuto.prototype.getIndices = function() {
+    return this._indices;
 }
 
 

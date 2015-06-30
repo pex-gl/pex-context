@@ -63,12 +63,14 @@ Window.create({
         g = toFlatGeometry(g);
         g.normals = computeNormals(g);
 
+        this.basePositions = clone(g.positions);
         this.mesh = new Mesh01ArraysAuto(ctx, g);
     },
     time: 0,
     prevTime: Date.now(),
     update: function() {
-        var gl = this.getContext().getGL();
+        var ctx = this.getContext();
+        var gl = ctx.getGL();
         gl.finish();
 
         console.log('--');
@@ -78,9 +80,8 @@ Window.create({
         this.prevTime = now;
 
         var time = this.time;
-        var basePositions = this.baseGeometry.positions;
-        var baseNormals = this.baseGeometry.normals;
-        var positions = this.positions;
+        var basePositions = this.basePositions;
+        var positions = this.mesh.getAttribute(ctx.ATTRIB_POSITION).data;
         var noiseFrequency = 2;
         var noiseScale = 0.75;
         console.time('noise');
@@ -93,37 +94,22 @@ Window.create({
         console.timeEnd('noise');
 
         console.time('normals');
-        //this.normals = computeNormals({ cells: this.baseGeometry.cells, positions: this.positions }, this.normals);
+        var faces = this.mesh.getIndices().data;
+        var normals = this.mesh.getAttribute(ctx.ATTRIB_NORMAL).data;
+        computeNormals({ cells: faces, positions: positions }, normals);
         console.timeEnd('normals');
 
-        console.time('flatten');
-        //R.flatten = 20ms
-        //this.positionArray.set(R.flatten(positions));
-        //this.normalArray.set(R.flatten(normals));
-
-        //for loop = 1-2ms
-        //for(var i=0, len=positions.length; i<len; i++) {
-        //    this.positionArray[i*3  ] = positions[i][0];
-        //    this.positionArray[i*3+1] = positions[i][1];
-        //    this.positionArray[i*3+2] = positions[i][2];
-        //}
-        //for(var i=0, len=this.normals.length; i<len; i++) {
-        //    this.normalArray[i*3  ] = this.normals[i][0];
-        //    this.normalArray[i*3+1] = this.normals[i][1];
-        //    this.normalArray[i*3+2] = this.normals[i][2];
-        //}
-        console.timeEnd('flatten');
-
+        console.time('flatten + buffer');
         gl.finish();
-        console.time('buffer');
-        //this.positionBuffer.bufferData(this.positionArray);
-        //this.normalBuffer.bufferData(this.normalArray);
+        this.mesh.updateAttribute(ctx.ATTRIB_POSITION, positions);
+        this.mesh.updateAttribute(ctx.ATTRIB_NORMAL, normals);
         gl.finish();
-        console.timeEnd('buffer');
+        console.timeEnd('flatten + buffer');
+
         console.timeEnd('update');
     },
     draw: function() {
-        //this.update();
+        this.update();
 
         var ctx = this.getContext();
         ctx.setClearColor(0.2, 0.2, 0.2, 1);
