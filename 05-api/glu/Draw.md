@@ -89,19 +89,60 @@ draw(primitive: number, numVertices: number, first?: number)
 ```
 
 [Drawing](https://github.com/turbulenz/turbulenz_engine/blob/74deeb1f1f8d609f6ccf8e1673cc440482fb95b9/tslib/drawprimitives.ts#L257)
-```
+```javascript
 gd.setTechnique(technique);
 gd.setTechniqueParameters(techniqueParameters);
 gd.setStream(vertexBuffer, semantics);
 gd.draw(primitive, numVertices);
 ```
 
-[Drawing Indexed](https://github.com/turbulenz/turbulenz_engine/blob/74deeb1f1f8d609f6ccf8e1673cc440482fb95b9/tslib/fontmanager.ts#L535)
+setStream causes attributes to be [bound](https://github.com/turbulenz/turbulenz_engine/blob/74deeb1f1f8d609f6ccf8e1673cc440482fb95b9/tslib/webgl/graphicsdevice.ts#L5986) for that buffer
+```javascript
+//in GraphicsDevice / Context
+this.attributeMask |=
+            (<WebGLVertexBuffer>vertexBuffer).bindAttributes(numAttributes,
+                                                             attributes,
+                                                             offset);
+//in VertexBuffer
+bindAttributes(numAttributes, attributes, offset) {
+    for (var n = 0; n < numAttributes; n += 1) {
+        ....
+    }
+}
 ```
+
+[Drawing Indexed](https://github.com/turbulenz/turbulenz_engine/blob/74deeb1f1f8d609f6ccf8e1673cc440482fb95b9/tslib/fontmanager.ts#L535)
+```javascript
 sharedVertexBuffer.setData(vertices, 0, numVertices);
 gd.setStream(sharedVertexBuffer, fm.semantics);
 gd.setIndexBuffer(sharedIndexBuffer);
 gd.drawIndexed(fm.primitive, numIndices, 0);
+```
+
+[Updating buffer](https://github.com/turbulenz/turbulenz_engine/blob/74deeb1f1f8d609f6ccf8e1673cc440482fb95b9/tslib/webgl/graphicsdevice.ts#L3367)
+
+```javascript
+gd.bindVertexBuffer(this.glBuffer);
+gl.bufferSubData(gl.ARRAY_BUFFER, (offset * strideInBytes), bufferData);
+//no unbind
+```
+
+Interesting mapped buffer writer iterator
+
+```javascript
+var writer = vertexBuffer.map(offset, count);
+if (writer)
+{
+    for (var n = 0; n < count; n += 1)
+    {
+        // This VertexBuffer has 3 attributes
+        writer(0, 1, 2, // first attribute has 3 components
+               0, 1, 2, // second attribute has also 3 components
+               0, 1);   // third attribute has only 2
+    }
+
+    vertexBuffer.unmap(writer);
+}
 ```
 
 ## GLTF
