@@ -10,6 +10,7 @@ function isFlatArray(a) {
     return (a.length == 0) || (a[0].length === undefined);
 }
 
+//TODO: add divisor support for attributes
 /**
  * [Mesh description]
  * @param {[type]} ctx              Context
@@ -106,7 +107,8 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
         this._indices = {
             data: indicesData,
             dataArray: indicesDataArray,
-            buffer: indicesBuffer
+            buffer: indicesBuffer,
+            size: indicesDataElementSize
         };
 
         indicesCount = indicesData.length * indicesDataElementSize;
@@ -150,10 +152,12 @@ Mesh.prototype.updateAttribute = function(location, data) {
         unpack(data, attribute.dataArray, attribute.size);
     }
 
-    //TODO: What about data ownership? Are we assuming that you updated the same data array or should we copy it?
-    //if (data != attribute.data) {
-    //  deepCopy(attribute.data, data);
-    //}
+    attribute.data = data;
+
+    //TODO: test this
+    if (location == ctx.ATTRIB_POSITION && this._indices === null) {
+        this._count = data.length;
+    }
 
     attribute.buffer.bufferData(attribute.dataArray);
 }
@@ -163,6 +167,12 @@ Mesh.prototype.getIndices = function() {
 }
 
 //TODO: test this
+//TODO: update count
+//TODO: copy data ref
+/**
+ * Updates index buffer
+ * @param  {Array of Int or Array or Arrays} data must have length > 0
+ */
 Mesh.prototype.updateIndices = function(data) {
     var indices = this._indices;
 
@@ -177,11 +187,16 @@ Mesh.prototype.updateIndices = function(data) {
         indices.dataArray.set(data);
     }
     else {
-        //ASSUMING we don't suddently change Vec2 into Vec3, so size is the same
-        unpack(data, indices.dataArray, data[0].length);
+        //ASSUMING we don't suddently change face3 into face2 or flat, so size is the same
+        unpack(data, indices.dataArray, indices.size);
     }
 
     indices.data = data;
+
+    //ASSUMING we don't suddently change face3 into face2 or flat, so size is the same
+    //TODO: test this
+    this._count = data.length * indices.size;
+
     indices.buffer.bufferData(indices.dataArray);
 }
 
