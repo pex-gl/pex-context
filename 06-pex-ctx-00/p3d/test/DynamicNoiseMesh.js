@@ -65,9 +65,9 @@ Window.create({
 
         this.basePositions = clone(g.positions);
         this.mesh = new Mesh(ctx, [
-            { data: g.positions, location: ctx.ATTRIB_POSITION },
-            { data: g.normals, location: ctx.ATTRIB_NORMAL }
-        ], g.cells);
+            { data: g.positions, location: ctx.ATTRIB_POSITION, usage: ctx.DYNAMIC_DRAW },
+            { data: g.normals, location: ctx.ATTRIB_NORMAL, usage: ctx.DYNAMIC_DRAW }
+        ], { data: g.cells, usage: ctx.STATIC_DRAW });
     },
     time: 0,
     prevTime: Date.now(),

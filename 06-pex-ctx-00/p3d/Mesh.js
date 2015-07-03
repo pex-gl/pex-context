@@ -17,7 +17,7 @@ function isFlatArray(a) {
  * @param {[type]} indicesData      Array(flat or list faces)
  * @param {[type]} primitiveType    PrimitiveType (default guesses from indices: no indices = POINTS, list of edges = LINES, list of faces = TRIANGLES)
  */
-function Mesh(ctx, attributesList, indicesData, primitiveType) {
+function Mesh(ctx, attributesList, indicesInfo, primitiveType) {
     this._ctx = ctx;
 
     var attributesDesc = [];
@@ -50,7 +50,9 @@ function Mesh(ctx, attributesList, indicesData, primitiveType) {
             unpack(data, dataArray, elementSize);
         }
 
-        var buffer = ctx.createBuffer(ctx.ARRAY_BUFFER, dataArray, ctx.STATIC_DRAW);
+        var usage = attributeInfo.usage || ctx.STATIC_DRAW;
+
+        var buffer = ctx.createBuffer(ctx.ARRAY_BUFFER, dataArray, usage);
 
         var attributeDesc = {
             buffer: buffer,
@@ -78,7 +80,8 @@ function Mesh(ctx, attributesList, indicesData, primitiveType) {
 
     var indicesCount = 0;
 
-    if (indicesData) {
+    if (indicesInfo) {
+        var indicesData = indicesInfo.data;
         var indicesDataElementSize = indicesData[0].length || 1;
         var indicesDataArray = new Uint16Array(indicesData.length * indicesDataElementSize);
 
@@ -89,7 +92,9 @@ function Mesh(ctx, attributesList, indicesData, primitiveType) {
             unpack(indicesData, indicesDataArray, indicesDataElementSize)
         }
 
-        var indicesBuffer  = ctx.createBuffer(ctx.ELEMENT_ARRAY_BUFFER, indicesDataArray, ctx.STATIC_DRAW);
+        var usage = indicesInfo.usage || ctx.STATIC_DRAW;
+
+        var indicesBuffer  = ctx.createBuffer(ctx.ELEMENT_ARRAY_BUFFER, indicesDataArray, usage);
 
         if (!primitiveType) {
             if (indicesDataElementSize == 1) primiviteType = ctx.POINTS;
@@ -149,12 +154,31 @@ Mesh.prototype.updateAttribute = function(location, data) {
     //  deepCopy(attribute.data, data);
     //}
 
-    attribute.buffer.setUsage(ctx.DYNAMIC_DRAW);
     attribute.buffer.bufferData(attribute.dataArray);
 }
 
 Mesh.prototype.getIndices = function() {
     return this._indices;
+}
+
+//TODO: test this
+Mesh.prototype.updateIndices = function(data) {
+    var indices = this._indices;
+
+    if (!indices) {
+        throw new Error('Mesh.updateIndices: mesh has no indices to update');
+    }
+    if (data.length != indices.data.length) {
+        indices.dataArray = new Float32Array(data.length);
+    }
+
+    if (isFlatArray(data)) {
+        indices.dataArray.set(data);
+    }
+    else {
+        //ASSUMING we don't suddently change Vec2 into Vec3, so size is the same
+        unpack(data, indices.dataArray, data[0].length);
+    }
 }
 
 module.exports = Mesh;
