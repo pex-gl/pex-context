@@ -180,6 +180,8 @@ Mesh.prototype.updateIndices = function(data) {
         //ASSUMING we don't suddently change Vec2 into Vec3, so size is the same
         unpack(data, indices.dataArray, data[0].length);
     }
+
+    indices.buffer.bufferData(indices.dataArray);
 }
 
 module.exports = Mesh;
