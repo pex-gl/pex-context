@@ -13,21 +13,23 @@ function isFlatArray(a) {
 /**
  * [Mesh description]
  * @param {[type]} ctx              Context
- * @param {[type]} attributesList   Array of { data: Array(flat or list of verts), location: Int, size: Int or guess}
- * @param {[type]} indicesData      Array(flat or list faces)
+ * @param {[type]} attributes       Array of { data: Array(flat or list of verts), location: Int, size: Int or guess, usage: Int or guess}
+ * @param {[type]} indicesInfo      { data : Array(flat or list faces), usage: Int or guess }
  * @param {[type]} primitiveType    PrimitiveType (default guesses from indices: no indices = POINTS, list of edges = LINES, list of faces = TRIANGLES)
  */
-function Mesh(ctx, attributesList, indicesInfo, primitiveType) {
+function Mesh(ctx, attributes, indicesInfo, primitiveType) {
     this._ctx = ctx;
 
     var attributesDesc = [];
-    var attributes = this._attributes = [];
-    var attributesMap = this._attributesMap = {};
+
+    this._attributes = [];
+    this._attributesMap = [];
+
 
     var vertexCount = 0;
 
-    for(var i=0, len=attributesList.length; i<len; i++) {
-        var attributeInfo = attributesList[i];
+    for(var i=0, len=attributes.length; i<len; i++) {
+        var attributeInfo = attributes[i];
         var data = attributeInfo.data;
         var location = attributeInfo.location;
         var elementSize = data[0].length || 1;
@@ -69,9 +71,8 @@ function Mesh(ctx, attributesList, indicesInfo, primitiveType) {
         }
 
         attributesDesc.push(attributeDesc);
-        attributes.push(attribute);
-
-        attributesMap[location] = attribute;
+        this._attributes.push(attribute);
+        this._attributesMap[location] = attribute;
 
         if (location == ctx.POSITION) {
             vertexCount = data.length;
@@ -102,7 +103,7 @@ function Mesh(ctx, attributesList, indicesInfo, primitiveType) {
             if (indicesDataElementSize == 3) primiviteType = ctx.TRIANGLES;
         }
 
-        var indices = this._indices = {
+        this._indices = {
             data: indicesData,
             dataArray: indicesDataArray,
             buffer: indicesBuffer
