@@ -181,6 +181,7 @@ Mesh.prototype.updateIndices = function(data) {
         unpack(data, indices.dataArray, data[0].length);
     }
 
+    indices.data = data;
     indices.buffer.bufferData(indices.dataArray);
 }
 
