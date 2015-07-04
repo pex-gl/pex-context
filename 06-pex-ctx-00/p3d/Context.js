@@ -211,6 +211,23 @@ function Context(gl){
     this.ATTRIB_CUSTOM_3    = ProgramAttributeLocation.CUSTOM_3;
     this.ATTRIB_CUSTOM_4    = ProgramAttributeLocation.CUSTOM_4;
 
+    //Blend
+    this.FUNC_ADD               = gl.FUNC_ADD;
+    this.FUNC_SUBSTRACT         = gl.FUNC_SUBSTRACT;
+    this.FUNC_REVERSE_SUBSTRACT = gl.FUNC_REVERSE_SUBSTRACT;
+    this.ZERO                = gl.ZERO;
+    this.ONE                 = gl.ONE;
+    this.SRC_COLOR           = gl.SRC_COLOR;
+    this.ONE_MINUS_SRC_COLOR = gl.ONE_MINUS_SRC_COLOR;
+    this.DST_COLOR           = gl.DST_COLOR;
+    this.ONE_MINUS_DST_COLOR = gl.ONE_MINUS_DST_COLOR;
+    this.SRC_ALPHA           = gl.SRC_ALPHA;
+    this.ONE_MINUS_SRC_ALPHA = gl.ONE_MINUS_SRC_ALPHA;
+    this.DST_ALPHA           = gl.DST_ALPHA;
+    this.ONE_MINUS_DST_ALPHA = gl.ONE_MINUS_DST_ALPHA;
+    this.SRC_ALPHA_SATURATE  = gl.SRC_ALPHA_SATURATE;
+
+
     //Data Types
     this.FLOAT          = gl.FLOAT;
     this.UNSIGNED_SHORT = gl.UNSIGNED_SHORT;
