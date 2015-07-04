@@ -231,6 +231,10 @@ function Context(gl){
     this.ONE_MINUS_DST_ALPHA = gl.ONE_MINUS_DST_ALPHA;
     this.SRC_ALPHA_SATURATE  = gl.SRC_ALPHA_SATURATE;
 
+    //Culling
+    this.FRONT          = gl.FRONT;
+    this.BACK           = gl.BACK;
+    this.FRONT_AND_BACK = gl.FRONT_AND_BACK;
 
     //Data Types
     this.FLOAT          = gl.FLOAT;
