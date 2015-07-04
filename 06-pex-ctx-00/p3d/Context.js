@@ -10,6 +10,7 @@ var ProgramAttributeLocation = require('./ProgramAttributeLocation');
 
 var Buffer      = require('./Buffer');
 var VertexArray = require('./VertexArray');
+var Mesh        = require('./Mesh');
 
 var Framebuffer = require('./Framebuffer');
 
@@ -180,6 +181,13 @@ function Context(gl){
     this._vertexArrayIndexBufferDataType = null;
     this._vertexArrayHasDivisor = false;
     this._vertexArrayStack = [];
+
+    this._mesh = null;
+    this._meshPrimitiveType = null;
+    this._meshHasIndexBuffer = false;
+    this._meshIndexBufferDataType = null;
+    this._meshCount = 0;
+    this._meshHasDivisor = false;
 
     this.TEXTURE_BIT = TEXTURE_BIT;
     this._maxTextureImageUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
@@ -870,6 +878,47 @@ Context.prototype.bindVertexArray = function(vertexArray) {
 
 Context.prototype.getVertexArray = function(){
     return this._vertexArray;
+};
+
+Context.prototype.createMesh = function(attributes, indicesInfo, primitiveType){
+    return new Mesh(attributes,indicesInfo,primitiveType);
+};
+
+Context.prototype.bindMesh = function(mesh){
+    this._mesh = mesh;
+    this._meshPrimitiveType = mesh._primiviteType;
+    this._meshHasIndexBuffer = mesh._indices !== null;
+    this._meshIndexBufferDataType = this._meshHasIndexBuffer ? mesh._indices.buffer.getDataType() : null;
+    this._meshCount = mesh._count;
+    //TODO: Add Mesh hasDivisor bool
+    this._meshHasDivisor = null;
+    ctx.bindVertexArray(mesh._vao);
+};
+
+//TODO: fix this, how does passing instances count work, are count and offset supported?
+Context.prototype.drawMesh = function(primcount){
+    this._updateMatrixUniforms();
+
+    if(this._meshHasIndexBuffer){
+        if(this._meshHasDivisor){
+            this._gl.drawElementsInstanced(this._meshPrimitiveType, this._meshCount, this._meshIndexBufferDataType, 0, primcount);
+        }
+        else{
+            this.gl.drawElements(this._meshPrimitiveType,this._meshCount,this._meshIndexBufferDataType,0);
+        }
+    }
+    else{
+        if(this._meshHasDivisor){
+            this._gl.drawArraysInstanced(this._meshPrimitiveType, 0, this._meshCount, primcount);
+        }
+        else {
+            this._gl.drawArrays(this._meshPrimitiveType, 0, this._meshCount);
+        }
+    }
+};
+
+Context.prototype.getMesh = function(){
+    return this._mesh;
 };
 
 Context.prototype.createTexture2D = function(data, width, height, options) {
