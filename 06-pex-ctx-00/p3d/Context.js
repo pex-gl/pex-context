@@ -340,12 +340,7 @@ Context.prototype.pushState = function(mask){
 Context.prototype.popState = function(){
     var gl   = this._gl;
     var mask = this._mask = this._maskStack.pop();
-    var prev;
-    var stack;
-
-    if((mask & DEPTH_BIT) == DEPTH_BIT){
-
-    }
+    var stack, prev, value;
 
     if((mask & COLOR_BIT) == COLOR_BIT){
         if(this._colorStack.length == 0){
@@ -353,17 +348,11 @@ Context.prototype.popState = function(){
         }
         stack = this._colorStack[this._colorStack.length - 1];
 
-        prev = this._clearColor;
-        this._clearColor = stack[0];
-        if(!Vec4.equals(this._clearColor,prev)){
-            gl.clearColor(this._clearColor[0],this._clearColor[1],this._clearColor[2],this._clearColor[3]);
-        }
+        value = stack[0];
+        this.setClearColor(value[0],value[1],value[2],value[3]);
 
-        prev = this._colorMask;
-        this._colorMask = stack[1];
-        if(!Vec4.equals(this._colorMask,prev)){
-            gl.colorMask(this._colorMask[0],this._colorMask[1],this._colorMask[2],this._colorMask[3]);
-        }
+        value = stack[1];
+        this.setColorMask(value[0],value[1],value[2],value[3]);
     }
 
     if((mask & DEPTH_BIT) == DEPTH_BIT){
@@ -372,46 +361,16 @@ Context.prototype.popState = function(){
         }
         stack = this._depthStack.pop();
 
-        prev = this._depthTest;
-        this._depthTest = stack[0];
-        if(this._depthTest != prev){
-            if(this._depthTest){
-                gl.enable(gl.DEPTH_TEST);
-            }
-            else {
-                gl.disable(gl.DEPTH_TEST);
-            }
-        }
+        this.setDepthTest(stack[0]);
+        this.setDepthMask(stack[1]);
+        this.setDepthFunc(stack[2]);
+        this.setClearDepth(stack[3]);
 
-        prev = this._depthMask;
-        this._depthMask = stack[1];
-        if(this._depthMask != prev){
-            gl.depthMask(this._depthMask);
-        }
+        value = stack[4];
+        this.setDepthRange(value[0],value[1]);
 
-        prev = this._depthFunc;
-        this._depthFunc = stack[2];
-        if(this._depthFunc != prev){
-            gl.depthFunc(this._depthFunc);
-        }
-
-        prev = this._depthClearValue;
-        this._depthClearValue = stack[3];
-        if(this._depthClearValue != prev){
-            gl.clearDepth(this._depthClearValue);
-        }
-
-        prev = this._depthRange;
-        this._depthRange = stack[4];
-        if(Vec2.equals(this._depthRange,prev)){
-            gl.depthRange(this._depthRange[0],this._depthRange[1]);
-        }
-
-        prev = this._polygonOffset;
-        this._polygonOffset = stack[5];
-        if(Vec2.equals(this._polygonOffset,prev)){
-            gl.polygonOffset(this._polygonOffset[0],this._polygonOffset[1]);
-        }
+        value = stack[5];
+        this.setPolygonOffset(value[0],value[1]);
     }
 
     if((mask & STENCIL_BIT) == STENCIL_BIT){
@@ -423,11 +382,8 @@ Context.prototype.popState = function(){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','VIEWPORT_BIT'));
         }
 
-        prev = this._viewport;
-        this._viewport = this._viewportStack.pop();
-        if(!Vec4.equals(this._viewport,prev)){
-            this._gl.viewport(this._viewport[0],this._viewport[1],this._viewport[2],this._viewport[3]);
-        }
+        value = this._viewportStack.pop();
+        this.setViewport(value[0],value[1],value[2],value[3]);
     }
 
     if((mask & SCISSOR_BIT) == SCISSOR_BIT){
@@ -436,24 +392,10 @@ Context.prototype.popState = function(){
         }
         stack = this._scissorStack.pop();
 
-        prev = this._scissorTest;
-        this._scissorTest = stack[0];
+        this.setScissorTest(stack[0]);
 
-        if(this._scissorTest != prev){
-            if(this._scissorTest){
-                gl.enable(gl.SCISSOR_TEST)
-            }
-            else {
-                gl.disable(gl.SCISSOR_TEST);
-            }
-        }
-
-        prev = this._scissorBox;
-        this._scissorBox  = stack[1];
-
-        if(!Vec4.equals(this._scissorBox,prev)){
-            gl.scissor(this._scissorBox[0],this._scissorBox[1],this._scissorBox[2],this._scissorBox[3]);
-        }
+        value = stack[1];
+        this.setScissor(value[0],value[1],value[2],value[3]);
     }
 
     if((mask & CULL_BIT) == CULL_BIT){
@@ -467,10 +409,13 @@ Context.prototype.popState = function(){
         stack = this._blendStack.pop();
 
         this.setBlend(stack[0]);
-        this.setBlendColor(stack[1][0],stack[1][1],stack[1][2],stack[1][3]);
+        value = stack[1];
+        this.setBlendColor(value[0],value[1],value[2],value[3]);
         this.setBlendEquation(stack[2]);
-        this.setBlendEquationSeparate(stack[3][0],stack[3][1]);
-        this.setBlendFunc(stack[4][0],stack[4][1]);
+        value = stack[3];
+        this.setBlendEquationSeparate(value[0],value[1]);
+        value = stack[4];
+        this.setBlendFunc(value[0],value[1]);
     }
 
     if((mask & ALPHA_BIT) == ALPHA_BIT){
@@ -481,11 +426,8 @@ Context.prototype.popState = function(){
         if(this._lineWidthStack.length == 0){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','LINE_WIDTH_BIT'));
         }
-        prev = this._lineWidth;
-        this._lineWidth = this._lineWidthStack.pop();
-        if(this._lineWidth != prev){
-            gl.lineWidth(this._lineWidth);
-        }
+        value = this._lineWidthStack.pop();
+        this.setLineWidth(value);
     }
 
     if((mask & PROGRAM_BIT) == PROGRAM_BIT){
@@ -496,7 +438,8 @@ Context.prototype.popState = function(){
         if(this._vertexArrayStack.length == 0){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','VERTEX_ARRAY_BIT'));
         }
-        this.bindVertexArray(this._vertexArrayStack.pop());
+        value = this._vertexArrayStack.pop();
+        this.bindVertexArray(value);
     }
 
     if((mask & TEXTURE_BIT) == TEXTURE_BIT){
