@@ -113,6 +113,7 @@ function Context(gl){
     this._blendEquation         = gl.getParameter(gl.BLEND_EQUATION);
     this._blendEquationSeparate = [gl.getParameter(gl.BLEND_EQUATION_RGB),gl.getParameter(gl.BLEND_EQUATION_ALPHA)];
     this._blendFunc             = [gl.ONE,gl.ZERO];
+    this._blendFuncSeparate     = [gl.ZERO,gl.ZERO,gl.ZERO,gl.ZERO];
     this._blendStack            = [];
 
     this.ALPHA_BIT = ALPHA_BIT;
@@ -331,7 +332,7 @@ Context.prototype.pushState = function(mask){
     }
 
     if((mask & BLEND_BIT) == BLEND_BIT){
-        this._blendStack.push([this._blend, Vec4.copy(this._blendColor), this._blendEquation, Vec2.copy(this._blendEquationSeparate), Vec2.copy(this._blendFunc)]);
+        this._blendStack.push([this._blend, Vec4.copy(this._blendColor), this._blendEquation, Vec2.copy(this._blendEquationSeparate), Vec2.copy(this._blendFunc), Vec4.copy(this._blendFuncSeparate)]);
     }
 
     if((mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
@@ -433,6 +434,8 @@ Context.prototype.popState = function(){
         this.setBlendEquationSeparate(value[0],value[1]);
         value = stack[4];
         this.setBlendFunc(value[0],value[1]);
+        value = stack[5];
+        this.setBlendFuncSeparate(value[0],value[1],value[2],value[3]);
     }
 
     if((mask & ALPHA_BIT) == ALPHA_BIT){
@@ -743,6 +746,18 @@ Context.prototype.setBlendFunc = function(sfactor,dfactor){
 
 Context.prototype.getBlendFunc = function(out){
     return Vec2.set(out === undefined ? Vec2.create() : out, this._blendFunc);
+};
+
+Context.prototype.setBlendFuncSeparate = function(srcRGB,dstRGB,srcAlpha,dstAlpha){
+    if(Vec4.equals4(this._blendFuncSeparate,srcRGB,dstRGB,srcAlpha,dstAlpha)){
+        return;
+    }
+    this._gl.blendFuncSeparate(srcRGB,dstRGB,srcAlpha,dstAlpha);
+    Vec4.set4(this._blendFuncSeparate,srcRGB,dstRGB,srcAlpha,dstAlpha);
+};
+
+Context.prototype.getBlendFuncSeparate = function(out){
+    return Vec4.set(out === undefined ? Vec4.create() : out,this._blendFuncSeparate);
 };
 
 Context.prototype.clear = function(mask){
