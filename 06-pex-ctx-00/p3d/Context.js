@@ -109,7 +109,7 @@ function Context(gl){
 
     this.BLEND_BIT              = BLEND_BIT;
     this._blend                 = gl.getParameter(gl.BLEND);
-    this._blendColor            = gl.getParameter(gl.BLEND_COLOR);
+    this._blendColor            = glObjToArray(gl.getParameter(gl.BLEND_COLOR)).slice(0,4);
     this._blendEquation         = gl.getParameter(gl.BLEND_EQUATION);
     this._blendEquationSeparate = [gl.getParameter(gl.BLEND_EQUATION_RGB),gl.getParameter(gl.BLEND_EQUATION_ALPHA)];
     this._blendFunc             = [gl.ONE,gl.ZERO];
@@ -193,7 +193,7 @@ function Context(gl){
     this._maxTextureImageUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
     this._textures = new Array(this._maxTextureImageUnits);
     this._textureStack = [];
-    
+
     this.ATTRIB_POSITION    = ProgramAttributeLocation.POSITION;
     this.ATTRIB_COLOR       = ProgramAttributeLocation.COLOR;
     this.ATTRIB_TEX_COORD_0 = ProgramAttributeLocation.TEX_COORD_0;
