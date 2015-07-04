@@ -347,6 +347,10 @@ Context.prototype.pushState = function(mask){
         this._vertexArrayStack.push(this._vertexArray);
     }
 
+    if((mask & PROGRAM_BIT) == PROGRAM_BIT){
+        this._programStack.push(this._program);
+    }
+
     if((mask & TEXTURE_BIT) == TEXTURE_BIT){
         this._textureStack.push(this._textures.slice(0));
     }
@@ -451,7 +455,11 @@ Context.prototype.popState = function(){
     }
 
     if((mask & PROGRAM_BIT) == PROGRAM_BIT){
-
+        if(this._programStack.length == 0){
+            throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','PROGRAM_BIT'));
+        }
+        value = this._programStack.pop();
+        this.bindProgram(value);
     }
 
     if((mask & VERTEX_ARRAY_BIT) == VERTEX_ARRAY_BIT){
