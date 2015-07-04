@@ -46,7 +46,7 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
         }
 
         var dataArray = new Float32Array(data.length * elementSize);
-        if (isFlatArray(data[0])) {
+        if (isFlatArray(data)) {
             dataArray.set(data);
         }
         else {
@@ -75,7 +75,7 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
         this._attributes.push(attribute);
         this._attributesMap[location] = attribute;
 
-        if (location == ctx.POSITION) {
+        if (location == ctx.ATTRIB_POSITION) {
             vertexCount = data.length;
         }
     }
@@ -117,7 +117,7 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
         this._indices = null;
     }
 
-    this._primiviteType = primiviteType || ctx.TRIANGLES;
+    this._primiviteType = primitiveType || ctx.TRIANGLES;
     this._count = indicesCount || vertexCount;
     this._offset = 0;
     this._vao = ctx.createVertexArray(attributesDesc, this._indices ? this._indices.buffer : null);
