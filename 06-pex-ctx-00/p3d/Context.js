@@ -105,7 +105,9 @@ function Context(gl){
     this._stencilOpSeparate   = null;
     this._stenciStack         = [];
 
-    this.CULL_BIT = CULL_BIT;
+    this.CULL_BIT  = CULL_BIT;
+    this._culling  = gl.getParameter(gl.CULL_FACE);
+    this._cullFaceMode = gl.getParameter(gl.CULL_FACE_MODE);
 
     this.BLEND_BIT              = BLEND_BIT;
     this._blend                 = gl.getParameter(gl.BLEND);
@@ -499,7 +501,7 @@ Context.prototype.getState = function(mask){
     if((mask & COLOR_BIT) == COLOR_BIT){
         state.push([Vec4.copy(this._clearColor), Vec4.copy(this._colorMask)]);
     }
-    
+
     if((mask & STENCIL_BIT) == STENCIL_BIT){
 
     }
@@ -546,6 +548,35 @@ Context.prototype.setViewport = function(x,y,width,height){
 
 Context.prototype.getViewport = function(out){
     return Vec4.copy(this._viewport,out);
+};
+
+Context.prototype.setCulling = function(culling){
+    if(culling == this._culling){
+        return;
+    }
+    if(culling){
+        this._gl.enable(this._gl.CULL_FACE);
+    }
+    else {
+        this._gl.disable(this._gl.CULL_FACE);
+    }
+    this._culling = culling;
+};
+
+Context.prototype.getCulling = function(){
+    return this._culling;
+};
+
+Context.prototype.setCullFace = function(mode){
+    if(mode == this._cullFaceMode){
+        return;
+    }
+    this._gl.cullFace(mode);
+    this._cullFaceMode = mode;
+};
+
+Context.prototype.getCullFaceMode = function(){
+    return this._cullFaceMode;
 };
 
 Context.prototype.setScissorTest = function(scissor){
