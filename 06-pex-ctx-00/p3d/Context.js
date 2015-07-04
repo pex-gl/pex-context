@@ -313,6 +313,10 @@ Context.prototype.pushState = function(mask){
 
     }
 
+    if((mask & BLEND_BIT) == BLEND_BIT){
+        this._blendStack.push([this._blend, Vec4.copy(this._blendColor), this._blendEquation, Vec2.copy(this._blendEquationSeparate), Vec2.copy(this._blendFunc)]);
+    }
+
     if((mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
         this._lineWidthStack.push(this._lineWidth);
     }
@@ -457,7 +461,16 @@ Context.prototype.popState = function(){
     }
 
     if((mask & BLEND_BIT) == BLEND_BIT){
+        if(this._blendStack.length == 0){
+            throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','BLEND_BIT'));
+        }
+        stack = this._blendStack.pop();
 
+        this.setBlend(stack[0]);
+        this.setBlendColor(stack[1][0],stack[1][1],stack[1][2],stack[1][3]);
+        this.setBlendEquation(stack[2]);
+        this.setBlendEquationSeparate(stack[3][0],stack[3][1]);
+        this.setBlendFunc(stack[4][0],stack[4][1]);
     }
 
     if((mask & ALPHA_BIT) == ALPHA_BIT){
@@ -537,7 +550,7 @@ Context.prototype.getState = function(mask){
     }
 
     if((mask & BLEND_BIT) == BLEND_BIT){
-
+        state.push([this._blend,Vec4.copy(this._blendColor),this._blendEquation,Vec2.copy(this._blendEquationSeparate),Vec2.copy(this._blendFunc)]);
     }
 
     if((mask & ALPHA_BIT) == ALPHA_BIT){
