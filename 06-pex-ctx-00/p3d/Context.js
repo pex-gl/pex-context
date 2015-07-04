@@ -499,11 +499,7 @@ Context.prototype.getState = function(mask){
     if((mask & COLOR_BIT) == COLOR_BIT){
         state.push([Vec4.copy(this._clearColor), Vec4.copy(this._colorMask)]);
     }
-
-    if((mask & DEPTH_BIT) == DEPTH_BIT){
-
-    }
-
+    
     if((mask & STENCIL_BIT) == STENCIL_BIT){
 
     }
