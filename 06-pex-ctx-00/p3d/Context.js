@@ -105,9 +105,10 @@ function Context(gl){
     this._stencilOpSeparate   = null;
     this._stenciStack         = [];
 
-    this.CULL_BIT  = CULL_BIT;
-    this._culling  = gl.getParameter(gl.CULL_FACE);
+    this.CULL_BIT      = CULL_BIT;
+    this._culling      = gl.getParameter(gl.CULL_FACE);
     this._cullFaceMode = gl.getParameter(gl.CULL_FACE_MODE);
+    this._cullStack    = [];
 
     this.BLEND_BIT              = BLEND_BIT;
     this._blend                 = gl.getParameter(gl.BLEND);
@@ -330,7 +331,7 @@ Context.prototype.pushState = function(mask){
     }
 
     if((mask & CULL_BIT) == CULL_BIT){
-
+        this._cullStack([this._culling,this._cullFaceMode]);
     }
 
     if((mask & BLEND_BIT) == BLEND_BIT){
@@ -423,7 +424,12 @@ Context.prototype.popState = function(){
     }
 
     if((mask & CULL_BIT) == CULL_BIT){
-
+        if(this._cullStack.length == 0){
+            throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','CULL_BIT'));
+        }
+        stack = this._cullStack.pop();
+        this.setCulling(stack[0]);
+        this.setCullFace(stack[1]);
     }
 
     if((mask & BLEND_BIT) == BLEND_BIT){
@@ -515,7 +521,7 @@ Context.prototype.getState = function(mask){
     }
 
     if((mask & CULL_BIT) == CULL_BIT){
-
+        state.push([this._culling, this._cullFaceMode]);
     }
 
     if((mask & BLEND_BIT) == BLEND_BIT){
