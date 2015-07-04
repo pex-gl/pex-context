@@ -335,7 +335,7 @@ Context.prototype.pushState = function(mask){
     }
 
     if((mask & CULL_BIT) == CULL_BIT){
-        this._cullStack([this._culling,this._cullFaceMode]);
+        this._cullStack.push([this._culling,this._cullFaceMode]);
     }
 
     if((mask & BLEND_BIT) == BLEND_BIT){
