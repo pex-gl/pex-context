@@ -617,6 +617,18 @@ Context.prototype.getClearColor = function(out){
     return Vec4.copy(this._clearColor,out);
 };
 
+Context.prototype.setColorMask = function(r,g,b,a){
+    if(Vec4.equals4(this._colorMask,r,g,b,a)){
+        return;
+    }
+    this._gl.colorMask(r,g,b,a);
+    Vec4.set4(this._colorMask,r,g,b,a);
+};
+
+Context.prototype.getColorMask = function(out){
+    return Vec4.set(out === undefined ? Vec4.create() : out, this._colorMask);
+};
+
 Context.prototype.setDepthTest = function(depthTest){
     if(depthTest ===this._depthTest){
         return;
