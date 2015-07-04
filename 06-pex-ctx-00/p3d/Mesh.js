@@ -33,7 +33,7 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
         var attributeInfo = attributes[i];
         var data = attributeInfo.data;
         var location = attributeInfo.location;
-        var elementSize = data[0].length || 1;
+        var elementSize = data[0].length || attributeInfo.size || -1;
         //TODO: this can be done with !isNaN(data[0])
 
         //TODO: are we allowing empty attributes e.g. data=[] ?
@@ -43,6 +43,10 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
 
         if (location === undefined) {
             throw new Error('Mesh: Unknown attribute location at index ' + i);
+        }
+
+        if (elementSize === -1) {
+            throw new Error('Mesh: Missing attribute size at index ' + i);
         }
 
         var dataArray = new Float32Array(data.length * elementSize);
