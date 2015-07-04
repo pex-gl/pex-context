@@ -112,7 +112,7 @@ function Context(gl){
     this._blendColor            = gl.getParameter(gl.BLEND_COLOR);
     this._blendEquation         = gl.getParameter(gl.BLEND_EQUATION);
     this._blendEquationSeparate = [gl.getParameter(gl.BLEND_EQUATION_RGB),gl.getParameter(gl.BLEND_EQUATION_ALPHA)];
-    this._blendFunc             = null;
+    this._blendFunc             = [gl.ONE,gl.ZERO];
     this._blendStack            = [];
 
     this.ALPHA_BIT = ALPHA_BIT;
@@ -697,6 +697,71 @@ Context.prototype.setLineWidth = function(lineWidth){
 
 Context.prototype.getLineWidth = function(){
     return this._lineWidth;
+};
+
+Context.prototype.setBlend = function(blend){
+    if(blend == this._blend){
+        return;
+    }
+    if(blend){
+        this._gl.enable(gl.BLEND);
+    }
+    else {
+        this._gl.disable(gl.BLEND);
+    }
+    this._blend = blend;
+};
+
+Context.prototype.getBlend = function(){
+    return this._blend;
+};
+
+Context.prototype.setBlendColor = function(r,g,b,a){
+    if(Vec4.equals4(this._blendColor,r,g,b,a)){
+        return;
+    }
+    this._gl.blendColor(r,g,b,a);
+    Vec4.set4(this._blendColor,r,g,b,a);
+};
+
+Context.prototype.getBlendColor = function(out){
+    return Vec4.set(out === undefined ? Vec4.create() : out, this._blendColor);
+};
+
+Context.prototype.setBlendEquation = function(mode){
+    if(mode == this._blendEquation){
+        return;
+    }
+    this._gl.blendEquation(mode);
+    this._blendEquation = mode;
+};
+
+Context.prototype.getBlendEquation = function(){
+    return this._blendEquation;
+};
+
+Context.prototype.setBlendEquationSeparate = function(modeRGB, modeAlpha){
+    if(Vec2.equals2(this._blendEquationSeparate,modeRGB,modeAlpha)){
+        return;
+    }
+    this._gl.blendEquationSeparate(modeRGB,modeAlpha);
+    Vec2.set2(this._blendEquationSeparate,modeRGB,modeAlpha);
+};
+
+Context.prototype.getBlendEquationSeparate = function(out){
+    return Vec2.set(out === undefined ? Vec2.create() : out,this._blendEquationSeparate);
+};
+
+Context.prototype.setBlendFunc = function(sfactor,dfactor){
+    if(Vec2.equals2(this._blendFunc,sfactor,dfactor)){
+        return;
+    }
+    this._gl.blendFunc(sfactor,dfactor);
+    Vec2.set2(this._blendFunc,sfactor,dfactor);
+};
+
+Context.prototype.getBlendFunc = function(out){
+    return Vec2.set(out === undefined ? Vec2.create() : out, this._blendFunc);
 };
 
 Context.prototype.clear = function(mask){
