@@ -881,7 +881,7 @@ Context.prototype.getVertexArray = function(){
 };
 
 Context.prototype.createMesh = function(attributes, indicesInfo, primitiveType){
-    return new Mesh(attributes,indicesInfo,primitiveType);
+    return new Mesh(this,attributes,indicesInfo,primitiveType);
 };
 
 Context.prototype.bindMesh = function(mesh){
