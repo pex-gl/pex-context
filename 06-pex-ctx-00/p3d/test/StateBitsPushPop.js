@@ -95,6 +95,23 @@ Window.create({
         ctx.popState(ctx.SCISSOR_TEST);
         assert.deepEqual(ctx.getScissor(),[0,0,800,600],'SCISSOR_BIT');
     },
+    testCullStateSeparate : function(){
+        var ctx = this.getContext();
+
+        ctx.setCulling(false);
+        ctx.pushState(ctx.CULL_BIT);
+            ctx.setCulling(true);
+            assert.equal(ctx.getCulling(), true, 'CULL_BIT');
+        ctx.popState(ctx.CULL_BIT);
+        assert.equal(ctx.getCulling(), false, 'CULL_BIT');
+
+        ctx.setCullFace(ctx.FRONT);
+        ctx.pushState(ctx.CULL_BIT);
+            ctx.setCullFace(ctx.BACK);
+            assert.equal(ctx.getCullFaceMode(), ctx.BACK, 'CULL_BIT');
+        ctx.popState(ctx.CULL_BIT);
+        assert.equal(ctx.getCullFaceMode(), ctx.FRONT, 'CULL_BIT');
+    },
     testViewportStateSeparate : function(){
         var ctx = this.getContext();
 
@@ -179,6 +196,10 @@ Window.create({
         ctx.setScissorTest(true);
         ctx.setScissor(0,0,800,600);
 
+        //cull state
+        ctx.setCulling(false);
+        ctx.setCullFace(ctx.FRONT);
+
         //viewport state
         ctx.setViewport(0,0,800,600);
 
@@ -209,6 +230,10 @@ Window.create({
             //scissor state
             ctx.setScissorTest(false);
             ctx.setScissor(0,0,400,300);
+
+            //cull state
+            ctx.setCulling(true);
+            ctx.setCullFace(ctx.BACK);
 
             //viewport state
             ctx.setViewport(0,0,400,300);
@@ -241,6 +266,11 @@ Window.create({
             assertArgs('SCISSOR_BIT',
                 ctx.getScissorTest(),false,
                 ctx.getScissor(),[0,0,400,300]
+            );
+
+            assertArgs('CULL_BIT',
+                ctx.getCulling(),true,
+                ctx.getCullFaceMode(),ctx.BACK
             );
 
             assertArgs('VIEWPORT_BIT',
@@ -281,6 +311,11 @@ Window.create({
             ctx.getScissor(),[0,0,800,600]
         );
 
+        assertArgs('CULL_BIT',
+            ctx.getCulling(),false,
+            ctx.getCullFaceMode(),ctx.FRONT
+        );
+
         assertArgs('VIEWPORT_BIT',
             ctx.getViewport(),[0,0,800,600]
         );
@@ -303,6 +338,7 @@ Window.create({
         this.testDepthStateSeparate();
         this.testColorStateSeparate();
         this.testScissorStateSeparate();
+        this.testCullStateSeparate();
         this.testViewportStateSeparate();
         this.testBlendStateSeparate();
         this.testLineWidthStateSeparate();
