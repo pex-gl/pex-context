@@ -193,11 +193,7 @@ function Context(gl){
     this._maxTextureImageUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
     this._textures = new Array(this._maxTextureImageUnits);
     this._textureStack = [];
-
-    this.LINE_WIDTH_BIT = LINE_WIDTH_BIT;
-    this._lineWidth = gl.getParameter(gl.LINE_WIDTH);
-    this._lineWidthStack = [];
-
+    
     this.ATTRIB_POSITION    = ProgramAttributeLocation.POSITION;
     this.ATTRIB_COLOR       = ProgramAttributeLocation.COLOR;
     this.ATTRIB_TEX_COORD_0 = ProgramAttributeLocation.TEX_COORD_0;
