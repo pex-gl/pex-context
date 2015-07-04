@@ -685,10 +685,10 @@ Context.prototype.setBlend = function(blend){
         return;
     }
     if(blend){
-        this._gl.enable(gl.BLEND);
+        this._gl.enable(this._gl.BLEND);
     }
     else {
-        this._gl.disable(gl.BLEND);
+        this._gl.disable(this._gl.BLEND);
     }
     this._blend = blend;
 };
