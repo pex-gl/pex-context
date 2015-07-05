@@ -14,7 +14,14 @@ Window.create({
         type  : '3d'
     },
     init : function(){
+        var ctx = this.getContext();
 
+        this._framebufferA = ctx.createFramebuffer([{
+            texture : ctx.createTexture2D(null,800,600)
+        }]);
+        this._framebufferB = ctx.createFramebuffer([{
+            texture : ctx.createTexture2D(null,400,300)
+        }]);
     },
     testDepthStateSeparate : function(){
         var ctx    = this.getContext();
@@ -177,6 +184,16 @@ Window.create({
         ctx.popState(ctx.LINE_WIDTH_BIT);
         assert.equal(ctx.getLineWidth(),1,'LINE_WIDTH_BIT');
     },
+    testFramebufferStateSeparate : function(){
+        var ctx = this.getContext();
+
+        ctx.bindFramebuffer(this._framebufferA);
+        ctx.pushState(ctx.FRAMEBUFFER_BIT);
+            ctx.bindFramebuffer(this._framebufferB);
+            assert.equal(ctx.getFramebuffer(),this._framebufferB,'FRAMEBUFFER_BIT');
+        ctx.popState(ctx.FRAMEBUFFER_BIT);
+        assert.equal(ctx.getFramebuffer(), this._framebufferA, 'FRAMEBUFFER_BIT');
+    },
     testAllState : function(){
         var ctx = this.getContext();
 
@@ -214,6 +231,9 @@ Window.create({
         //linewidth state
         ctx.setLineWidth(1);
 
+        //framebuffer state
+        ctx.bindFramebuffer(this._framebufferA);
+
         ctx.pushState();
             //depth state
             ctx.setDepthTest(true);
@@ -248,6 +268,9 @@ Window.create({
 
             //linewidth state
             ctx.setLineWidth(3);
+
+            //framebuffer state
+            ctx.bindFramebuffer(this._framebufferB);
 
             assertArgs('DEPTH_BIT',
                 ctx.getDepthTest(),true,
@@ -288,6 +311,10 @@ Window.create({
 
             assertArgs('LINE_WIDTH_BIT',
                 ctx.getLineWidth(), 3
+            );
+
+            assertArgs('FRAMEBUFFER_BIT',
+                ctx.getFramebuffer(), this._framebufferB
             );
 
         ctx.popState();
@@ -333,6 +360,9 @@ Window.create({
             ctx.getLineWidth(), 1
         );
 
+        assertArgs('FRAMEBUFFER_BIT',
+            ctx.getFramebuffer(), this._framebufferA
+        );
     },
     draw : function(){
         this.testDepthStateSeparate();
@@ -342,6 +372,7 @@ Window.create({
         this.testViewportStateSeparate();
         this.testBlendStateSeparate();
         this.testLineWidthStateSeparate();
+        this.testFramebufferStateSeparate();
         this.testAllState();
     }
 });
