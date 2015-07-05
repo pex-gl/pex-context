@@ -99,11 +99,11 @@ function Context(gl){
 
     this.STENCIL_BIT          = STENCIL_BIT;
     this._stencilTest         = gl.getParameter(gl.STENCIL_TEST);
-    this._stencilFunc         = gl.getParameter(gl.STENCIL_FUNC);
-    this._stencilFuncSeparate = null;
-    this._stencilOp           = null;
-    this._stencilOpSeparate   = null;
-    this._stenciStack         = [];
+    this._stencilFunc         = [null,null,null];
+    this._stencilFuncSeparate = [null,null,null,null];
+    this._stencilOp           = [null,null,null];
+    this._stencilOpSeparate   = [null,null,null,null];
+    this._stencilStack        = [];
 
     this.CULL_BIT      = CULL_BIT;
     this._culling      = gl.getParameter(gl.CULL_FACE);
@@ -328,7 +328,7 @@ Context.prototype.pushState = function(mask){
     }
 
     if((mask & STENCIL_BIT) == STENCIL_BIT){
-
+        this._stencilStack.push([this._stencilTest,Vec3.copy(this._stencilFunc),Vec4.copy(this._stencilFuncSeparate),Vec3.copy(this._stencilOp),Vec4.copy(this._stencilOpSeparate)]);
     }
 
     if((mask & VIEWPORT_BIT) == VIEWPORT_BIT){
@@ -376,9 +376,8 @@ Context.prototype.pushState = function(mask){
 };
 
 Context.prototype.popState = function(){
-    var gl   = this._gl;
     var mask = this._mask = this._maskStack.pop();
-    var stack, prev, value;
+    var stack, value;
 
     if((mask & COLOR_BIT) == COLOR_BIT){
         if(this._colorStack.length == 0){
@@ -412,7 +411,20 @@ Context.prototype.popState = function(){
     }
 
     if((mask & STENCIL_BIT) == STENCIL_BIT){
+        if(this._stencilStack.length == 0){
+            throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','STENCIL_BIT'));
+        }
+        stack = this._stencilStack.pop();
 
+        this.setStencilTest(stack[0]);
+        value = stack[1];
+        this.setStencilFunc(value[0],value[1],value[2]);
+        value = stack[2];
+        this.setStencilFuncSeparate(value[0],value[1],value[2]);
+        value = stack[3];
+        this.setStencilOp(value[0],value[1],value[2]);
+        value = stack[4];
+        this.setStencilOpSeparate(value[0],value[1],value[2],value[3]);
     }
 
     if((mask & VIEWPORT_BIT) == VIEWPORT_BIT){
@@ -523,7 +535,7 @@ Context.prototype.getState = function(mask){
     }
 
     if((mask & STENCIL_BIT) == STENCIL_BIT){
-
+        state.push([this._stencilTest,Vec3.copy(this._stencilFunc),Vec4.copy(this._stencilFuncSeparate),Vec3.copy(this._stencilOp),Vec4.copy(this._stencilOpSeparate)]);
     }
 
     if((mask & VIEWPORT_BIT) == VIEWPORT_BIT){
@@ -628,6 +640,71 @@ Context.prototype.setScissor = function(x,y,w,h){
 
 Context.prototype.getScissor = function(out){
     return Vec4.copy(this._scissorBox,out);
+};
+
+Context.prototype.setStencilTest = function(stencilTest){
+    if(stencilTest == this._stencilTest){
+        return;
+    }
+    if(stencilTest){
+        this._gl.enable(this._gl.STENCIL_TEST);
+    }
+    else{
+        this._gl.disable(this._gl.STENCIL_TEST);
+    }
+    this._stencilTest = stencilTest;
+};
+
+Context.prototype.getStencilTest = function(){
+    return this._stencilTest;
+};
+
+Context.prototype.setStencilFunc = function(func,ref,mask){
+    if(Vec3.equals3(this._stencilFunc,func,ref,mask)){
+        return;
+    }
+    this._gl.stencilFunc(func,ref,mask);
+    Vec3.set3(this._stencilFunc,func,ref,mask);
+};
+
+Context.prototype.getStencilFunc = function(out){
+    return Vec3.set(out === undefined ? Vec3.create() : out, this._stencilFunc);
+};
+
+Context.prototype.setStencilFuncSeparate = function(face, func, ref, mask){
+    if(Vec4.equals4(this._stencilFuncSeparate,face,func,ref,mask)){
+        return;
+    }
+    this._gl.stencilFuncSeparate(face,func,ref,mask);
+    Vec4.set4(this._stencilFuncSeparate,face,func,ref,mask);
+};
+
+Context.prototype.getStencilFuncSeparate = function(out){
+    return Vec4.set(out === undefined ? Vec4.create() : out, this._stencilFuncSeparate);
+};
+
+Context.prototype.setStencilOp = function(fail, zfail, zpass){
+    if(Vec3.equals3(this._stencilOp,fail,zfail,zpass)){
+        return;
+    }
+    this._gl.stencilOp(fail,zfail,zpass);
+    Vec3.set3(this._stencilOp,fail,zfail,zpass);
+};
+
+Context.prototype.getStencilOp = function(out){
+    return Vec3.set(out === undefined ? Vec3.create() : out, this._stencilOp);
+};
+
+Context.prototype.setStencilOpSeparate = function(face, fail, zfail, zpass){
+    if(Vec4.equals4(this._stencilFuncSeparate,face,fail,zfail,zpass)){
+        return;
+    }
+    this._gl.stencilOpSeparate(face,fail,zfail,zpass);
+    Vec4.set4(this._stencilFuncSeparate,face,fail,zfail,zpass);
+};
+
+Context.prototype.getStencilOpSeparate = function(out){
+    return Vec4.set(out === undefined ? Vec4.create() : out, this._stencilOpSeparate);
 };
 
 Context.prototype.setClearColor = function(r,g,b,a){
