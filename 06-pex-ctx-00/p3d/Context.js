@@ -448,6 +448,18 @@ Context.prototype.pushState = function(mask){
         this._lineWidthStack.push(this._lineWidth);
     }
 
+    if((mask & MATRIX_PROJECTION_BIT) == MATRIX_PROJECTION_BIT){
+        this.pushProjectionMatrix();
+    }
+
+    if((mask & MATRIX_VIEW_BIT) == MATRIX_VIEW_BIT){
+        this.pushViewMatrix();
+    }
+
+    if((mask & MATRIX_MODEL_BIT) == MATRIX_MODEL_BIT){
+        this.pushModelMatrix();
+    }
+
     if((mask & VERTEX_ARRAY_BIT) == VERTEX_ARRAY_BIT){
         this._vertexArrayStack.push(this._vertexArray);
     }
@@ -584,6 +596,18 @@ Context.prototype.popState = function(){
         this.setLineWidth(value);
     }
 
+    if((mask & MATRIX_PROJECTION_BIT) == MATRIX_PROJECTION_BIT){
+        this.popProjectionMatrix();
+    }
+
+    if((mask & MATRIX_VIEW_BIT) == MATRIX_VIEW_BIT){
+        this.popViewMatrix();
+    }
+
+    if((mask & MATRIX_MODEL_BIT) == MATRIX_MODEL_BIT){
+        this.popModelMatrix();
+    }
+
     if((mask & PROGRAM_BIT) == PROGRAM_BIT){
         if(this._programStack.length == 0){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','PROGRAM_BIT'));
@@ -663,6 +687,18 @@ Context.prototype.getState = function(mask){
 
     if((mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
         state.push(this._lineWidth);
+    }
+
+    if((mask & MATRIX_PROJECTION_BIT) == MATRIX_PROJECTION_BIT){
+        state.push(Mat4.copy(this._matrix[MATRIX_PROJECTION_BIT]));
+    }
+
+    if((mask & MATRIX_VIEW_BIT) == MATRIX_VIEW_BIT){
+        state.push(Mat4.copy(this._matrix[MATRIX_VIEW_BIT]));
+    }
+
+    if((mask & MATRIX_MODEL_BIT) == MATRIX_MODEL_BIT){
+        state.push(Mat4.copy(this._matrix[MATRIX_MODEL_BIT]));
     }
 
     if((mask & PROGRAM_BIT) == PROGRAM_BIT){
