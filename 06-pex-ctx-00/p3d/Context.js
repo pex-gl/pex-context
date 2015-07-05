@@ -29,8 +29,7 @@ var VIEWPORT_BIT   = 1 << 4;
 var SCISSOR_BIT    = 1 << 5;
 var CULL_BIT       = 1 << 6;
 var BLEND_BIT      = 1 << 7;
-var ALPHA_BIT      = 1 << 8;
-var LINE_WIDTH_BIT = 1 << 9;
+var LINE_WIDTH_BIT = 1 << 8;
 
 var MATRIX_PROJECTION_BIT = 1 << 16;
 var MATRIX_VIEW_BIT       = 1 << 17;
@@ -158,8 +157,6 @@ function Context(gl){
     this._blendFunc             = [gl.ONE,gl.ZERO];
     this._blendFuncSeparate     = [gl.ZERO,gl.ZERO,gl.ZERO,gl.ZERO];
     this._blendStack            = [];
-
-    this.ALPHA_BIT = ALPHA_BIT;
 
     /**
      * [BIT description here]
@@ -584,10 +581,6 @@ Context.prototype.popState = function(){
         this.setBlendFuncSeparate(value[0],value[1],value[2],value[3]);
     }
 
-    if((mask & ALPHA_BIT) == ALPHA_BIT){
-
-    }
-
     if((mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
         if(this._lineWidthStack.length == 0){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','LINE_WIDTH_BIT'));
@@ -679,10 +672,6 @@ Context.prototype.getState = function(mask){
 
     if((mask & BLEND_BIT) == BLEND_BIT){
         state.push([this._blend,Vec4.copy(this._blendColor),this._blendEquation,Vec2.copy(this._blendEquationSeparate),Vec2.copy(this._blendFunc)]);
-    }
-
-    if((mask & ALPHA_BIT) == ALPHA_BIT){
-
     }
 
     if((mask & LINE_WIDTH_BIT) == LINE_WIDTH_BIT){
