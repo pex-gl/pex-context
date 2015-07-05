@@ -1180,7 +1180,8 @@ Context.prototype._updateMatrixUniforms = function(){
 
         Mat4.invert(temp);
         Mat4.transpose(temp);
-        Mat3.fromMat4(this._matrix[MATRIX_NORMAL],temp)
+        Mat3.fromMat4(this._matrix[MATRIX_NORMAL],temp);
+        this._matrixSend[matrixType] = false;
     }
 
     for(var uniformName in this._matrixTypesByUniformInProgram){
