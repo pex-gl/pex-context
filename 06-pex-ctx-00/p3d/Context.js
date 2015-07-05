@@ -351,10 +351,6 @@ Context.prototype.pushState = function(mask){
         this._lineWidthStack.push(this._lineWidth);
     }
 
-    if((mask & PROGRAM_BIT) == PROGRAM_BIT){
-        this._programStack.push(this._program);
-    }
-
     if((mask & VERTEX_ARRAY_BIT) == VERTEX_ARRAY_BIT){
         this._vertexArrayStack.push(this._vertexArray);
     }
