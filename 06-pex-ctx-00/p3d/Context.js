@@ -998,7 +998,7 @@ Context.prototype.bindMesh = function(mesh){
     this._meshCount = mesh._count;
     //TODO: Add Mesh hasDivisor bool
     this._meshHasDivisor = null;
-    ctx.bindVertexArray(mesh._vao);
+    this.bindVertexArray(mesh._vao);
 };
 
 //TODO: fix this, how does passing instances count work, are count and offset supported?
@@ -1010,7 +1010,7 @@ Context.prototype.drawMesh = function(primcount){
             this._gl.drawElementsInstanced(this._meshPrimitiveType, this._meshCount, this._meshIndexBufferDataType, 0, primcount);
         }
         else{
-            this.gl.drawElements(this._meshPrimitiveType,this._meshCount,this._meshIndexBufferDataType,0);
+            this._gl.drawElements(this._meshPrimitiveType,this._meshCount,this._meshIndexBufferDataType,0);
         }
     }
     else{
