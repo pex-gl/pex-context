@@ -72,8 +72,18 @@ function Context(gl){
     this._bitMap[COLOR_BIT] = gl.COLOR_BUFFER_BIT;
     this._bitMap[DEPTH_BIT | COLOR_BIT] = gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT;
 
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.ALL_BIT = ALL_BIT;
 
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.DEPTH_BIT        = DEPTH_BIT;
     this._depthTest       = false;
     this._depthMask       = gl.getParameter(gl.DEPTH_WRITEMASK);
@@ -83,20 +93,40 @@ function Context(gl){
     this._polygonOffset   = [gl.getParameter(gl.POLYGON_OFFSET_FACTOR),gl.getParameter(gl.POLYGON_OFFSET_UNITS)];
     this._depthStack      = [];
 
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.COLOR_BIT   = COLOR_BIT;
     this._clearColor = [0, 0, 0, 1];
     this._colorMask  = gl.getParameter(gl.COLOR_WRITEMASK);
     this._colorStack = [];
 
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.SCISSOR_BIT   = SCISSOR_BIT;
     this._scissorTest  = gl.getParameter(gl.SCISSOR_TEST);
     this._scissorBox   = glObjToArray(gl.getParameter(gl.SCISSOR_BOX)).slice(0,4);
     this._scissorStack = [];
 
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.VIEWPORT_BIT   = VIEWPORT_BIT;
     this._viewport      = glObjToArray(gl.getParameter(gl.VIEWPORT)).slice(0,4);
     this._viewportStack = [];
 
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.STENCIL_BIT          = STENCIL_BIT;
     this._stencilTest         = gl.getParameter(gl.STENCIL_TEST);
     this._stencilFunc         = [null,null,null];
@@ -105,11 +135,21 @@ function Context(gl){
     this._stencilOpSeparate   = [null,null,null,null];
     this._stencilStack        = [];
 
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.CULL_BIT      = CULL_BIT;
     this._culling      = gl.getParameter(gl.CULL_FACE);
     this._cullFaceMode = gl.getParameter(gl.CULL_FACE_MODE);
     this._cullStack    = [];
 
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.BLEND_BIT              = BLEND_BIT;
     this._blend                 = gl.getParameter(gl.BLEND);
     this._blendColor            = glObjToArray(gl.getParameter(gl.BLEND_COLOR)).slice(0,4);
@@ -121,12 +161,34 @@ function Context(gl){
 
     this.ALPHA_BIT = ALPHA_BIT;
 
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.LINE_WIDTH_BIT  = LINE_WIDTH_BIT;
     this._lineWidth      = gl.getParameter(gl.LINE_WIDTH);
     this._lineWidthStack = [];
 
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.MATRIX_PROJECTION_BIT = MATRIX_PROJECTION_BIT;
+
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.MATRIX_VIEW_BIT       = MATRIX_VIEW_BIT;
+
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.MATRIX_MODEL_BIT      = MATRIX_MODEL_BIT;
     this._matrix = {};
     this._matrix[MATRIX_PROJECTION]   = Mat4.create();
@@ -167,6 +229,11 @@ function Context(gl){
 
     this._matrixTypesByUniformInProgram = {};
 
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.PROGRAM_BIT = PROGRAM_BIT;
     this._program = null;
     this._programStack = [];
@@ -179,6 +246,11 @@ function Context(gl){
     this._buffer[gl.ARRAY_BUFFER] = null;
     this._buffer[gl.ELEMENT_ARRAY_BUFFER] = null;
 
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
     this.VERTEX_ARRAY_BIT = VERTEX_ARRAY_BIT;
     this._vertexArray = null;
     this._vertexArrayHasIndexBuffer = false;
@@ -193,16 +265,31 @@ function Context(gl){
     this._meshCount = 0;
     this._meshHasDivisor = false;
 
+    /**
+     * [BIT description here]
+     * @type {number}
+     * @const
+     */
     this.TEXTURE_BIT = TEXTURE_BIT;
     this._maxTextureImageUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
     this._textures = new Array(this._maxTextureImageUnits);
     this._textureStack = [];
     this.MAX_TEXTURE_IMAGE_UNITS = this._maxTextureImageUnits;
 
+    /**
+     * [BIT description here]
+     * @type {number}
+     * @const
+     */
     this.FRAMEBUFFER_BIT = FRAMEBUFFER_BIT;
     this._framebuffer = null;
     this._framebufferStack = [];
 
+    /**
+     * [BIT description here]
+     * @type {number}
+     * @const
+     */
     this.ATTRIB_POSITION    = ProgramAttributeLocation.POSITION;
     this.ATTRIB_COLOR       = ProgramAttributeLocation.COLOR;
     this.ATTRIB_TEX_COORD_0 = ProgramAttributeLocation.TEX_COORD_0;
@@ -310,9 +397,19 @@ function Context(gl){
     }
 }
 
+/**
+ * Returns the underlying gl context.
+ * @returns {WebGLRenderingContext}
+ */
+
 Context.prototype.getGL = function(){
     return this._gl;
 };
+
+/**
+ *
+ * @param {Number} [mask]
+ */
 
 Context.prototype.pushState = function(mask){
     mask = mask === undefined ? ALL_BIT : mask;
@@ -370,6 +467,10 @@ Context.prototype.pushState = function(mask){
     this._mask = mask;
     this._maskStack.push(this._mask);
 };
+
+/**
+ *
+ */
 
 Context.prototype.popState = function(){
     var mask = this._mask = this._maskStack.pop();
@@ -515,6 +616,12 @@ Context.prototype.popState = function(){
     }
 };
 
+/**
+ *
+ * @param {Number} [mask]
+ * @returns {Array}
+ */
+
 Context.prototype.getState = function(mask){
     mask = mask === undefined ? ALL_BIT : mask;
 
@@ -573,6 +680,14 @@ Context.prototype.getState = function(mask){
     return state.length > 1 ? state : state[0];
 };
 
+/**
+ * Sets the viewport.
+ * @param {Number} x - origin x (lower left corner)
+ * @param {Number} y - origin y (lower left corner)
+ * @param {Number} width - rectangle width
+ * @param {Number} height - rectangle height
+ */
+
 Context.prototype.setViewport = function(x,y,width,height){
     if(Vec4.equals4(this._viewport,x,y,width,height)){
         return;
@@ -581,9 +696,20 @@ Context.prototype.setViewport = function(x,y,width,height){
     this._gl.viewport(x,y,width,height);
 };
 
+/**
+ * Returns the current viewport rectangle.
+ * @param out
+ * @returns {Array}
+ */
+
 Context.prototype.getViewport = function(out){
     return Vec4.copy(this._viewport,out);
 };
+
+/**
+ * Enables / disables culling polygons based on their winding in window coordinates.
+ * @param {Boolean} culling
+ */
 
 Context.prototype.setCulling = function(culling){
     if(culling == this._culling){
@@ -598,9 +724,19 @@ Context.prototype.setCulling = function(culling){
     this._culling = culling;
 };
 
+/**
+ * Returns true if culling is enabled.
+ * @returns {Boolean}
+ */
+
 Context.prototype.getCulling = function(){
     return this._culling;
 };
+
+/**
+ * Specify whether front- or back-facing polygons can be culled.
+ * @param {Number} mode
+ */
 
 Context.prototype.setCullFace = function(mode){
     if(mode == this._cullFaceMode){
@@ -610,9 +746,19 @@ Context.prototype.setCullFace = function(mode){
     this._cullFaceMode = mode;
 };
 
+/**
+ * Returns the current cull face mode.
+ * @returns {Number}
+ */
+
 Context.prototype.getCullFaceMode = function(){
     return this._cullFaceMode;
 };
+
+/**
+ * Enables / disables discarding fragments that are outside the scissor rectangle.
+ * @param {Boolean} scissor
+ */
 
 Context.prototype.setScissorTest = function(scissor){
     if(scissor == this._scissorTest){
@@ -622,9 +768,22 @@ Context.prototype.setScissorTest = function(scissor){
     this._scissorTest = scissor;
 };
 
+/**
+ * Returns true if scissor test is enabled.
+ * @returns {Boolean}
+ */
+
 Context.prototype.getScissorTest = function(){
     return this._scissorTest
 };
+
+/**
+ * Defines the scissor box.
+ * @param {Number} x - origin x (lower left corner)
+ * @param {Number} y - origin y (lower left corner)
+ * @param {Number} w - width of the rectangle
+ * @param {Number} h - height of the rectangle
+ */
 
 Context.prototype.setScissor = function(x,y,w,h){
     if(Vec4.equals4(this._scissorBox,x,y,w,h)){
@@ -634,9 +793,20 @@ Context.prototype.setScissor = function(x,y,w,h){
     Vec4.set4(this._scissorBox,x,y,w,h);
 };
 
+/**
+ * Returns the current scissor box.
+ * @param out
+ * @returns {Array}
+ */
+
 Context.prototype.getScissor = function(out){
     return Vec4.copy(this._scissorBox,out);
 };
+
+/**
+ * Enables / disables stencil testing and updating the stencil buffer.
+ * @param {Boolean} stencilTest
+ */
 
 Context.prototype.setStencilTest = function(stencilTest){
     if(stencilTest == this._stencilTest){
@@ -651,9 +821,21 @@ Context.prototype.setStencilTest = function(stencilTest){
     this._stencilTest = stencilTest;
 };
 
+/**
+ * Returns true if stencil testing is enabled.
+ * @returns {Boolean}
+ */
+
 Context.prototype.getStencilTest = function(){
     return this._stencilTest;
 };
+
+/**
+ * Sets the front and back function and reference value for stencil testing.
+ * @param {Number} func - The test function
+ * @param {Number} ref - The reference value for the stencil test
+ * @param {Number} mask - A mask that is ANDed with both the reference value and the stored stencil value whe the test is done
+ */
 
 Context.prototype.setStencilFunc = function(func,ref,mask){
     if(Vec3.equals3(this._stencilFunc,func,ref,mask)){
@@ -663,9 +845,23 @@ Context.prototype.setStencilFunc = function(func,ref,mask){
     Vec3.set3(this._stencilFunc,func,ref,mask);
 };
 
+/**
+ * Returns the current stencil func set.
+ * @param out
+ * @returns {Array}
+ */
+
 Context.prototype.getStencilFunc = function(out){
     return Vec3.set(out === undefined ? Vec3.create() : out, this._stencilFunc);
 };
+
+/**
+ * Sets the front and back function and reference value for stencil testing.
+ * @param {Number} face - Either front and/or back stencil to be updated
+ * @param {Number} func - The test function
+ * @param {Number} ref - The reference value for the stencil test
+ * @param {Number} mask - A mask that is ANDed with both the reference value and the stored stencil value whe the test is done
+ */
 
 Context.prototype.setStencilFuncSeparate = function(face, func, ref, mask){
     if(Vec4.equals4(this._stencilFuncSeparate,face,func,ref,mask)){
@@ -675,9 +871,22 @@ Context.prototype.setStencilFuncSeparate = function(face, func, ref, mask){
     Vec4.set4(this._stencilFuncSeparate,face,func,ref,mask);
 };
 
+/**
+ * Returns the current stencil func separate set.
+ * @param out
+ * @returns {Array}
+ */
+
 Context.prototype.getStencilFuncSeparate = function(out){
     return Vec4.set(out === undefined ? Vec4.create() : out, this._stencilFuncSeparate);
 };
+
+/**
+ * Sets the front and back stencil test actions.
+ * @param {Number} fail - The action to take when stencil test fails
+ * @param {Number} zfail - The stencil action when the stencil passes, but the depth test fails
+ * @param {Number} zpass - The stencil action when both the stencil and the depth test pass, or when the stencil passes and either there is no depth buffer or depth testing is not enabled
+ */
 
 Context.prototype.setStencilOp = function(fail, zfail, zpass){
     if(Vec3.equals3(this._stencilOp,fail,zfail,zpass)){
@@ -687,9 +896,23 @@ Context.prototype.setStencilOp = function(fail, zfail, zpass){
     Vec3.set3(this._stencilOp,fail,zfail,zpass);
 };
 
+/**
+ * Returns the current front and back stencil test actions set.
+ * @param out
+ * @returns {Array}
+ */
+
 Context.prototype.getStencilOp = function(out){
     return Vec3.set(out === undefined ? Vec3.create() : out, this._stencilOp);
 };
+
+/**
+ * Sets the front and/or back stencil test actions.
+ * @param {Number} face - Either the front and/or back stencil to be updated
+ * @param {Number} fail - The action to take when stencil test fails
+ * @param {Number} zfail - The stencil action when the stencil passes, but the depth test fails
+ * @param {Number} zpass - The stencil action when both the stencil and the depth test pass, or when the stencil passes and either there is no depth buffer or depth testing is not enabled
+ */
 
 Context.prototype.setStencilOpSeparate = function(face, fail, zfail, zpass){
     if(Vec4.equals4(this._stencilFuncSeparate,face,fail,zfail,zpass)){
@@ -699,13 +922,32 @@ Context.prototype.setStencilOpSeparate = function(face, fail, zfail, zpass){
     Vec4.set4(this._stencilFuncSeparate,face,fail,zfail,zpass);
 };
 
+/**
+ * Returns the current stencil test separate set.
+ * @param out
+ * @returns {Array}
+ */
+
 Context.prototype.getStencilOpSeparate = function(out){
     return Vec4.set(out === undefined ? Vec4.create() : out, this._stencilOpSeparate);
 };
 
+/**
+ * Sets the clear value for the stencil buffer.
+ * @param {Number} s - The index to be used when the stencil buffer is cleared.
+ */
+
 Context.prototype.clearStencil = function(s){
     this._gl.clearStencil(s);
 };
+
+/**
+ * Sets the clear values for the color buffers.
+ * @param {Number} r - Red value
+ * @param {Number} g - Green value
+ * @param {Number} b - Blue value
+ * @param {Number} a - Alpha value
+ */
 
 Context.prototype.setClearColor = function(r,g,b,a){
     if(Vec4.equals4(this._clearColor,r,g,b,a)){
@@ -715,9 +957,23 @@ Context.prototype.setClearColor = function(r,g,b,a){
     Vec4.set4(this._clearColor,r,g,b,a);
 };
 
+/**
+ * Returns the current clear color set.
+ * @param out
+ * @returns {Array}
+ */
+
 Context.prototype.getClearColor = function(out){
     return Vec4.copy(this._clearColor,out);
 };
+
+/**
+ * Enables / disables writing of frame buffer color components.
+ * @param {Boolean} r
+ * @param {Boolean} g
+ * @param {Boolean} b
+ * @param {Boolean} a
+ */
 
 Context.prototype.setColorMask = function(r,g,b,a){
     if(Vec4.equals4(this._colorMask,r,g,b,a)){
@@ -727,9 +983,20 @@ Context.prototype.setColorMask = function(r,g,b,a){
     Vec4.set4(this._colorMask,r,g,b,a);
 };
 
+/**
+ * Returns the current color mask set.
+ * @param out
+ * @returns {Array}
+ */
+
 Context.prototype.getColorMask = function(out){
     return Vec4.set(out === undefined ? Vec4.create() : out, this._colorMask);
 };
+
+/**
+ * Enables / disables depth comparisons and updating the depth buffer.
+ * @param {Boolean} depthTest
+ */
 
 Context.prototype.setDepthTest = function(depthTest){
     if(depthTest ===this._depthTest){
@@ -744,9 +1011,19 @@ Context.prototype.setDepthTest = function(depthTest){
     this._depthTest = depthTest;
 };
 
+/**
+ * Returns true if depth testing is enabled.
+ * @returns {Boolean}
+ */
+
 Context.prototype.getDepthTest = function(){
     return this._depthTest;
 };
+
+/**
+ * Enables / disables writing into the depth buffer.
+ * @param {Boolean} flag
+ */
 
 Context.prototype.setDepthMask = function(flag){
     if(flag == this._depthMask){
@@ -756,9 +1033,19 @@ Context.prototype.setDepthMask = function(flag){
     this._depthMask = flag;
 };
 
+/**
+ * Returns true if writing into depth buffer is enabled.
+ * @returns {Boolean}
+ */
+
 Context.prototype.getDepthMask = function(){
     return this._depthMask;
 };
+
+/**
+ * Sets the value used for depth comparisons.
+ * @param {Number} func
+ */
 
 Context.prototype.setDepthFunc = function(func){
     if(func == this._depthFunc){
@@ -768,9 +1055,19 @@ Context.prototype.setDepthFunc = function(func){
     this._depthFunc = func;
 };
 
+/**
+ * Returns the current depth func set.
+ * @returns {Number}
+ */
+
 Context.prototype.getDepthFunc = function(){
     return this._depthFunc;
 };
+
+/**
+ * Sets the clear value for the depth buffer.
+ * @param {Number} depth
+ */
 
 Context.prototype.setClearDepth = function(depth){
     if(depth == this._depthClearValue){
@@ -780,9 +1077,20 @@ Context.prototype.setClearDepth = function(depth){
     this._depthClearValue = depth;
 };
 
+/**
+ * Returns the current depth buffer clear value set.
+ * @returns {Number}
+ */
+
 Context.prototype.getClearDepth = function(){
     return this._depthClearValue;
 };
+
+/**
+ * Sets the mapping of depth values from normalized device coordinates to window coordinates.
+ * @param {Number} znear - The mapping of the near clipping plane to window coordinates
+ * @param {Number} zfar - The mapping of the far clipping plane to window coordinates
+ */
 
 Context.prototype.setDepthRange = function(znear,zfar){
     if(Vec2.equals2(this._depthRange,znear,zfar)){
@@ -793,9 +1101,21 @@ Context.prototype.setDepthRange = function(znear,zfar){
     this._depthRange[1] = zfar;
 };
 
+/**
+ * Returns the current depth range values set.
+ * @param out
+ * @returns {Array}
+ */
+
 Context.prototype.getDepthRange = function(out){
     return Vec2.copy(this._depthRange,out);
 };
+
+/**
+ * Sets the scale and units used to calculate depth values
+ * @param {Number} factor
+ * @param {Number} units
+ */
 
 Context.prototype.setPolygonOffset = function(factor,units){
     if(Vec2.equals(this._polygonOffset,factor,units)){
@@ -806,9 +1126,20 @@ Context.prototype.setPolygonOffset = function(factor,units){
     this._polygonOffset[1] = units;
 };
 
+/**
+ * Returns the current polygon offset values.
+ * @param out
+ * @returns {Array}
+ */
+
 Context.prototype.getPolygonOffset = function(out){
     return Vec2.copy(this._polygonOffset,out);
 };
+
+/**
+ * Sets the width of rasterized lines.
+ * @param {Number} lineWidth
+ */
 
 Context.prototype.setLineWidth = function(lineWidth){
     if(this._lineWidth == lineWidth){
@@ -818,9 +1149,19 @@ Context.prototype.setLineWidth = function(lineWidth){
     this._lineWidth = lineWidth;
 };
 
+/**
+ * Returns the current line width value.
+ * @returns {Number}
+ */
+
 Context.prototype.getLineWidth = function(){
     return this._lineWidth;
 };
+
+/**
+ * Enables / disables blending the computed fragment color values with the values in the color buffers.
+ * @param {Number} blend
+ */
 
 Context.prototype.setBlend = function(blend){
     if(blend == this._blend){
@@ -835,9 +1176,22 @@ Context.prototype.setBlend = function(blend){
     this._blend = blend;
 };
 
+/**
+ * Returns true if blending is enabled.
+ * @returns {Boolean}
+ */
+
 Context.prototype.getBlend = function(){
     return this._blend;
 };
+
+/**
+ * Sets the blend color.
+ * @param {Number} r
+ * @param {Number} g
+ * @param {Number} b
+ * @param {Number} a
+ */
 
 Context.prototype.setBlendColor = function(r,g,b,a){
     if(Vec4.equals4(this._blendColor,r,g,b,a)){
@@ -847,9 +1201,21 @@ Context.prototype.setBlendColor = function(r,g,b,a){
     Vec4.set4(this._blendColor,r,g,b,a);
 };
 
+/**
+ * Return the current blend color set.
+ * @param {Array} [out]
+ * @returns {Array}
+ */
+
 Context.prototype.getBlendColor = function(out){
-    return Vec4.set(out === undefined ? Vec4.create() : out, this._blendColor);
+    out = out === undefined ? Vec4.create() : out;
+    return Vec4.set(out, this._blendColor);
 };
+
+/**
+ * Sets the equation used for both the RGB blend equation and the alpha blend equation.
+ * @param {Number} mode
+ */
 
 Context.prototype.setBlendEquation = function(mode){
     if(mode == this._blendEquation){
@@ -859,9 +1225,20 @@ Context.prototype.setBlendEquation = function(mode){
     this._blendEquation = mode;
 };
 
+/**
+ * Returns the current blend equation set.
+ * @returns {Number}
+ */
+
 Context.prototype.getBlendEquation = function(){
     return this._blendEquation;
 };
+
+/**
+ * Sets the RGB blend equation and the alpha blend equation separately.
+ * @param {Number} modeRGB
+ * @param {Number} modeAlpha
+ */
 
 Context.prototype.setBlendEquationSeparate = function(modeRGB, modeAlpha){
     if(Vec2.equals2(this._blendEquationSeparate,modeRGB,modeAlpha)){
@@ -871,9 +1248,21 @@ Context.prototype.setBlendEquationSeparate = function(modeRGB, modeAlpha){
     Vec2.set2(this._blendEquationSeparate,modeRGB,modeAlpha);
 };
 
+/**
+ * Returns the current RGB and alpha blend equation set.
+ * @param {Array} [out]
+ * @returns {Array}
+ */
+
 Context.prototype.getBlendEquationSeparate = function(out){
     return Vec2.set(out === undefined ? Vec2.create() : out,this._blendEquationSeparate);
 };
+
+/**
+ * Sets the pixel arithmetic.
+ * @param {Number} sfactor - Specifies how the red, green, blue, and alpha source blending factors are computed
+ * @param {Number} dfactor - Specifies how the red, green, blue, and alpha destination blending factors are computed
+ */
 
 Context.prototype.setBlendFunc = function(sfactor,dfactor){
     if(Vec2.equals2(this._blendFunc,sfactor,dfactor)){
@@ -883,9 +1272,23 @@ Context.prototype.setBlendFunc = function(sfactor,dfactor){
     Vec2.set2(this._blendFunc,sfactor,dfactor);
 };
 
+/**
+ * Returns the current pixel arithmetic set.
+ * @param {Array} [out]
+ * @returns {Array}
+ */
+
 Context.prototype.getBlendFunc = function(out){
     return Vec2.set(out === undefined ? Vec2.create() : out, this._blendFunc);
 };
+
+/**
+ * Sets the pixel arithmetic for RGB and alpha components separately.
+ * @param {Number} srcRGB - Specifies how the red, green, and blue blending factors are computed
+ * @param {Number} dstRGB - Specifies how the red, green, and blue destination blending factors are computed
+ * @param {Number} srcAlpha - Specifies how the alpha source blending factor is computed
+ * @param {Number} dstAlpha Specifies how the alpha destination blending factor is computed
+ */
 
 Context.prototype.setBlendFuncSeparate = function(srcRGB,dstRGB,srcAlpha,dstAlpha){
     if(Vec4.equals4(this._blendFuncSeparate,srcRGB,dstRGB,srcAlpha,dstAlpha)){
@@ -895,18 +1298,39 @@ Context.prototype.setBlendFuncSeparate = function(srcRGB,dstRGB,srcAlpha,dstAlph
     Vec4.set4(this._blendFuncSeparate,srcRGB,dstRGB,srcAlpha,dstAlpha);
 };
 
+/**
+ * Returns the current pixel arithmetic for RGB and alpha components separately set.
+ * @param {Array} [out]
+ * @returns {Array}
+ */
+
 Context.prototype.getBlendFuncSeparate = function(out){
     return Vec4.set(out === undefined ? Vec4.create() : out,this._blendFuncSeparate);
 };
+
+/**
+ * Clears buffers to preset values.
+ * @param {Number} mask - Bitwise OR of masks that indicate the buffers to be cleared
+ */
 
 Context.prototype.clear = function(mask){
     this._gl.clear(this._bitMap[mask]);
 };
 
+/**
+ * Sets the projection matrix to be used.
+ * @param {Array} matrix
+ */
+
 Context.prototype.setProjectionMatrix = function(matrix){
     Mat4.set(this._matrix[MATRIX_PROJECTION],matrix);
     this._matrixSend[MATRIX_PROJECTION] = false;
 };
+
+/**
+ * Sets the view matrix to be used.
+ * @param {Array} matrix
+ */
 
 Context.prototype.setViewMatrix = function(matrix){
     Mat4.set(this._matrix[MATRIX_VIEW],matrix);
@@ -918,88 +1342,184 @@ Context.prototype.setViewMatrix = function(matrix){
     }
 };
 
+/**
+ * Set the model matrix to be used.
+ * @param {Array} matrix
+ */
+
 Context.prototype.setModelMatrix = function(matrix){
     Mat4.set(this._matrix[MATRIX_MODEL],matrix);
     this._matrixSend[MATRIX_MODEL] = false;
 };
 
+/**
+ * Returns the current projection matrix.
+ * @param {Array} [out]
+ * @returns {Array}
+ */
+
 Context.prototype.getProjectionMatrix = function(out){
     return Mat4.copy(this._matrix[MATRIX_PROJECTION],out);
 };
+
+/**
+ * Returns the current view matrix.
+ * @param {Array} [out]
+ * @returns {Array}
+ */
 
 Context.prototype.getViewMatrix = function(out){
     return Mat4.copy(this._matrix[MATRIX_VIEW],out);
 };
 
+/**
+ * Returns the current model matrix.
+ * @param {Array} [out]
+ * @returns {Array}
+ */
+
 Context.prototype.getModelMatrix = function(out){
     return Mat4.copy(this._matrix[MATRIX_MODEL],out);
 };
 
+/**
+ * Pushes the current projection matrix on the projection matrix stack.
+ */
+
 Context.prototype.pushProjectionMatrix = function(){
     this._matrixStack[MATRIX_PROJECTION_BIT].push(Mat4.copy(this._matrix[MATRIX_PROJECTION]));
 };
+
+/**
+ * Replaces the current projection matrix with the matrix previously pushed on the stack and removes the top.
+ */
 
 Context.prototype.popProjectionMatrix = function(){
     this._matrix[MATRIX_PROJECTION] = this._matrixStack[MATRIX_PROJECTION_BIT].pop();
     this._matrixSend[MATRIX_PROJECTION] = false;
 };
 
+/**
+ * Pushes the current view matrix on the view matrix stack.
+ */
+
+
 Context.prototype.pushViewMatrix = function(){
     this._matrixStack[MATRIX_VIEW_BIT].push(Mat4.copy(this._matrix[MATRIX_VIEW]));
 };
+
+/**
+ * Replaces the current view matrix with the matrix previously pushed on the stack and removes the top.
+ */
 
 Context.prototype.popViewMatrix = function(){
     this._matrix[MATRIX_VIEW] = this._matrixStack[MATRIX_VIEW_BIT].pop();
     this._matrixSend[MATRIX_VIEW] = false;
 };
 
+/**
+ * Pushes the current model matrix on the model matrix stack.
+ */
+
 Context.prototype.pushModelMatrix = function(){
     this._matrixStack[MATRIX_MODEL_BIT].push(Mat4.copy(this._matrix[MATRIX_MODEL]));
 };
+
+/**
+ * Replaces the current model matrix with the matrix previously pushed on the stack and removes the top.
+ */
 
 Context.prototype.popModelMatrix = function(){
     this._matrix[MATRIX_MODEL] = this._matrixStack[MATRIX_MODEL_BIT].pop();
     this._matrixSend[MATRIX_MODEL] = false;
 };
 
+/**
+ * Resets the current model matrix to its identity.
+ */
+
 Context.prototype.identity = function(){
     Mat4.identity(this._matrix[MATRIX_MODEL]);
     this._matrixSend[MATRIX_MODEL] = false;
 };
+
+/**
+ * Scales the current model matrix.
+ * @param {Array} v
+ */
 
 Context.prototype.scale = function(v){
     Mat4.scale(this._matrix[MATRIX_MODEL],v);
     this._matrixSend[MATRIX_MODEL] = false;
 };
 
+/**
+ * Translates the current model matrix.
+ * @param {Array} v
+ */
+
 Context.prototype.translate = function(v){
     Mat4.translate(this._matrix[MATRIX_MODEL],v);
     this._matrixSend[MATRIX_MODEL] = false;
 };
+
+/**
+ * Rotates the current model matrix with angle and axis.
+ * @param {Number} r
+ * @param {Array} v
+ */
 
 Context.prototype.rotate = function(r,v){
     Mat4.rotate(this._matrix[MATRIX_MODEL],r,v);
     this._matrixSend[MATRIX_MODEL] = false;
 };
 
+/**
+ * Rotates the current model matrix with rotation per axis.
+ * @param {Array} v
+ */
+
 Context.prototype.rotateXYZ = function(v){
     Mat4.rotateXYZ(this._matrix[MATRIX_MODEL],v);
     this._matrixSend[MATRIX_MODEL] = false;
 };
+
+/**
+ * Rotates the current model matrix with a quaternion.
+ * @param {Array} q
+ */
 
 Context.prototype.rotateQuat = function(q){
     Mat4.mult(this._matrix[MATRIX_MODEL],Mat4.fromQuat(this._matrix4Temp,q));
     this._matrixSend[MATRIX_MODEL] = false;
 };
 
+/**
+ * Multiplies the current model matrix with another matrix.
+ * @param {Array} m
+ */
+
 Context.prototype.multMatrix = function(m){
     Mat4.mult(this._matrix[MATRIX_MODEL],m);
     this._matrixSend[MATRIX_MODEL] = false;
 };
 
+/**
+ * Creates a program object.
+ * @param {String} vertSrc
+ * @param {String} [fragSrc] - vert shader source (or combined vert/fragShader)
+ * @param {Array} [attributeLocationMap] - attribute locations map { 0: 'aPositon', 1: 'aNormal', 2: 'aColor' }
+ * @returns {Program}
+ */
+
 Context.prototype.createProgram = function(vertSrc, fragSrc, attributeLocationMap){
     return new Program(this, vertSrc, fragSrc, attributeLocationMap);
 };
+
+/**
+ * Binds a program object as part of the current rendering state.
+ * @param {Program} program
+ */
 
 Context.prototype.bindProgram = function(program) {
     if(program === this._program){
@@ -1029,9 +1549,23 @@ Context.prototype.bindProgram = function(program) {
     }
 };
 
+/**
+ * Returns the current program used.
+ * @returns {null|Program}
+ */
+
 Context.prototype.getProgram = function(){
     return this._program;
 };
+
+/**
+ * Creates a buffer object.
+ * @param {Number} target
+ * @param {(Number|Float32Array|Uint8Array|Uint16Array|Uint32Array)} sizeOrData
+ * @param {Number} [usage]
+ * @param {Boolean} [preserveData]
+ * @returns {Buffer}
+ */
 
 Context.prototype.createBuffer = function(target, sizeOrData, usage, preserveData) {
     return new Buffer(this, target, sizeOrData, usage, preserveData);
@@ -1059,9 +1593,21 @@ Context.prototype._unbindBuffer = function(buffer){
     this._buffer[target] = bufferPrev;
 };
 
+/**
+ * Creates a vertex array object.
+ * @param {Array} attributes
+ * @param {Buffer} [indexBuffer]
+ * @returns {VertexArray}
+ */
+
 Context.prototype.createVertexArray = function(attributes, indexBuffer) {
     return new VertexArray(this, attributes, indexBuffer);
 };
+
+/**
+ * Binds a vertex array object.
+ * @param {VertexArray} vertexArray
+ */
 
 Context.prototype.bindVertexArray = function(vertexArray) {
     if(vertexArray === this._vertexArray){
@@ -1076,13 +1622,31 @@ Context.prototype.bindVertexArray = function(vertexArray) {
     this._vertexArrayHasDivisor = vertexArray.hasDivisor();
 };
 
+/**
+ * Returns the current vertex array object used.
+ * @returns {null|VertexArray}
+ */
+
 Context.prototype.getVertexArray = function(){
     return this._vertexArray;
 };
 
+/**
+ * Creates a mesh object.
+ * @param attributes
+ * @param indicesInfo
+ * @param primitiveType
+ * @returns {Mesh}
+ */
+
 Context.prototype.createMesh = function(attributes, indicesInfo, primitiveType){
     return new Mesh(this,attributes,indicesInfo,primitiveType);
 };
+
+/**
+ * Binds a mesh object.
+ * @param {Mesh} mesh
+ */
 
 Context.prototype.bindMesh = function(mesh){
     this._mesh = mesh;
@@ -1094,6 +1658,11 @@ Context.prototype.bindMesh = function(mesh){
     this._meshHasDivisor = null;
     this.bindVertexArray(mesh._vao);
 };
+
+/**
+ * Draws the mesh currently bound.
+ * @param {Number} [primcount]
+ */
 
 //TODO: fix this, how does passing instances count work, are count and offset supported?
 Context.prototype.drawMesh = function(primcount){
@@ -1118,17 +1687,46 @@ Context.prototype.drawMesh = function(primcount){
     }
 };
 
+/**
+ * Returns the mesh currently used.
+ * @returns {null|Mesh}
+ */
+
 Context.prototype.getMesh = function(){
     return this._mesh;
 };
+
+/**
+ *
+ * @param data
+ * @param width
+ * @param height
+ * @param options
+ * @returns {Texture2D}
+ */
 
 Context.prototype.createTexture2D = function(data, width, height, options) {
     return new Texture2D(this, data, width, height, options);
 };
 
+/**
+ *
+ * @param facesData
+ * @param width
+ * @param height
+ * @param options
+ * @returns {TextureCube}
+ */
+
 Context.prototype.createTextureCube = function(facesData, width, height, options) {
     return new TextureCube(this, facesData, width, height, options);
 };
+
+/**
+ *
+ * @param texture
+ * @param textureUnit
+ */
 
 Context.prototype.bindTexture = function(texture, textureUnit) {
     textureUnit = textureUnit || 0;
@@ -1140,14 +1738,32 @@ Context.prototype.bindTexture = function(texture, textureUnit) {
     this._textures[textureUnit] = texture;
 };
 
+/**
+ * Returns the current texture bound.
+ * @param {Number} [textureUnit]
+ * @returns {null|Texture2D|TextureCube}
+ */
+
 Context.prototype.getTexture = function(textureUnit){
     textureUnit = textureUnit || 0;
     return this._textures[textureUnit];
 };
 
+/**
+ * Creates a frambuffer object.
+ * @param colorAttachments
+ * @param depthAttachment
+ * @returns {Framebuffer}
+ */
+
 Context.prototype.createFramebuffer = function(colorAttachments, depthAttachment) {
     return new Framebuffer(this, colorAttachments, depthAttachment);
 };
+
+/**
+ * Binds a framebuffer object.
+ * @param {Framebuffer} framebuffer
+ */
 
 Context.prototype.bindFramebuffer = function(framebuffer) {
     framebuffer = framebuffer === undefined ? null : framebuffer;
@@ -1163,6 +1779,11 @@ Context.prototype.bindFramebuffer = function(framebuffer) {
     this._framebuffer = framebuffer;
 };
 
+/**
+ * Returns the current frambuffer object bound.
+ * @returns {null|Framebuffer}
+ */
+
 Context.prototype.getFramebuffer = function(){
     return this._framebuffer;
 };
@@ -1176,7 +1797,7 @@ Context.prototype._updateMatrixUniforms = function(){
 
         Mat4.invert(temp);
         Mat4.transpose(temp);
-        Mat3.fromMat4(this._matrix[MATRIX_NORMAL],temp);
+        Mat3.fromMat4(this._matrix[MATRIX_NORMAL],temp)
         this._matrixSend[MATRIX_NORMAL] = false;
     }
 
@@ -1191,20 +1812,50 @@ Context.prototype._updateMatrixUniforms = function(){
     }
 };
 
+/**
+ * Renders primitives from array data.
+ * @param {Number} mode
+ * @param {Number} first
+ * @param {Number} count
+ */
+
 Context.prototype.drawArrays = function(mode, first, count){
     this._updateMatrixUniforms();
     this._gl.drawArrays(mode, first, count);
 };
+
+/**
+ * Draws multiple instances of a range of elements.
+ * @param {Number} mode
+ * @param {Number} first
+ * @param {Number} count
+ * @param {Number} primcount
+ */
 
 Context.prototype.drawArraysInstanced = function(mode, first, count, primcount){
     this._updateMatrixUniforms();
     this._gl.drawArraysInstanced(mode, first, count, primcount);
 };
 
+/**
+ * Renders primitives from array data
+ * @param {Number} mode
+ * @param {Number} count
+ * @param {Number} offset
+ */
+
 Context.prototype.drawElements = function(mode, count, offset){
     this._updateMatrixUniforms();
     this._gl.drawElements(mode, count, this._vertexArrayIndexBufferDataType, offset);
 };
+
+/**
+ * Draw multiple instances of a set of elements
+ * @param {Number} mode
+ * @param {Number} count
+ * @param {Number} offset
+ * @param {Number} primcount
+ */
 
 Context.prototype.drawElementsInstanced = function(mode, count, offset, primcount){
     this._updateMatrixUniforms();
