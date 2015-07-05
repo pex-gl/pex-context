@@ -7,6 +7,23 @@ function assertArgs(bitname,args){
     }
 }
 
+function createArrWithValues(numElements,args){
+    var elementSize = arguments.length - 1;
+    var element     = new Array(elementSize);
+    var out         = new Array(elementSize * numElements);
+
+    for(var i = 0; i < elementSize; ++i){
+        element[i] = arguments[1 + i];
+    }
+    for(var i = 0, l = out.length; i < l; i += elementSize){
+        for(var j = 0; j < elementSize; ++j){
+            out[i + j] = element[j];
+        }
+    }
+
+    return out;
+}
+
 var VERT_SRC = '\
 attribute vec2 position; \
 void main() { \
@@ -48,6 +65,13 @@ Window.create({
         this._framebufferB = ctx.createFramebuffer([{
             texture : ctx.createTexture2D(null,400,300)
         }]);
+
+        this._textureA = ctx.createTexture2D(
+            new Float32Array(createArrWithValues(16 * 16, 1,0,0,1))
+        );
+        this._textureB = ctx.createTexture2D(
+            new Float32Array(createArrWithValues(16 * 16, 0,0,1,1))
+        );
     },
     testDepthStateSeparate : function(){
         var ctx    = this.getContext();
@@ -230,6 +254,18 @@ Window.create({
         ctx.popState(ctx.FRAMEBUFFER_BIT);
         assert.equal(ctx.getFramebuffer(), this._framebufferA, 'FRAMEBUFFER_BIT');
     },
+    testTextureState : function(){
+        var ctx = this.getContext();
+
+        for(var i = 0, l = ctx.MAX_TEXTURE_IMAGE_UNITS; i < l; ++i){
+            ctx.bindTexture(this._textureA,i);
+                ctx.pushState(ctx.TEXTURE_BIT);
+                ctx.bindTexture(this._textureB,i);
+                assert.equal(ctx.getTexture(i),this._textureB,'TEXTURE_BIT');
+            ctx.popState(ctx.TEXTURE_BIT);
+            assert.equal(ctx.getTexture(i),this._textureA,'TEXTURE_BIT');
+        }
+    },
     testAllState : function(){
         var ctx = this.getContext();
 
@@ -273,6 +309,11 @@ Window.create({
         //framebuffer state
         ctx.bindFramebuffer(this._framebufferA);
 
+        //texture state
+        for(var i = 0, l = ctx.MAX_TEXTURE_IMAGE_UNITS; i < l; ++i){
+            ctx.bindTexture(this._textureA,i);
+        }
+
         ctx.pushState();
             //depth state
             ctx.setDepthTest(true);
@@ -313,6 +354,11 @@ Window.create({
 
             //framebuffer state
             ctx.bindFramebuffer(this._framebufferB);
+
+            //texture state
+            for(var i = 0, l = ctx.MAX_TEXTURE_IMAGE_UNITS; i < l; ++i){
+                ctx.bindTexture(this._textureB,i);
+            }
 
             assertArgs('DEPTH_BIT',
                 ctx.getDepthTest(),true,
@@ -362,6 +408,12 @@ Window.create({
             assertArgs('FRAMEBUFFER_BIT',
                 ctx.getFramebuffer(), this._framebufferB
             );
+
+            for(var i = 0, l = ctx.MAX_TEXTURE_IMAGE_UNITS; i < l; ++i){
+                assertArgs('TEXTURE_BIT',
+                    ctx.getTexture(i), this._textureB
+                );
+            }
 
         ctx.popState();
 
@@ -413,6 +465,12 @@ Window.create({
         assertArgs('FRAMEBUFFER_BIT',
             ctx.getFramebuffer(), this._framebufferA
         );
+
+        for(var i = 0, l = ctx.MAX_TEXTURE_IMAGE_UNITS; i < l; ++i){
+            assertArgs('TEXTURE_BIT',
+                ctx.getTexture(i), this._textureA
+            );
+        }
     },
     draw : function(){
         this.testDepthStateSeparate();
@@ -424,6 +482,7 @@ Window.create({
         this.testLineWidthStateSeparate();
         this.testProgramStateSeparate();
         this.testFramebufferStateSeparate();
+        this.testTextureState();
         this.testAllState();
     }
 });
