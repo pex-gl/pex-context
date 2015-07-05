@@ -707,6 +707,10 @@ Context.prototype.getStencilOpSeparate = function(out){
     return Vec4.set(out === undefined ? Vec4.create() : out, this._stencilOpSeparate);
 };
 
+Context.prototype.clearStencil = function(s){
+    this._gl.clearStencil(s);
+};
+
 Context.prototype.setClearColor = function(r,g,b,a){
     if(Vec4.equals4(this._clearColor,r,g,b,a)){
         return;
