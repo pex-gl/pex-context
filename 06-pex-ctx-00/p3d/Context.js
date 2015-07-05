@@ -1108,7 +1108,7 @@ Context.prototype.drawMesh = function(primcount){
             this._gl.drawElementsInstanced(this._meshPrimitiveType, this._meshCount, this._meshIndexBufferDataType, 0, primcount);
         }
         else{
-            this._gl.drawElements(this._meshPrimitiveType,this._meshCount,this._meshIndexBufferDataType,0);
+            this._gl.drawElements(this._meshPrimitiveType, this._meshCount, this._meshIndexBufferDataType, 0);
         }
     }
     else{
@@ -1116,6 +1116,7 @@ Context.prototype.drawMesh = function(primcount){
             this._gl.drawArraysInstanced(this._meshPrimitiveType, 0, this._meshCount, primcount);
         }
         else {
+            console.log('drawArrays', this._meshPrimitiveType, 0, this._meshCount)
             this._gl.drawArrays(this._meshPrimitiveType, 0, this._meshCount);
         }
     }

@@ -64,7 +64,7 @@ Window.create({
         g.normals = computeNormals(g);
 
         this.basePositions = clone(g.positions);
-        this.mesh = new Mesh(ctx, [
+        this.mesh = ctx.createMesh([
             { data: g.positions, location: ctx.ATTRIB_POSITION, usage: ctx.DYNAMIC_DRAW },
             { data: g.normals, location: ctx.ATTRIB_NORMAL, usage: ctx.DYNAMIC_DRAW }
         ], { data: g.cells, usage: ctx.STATIC_DRAW });
@@ -141,6 +141,7 @@ Window.create({
         this.program.setUniform('uViewMatrix', ctx.getViewMatrix());
         this.program.setUniform('uModelMatrix', ctx.getModelMatrix());
 
-        this.mesh.draw();
+        ctx.bindMesh(this.mesh);
+        ctx.drawMesh();
     }
 })
