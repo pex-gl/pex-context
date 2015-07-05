@@ -167,7 +167,7 @@ function Context(gl){
 
     this._matrixTypesByUniformInProgram = {};
 
-    this.PROGAM_BIT = PROGRAM_BIT;
+    this.PROGRAM_BIT = PROGRAM_BIT;
     this._program = null;
     this._programStack = [];
 
@@ -1081,7 +1081,7 @@ Context.prototype.bindFramebuffer = function(framebuffer) {
 
 Context.prototype.getFramebuffer = function(){
     return this._framebuffer;
-}
+};
 
 Context.prototype._updateMatrixUniforms = function(){
     if(this._matrixTypesByUniformInProgram[ProgramUniform.NORMAL_MATRIX] !== undefined &&
