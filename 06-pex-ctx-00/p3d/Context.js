@@ -198,6 +198,10 @@ function Context(gl){
     this._textures = new Array(this._maxTextureImageUnits);
     this._textureStack = [];
 
+    this.FRAMEBUFFER_BIT = FRAMEBUFFER_BIT;
+    this._framebuffer = null;
+    this._framebufferStack = [];
+
     this.ATTRIB_POSITION    = ProgramAttributeLocation.POSITION;
     this.ATTRIB_COLOR       = ProgramAttributeLocation.COLOR;
     this.ATTRIB_TEX_COORD_0 = ProgramAttributeLocation.TEX_COORD_0;
@@ -362,6 +366,10 @@ Context.prototype.pushState = function(mask){
         this._textureStack.push(this._textures.slice(0));
     }
 
+    if((mask & FRAMEBUFFER_BIT) == FRAMEBUFFER_BIT){
+        this._framebufferStack.push(this._framebuffer);
+    }
+
     this._mask = mask;
     this._maskStack.push(this._mask);
 };
@@ -495,6 +503,11 @@ Context.prototype.popState = function(){
             }
         }
     }
+
+    if((mask & FRAMEBUFFER_BIT) == FRAMEBUFFER_BIT){
+        value = this._framebufferStack.pop();
+        this.bindFramebuffer(value);
+    }
 };
 
 Context.prototype.getState = function(mask){
@@ -544,8 +557,11 @@ Context.prototype.getState = function(mask){
         state.push(this._program);
     }
 
-    return state.length > 1 ? state : state[0];
+    if((mask & FRAMEBUFFER_BIT) == FRAMEBUFFER_BIT){
+        state.push(this._framebuffer);
+    }
 
+    return state.length > 1 ? state : state[0];
 };
 
 Context.prototype.setViewport = function(x,y,width,height){
@@ -1050,15 +1066,22 @@ Context.prototype.createFramebuffer = function(colorAttachments, depthAttachment
 };
 
 Context.prototype.bindFramebuffer = function(framebuffer) {
-    //TODO: implement framebuffer state stack
+    framebuffer = framebuffer === undefined ? null : framebuffer;
+    if(framebuffer == this._framebuffer){
+        return;
+    }
     if (framebuffer) {
         framebuffer._bindInternal();
     }
     else {
-        var gl = this._gl;
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, null);
     }
+    this._framebuffer = framebuffer;
 };
+
+Context.prototype.getFramebuffer = function(){
+    return this._framebuffer;
+}
 
 Context.prototype._updateMatrixUniforms = function(){
     if(this._matrixTypesByUniformInProgram[ProgramUniform.NORMAL_MATRIX] !== undefined &&
