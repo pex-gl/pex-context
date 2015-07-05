@@ -7,6 +7,29 @@ function assertArgs(bitname,args){
     }
 }
 
+var VERT_SRC = '\
+attribute vec2 position; \
+void main() { \
+  gl_Position = vec4(position, 0.0, 1.0); \
+} \
+';
+
+var FRAG_SRC_A = '\
+uniform vec4 uColor; \
+void main() { \
+  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \
+  gl_FragColor = uColor; \
+} \
+';
+
+var FRAG_SRC_B = '\
+uniform vec4 uColor; \
+void main() { \
+  gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0); \
+  gl_FragColor = uColor; \
+} \
+';
+
 Window.create({
     settings : {
         width : 800,
@@ -15,6 +38,9 @@ Window.create({
     },
     init : function(){
         var ctx = this.getContext();
+
+        this._programA = ctx.createProgram(VERT_SRC,FRAG_SRC_A);
+        this._programB = ctx.createProgram(VERT_SRC,FRAG_SRC_B);
 
         this._framebufferA = ctx.createFramebuffer([{
             texture : ctx.createTexture2D(null,800,600)
@@ -184,6 +210,16 @@ Window.create({
         ctx.popState(ctx.LINE_WIDTH_BIT);
         assert.equal(ctx.getLineWidth(),1,'LINE_WIDTH_BIT');
     },
+    testProgramStateSeparate : function(){
+        var ctx = this.getContext();
+
+        ctx.bindProgram(this._programA);
+        ctx.pushState(ctx.PROGRAM_BIT);
+            ctx.bindProgram(this._programB);
+            assert.equal(ctx.getProgram(),this._programB,'PROGRAM_BIT');
+        ctx.popState(ctx.PROGRAM_BIT);
+        assert.equal(ctx.getProgram(), this._programA, 'PROGRAM_BIT');
+    },
     testFramebufferStateSeparate : function(){
         var ctx = this.getContext();
 
@@ -231,6 +267,9 @@ Window.create({
         //linewidth state
         ctx.setLineWidth(1);
 
+        //program state
+        ctx.bindProgram(this._programA);
+
         //framebuffer state
         ctx.bindFramebuffer(this._framebufferA);
 
@@ -268,6 +307,9 @@ Window.create({
 
             //linewidth state
             ctx.setLineWidth(3);
+
+            //program state
+            ctx.bindProgram(this._programB);
 
             //framebuffer state
             ctx.bindFramebuffer(this._framebufferB);
@@ -311,6 +353,10 @@ Window.create({
 
             assertArgs('LINE_WIDTH_BIT',
                 ctx.getLineWidth(), 3
+            );
+
+            assertArgs('PROGRAM_BIT',
+                ctx.getProgram(), this._programB
             );
 
             assertArgs('FRAMEBUFFER_BIT',
@@ -360,6 +406,10 @@ Window.create({
             ctx.getLineWidth(), 1
         );
 
+        assertArgs('PROGRAM_BIT',
+            ctx.getProgram(), this._programA
+        );
+
         assertArgs('FRAMEBUFFER_BIT',
             ctx.getFramebuffer(), this._framebufferA
         );
@@ -372,6 +422,7 @@ Window.create({
         this.testViewportStateSeparate();
         this.testBlendStateSeparate();
         this.testLineWidthStateSeparate();
+        this.testProgramStateSeparate();
         this.testFramebufferStateSeparate();
         this.testAllState();
     }
