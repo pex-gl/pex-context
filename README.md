@@ -1,3 +1,3 @@
 # pex-context
 
-Thin WebGL wrapper for state stack and resource management
+Thin WebGL state stack and resource management wrapper for the pex library
