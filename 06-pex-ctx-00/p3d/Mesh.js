@@ -103,9 +103,9 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
         var indicesBuffer  = ctx.createBuffer(ctx.ELEMENT_ARRAY_BUFFER, indicesDataArray, usage);
 
         if (!primitiveType) {
-            if (indicesDataElementSize == 1) primiviteType = ctx.POINTS;
-            if (indicesDataElementSize == 2) primiviteType = ctx.LINES;
-            if (indicesDataElementSize == 3) primiviteType = ctx.TRIANGLES;
+            if (indicesDataElementSize == 1) primitiveType = ctx.POINTS;
+            if (indicesDataElementSize == 2) primitiveType = ctx.LINES;
+            if (indicesDataElementSize == 3) primitiveType = ctx.TRIANGLES;
         }
 
         this._indices = {
