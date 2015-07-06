@@ -1,4 +1,21 @@
-var DefaultAttributeLocationBinding = require('./ProgramAttributeLocationBinding');
+var DEFAULT_ATTRIB_LOCATION_BINDING = {
+    0 : 'aPosition',
+    1 : 'aColor',
+    2 : 'aTexCoord0',
+    3 : 'aTexCoord1',
+    4 : 'aTexCoord2',
+    5 : 'aTexCoord3',
+    6 : 'aNormal',
+    7 : 'aTangent',
+    8 : 'aBitangent',
+    9 : 'aBoneIndex',
+    10 : 'aBoneWeight',
+    11 : 'aCustom0',
+    12 : 'aCustom1',
+    13 : 'aCustom2',
+    14 : 'aCustom3',
+    15 : 'aCustom4'
+};
 
 //TODO: this is true in 99% of cases, might be implementation specific
 var NUM_VERTEX_ATTRIBUTES_MAX = 16;
@@ -45,7 +62,7 @@ Program.prototype.update = function(vertSrc, fragSrc, attributeLocationBinding){
     gl.attachShader(program, fragShader);
 
     for(var location = 0; location < NUM_VERTEX_ATTRIBUTES_MAX; location++){
-        var attributeName = (attributeLocationBinding && attributeLocationBinding[location]) || DefaultAttributeLocationBinding[location];
+        var attributeName = (attributeLocationBinding && attributeLocationBinding[location]) || DEFAULT_ATTRIB_LOCATION_BINDING[location];
         gl.bindAttribLocation(program, location, attributeName);
     }
 
