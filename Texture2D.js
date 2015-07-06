@@ -1,5 +1,5 @@
 var isBrowser = require('is-browser');
-var plask = require('plask');
+var plask     = isBrowser ? {} : require('plask');
 
 //TODO: update width and height if not passed but data is Image or Canvas
 function Texture2D(ctx, data, width, height, options) {
