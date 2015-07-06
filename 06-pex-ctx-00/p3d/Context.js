@@ -526,7 +526,7 @@ Context.prototype.popState = function(){
         value = stack[1];
         this.setStencilFunc(value[0],value[1],value[2]);
         value = stack[2];
-        this.setStencilFuncSeparate(value[0],value[1],value[2]);
+        this.setStencilFuncSeparate(value[0],value[1],value[2],value[3]);
         value = stack[3];
         this.setStencilOp(value[0],value[1],value[2]);
         value = stack[4];
