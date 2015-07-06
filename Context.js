@@ -1,8 +1,8 @@
-var Mat3 = require('../math/Mat3');
-var Mat4 = require('../math/Mat4');
-var Vec2 = require('../math/Vec2');
-var Vec3 = require('../math/Vec3');
-var Vec4 = require('../math/Vec4');
+var Mat3 = require('pex-math/Mat3');
+var Mat4 = require('pex-math/Mat4');
+var Vec2 = require('pex-math/Vec2');
+var Vec3 = require('pex-math/Vec3');
+var Vec4 = require('pex-math/Vec4');
 
 var Program        = require('./Program');
 var ProgramUniform = require('./ProgramUniform');

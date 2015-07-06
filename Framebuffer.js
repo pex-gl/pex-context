@@ -1,4 +1,4 @@
-var Platform = require('../sys/Platform');
+var Platform = require('pex-sys/Platform');
 /**
  * Assumptions:
  * - colorAttachments is an array or null

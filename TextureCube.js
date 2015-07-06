@@ -1,4 +1,4 @@
-var Platform = require('../sys/Platform');
+var Platform = require('pex-sys/Platform');
 var plask = require('plask');
 
 //TODO: update width and height if not passed but data is Image or Canvas
