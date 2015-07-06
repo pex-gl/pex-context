@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/variablestudio/pex-context"
+    "url": "https://github.com/variablestudio/pex-context.git"
   },
   "keywords": [
     "pex",
