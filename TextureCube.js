@@ -1,4 +1,4 @@
-var Platform = require('pex-sys/Platform');
+var isBrowser = require('is-browser');
 var plask = require('plask');
 
 //TODO: update width and height if not passed but data is Image or Canvas
@@ -38,7 +38,7 @@ function TextureCube(ctx, facesData, width, height, options) {
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, wrapS);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, wrapT);
 
-    if (Platform.isBrowser && (format == gl.DEPTH_COMPONENT)) {
+    if (isBrowser && (format == gl.DEPTH_COMPONENT)) {
         //TODO: Not required in WebGL 2.0
         //TODO: Throw on extension not supported?
         gl.getExtension('WEBGL_depth_texture');
@@ -75,7 +75,19 @@ TextureCube.prototype.update = function(facesData, options) {
         if (!data) {
             gl.texImage2D(target, lod, internalFormat, width, height, 0, format, dataType, null);
         }
-        else if (Platform.isPlask) {
+        else if (isBrowser) {
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flip);
+            //Image, ImageData or Canvas
+            if (data.width && data.height) {
+                gl.texImage2D(target, lod, internalFormat, format, dataType, data);
+            }
+            //Array buffer
+            else {
+                //TODO: set flip flag
+                gl.texImage2D(target, lod, internalFormat, width, height, 0, format, dataType, data);
+            }
+        }
+        else { //assuming Plask
             if (data instanceof plask.SkCanvas) {
                 if (flip) {
                   gl.texImage2DSkCanvas(target, lod, data);
@@ -85,18 +97,6 @@ TextureCube.prototype.update = function(facesData, options) {
                 }
             }
             else {
-                gl.texImage2D(target, lod, internalFormat, width, height, 0, format, dataType, data);
-            }
-        }
-        else if (Platform.isBrowser) {
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flip);
-            //Image, ImageData or Canvas
-            if (data.width && data.height) {
-                gl.texImage2D(target, lod, internalFormat, format, dataType, data);
-            }
-            //Array buffer
-            else {
-                //TODO: set flip flag
                 gl.texImage2D(target, lod, internalFormat, width, height, 0, format, dataType, data);
             }
         }

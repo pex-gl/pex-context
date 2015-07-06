@@ -1,4 +1,5 @@
-var Platform = require('pex-sys/Platform');
+var isBrowser = require('is-browser');
+
 /**
  * Assumptions:
  * - colorAttachments is an array or null
@@ -18,7 +19,7 @@ function Framebuffer(ctx, colorAttachments, depthAttachment) {
     this._height = 0;
 
     //TODO: how to handle that?
-    if (Platform.isBrowser) {
+    if (isBrowser) {
         //TODO: Not required in WebGL 2.0
         //TODO: Throw on extension not supported?
         this._webglDrawBuffersExt = gl.getExtension('WEBGL_draw_buffers');
@@ -73,7 +74,7 @@ Framebuffer.prototype._bindInternal = function() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, this._handle);
 
     if (this._colorAttachmentsPositions.length > 1) {
-        if (Platform.isBrowser) {
+        if (isBrowser) {
           this._webglDrawBuffersExt.drawBuffersWEBGL(this._colorAttachmentsPositions);
         }
         else {

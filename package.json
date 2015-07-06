@@ -15,22 +15,28 @@
     "webgl"
   ],
   "author": {
-      "name": "variable.io",
-      "email": "contact@variable.io",
-      "url": "http://variable.io"
+    "name": "variable.io",
+    "email": "contact@variable.io",
+    "url": "http://variable.io"
   },
-  "contributors": [{
+  "contributors": [
+    {
       "name": "Marcin Ignac",
       "email": "marcin.ignac@gmail.com",
       "url": "http://marcinignac.com"
-  },{
+    },
+    {
       "name": "Henryk Wollik",
       "email": "hwollik@hotmail.com",
       "url": "http://henrykwollik.com"
-  }],
+    }
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/variablestudio/pex-context/issues"
   },
-  "homepage": "https://github.com/variablestudio/pex-context"
+  "homepage": "https://github.com/variablestudio/pex-context",
+  "dependencies": {
+    "is-browser": "^2.0.1"
+  }
 }

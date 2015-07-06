@@ -1,4 +1,4 @@
-var Platform = require('pex-sys/Platform');
+var isBrowser = require('is-browser');
 var plask = require('plask');
 
 //TODO: update width and height if not passed but data is Image or Canvas
@@ -31,7 +31,7 @@ function Texture2D(ctx, data, width, height, options) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
 
-    if (Platform.isBrowser && (format == gl.DEPTH_COMPONENT)) {
+    if (isBrowser && (format == gl.DEPTH_COMPONENT)) {
         //TODO: Not required in WebGL 2.0
         //TODO: Throw on extension not supported?
         gl.getExtension('WEBGL_depth_texture');
@@ -60,30 +60,7 @@ Texture2D.prototype.update = function(data, width, height, options) {
     if (!data) {
         gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, null);
     }
-    else if (Platform.isPlask) {
-        if (data instanceof plask.SkCanvas) {
-            if (flip) {
-              gl.texImage2DSkCanvas(this._target, lod, data);
-            }
-            else {
-              gl.texImage2DSkCanvasNoFlip(this._target, lod, data);
-            }
-        }
-        else {
-            if (compressed) {
-                if (compressed == 'dxt1') {
-                    gl.compressedTexImage2D(gl.TEXTURE_2D, 0, gl.COMPRESSED_RGB_S3TC_DXT1_EXT, width, height, 0, data);
-                }
-                if (compressed == 'dxt5') {
-                    gl.compressedTexImage2D(gl.TEXTURE_2D, lod, gl.COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, data);
-                }
-            }
-            else {
-                gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
-            }
-        }
-    }
-    else if (Platform.isBrowser) {
+    else if (isBrowser) {
         if (compressed == 'dxt1') {
             var ext = gl.getExtension('WEBGL_compressed_texture_s3tc');
             gl.compressedTexImage2D(gl.TEXTURE_2D, lod, ext.COMPRESSED_RGB_S3TC_DXT1_EXT, width, height, 0, data);
@@ -105,7 +82,29 @@ Texture2D.prototype.update = function(data, width, height, options) {
                 gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
             }
         }
-
+    }
+    else { //assuming Plask
+        if (data instanceof plask.SkCanvas) {
+            if (flip) {
+              gl.texImage2DSkCanvas(this._target, lod, data);
+            }
+            else {
+              gl.texImage2DSkCanvasNoFlip(this._target, lod, data);
+            }
+        }
+        else {
+            if (compressed) {
+                if (compressed == 'dxt1') {
+                    gl.compressedTexImage2D(gl.TEXTURE_2D, 0, gl.COMPRESSED_RGB_S3TC_DXT1_EXT, width, height, 0, data);
+                }
+                if (compressed == 'dxt5') {
+                    gl.compressedTexImage2D(gl.TEXTURE_2D, lod, gl.COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, data);
+                }
+            }
+            else {
+                gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
+            }
+        }
     }
 }
 
