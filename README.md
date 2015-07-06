@@ -1,2 +1,3 @@
-# pex-next
-The future starts here
+# pex-context
+
+Thin WebGL wrapper for state stack and resource management

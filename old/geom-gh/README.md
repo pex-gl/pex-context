@@ -1,1 +1,0 @@
-﻿Grasshopper inspired lib
