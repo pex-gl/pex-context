@@ -728,7 +728,8 @@ Context.prototype.setViewport = function(x,y,width,height){
  */
 
 Context.prototype.getViewport = function(out){
-    return Vec4.copy(this._viewport,out);
+    out = out === undefined ? Vec4.create() : out;
+    return Vec4.set(out,this._viewport);
 };
 
 /**
@@ -825,7 +826,8 @@ Context.prototype.setScissor = function(x,y,w,h){
  */
 
 Context.prototype.getScissor = function(out){
-    return Vec4.copy(this._scissorBox,out);
+    out = out === undefined ? Vec4.create() : out;
+    return Vec4.set(out, this._scissorBox);
 };
 
 /**
@@ -877,7 +879,8 @@ Context.prototype.setStencilFunc = function(func,ref,mask){
  */
 
 Context.prototype.getStencilFunc = function(out){
-    return Vec3.set(out === undefined ? Vec3.create() : out, this._stencilFunc);
+    out = out === undefined ? Vec3.create() : out;
+    return Vec3.set(out, this._stencilFunc);
 };
 
 /**
@@ -903,7 +906,8 @@ Context.prototype.setStencilFuncSeparate = function(face, func, ref, mask){
  */
 
 Context.prototype.getStencilFuncSeparate = function(out){
-    return Vec4.set(out === undefined ? Vec4.create() : out, this._stencilFuncSeparate);
+    out = out === undefined ? Vec4.create() : out;
+    return Vec4.set(out, this._stencilFuncSeparate);
 };
 
 /**
@@ -928,7 +932,8 @@ Context.prototype.setStencilOp = function(fail, zfail, zpass){
  */
 
 Context.prototype.getStencilOp = function(out){
-    return Vec3.set(out === undefined ? Vec3.create() : out, this._stencilOp);
+    out = out === undefined ? Vec3.create() : out;
+    return Vec3.set(out, this._stencilOp);
 };
 
 /**
@@ -954,7 +959,8 @@ Context.prototype.setStencilOpSeparate = function(face, fail, zfail, zpass){
  */
 
 Context.prototype.getStencilOpSeparate = function(out){
-    return Vec4.set(out === undefined ? Vec4.create() : out, this._stencilOpSeparate);
+    out = out === undefined ? Vec4.create() : out;
+    return Vec4.set(out, this._stencilOpSeparate);
 };
 
 /**
@@ -989,7 +995,8 @@ Context.prototype.setClearColor = function(r,g,b,a){
  */
 
 Context.prototype.getClearColor = function(out){
-    return Vec4.copy(this._clearColor,out);
+    out = out === undefined ? Vec4.create() : out;
+    return Vec4.set(out,this._clearColor);
 };
 
 /**
@@ -1015,7 +1022,8 @@ Context.prototype.setColorMask = function(r,g,b,a){
  */
 
 Context.prototype.getColorMask = function(out){
-    return Vec4.set(out === undefined ? Vec4.create() : out, this._colorMask);
+    out = out === undefined ? Vec4.create() : out;
+    return Vec4.set(out,this._colorMask);
 };
 
 /**
@@ -1133,7 +1141,8 @@ Context.prototype.setDepthRange = function(znear,zfar){
  */
 
 Context.prototype.getDepthRange = function(out){
-    return Vec2.copy(this._depthRange,out);
+    out = out === undefined ? Vec2.create() : out;
+    return Vec2.set(out,this._depthRange);
 };
 
 /**
@@ -1158,7 +1167,8 @@ Context.prototype.setPolygonOffset = function(factor,units){
  */
 
 Context.prototype.getPolygonOffset = function(out){
-    return Vec2.copy(this._polygonOffset,out);
+    out = out === undefined ? Vec2.create() : out;
+    return Vec2.set(out,this._polygonOffset);
 };
 
 /**
@@ -1280,7 +1290,8 @@ Context.prototype.setBlendEquationSeparate = function(modeRGB, modeAlpha){
  */
 
 Context.prototype.getBlendEquationSeparate = function(out){
-    return Vec2.set(out === undefined ? Vec2.create() : out,this._blendEquationSeparate);
+    out = out === undefined ? Vec2.create() : out;
+    return Vec2.set(out, this._blendEquationSeparate);
 };
 
 /**
@@ -1304,7 +1315,8 @@ Context.prototype.setBlendFunc = function(sfactor,dfactor){
  */
 
 Context.prototype.getBlendFunc = function(out){
-    return Vec2.set(out === undefined ? Vec2.create() : out, this._blendFunc);
+    out = out === undefined ? Vec2.create() : out;
+    return Vec2.set(out, this._blendFunc);
 };
 
 /**
@@ -1330,7 +1342,8 @@ Context.prototype.setBlendFuncSeparate = function(srcRGB,dstRGB,srcAlpha,dstAlph
  */
 
 Context.prototype.getBlendFuncSeparate = function(out){
-    return Vec4.set(out === undefined ? Vec4.create() : out,this._blendFuncSeparate);
+    out = out === undefined ? Vec4.create() : out;
+    return Vec4.set(out,this._blendFuncSeparate);
 };
 
 /**
@@ -1384,7 +1397,8 @@ Context.prototype.setModelMatrix = function(matrix){
  */
 
 Context.prototype.getProjectionMatrix = function(out){
-    return Mat4.copy(this._matrix[MATRIX_PROJECTION],out);
+    out = out === undefined ? Mat4.create() : out;
+    return Mat4.set(out, this._matrix[MATRIX_PROJECTION]);
 };
 
 /**
@@ -1394,7 +1408,8 @@ Context.prototype.getProjectionMatrix = function(out){
  */
 
 Context.prototype.getViewMatrix = function(out){
-    return Mat4.copy(this._matrix[MATRIX_VIEW],out);
+    out = out === undefined ? Mat4.create() : out;
+    return Mat4.set(out, this._matrix[MATRIX_VIEW]);
 };
 
 /**
@@ -1404,7 +1419,8 @@ Context.prototype.getViewMatrix = function(out){
  */
 
 Context.prototype.getModelMatrix = function(out){
-    return Mat4.copy(this._matrix[MATRIX_MODEL],out);
+    out = out === undefined ? Mat4.create() : out;
+    return Mat4.set(out, this._matrix[MATRIX_MODEL]);
 };
 
 /**
