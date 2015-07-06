@@ -38,7 +38,6 @@ var FRAMEBUFFER_BIT       = 1 << 19;
 var VERTEX_ARRAY_BIT      = 1 << 21;
 var PROGRAM_BIT           = 1 << 22;
 var TEXTURE_BIT           = 1 << 23;
-var XBO_BIT               = 1 << 24;
 
 var MATRIX_PROJECTION    = 'matrixProjection';
 var MATRIX_VIEW          = 'matrixView';
