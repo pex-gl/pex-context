@@ -38,6 +38,7 @@ var FRAMEBUFFER_BIT       = 1 << 19;
 var VERTEX_ARRAY_BIT      = 1 << 21;
 var PROGRAM_BIT           = 1 << 22;
 var TEXTURE_BIT           = 1 << 23;
+var MESH_BIT              = 1 << 24;
 
 var MATRIX_PROJECTION    = 'matrixProjection';
 var MATRIX_VIEW          = 'matrixView';
@@ -252,12 +253,19 @@ function Context(gl){
     this._vertexArrayHasDivisor = false;
     this._vertexArrayStack = [];
 
+    /**
+     * [BIT description here]
+     * @type {Number}
+     * @const
+     */
+    this.MESH_BIT = MESH_BIT;
     this._mesh = null;
     this._meshPrimitiveType = null;
     this._meshHasIndexBuffer = false;
     this._meshIndexBufferDataType = null;
     this._meshCount = 0;
     this._meshHasDivisor = false;
+    this._meshStack = [];
 
     /**
      * [BIT description here]
@@ -470,6 +478,10 @@ Context.prototype.pushState = function(mask){
         this._framebufferStack.push(this._framebuffer);
     }
 
+    if((mask & MESH_BIT) == MESH_BIT){
+        this._meshStack.push(this._mesh);
+    }
+
     this._mask = mask;
     this._maskStack.push(this._mask);
 };
@@ -628,6 +640,11 @@ Context.prototype.popState = function(){
         value = this._framebufferStack.pop();
         this.bindFramebuffer(value);
     }
+
+    if((mask & MESH_BIT) == MESH_BIT){
+        value = this._meshStack.pop();
+        this.bindMesh(value);
+    }
 };
 
 /**
@@ -697,6 +714,10 @@ Context.prototype.getState = function(mask){
 
     if((mask & FRAMEBUFFER_BIT) == FRAMEBUFFER_BIT){
         state.push(this._framebuffer);
+    }
+
+    if((mask & MESH_BIT) == MESH_BIT){
+        state.push(this._mesh);
     }
 
     return state.length > 1 ? state : state[0];
@@ -1687,14 +1708,22 @@ Context.prototype.createMesh = function(attributes, indicesInfo, primitiveType){
  */
 
 Context.prototype.bindMesh = function(mesh){
+    if(mesh === null){
+        this._meshPrimitiveType = null;
+        this._meshHasIndexBuffer = false;
+        this._meshIndexBufferDataType = null;
+        this._meshCount = 0;
+        this._meshHasDivisor = null;
+    } else {
+        this._meshPrimitiveType = mesh._primiviteType;
+        this._meshHasIndexBuffer = mesh._indices !== null;
+        this._meshIndexBufferDataType = this._meshHasIndexBuffer ? mesh._indices.buffer.getDataType() : null;
+        this._meshCount = mesh._count;
+        //TODO: Add Mesh hasDivisor bool
+        this._meshHasDivisor = null;
+        this.bindVertexArray(mesh._vao);
+    }
     this._mesh = mesh;
-    this._meshPrimitiveType = mesh._primiviteType;
-    this._meshHasIndexBuffer = mesh._indices !== null;
-    this._meshIndexBufferDataType = this._meshHasIndexBuffer ? mesh._indices.buffer.getDataType() : null;
-    this._meshCount = mesh._count;
-    //TODO: Add Mesh hasDivisor bool
-    this._meshHasDivisor = null;
-    this.bindVertexArray(mesh._vao);
 };
 
 /**
