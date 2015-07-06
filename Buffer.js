@@ -43,6 +43,7 @@ function Buffer(ctx, target, sizeOrData, usage, preserveData) {
     this._usage        = usage  === undefined ? gl.STATIC_DRAW  : usage;
     this._length       = 0;
     this._byteLength   = 0;
+    this._data         = null;
     this._dataType     = null;
     this._preserveData = preserveData === undefined ? false : preserveData;
     this._handle       = gl.createBuffer();
