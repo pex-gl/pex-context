@@ -723,7 +723,7 @@ Context.prototype.setViewport = function(x,y,width,height){
 
 /**
  * Returns the current viewport rectangle.
- * @param out
+ * @param {Array} [out]
  * @returns {Array}
  */
 
@@ -821,7 +821,7 @@ Context.prototype.setScissor = function(x,y,w,h){
 
 /**
  * Returns the current scissor box.
- * @param out
+ * @param {Array} [out]
  * @returns {Array}
  */
 
@@ -874,7 +874,7 @@ Context.prototype.setStencilFunc = function(func,ref,mask){
 
 /**
  * Returns the current stencil func set.
- * @param out
+ * @param {Array} [out]
  * @returns {Array}
  */
 
@@ -901,7 +901,7 @@ Context.prototype.setStencilFuncSeparate = function(face, func, ref, mask){
 
 /**
  * Returns the current stencil func separate set.
- * @param out
+ * @param {Array} [out]
  * @returns {Array}
  */
 
@@ -927,7 +927,7 @@ Context.prototype.setStencilOp = function(fail, zfail, zpass){
 
 /**
  * Returns the current front and back stencil test actions set.
- * @param out
+ * @param {Array} [out]
  * @returns {Array}
  */
 
@@ -954,7 +954,7 @@ Context.prototype.setStencilOpSeparate = function(face, fail, zfail, zpass){
 
 /**
  * Returns the current stencil test separate set.
- * @param out
+ * @param {Array} [out]
  * @returns {Array}
  */
 
@@ -990,7 +990,7 @@ Context.prototype.setClearColor = function(r,g,b,a){
 
 /**
  * Returns the current clear color set.
- * @param out
+ * @param {Array} [out]
  * @returns {Array}
  */
 
@@ -1017,7 +1017,7 @@ Context.prototype.setColorMask = function(r,g,b,a){
 
 /**
  * Returns the current color mask set.
- * @param out
+ * @param {Array} [out]
  * @returns {Array}
  */
 
@@ -1136,7 +1136,7 @@ Context.prototype.setDepthRange = function(znear,zfar){
 
 /**
  * Returns the current depth range values set.
- * @param out
+ * @param {Array} [out]
  * @returns {Array}
  */
 
@@ -1162,7 +1162,7 @@ Context.prototype.setPolygonOffset = function(factor,units){
 
 /**
  * Returns the current polygon offset values.
- * @param out
+ * @param {Array} [out]
  * @returns {Array}
  */
 
