@@ -35,7 +35,6 @@ var MATRIX_PROJECTION_BIT = 1 << 16;
 var MATRIX_VIEW_BIT       = 1 << 17;
 var MATRIX_MODEL_BIT      = 1 << 18;
 var FRAMEBUFFER_BIT       = 1 << 19;
-var BUFFER_BIT            = 1 << 20;
 var VERTEX_ARRAY_BIT      = 1 << 21;
 var PROGRAM_BIT           = 1 << 22;
 var TEXTURE_BIT           = 1 << 23;
@@ -235,7 +234,6 @@ function Context(gl){
     this._program = null;
     this._programStack = [];
 
-    this.BUFFER_BIT = BUFFER_BIT;
     this._bufferPrev = {};
     this._bufferPrev[gl.ARRAY_BUFFER] = null;
     this._bufferPrev[gl.ELEMENT_ARRAY_BUFFER] = null;
