@@ -15,7 +15,10 @@ var Mesh        = require('./Mesh');
 var Framebuffer = require('./Framebuffer');
 
 var Texture2D   = require('./Texture2D');
-var TextureCube   = require('./TextureCube');
+var TextureCube = require('./TextureCube');
+
+var isBrowser   = require('is-browser');
+var isPlask     = !isBrowser;
 
 var STR_ERROR_STACK_POP_BIT = 'Invalid pop. Bit %s stack is empty.';
 
@@ -45,6 +48,14 @@ var MATRIX_VIEW          = 'matrixView';
 var MATRIX_MODEL         = 'matrixModel';
 var MATRIX_NORMAL        = 'matrixNormal';
 var MATRIX_INVERSE_VIEW  = 'matrixInverseView';
+
+var CAPS_WEBGL2                    = 0;
+var CAPS_INSTANCED_ARRAYS          = 1;
+var CAPS_TEXTURE_FLOAT             = 2;
+var CAPS_TEXTURE_FLOAT_LINEAR      = 3;
+var CAPS_TEXTURE_HALF_FLOAT        = 4;
+var CAPS_TEXTURE_HALF_FLOAT_LINEAR = 5;
+var CAPS_DEPTH_TEXTURE             = 6;
 
 //UITLS
 
@@ -369,11 +380,26 @@ function Context(gl){
     this.TRIANGLE_STRIP = gl.TRIANGLE_STRIP;
     this.TRIANGLE_FAN   = gl.TRIANGLE_FAN;
 
-    //extensions
+    //Extensions and Capabilities
+
+    this._caps = [];
+    this.CAPS_WEBGL2                        = CAPS_WEBGL2;
+    this.CAPS_INSTANCED_ARRAYS              = CAPS_INSTANCED_ARRAYS;
+    this.CAPS_TEXTURE_FLOAT                 = CAPS_TEXTURE_FLOAT;
+    this.CAPS_TEXTURE_FLOAT_LINEAR          = CAPS_TEXTURE_FLOAT_LINEAR;
+    this.CAPS_TEXTURE_HALF_FLOAT            = CAPS_TEXTURE_HALF_FLOAT;
+    this.CAPS_TEXTURE_HALF_FLOAT_LINEAR     = CAPS_TEXTURE_HALF_FLOAT_LINEAR;
+    this.CAPS_DEPTH_TEXTURE                 = CAPS_DEPTH_TEXTURE;
+
+    //TODO: implement webgl 2 check
+    var isWebGL2              = false;
+    this._caps[CAPS_WEBGL2]   = isWebGL2;
+
     //ANGLE_instanced_arrays
     if (!gl.drawElementsInstanced) {
         var ext = gl.getExtension("ANGLE_instanced_arrays");
         if (!ext) {
+            this._caps[CAPS_INSTANCED_ARRAYS] = false;
             gl.drawElementsInstanced = function() {
                 throw new Error('ANGLE_instanced_arrays not supported');
             };
@@ -385,6 +411,7 @@ function Context(gl){
             };
         }
         else {
+            this._caps[CAPS_INSTANCED_ARRAYS] = true;
             gl.drawElementsInstanced = function() {
                 ext.drawElementsInstancedANGLE.apply(ext, arguments);
             };
@@ -395,8 +422,19 @@ function Context(gl){
                 ext.vertexAttribDivisorANGLE.apply(ext, arguments);
             };
         }
-        //gl = drawElementsInstancedANGLE
     }
+    else {
+        this._caps[CAPS_INSTANCED_ARRAYS] = true;
+    }
+
+    //OES_texture_float
+    this._caps[CAPS_TEXTURE_FLOAT]             = isPlask || isWebGL2 || (gl.getExtension('OES_texture_float') != null);
+    this._caps[CAPS_TEXTURE_FLOAT_LINEAR]      = isPlask || isWebGL2 || (gl.getExtension('OES_texture_float_linear') != null);
+    this._caps[CAPS_TEXTURE_HALF_FLOAT]        = isPlask || isWebGL2 || (gl.getExtension('OES_texture_half_float') != null);
+    this._caps[CAPS_TEXTURE_HALF_FLOAT_LINEAR] = isPlask || isWebGL2 || (gl.getExtension('OES_texture_half_float_linear') != null);
+
+    //WEBGL_depth_texture
+    this._caps[CAPS_DEPTH_TEXTURE]             = isPlask || isWebGL2 || (gl.getExtension('WEBGL_depth_texture') != null);
 }
 
 /**
@@ -1952,6 +1990,10 @@ Context.prototype.draw = function(mode, first, count){
         }
 
     }
+};
+
+Context.prototype.isSupported = function(flag) {
+    return this._caps[flag];
 };
 
 module.exports = Context;

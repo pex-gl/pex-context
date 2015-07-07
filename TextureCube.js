@@ -38,10 +38,16 @@ function TextureCube(ctx, facesData, width, height, options) {
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, wrapS);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, wrapT);
 
-    if (isBrowser && (format == gl.DEPTH_COMPONENT)) {
-        //TODO: Not required in WebGL 2.0
-        //TODO: Throw on extension not supported?
-        gl.getExtension('WEBGL_depth_texture');
+    if (format == gl.DEPTH_COMPONENT && !ctx.isSupported(ctx.CAPS_DEPTH_TEXTURE)) {
+        throw new Error('TextureCube - Depth Texture format is not supported');
+    }
+
+    if (dataType == gl.FLOAT && !ctx.isSupported(ctx.CAPS_TEXTURE_FLOAT)) {
+        throw new Error('TextureCube - Float type is not supported');
+    }
+
+    if (dataType == gl.HALF_FLOAT && !ctx.isSupported(ctx.CAPS_TEXTURE_HALF_FLOAT)) {
+        throw new Error('TextureCube - Half Float type is not supported');
     }
 
     this.update(facesData, width, height, options);
@@ -49,7 +55,7 @@ function TextureCube(ctx, facesData, width, height, options) {
 }
 
 //TODO: update width and height if not passed but data is Image or Canvas
-TextureCube.prototype.update = function(facesData, options) {
+TextureCube.prototype.update = function(facesData, width, height, options) {
     var ctx = this._ctx;
     var gl  = ctx.getGL();
 
@@ -63,7 +69,6 @@ TextureCube.prototype.update = function(facesData, options) {
     var dataType        = (options && options.type  ) || gl.UNSIGNED_BYTE;
     var flip            = (options && options.flip  ) || false;
     var lod             = (options && options.lod   ) || 0;
-
 
     for(var i=0; i<facesData.length; i++) {
         var face = facesData[i];
@@ -84,6 +89,7 @@ TextureCube.prototype.update = function(facesData, options) {
             //Array buffer
             else {
                 //TODO: set flip flag
+                console.log(dataType, 'gl.FLOAT', ctx.FLOAT);
                 gl.texImage2D(target, lod, internalFormat, width, height, 0, format, dataType, data);
             }
         }
