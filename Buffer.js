@@ -162,9 +162,13 @@ Buffer.prototype.bufferData = function(sizeOrData){
         }
 
         if(this._preserveData){
-            this._data = new data_ctor(sizeOrData);
+            if(this._data.length = sizeOrData.length){
+                this._data.set(sizeOrData);
+            }
+            else {
+                this._data = new data_ctor(sizeOrData);
+            }
         }
-
     } else {
         this._length     = sizeOrData;
         this._byteLength = null;
