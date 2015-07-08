@@ -162,7 +162,7 @@ Buffer.prototype.bufferData = function(sizeOrData){
         }
 
         if(this._preserveData){
-            if(this._data.length = sizeOrData.length){
+            if(this._data !== null && this._data.length == sizeOrData.length){
                 this._data.set(sizeOrData);
             }
             else {
@@ -186,7 +186,15 @@ Buffer.prototype.bufferData = function(sizeOrData){
  * @param {Uint8Array|Uint16Array|Uint32Array|Float32Array} data - The new data that will be copied into the data store
  */
 Buffer.prototype.bufferSubData = function(offset,data){
-    this._ctx.getGL().bufferSubData(this._target,offset,data);
+    var gl = this._ctx.getGL();
+    gl.bufferSubData(this._target,offset,data);
+    
+    if(this._preserveData && data != this._data){
+        offset = offset / this._data.BYTES_PER_ELEMENT;
+        for(var i = 0, l = this._data.length; offset < l; ++i, offset+=1){
+            this._data[offset] = data[i];
+        }
+    }
 };
 
 /**
