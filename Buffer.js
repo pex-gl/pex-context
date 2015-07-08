@@ -182,7 +182,7 @@ Buffer.prototype.bufferData = function(sizeOrData){
  * @param {Uint8Array|Uint16Array|Uint32Array|Float32Array} data - The new data that will be copied into the data store
  */
 Buffer.prototype.bufferSubData = function(offset,data){
-    this._gl.bufferSubData(this._target,offset,data);
+    this._ctx.getGL().bufferSubData(this._target,offset,data);
 };
 
 /**
