@@ -28,8 +28,9 @@ var STR_ERROR_ATTRIBUTE_BINDING_UNDEFINED = 'Attribute "%s" is not present in pr
 function Program(context, vertSrc, fragSrc, attributeLocationBinding){
     var gl = this._gl = context.getGL();
 
-    this._handle           = gl.createProgram();
-    this._attributes       = {};
+    this._handle = gl.createProgram();
+    this._attributes            = {};
+    this._attributesPerLocation = {};
     this._uniforms         = {};
     this._uniformSetterMap = {};
     if(vertSrc){
@@ -107,17 +108,19 @@ Program.prototype._updateUniforms = function(){
 
 Program.prototype._updateAttributes = function(){
     var gl = this._gl;
-    var program       = this._handle;
-    var numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-    var attributes    = this._attributes = {};
+    var program = this._handle;
+    var numAttributes         = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+    var attributes            = this._attributes = {};
+    var attributesPerLocation = this._attributesPerLocation = {};
 
-    for(var i = 0, info, name; i < numAttributes; ++i){
-        info = gl.getActiveAttrib(program, i);
-        name = info.name;
-        attributes[name] = {
+    for(var i = 0, info, name, attrib; i < numAttributes; ++i){
+        info   = gl.getActiveAttrib(program, i);
+        name   = info.name;
+        attrib = attributes[name] = {
             type : info.type,
             location : gl.getAttribLocation(program, name)
         }
+        attributesPerLocation[attrib.location] = attrib;
     }
 };
 
@@ -239,6 +242,10 @@ Program.prototype.setUniform = function(name, x, y, z, w){
         throw new Error(STR_ERROR_UNIFORM_UNDEFINED.replace('%s', name));
     }
     this._uniformSetterMap[uniform.type](uniform.location,x,y,z,w);
+};
+
+Program.prototype.hasAttributeAtLocation = function(location){
+    return this._attributesPerLocation[location] !== undefined;
 };
 
 Program.prototype.hasUniform = function(name){
