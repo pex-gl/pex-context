@@ -110,9 +110,19 @@ VertexArray.prototype.hasIndexBuffer = function(){
     return this._indexBuffer !== null;
 };
 
+/**
+ * Returns the index buffer buffer bound.
+ * @returns {Buffer|null}
+ */
+
 VertexArray.prototype.getIndexBuffer = function(){
     return this._indexBuffer;
 };
+
+/**
+ * Returns true if there is at least one attribute with divisor set.
+ * @returns {Boolean}
+ */
 
 VertexArray.prototype.hasDivisor = function(){
     return this._hasDivisor;
