@@ -25,6 +25,17 @@ var STR_ERROR_WRONG_NUM_ARGS = 'Wrong number of arguments.';
 var STR_ERROR_INVALID_UNIFORM_TYPE = 'Unsupported uniform type "%s".';
 var STR_ERROR_ATTRIBUTE_BINDING_UNDEFINED = 'Attribute "%s" is not present in program.';
 
+/**
+ * @example
+ * var program = new Program(ctx, vertexSrc, fragmentSrc, { 0: 'aPositon', 1: 'aNormal', 2: 'aColor' });
+ *
+ * @param {Context} context
+ * @param {String} vertSrc
+ * @param {String} [fragSrc]
+ * @param {Object} attributeLocationBinding
+ * @constructor
+ */
+
 function Program(context, vertSrc, fragSrc, attributeLocationBinding){
     var gl = this._gl = context.getGL();
 
@@ -37,6 +48,11 @@ function Program(context, vertSrc, fragSrc, attributeLocationBinding){
         this.update(vertSrc, fragSrc, attributeLocationBinding);
     }
 }
+
+/**
+ * Returns the underlying WebGLProgram handle.
+ * @returns {WebGLProgram|null}
+ */
 
 Program.prototype.getHandle = function(){
     return this._handle;
@@ -233,8 +249,16 @@ Program.prototype._updateUniformSetterMap = function(){
             }
         }
     }
-
 };
+
+/**
+ * Specifies the value of a uniform variable for the program bound.
+ * @param {String} name
+ * @param {Boolean|Number|Float32Array|Uint8Array|Uint16Array|Uint32Array} x
+ * @param {Number} [y]
+ * @param {Number} [z]
+ * @param {Number} [w]
+ */
 
 Program.prototype.setUniform = function(name, x, y, z, w){
     var uniform = this._uniforms[name];
@@ -244,13 +268,30 @@ Program.prototype.setUniform = function(name, x, y, z, w){
     this._uniformSetterMap[uniform.type](uniform.location,x,y,z,w);
 };
 
+/**
+ * Returns true if there is an attribute bound to the location passed.
+ * @param {Boolean} location
+ * @returns {boolean}
+ */
+
 Program.prototype.hasAttributeAtLocation = function(location){
     return this._attributesPerLocation[location] !== undefined;
 };
 
+/**
+ * Returns true if the uniform is present in the program.
+ * @param {String} name
+ * @returns {boolean}
+ */
+
 Program.prototype.hasUniform = function(name){
     return this._uniforms[name] !== undefined;
 };
+
+/**
+ * Frees the memory and invalidates the program.
+ * @returns {Program}
+ */
 
 Program.prototype.dispose = function(){
     if(!this._handle){
