@@ -34,11 +34,12 @@ var STR_ERROR_ATTRIB_LOCATION_DUPLICATE = 'Attribute at location "%s" has alread
 function VertexArray(ctx,attributes,indexBuffer){
     this._ctx = ctx;
 
-    this._attributes   = {};
+    this._attributes            = {};
+    this._attributesPerLocation = {};
+
     this._arrayBuffers = [];
     this._indexBuffer  = indexBuffer !== undefined ? indexBuffer : null;
-    //we have no separated divisors,but we need to know if VertexArray has divisors for setting
-    //the draw func on ctx.bindVertexArray to remove rechecking on draw
+
     this._hasDivisor   = false;
 
     var attrib, attribCopy, defaultProp, buffer;
@@ -98,7 +99,18 @@ function VertexArray(ctx,attributes,indexBuffer){
 
         this._hasDivisor = this._hasDivisor || attribCopy.divisor !== null;
         this._attributes[bufferIndex].push(attribCopy);
+        this._attributesPerLocation[attribCopy.location] = attribCopy;
     }
+}
+
+/**
+ * Returns the attribute properties at an attribute location.
+ * @param {Number} location
+ * @returns {undefined|Object}
+ */
+
+VertexArray.prototype.getAttribute = function(location){
+    return this._attributesPerLocation[location];
 }
 
 /**
@@ -137,8 +149,6 @@ VertexArray.prototype._bindInternal = function(){
 
     var bufferAttributes, attribute, location;
 
-    //NOTE: No idea how faster variables declared in loops are but this is super hard to read
-    //NOTE: So renamed for now for debugging, as these are 1-2 interation long loops anyway
     for(var i = 0, numArrayBuffers = arrayBuffers.length; i < numArrayBuffers; ++i) {
         ctx._bindBuffer(arrayBuffers[i]);
         bufferAttributes = attributes[i];
