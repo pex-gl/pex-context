@@ -141,40 +141,43 @@ Buffer.prototype.bufferData = function(sizeOrData){
         }
     }
 
-    if(sizeOrData.byteLength !== undefined){
-        this._length     = sizeOrData.length;
-        this._byteLength = sizeOrData.byteLength;
-        var data_ctor    = sizeOrData.constructor;
+    if(sizeOrData !== this._data){
+        if(sizeOrData.byteLength !== undefined){
+            this._length     = sizeOrData.length;
+            this._byteLength = sizeOrData.byteLength;
+            var data_ctor    = sizeOrData.constructor;
 
-        switch(data_ctor){
-            case Float32Array:
-                this._dataType = gl.FLOAT;
-                break;
-            case Uint16Array:
-                this._dataType = gl.UNSIGNED_SHORT;
-                break;
-            case Uint32Array:
-                this._dataType = gl.UNSIGNED_INT;
-                break;
-            default:
-                throw new TypeError('Unsupported data type.');
-                break;
-        }
+            switch(data_ctor){
+                case Float32Array:
+                    this._dataType = gl.FLOAT;
+                    break;
+                case Uint16Array:
+                    this._dataType = gl.UNSIGNED_SHORT;
+                    break;
+                case Uint32Array:
+                    this._dataType = gl.UNSIGNED_INT;
+                    break;
+                default:
+                    throw new TypeError('Unsupported data type.');
+                    break;
+            }
 
-        if(this._preserveData){
-            if(this._data !== null && this._data.length == sizeOrData.length){
-                this._data.set(sizeOrData);
+            if(this._preserveData && sizeOrData){
+                if(this._data !== null && this._data.length == sizeOrData.length){
+                    this._data.set(sizeOrData);
+                }
+                else {
+                    this._data = new data_ctor(sizeOrData);
+                }
             }
-            else {
-                this._data = new data_ctor(sizeOrData);
-            }
+        } else {
+            this._length     = sizeOrData;
+            this._byteLength = null;
+            this._dataType   = null;
+            this._data       = null;
         }
-    } else {
-        this._length     = sizeOrData;
-        this._byteLength = null;
-        this._dataType   = null;
-        this._data       = null;
     }
+
     gl.bufferData(this._target,sizeOrData,this._usage);
 
     ctx._unbindBuffer(this);
@@ -188,7 +191,7 @@ Buffer.prototype.bufferData = function(sizeOrData){
 Buffer.prototype.bufferSubData = function(offset,data){
     var gl = this._ctx.getGL();
     gl.bufferSubData(this._target,offset,data);
-    
+
     if(this._preserveData && data != this._data){
         offset = offset / this._data.BYTES_PER_ELEMENT;
         for(var i = 0, l = this._data.length; offset < l; ++i, offset+=1){
