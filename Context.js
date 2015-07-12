@@ -440,23 +440,20 @@ function Context(gl){
     //EXT_sRGB
     if (gl.SRGB) {
         this._caps[CAPS_SRGB] = true;
-        ctx.SRGB        = gl.SRGB;
-        ctx.SRGB_ALPHA  = gl.SRGB_ALPHA;
+        this.SRGB        = gl.SRGB;
+        this.SRGB_ALPHA  = gl.SRGB_ALPHA;
     }
     else {
         var ext = gl.getExtension('EXT_sRGB');
         if (ext) {
             this._caps[CAPS_SRGB] = true;
-            ctx.SRGB        = ext.SRGB;
-            ctx.SRGB_ALPHA  = ext.SRGB_ALPHA;
+            this.SRGB        = ext.SRGB;
+            this.SRGB_ALPHA  = ext.SRGB_ALPHA;
         }
         else {
             this._caps[CAPS_SRGB] = false;
         }
     }
-    0x8C40
-
-
 }
 
 /**
