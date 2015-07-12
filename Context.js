@@ -397,7 +397,7 @@ function Context(gl){
 
     //ANGLE_instanced_arrays
     if (!gl.drawElementsInstanced) {
-        var ext = gl.getExtension("ANGLE_instanced_arrays");
+        var ext = gl.getExtension('ANGLE_instanced_arrays');
         if (!ext) {
             this._caps[CAPS_INSTANCED_ARRAYS] = false;
             gl.drawElementsInstanced = function() {
