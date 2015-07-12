@@ -56,6 +56,7 @@ var CAPS_TEXTURE_FLOAT_LINEAR      = 3;
 var CAPS_TEXTURE_HALF_FLOAT        = 4;
 var CAPS_TEXTURE_HALF_FLOAT_LINEAR = 5;
 var CAPS_DEPTH_TEXTURE             = 6;
+var CAPS_SRGB                      = 7;
 
 //UITLS
 
@@ -435,6 +436,27 @@ function Context(gl){
 
     //WEBGL_depth_texture
     this._caps[CAPS_DEPTH_TEXTURE]             = isPlask || isWebGL2 || (gl.getExtension('WEBGL_depth_texture') != null);
+
+    //EXT_sRGB
+    if (gl.SRGB) {
+        this._capts[CAPS_SRGB] = true;
+        ctx.SRGB        = gl.SRGB;
+        ctx.SRGB_ALPHA  = gl.SRGB_ALPHA;
+    }
+    else {
+        var ext = gl.getExtension('EXT_sRGB');
+        if (ext) {
+            this._capts[CAPS_SRGB] = true;
+            ctx.SRGB        = ext.SRGB;
+            ctx.SRGB_ALPHA  = ext.SRGB_ALPHA;
+        }
+        else {
+            this._capts[CAPS_SRGB] = false;
+        }
+    }
+    0x8C40
+
+
 }
 
 /**
