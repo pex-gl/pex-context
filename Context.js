@@ -1551,6 +1551,24 @@ Context.prototype.popModelMatrix = function(){
 };
 
 /**
+ * Pushes all matrices on their stack.
+ */
+Context.prototype.pushMatrices = function(){
+    this.pushProjectionMatrix();
+    this.pushViewMatrix();
+    this.pushModelMatrix();
+}
+
+/**
+ * Replaces all matrices with the matrices previously pushed on the stack and removes the top.
+ */
+Context.prototype.popMatrices = function(){
+    this.popModelMatrix();
+    this.popViewMatrix();
+    this.popProjectionMatrix();
+}
+
+/**
  * Resets the current model matrix to its identity.
  */
 
@@ -1558,6 +1576,17 @@ Context.prototype.loadIdentity = function(){
     Mat4.identity(this._matrix[MATRIX_MODEL]);
     this._matrixSend[MATRIX_MODEL] = false;
 };
+
+/**
+ * Resets all matrices to their identities.
+ */
+Context.prototype.loadIdentities = function(){
+    Mat4.identity(this._matrix[MATRIX_PROJECTION]);
+    this._matrixSend[MATRIX_PROJECTION] = false;
+    Mat4.identity(this._matrix[MATRIX_VIEW]);
+    this._matrixSend[MATRIX_VIEW] = false;
+    this.loadIdentity();
+}
 
 /**
  * Scales the current model matrix.
