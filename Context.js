@@ -1554,7 +1554,7 @@ Context.prototype.popModelMatrix = function(){
  * Resets the current model matrix to its identity.
  */
 
-Context.prototype.identity = function(){
+Context.prototype.loadIdentity = function(){
     Mat4.identity(this._matrix[MATRIX_MODEL]);
     this._matrixSend[MATRIX_MODEL] = false;
 };
