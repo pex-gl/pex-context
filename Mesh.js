@@ -89,7 +89,17 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
     if (indicesInfo) {
         var indicesData = indicesInfo.data;
         var indicesDataElementSize = indicesData[0].length || 1;
-        var indicesDataArray = new Uint16Array(indicesData.length * indicesDataElementSize);
+        var indicesDataType = indicesInfo.type;
+        if (!indicesDataType) {
+            if (ctx.isSupported(ctx.CAPS_ELEMENT_INDEX_UINT)) {
+                indicesDataType = ctx.UNSIGNED_INT;
+            }
+            else {
+                indicesDataType = ctx.UNSIGNED_SHORT;
+            }
+        }
+        var indicesDataArrayType = (indicesDataType === ctx.UNSIGNED_INT) ? Uint32Array : Uint16Array;
+        var indicesDataArray = new indicesDataArrayType(indicesData.length * indicesDataElementSize);
 
         if (isFlatArray(indicesData)) {
             indicesDataArray.set(indicesDataElementSize);
