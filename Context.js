@@ -440,15 +440,21 @@ function Context(gl){
     //EXT_sRGB
     if (gl.SRGB) {
         this._caps[CAPS_SRGB] = true;
-        this.SRGB        = gl.SRGB;
-        this.SRGB_ALPHA  = gl.SRGB_ALPHA;
+        this.SRGB         = gl.SRGB_EXT;
+        this.SRGB8        = gl.SRGB8_EXT;
+        this.SRGB_ALPHA   = gl.SRGB_ALPHA_EXT;
+        this.SRGB8_ALPHA8 = gl.SRGB8_ALPHA8_EXT;
+        this.FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING = gl.FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING;
     }
     else {
         var ext = gl.getExtension('EXT_sRGB');
         if (ext) {
             this._caps[CAPS_SRGB] = true;
-            this.SRGB        = ext.SRGB;
-            this.SRGB_ALPHA  = ext.SRGB_ALPHA;
+            this.SRGB         = ext.SRGB_EXT;
+            this.SRGB8        = ext.SRGB8_EXT;
+            this.SRGB_ALPHA   = ext.SRGB_ALPHA_EXT;
+            this.SRGB8_ALPHA8 = ext.SRGB8_ALPHA8_EXT;
+            this.FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING = ext.FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING_EXT;
         }
         else {
             this._caps[CAPS_SRGB] = false;
