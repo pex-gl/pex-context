@@ -152,7 +152,7 @@ function Context(gl){
      * @const
      */
     this.CULL_BIT      = CULL_BIT;
-    this._culling      = gl.getParameter(gl.CULL_FACE);
+    this._cullFace      = gl.getParameter(gl.CULL_FACE);
     this._cullFaceMode = gl.getParameter(gl.CULL_FACE_MODE);
     this._cullStack    = [];
 
@@ -514,7 +514,7 @@ Context.prototype.pushState = function(mask){
     }
 
     if((mask & CULL_BIT) == CULL_BIT){
-        this._cullStack.push([this._culling,this._cullFaceMode]);
+        this._cullStack.push([this._cullFace,this._cullFaceMode]);
     }
 
     if((mask & BLEND_BIT) == BLEND_BIT){
@@ -756,7 +756,7 @@ Context.prototype.getState = function(mask){
     }
 
     if((mask & CULL_BIT) == CULL_BIT){
-        state.push([this._culling, this._cullFaceMode]);
+        state.push([this._cullFace, this._cullFaceMode]);
     }
 
     if((mask & BLEND_BIT) == BLEND_BIT){
@@ -830,8 +830,8 @@ Context.prototype.getViewport = function(out){
  * @param {Boolean} culling
  */
 
-Context.prototype.setCulling = function(culling){
-    if(culling == this._culling){
+Context.prototype.setCullFace = function(culling){
+    if(culling == this._cullFace){
         return;
     }
     if(culling){
@@ -840,7 +840,7 @@ Context.prototype.setCulling = function(culling){
     else {
         this._gl.disable(this._gl.CULL_FACE);
     }
-    this._culling = culling;
+    this._cullFace = culling;
 };
 
 /**
@@ -848,8 +848,8 @@ Context.prototype.setCulling = function(culling){
  * @returns {Boolean}
  */
 
-Context.prototype.getCulling = function(){
-    return this._culling;
+Context.prototype.getCullFace = function(){
+    return this._cullFace;
 };
 
 /**
@@ -857,7 +857,7 @@ Context.prototype.getCulling = function(){
  * @param {Number} mode
  */
 
-Context.prototype.setCullFace = function(mode){
+Context.prototype.setCullFaceMode = function(mode){
     if(mode == this._cullFaceMode){
         return;
     }
