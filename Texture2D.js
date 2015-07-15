@@ -91,6 +91,7 @@ Texture2D.prototype.update = function(data, width, height, options) {
     }
     else { //assuming Plask
         if (data instanceof plask.SkCanvas) {
+            //FIXME: using SKCanvas methods ignores format and internal format which forces RGBA and doesn't allow e.g. SRGB
             if (flip) {
               gl.texImage2DSkCanvas(this._target, lod, data);
             }
