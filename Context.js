@@ -337,6 +337,10 @@ function Context(gl){
     this.DST_ALPHA           = gl.DST_ALPHA;
     this.ONE_MINUS_DST_ALPHA = gl.ONE_MINUS_DST_ALPHA;
     this.SRC_ALPHA_SATURATE  = gl.SRC_ALPHA_SATURATE;
+    this.CONSTANT_COLOR           = gl.CONSTANT_COLOR;
+    this.ONE_MINUS_CONSTANT_COLOR = gl.CONSTANT_COLOR;
+    this.CONSTANT_ALPHA           = gl.CONSTANT_ALPHA;
+    this.ONE_MINUS_CONSTANT_ALPHA = gl.ONE_MINUS_CONSTANT_ALPHA;
 
     //Culling
     this.FRONT          = gl.FRONT;
