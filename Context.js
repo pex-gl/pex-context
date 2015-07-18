@@ -1856,7 +1856,6 @@ Context.prototype.drawMesh = function(primcount){
             this._gl.drawArraysInstanced(this._meshPrimitiveType, 0, this._meshCount, primcount);
         }
         else {
-            console.log('drawArrays', this._meshPrimitiveType, 0, this._meshCount)
             this._gl.drawArrays(this._meshPrimitiveType, 0, this._meshCount);
         }
     }
