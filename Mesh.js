@@ -150,7 +150,7 @@ Mesh.prototype.updateAttribute = function(location, data) {
         throw new Error('Mesh.updateAttribute: invalid attribute loaction');
     }
 
-    if (data.length != attribute.data.length) {
+    if (data.length * attribute.size != attribute.dataArray.length) {
         attribute.dataArray = new Float32Array(data.length * attribute.size);
     }
 
@@ -189,7 +189,7 @@ Mesh.prototype.updateIndices = function(data) {
     if (!indices) {
         throw new Error('Mesh.updateIndices: mesh has no indices to update');
     }
-    if (data.length != indices.data.length) {
+    if (data.length * indices.size != indices.dataArray.length) {
         if (indices.dataArray instanceof Uint32Array) {
             indices.dataArray = new Uint32Array(data.length * indices.size);
         }
