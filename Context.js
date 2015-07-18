@@ -1292,7 +1292,7 @@ Context.prototype.getLineWidth = function(){
 
 /**
  * Enables / disables blending the computed fragment color values with the values in the color buffers.
- * @param {Number} blend
+ * @param {Boolean} blend
  */
 
 Context.prototype.setBlend = function(blend){
