@@ -155,7 +155,7 @@ Mesh.prototype.updateAttribute = function(location, data) {
     }
 
     if (data.length != attribute.data.length) {
-        attribute.dataArray = new Float32Array(data.length);
+        attribute.dataArray = new Float32Array(data.length * attribute.size);
     }
 
     if (isFlatArray(data)) {
@@ -194,7 +194,12 @@ Mesh.prototype.updateIndices = function(data) {
         throw new Error('Mesh.updateIndices: mesh has no indices to update');
     }
     if (data.length != indices.data.length) {
-        indices.dataArray = new Float32Array(data.length);
+        if (indices.dataArray instanceof Uint32Array) {
+            indices.dataArray = new Uint32Array(data.length * indices.size);
+        }
+        else {
+            indices.dataArray = new Uint16Array(data.length * indices.size);
+        }
     }
 
     if (isFlatArray(data)) {
