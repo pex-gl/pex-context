@@ -33,7 +33,7 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
         var attributeInfo = attributes[i];
         var data = attributeInfo.data;
         var location = attributeInfo.location;
-        var elementSize = data[0].length || attributeInfo.size || -1;
+        var elementSize = attributeInfo.size || (data[0] && data[0].length) ? data[0].length : 1;
         //TODO: this can be done with !isNaN(data[0])
 
         //TODO: are we allowing empty attributes e.g. data=[] ?
@@ -43,10 +43,6 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
 
         if (location === undefined) {
             throw new Error('Mesh: Unknown attribute location at index ' + i);
-        }
-
-        if (elementSize === -1) {
-            throw new Error('Mesh: Missing attribute size at index ' + i);
         }
 
         var dataArray = new Float32Array(data.length * elementSize);
@@ -88,7 +84,7 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
 
     if (indicesInfo) {
         var indicesData = indicesInfo.data;
-        var indicesDataElementSize = indicesData[0].length || 1;
+        var indicesDataElementSize = indicesInfo.size || ((indicesData[0] && indicesData[0].length) ? indicesData[0].length : 1);
         var indicesDataType = indicesInfo.type;
         if (!indicesDataType) {
             if (ctx.isSupported(ctx.CAPS_ELEMENT_INDEX_UINT)) {
@@ -215,7 +211,6 @@ Mesh.prototype.updateIndices = function(data) {
     //ASSUMING we don't suddently change face3 into face2 or flat, so size is the same
     //TODO: test this
     this._count = data.length * indices.size;
-
     indices.buffer.bufferData(indices.dataArray);
 }
 
