@@ -140,10 +140,10 @@ function Context(gl){
      */
     this.STENCIL_BIT          = STENCIL_BIT;
     this._stencilTest         = gl.getParameter(gl.STENCIL_TEST);
-    this._stencilFunc         = [null,null,null];
-    this._stencilFuncSeparate = [null,null,null,null];
-    this._stencilOp           = [null,null,null];
-    this._stencilOpSeparate   = [null,null,null,null];
+    this._stencilFunc         = [gl.getParameter(gl.STENCIL_FUNC),gl.getParameter(gl.STENCIL_REF),0xFF];
+    this._stencilFuncSeparate = [gl.FRONT,this._stencilFunc[0],gl.getParameter(gl.STENCIL_REF),this._stencilFunc[2]];
+    this._stencilOp           = [gl.getParameter(gl.STENCIL_FAIL),gl.getParameter(gl.STENCIL_PASS_DEPTH_FAIL),gl.getParameter(gl.STENCIL_PASS_DEPTH_PASS)];
+    this._stencilOpSeparate   = [gl.FRONT,this._stencilOp[0],this._stencilOp[1],this._stencilOp[2]];
     this._stencilStack        = [];
 
     /**
