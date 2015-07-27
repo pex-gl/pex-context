@@ -1966,8 +1966,8 @@ Context.prototype._updateMatrixUniforms = function(){
     if(this._matrixTypesByUniformInProgram[ProgramUniform.NORMAL_MATRIX] !== undefined &&
        (!this._matrixSend[MATRIX_VIEW] || !this._matrixSend[MATRIX_MODEL])){
 
-        var temp = Mat4.set(this._matrix4Temp,this._matrix[MATRIX_MODEL]);
-        Mat4.mult(temp, this._matrix[MATRIX_VIEW]);
+        var temp = Mat4.set(this._matrix4Temp,this._matrix[MATRIX_VIEW]);
+        Mat4.mult(temp, this._matrix[MATRIX_MODEL]);
 
         Mat4.invert(temp);
         Mat4.transpose(temp);
