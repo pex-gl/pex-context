@@ -98,7 +98,7 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
         var indicesDataArray = new indicesDataArrayType(indicesData.length * indicesDataElementSize);
 
         if (isFlatArray(indicesData)) {
-            indicesDataArray.set(indicesDataElementSize);
+            indicesDataArray.set(indicesData);
         }
         else {
             unpack(indicesData, indicesDataArray, indicesDataElementSize)
