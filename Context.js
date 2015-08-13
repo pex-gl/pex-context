@@ -351,6 +351,7 @@ function Context(gl){
     this.FLOAT          = gl.FLOAT;
     this.UNSIGNED_SHORT = gl.UNSIGNED_SHORT;
     this.UNSIGNED_INT   = gl.UNSIGNED_INT;
+    this.UNSIGNED_BYTE  = gl.UNSIGNED_BYTE;
 
     //Texture Formats
     this.RGBA           = gl.RGBA;
