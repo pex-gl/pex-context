@@ -2061,6 +2061,10 @@ Context.prototype.draw = function(mode, first, count){
     }
 };
 
+Context.prototype.readPixels = function(x,y,width,height,format,type,pixels){
+    this._gl.readPixels(x,y,width,height,format,type,pixels);
+}
+
 Context.prototype.isSupported = function(flag) {
     return this._caps[flag];
 };
