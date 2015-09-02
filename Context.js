@@ -421,15 +421,9 @@ function Context(gl){
         }
         else {
             this._caps[CAPS_INSTANCED_ARRAYS] = true;
-            gl.drawElementsInstanced = function() {
-                ext.drawElementsInstancedANGLE.apply(ext, arguments);
-            };
-            gl.drawArraysInstanced = function() {
-                ext.drawArraysInstancedANGLE.apply(ext, arguments);
-            };
-            gl.vertexAttribDivisor = function() {
-                ext.vertexAttribDivisorANGLE.apply(ext, arguments);
-            };
+            gl.drawElementsInstanced = ext.drawElementsInstancedANGLE.bind(ext);
+            gl.drawArraysInstanced = ext.drawArraysInstancedANGLE.bind(ext);
+            gl.vertexAttribDivisor = ext.vertexAttribDivisorANGLE.bind(ext);
         }
     }
     else {
