@@ -24,6 +24,7 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
 
     this._attributes = [];
     this._attributesMap = [];
+    this._hasDivisor = false;
 
 
     var vertexCount = 0;
@@ -60,7 +61,7 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
             buffer: buffer,
             location : location,
             size: attributeInfo.size || elementSize,
-            divisor: attributeInfo.divisor
+            divisor: attributeInfo.divisor || null
         }
 
         var attribute = {
