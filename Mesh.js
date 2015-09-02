@@ -137,11 +137,6 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
     this._vao = ctx.createVertexArray(attributesDesc, this._indices ? this._indices.buffer : null);
 }
 
-Mesh.prototype.draw = function() {
-    this._ctx.bindVertexArray(this._vao);
-    this._ctx.drawElements(this._primiviteType, this._count, this._offset);
-}
-
 Mesh.prototype.getAttribute = function(location) {
     return this._attributesMap[location];
 }
