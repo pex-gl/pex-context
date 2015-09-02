@@ -648,8 +648,8 @@ Context.prototype.popState = function(){
             throw new Error(STR_ERROR_STACK_POP_BIT.replace('%s','CULL_BIT'));
         }
         stack = this._cullStack.pop();
-        this.setCulling(stack[0]);
-        this.setCullFace(stack[1]);
+        this.setCullFace(stack[0]);
+        this.setCullFaceMode(stack[1]);
     }
 
     if((mask & BLEND_BIT) == BLEND_BIT){
