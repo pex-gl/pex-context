@@ -10,7 +10,6 @@ function isFlatArray(a) {
     return (a.length == 0) || (a[0].length === undefined);
 }
 
-//TODO: add divisor support for attributes
 /**
  * [Mesh description]
  * @param {[type]} ctx              Context
@@ -60,7 +59,8 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
         var attributeDesc = {
             buffer: buffer,
             location : location,
-            size: attributeInfo.size || elementSize
+            size: attributeInfo.size || elementSize,
+            divisor: attributeInfo.divisor
         }
 
         var attribute = {
@@ -77,6 +77,10 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
 
         if (location == ctx.ATTRIB_POSITION) {
             vertexCount = data.length;
+        }
+
+        if (attributeDesc.divisor !== null) {
+            this._hasDivisor = true;
         }
     }
 

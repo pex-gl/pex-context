@@ -1828,8 +1828,7 @@ Context.prototype.bindMesh = function(mesh){
         this._meshHasIndexBuffer = mesh._indices !== null;
         this._meshIndexBufferDataType = this._meshHasIndexBuffer ? mesh._indices.buffer.getDataType() : null;
         this._meshCount = mesh._count;
-        //TODO: Add Mesh hasDivisor bool
-        this._meshHasDivisor = null;
+        this._meshHasDivisor = mesh._hasDivisor;
         this.bindVertexArray(mesh._vao);
     }
     this._mesh = mesh;
