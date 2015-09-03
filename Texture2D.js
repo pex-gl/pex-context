@@ -32,15 +32,15 @@ function Texture2D(ctx, data, width, height, options) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
 
     if (format == gl.DEPTH_COMPONENT && !ctx.isSupported(ctx.CAPS_DEPTH_TEXTURE)) {
-        throw new Error('TextureCube - Depth Texture format is not supported');
+        throw new Error('Texture2D - Depth Texture format is not supported');
     }
 
     if (dataType == gl.FLOAT && !ctx.isSupported(ctx.CAPS_TEXTURE_FLOAT)) {
-        throw new Error('TextureCube - Float type is not supported');
+        throw new Error('Texture2D - Float type is not supported');
     }
 
     if (dataType == gl.HALF_FLOAT && !ctx.isSupported(ctx.CAPS_TEXTURE_HALF_FLOAT)) {
-        throw new Error('TextureCube - Half Float type is not supported');
+        throw new Error('Texture2D - Half Float type is not supported');
     }
 
     this.update(data, width, height, options);
