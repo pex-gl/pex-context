@@ -1465,11 +1465,6 @@ Context.prototype.setProjectionMatrix = function(matrix){
 Context.prototype.setViewMatrix = function(matrix){
     Mat4.set(this._matrix[MATRIX_VIEW],matrix);
     this._matrixSend[MATRIX_VIEW] = false;
-
-    if(this._matrixTypesByUniformInProgram[MATRIX_INVERSE_VIEW] !== undefined){
-        Mat4.invert(Mat4.set(this._matrix[MATRIX_INVERSE_VIEW],matrix));
-        this._matrixSend[MATRIX_INVERSE_VIEW] = false;
-    }
 };
 
 /**
@@ -1687,7 +1682,6 @@ Context.prototype.bindProgram = function(program) {
     if(program === this._program){
         return;
     }
-    var prevHadInverseViewMatrix = this._matrixTypesByUniformInProgram[ProgramUniform.INVERSE_VIEW_MATRIX] !== undefined;
 
     program._bindInternal();
 
@@ -1704,10 +1698,6 @@ Context.prototype.bindProgram = function(program) {
         if(program.hasUniform(uniformName)){
             this._matrixTypesByUniformInProgram[uniformName] = this._matrixTypeByUniformNameMap[uniformName];
         }
-    }
-
-    if(!prevHadInverseViewMatrix && this._matrixTypesByUniformInProgram[ProgramUniform.INVERSE_VIEW_MATRIX] !== undefined){
-        Mat4.invert(Mat4.set(this._matrix[MATRIX_INVERSE_VIEW],this._matrix[MATRIX_VIEW]));
     }
 };
 
@@ -1967,6 +1957,12 @@ Context.prototype._updateMatrixUniforms = function(){
         Mat4.transpose(temp);
         Mat3.fromMat4(this._matrix[MATRIX_NORMAL],temp)
         this._matrixSend[MATRIX_NORMAL] = false;
+    }
+
+    if (this._matrixTypesByUniformInProgram[ProgramUniform.INVERSE_VIEW_MATRIX] !== undefined &&
+        (!this._matrixSend[MATRIX_VIEW])) {
+        Mat4.invert(Mat4.set(this._matrix[MATRIX_INVERSE_VIEW], this._matrix[MATRIX_VIEW]));
+        this._matrixSend[MATRIX_INVERSE_VIEW] = false;
     }
 
     for(var uniformName in this._matrixTypesByUniformInProgram){
