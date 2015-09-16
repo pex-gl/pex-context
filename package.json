@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/variablestudio/pex-context.git"
+    "url": "https://github.com/pex-gl/pex-context.git"
   },
   "keywords": [
     "pex",
@@ -33,9 +33,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/variablestudio/pex-context/issues"
+    "url": "https://github.com/pex-gl/pex-context/issues"
   },
-  "homepage": "https://github.com/variablestudio/pex-context",
+  "homepage": "https://github.com/pex-gl/pex-context",
   "dependencies": {
     "is-browser": "^2.0.1"
   }
