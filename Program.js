@@ -147,7 +147,10 @@ Program.prototype._compileSource = function(type, src){
     gl.shaderSource(shader, src + '\n');
     gl.compileShader(shader);
     if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
-        throw new Error((type === gl.VERTEX_SHADER ? 'Vertex ' : 'Fragment ') + 'shader: ' + gl.getShaderInfoLog(shader));
+        var shaderType = (type === gl.VERTEX_SHADER) ? 'Vertex' : 'Fragment';
+        console.log(shaderType + ' shader compilation failed');
+        console.log(src);
+        throw new Error(shaderType + ' shader error: ' + gl.getShaderInfoLog(shader));
     }
     return shader;
 };
