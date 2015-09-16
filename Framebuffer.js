@@ -30,22 +30,24 @@ function Framebuffer(ctx, colorAttachments, depthAttachment) {
         this._width = colorAttachments[0].texture.getWidth();
         this._height = colorAttachments[0].texture.getHeight();
     }
-    else {
+    else if (depthAttachment) {
         this._width = depthAttachment.texture.getWidth();
         this._height = depthAttachment.texture.getHeight();
     }
 
     ctx.bindFramebuffer(this); //TODO: Should we push and pop?
 
-    for(var i=0; i<colorAttachments.length; i++) {
-        var colorAttachment = colorAttachments[i];
-        var colorTexture = colorAttachment.texture;
-        var level = colorAttachment.level || 0;
-        var target = colorTexture.getTarget() || colorAttachment.target;
-        var handle = colorTexture.getHandle();
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, target, handle, level);
-        this._colorAttachments.push(colorAttachment);
-        this._colorAttachmentsPositions.push(gl.COLOR_ATTACHMENT0 + i);
+    if (colorAttachments) {
+        for(var i=0; i<colorAttachments.length; i++) {
+            var colorAttachment = colorAttachments[i];
+            var colorTexture = colorAttachment.texture;
+            var level = colorAttachment.level || 0;
+            var target = colorTexture.getTarget() || colorAttachment.target;
+            var handle = colorTexture.getHandle();
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, target, handle, level);
+            this._colorAttachments.push(colorAttachment);
+            this._colorAttachmentsPositions.push(gl.COLOR_ATTACHMENT0 + i);
+        }
     }
 
     if (depthAttachment) {
@@ -59,6 +61,11 @@ function Framebuffer(ctx, colorAttachments, depthAttachment) {
 
     //TODO: unbind -> pop?
     ctx.bindFramebuffer(null);
+}
+
+Framebuffer.prototype.setColorAttachment = function(attachment, textureTarget, textureHandle, level) {
+    var gl = this._ctx.getGL();
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + attachment, textureTarget, textureHandle, level);
 }
 
 Framebuffer.prototype.getWidth = function() {
