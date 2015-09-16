@@ -70,13 +70,16 @@ TextureCube.prototype.update = function(facesData, width, height, options) {
     var flip            = (options && options.flip  ) || false;
     var lod             = (options && options.lod   ) || 0;
 
-    for(var i=0; i<facesData.length; i++) {
-        var face = facesData[i];
-        var data = face.data;
-        var width = face.width;
-        var height = face.height;
-        var lod = face.lod;
-        var target = ctx.TEXTURE_CUBE_MAP_POSITIVE_X + face.face;
+    var numFaces = facesData ? facesData.length : 6;
+
+    for(var i=0; i<numFaces; i++) {
+        var face = facesData ? facesData[i] : null;
+        var data = facesData ? face.data : null;
+        var width = facesData ? face.width : width;
+        var height = facesData ? face.height : width;
+        var lod = facesData ? (face.lod || 0) : 0;
+        var faceSide = facesData ? (face.face || i) : i;
+        var target = ctx.TEXTURE_CUBE_MAP_POSITIVE_X + faceSide;
         if (!data) {
             gl.texImage2D(target, lod, internalFormat, width, height, 0, format, dataType, null);
         }
