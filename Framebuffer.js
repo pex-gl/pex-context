@@ -68,6 +68,11 @@ Framebuffer.prototype.setColorAttachment = function(attachment, textureTarget, t
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + attachment, textureTarget, textureHandle, level);
 }
 
+Framebuffer.prototype.setDepthAttachment = function(textureTarget, textureHandle, level) {
+    var gl = this._ctx.getGL();
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, textureTarget, textureHandle, level);
+}
+
 Framebuffer.prototype.getWidth = function() {
     return this._width;
 }
