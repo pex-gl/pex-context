@@ -436,6 +436,16 @@ function Context(gl){
     this._caps[CAPS_TEXTURE_HALF_FLOAT]        = isPlask || isWebGL2 || (gl.getExtension('OES_texture_half_float') != null);
     this._caps[CAPS_TEXTURE_HALF_FLOAT_LINEAR] = isPlask || isWebGL2 || (gl.getExtension('OES_texture_half_float_linear') != null);
 
+    if (gl.HALF_FLOAT) {
+        this.HALF_FLOAT = gl.HALF_FLOAT;
+    }
+    else {
+        var ext = gl.getExtension('OES_texture_half_float');
+        if (ext) {
+            this.HALF_FLOAT = ext.HALF_FLOAT_OES;
+        }
+    }
+
     //WEBGL_depth_texture
     this._caps[CAPS_DEPTH_TEXTURE]             = isPlask || isWebGL2 || (gl.getExtension('WEBGL_depth_texture') != null);
 
