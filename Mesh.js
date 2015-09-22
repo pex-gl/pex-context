@@ -113,7 +113,7 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
 
         var indicesBuffer  = ctx.createBuffer(ctx.ELEMENT_ARRAY_BUFFER, indicesDataArray, usage);
 
-        if (!primitiveType) {
+        if (primitiveType === undefined) {
             if (indicesDataElementSize == 1) primitiveType = ctx.POINTS;
             if (indicesDataElementSize == 2) primitiveType = ctx.LINES;
             if (indicesDataElementSize == 3) primitiveType = ctx.TRIANGLES;
@@ -132,7 +132,11 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
         this._indices = null;
     }
 
-    this._primiviteType = primitiveType || ctx.TRIANGLES;
+    if (primitiveType === undefined) {
+        primitiveType = ctx.TRIANGLES;
+    }
+
+    this._primiviteType = primitiveType;
     this._count = indicesCount || vertexCount;
     this._offset = 0;
     this._vao = ctx.createVertexArray(attributesDesc, this._indices ? this._indices.buffer : null);
