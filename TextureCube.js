@@ -14,14 +14,15 @@ function TextureCube(ctx, facesData, width, height, options) {
     var gl           = ctx.getGL();
     this._handle     = gl.createTexture();
     this._target     = gl.TEXTURE_CUBE_MAP;
-
-    var internalFormat  = (options && options.format) || gl.RGBA;
-    var format          = (options && options.format) || gl.RGBA;
-    var repeat          = (options && options.repeat) || false;
-    var dataType        = (options && options.type  ) || gl.UNSIGNED_BYTE;
-    var flip            = (options && options.flip  ) || false;
     this._width      = width  || (facesData && facesData[0] && facesData[0].data.width ) || 0;
     this._height     = height || (facesData && facesData[0] && facesData[0].data.height) || 0;
+
+    //TODO: remember these settings
+    var internalFormat  = (options && options.format     ) || gl.RGBA;
+    var format          = (options && options.format     ) || gl.RGBA;
+    var repeat          = (options && options.repeat     ) || false;
+    var dataType        = (options && options.type       ) || gl.UNSIGNED_BYTE;
+    var flipY           = (options && options.flipY      ) || false;
     var magFilter       = (options && options.magFilter  ) || gl.LINEAR;
     var minFilter       = (options && options.minFilter  ) || gl.LINEAR;
     var lod            = 0;
@@ -54,7 +55,6 @@ function TextureCube(ctx, facesData, width, height, options) {
     //ctx.popState(ctx.TEXTURE_BIT);
 }
 
-//TODO: update width and height if not passed but data is Image or Canvas
 TextureCube.prototype.update = function(facesData, width, height, options) {
     var ctx = this._ctx;
     var gl  = ctx.getGL();
@@ -63,17 +63,18 @@ TextureCube.prototype.update = function(facesData, width, height, options) {
     ctx.bindTexture(this, 0);
 
     //TODO: this should remember settings from constructor
-    var internalFormat  = (options && options.format) || gl.RGBA;
-    var format          = (options && options.format) || gl.RGBA;
-    var repeat          = (options && options.repeat) || false;
-    var dataType        = (options && options.type  ) || gl.UNSIGNED_BYTE;
-    var flip            = (options && options.flip  ) || false;
-    var lod             = (options && options.lod   ) || 0;
+    var internalFormat  = (options && options.format    ) || gl.RGBA;
+    var format          = (options && options.format    ) || gl.RGBA;
+    var repeat          = (options && options.repeat    ) || false;
+    var dataType        = (options && options.type      ) || gl.UNSIGNED_BYTE;
+    var flipY           = (options && options.flipY     ) || false;
+    var lod             = (options && options.lod       ) || 0;
 
     var numFaces = facesData ? facesData.length : 6;
 
     this._width      = width  || (facesData && facesData[0] && facesData[0].data.width ) || 0;
     this._height     = height || (facesData && facesData[0] && facesData[0].data.height) || 0;
+
     for(var i=0; i<numFaces; i++) {
         var face = facesData ? facesData[i] : null;
         var data = facesData ? face.data : null;
@@ -86,21 +87,20 @@ TextureCube.prototype.update = function(facesData, width, height, options) {
             gl.texImage2D(target, lod, internalFormat, width, height, 0, format, dataType, null);
         }
         else if (isBrowser) {
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flip);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
             //Image, ImageData or Canvas
             if (data.width && data.height) {
                 gl.texImage2D(target, lod, internalFormat, format, dataType, data);
             }
             //Array buffer
             else {
-                //TODO: set flip flag
                 console.log(dataType, 'gl.FLOAT', ctx.FLOAT);
                 gl.texImage2D(target, lod, internalFormat, width, height, 0, format, dataType, data);
             }
         }
         else { //assuming Plask
             if (data instanceof plask.SkCanvas) {
-                if (flip) {
+                if (flipY) {
                   gl.texImage2DSkCanvas(target, lod, data);
                 }
                 else {
@@ -134,7 +134,6 @@ TextureCube.prototype.getWidth = function() {
 TextureCube.prototype.getHeight = function() {
     return this._height;
 }
-
 
 TextureCube.prototype.dispose = function(){
     var gl  = this._ctx.getGL();
