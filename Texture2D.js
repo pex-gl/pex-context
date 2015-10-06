@@ -7,8 +7,8 @@ function Texture2D(ctx, data, width, height, options) {
     var gl           = ctx.getGL();
     this._handle     = gl.createTexture();
     this._target     = gl.TEXTURE_2D;
-    this._width      = width;
-    this._height     = height;
+    this._width      = width  || (data && data.width ) || 0;
+    this._height     = height || (data && data.height) || 0;
 
     var internalFormat  = (options && options.format) || gl.RGBA;
     var format          = (options && options.format) || gl.RGBA;
@@ -50,6 +50,9 @@ function Texture2D(ctx, data, width, height, options) {
 Texture2D.prototype.update = function(data, width, height, options) {
     var ctx = this._ctx;
     var gl  = ctx.getGL();
+
+    width  = this._width  = width  || (data && data.width ) || 0;
+    height = this._height = height || (data && data.height) || 0;
 
     //TODO: Should we push stack here?
     ctx.bindTexture(this, 0);
