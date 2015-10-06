@@ -14,9 +14,9 @@ function Texture2D(ctx, data, width, height, options) {
     var format          = (options && options.format) || gl.RGBA;
     var repeat          = (options && options.repeat) || false;
     var dataType        = (options && options.type  ) || gl.UNSIGNED_BYTE;
-    var flip            = (options && options.flip  ) || false;
     var magFilter       = (options && options.magFilter  ) || gl.LINEAR;
     var minFilter       = (options && options.minFilter  ) || gl.LINEAR;
+    var flipY           = (options && options.flipY     ) || ((options && options.compressed) ? false : true);
     var lod             = 0;
     var compressed      = (options && options.compressed) || false;
 
@@ -59,7 +59,7 @@ Texture2D.prototype.update = function(data, width, height, options) {
     var format          = (options && options.format) || gl.RGBA;
     var repeat          = (options && options.repeat) || false;
     var dataType        = (options && options.type  ) || gl.UNSIGNED_BYTE;
-    var flip            = (options && options.flip  ) || false;
+    var flipY           = (options && options.flipY ) || true;
     var lod             = (options && options.lod   ) || 0;
     var compressed      = (options && options.compressed) || false;
 
@@ -77,7 +77,7 @@ Texture2D.prototype.update = function(data, width, height, options) {
         }
         else {
             //gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flip);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
             //Image, ImageData or Canvas
             if (data.width && data.height) {
                 gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, format, dataType, data);
