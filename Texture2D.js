@@ -10,13 +10,13 @@ function Texture2D(ctx, data, width, height, options) {
     this._width      = width  || (data && data.width ) || 0;
     this._height     = height || (data && data.height) || 0;
 
-    var internalFormat  = (options && options.format) || gl.RGBA;
-    var format          = (options && options.format) || gl.RGBA;
-    var repeat          = (options && options.repeat) || false;
-    var dataType        = (options && options.type  ) || gl.UNSIGNED_BYTE;
-    var magFilter       = (options && options.magFilter  ) || gl.LINEAR;
-    var minFilter       = (options && options.minFilter  ) || gl.LINEAR;
+    var internalFormat  = (options && options.format    ) || gl.RGBA;
+    var format          = (options && options.format    ) || gl.RGBA;
+    var repeat          = (options && options.repeat    ) || false;
+    var dataType        = (options && options.type      ) || gl.UNSIGNED_BYTE;
     var flipY           = (options && options.flipY     ) || ((options && options.compressed) ? false : true);
+    var magFilter       = (options && options.magFilter ) || gl.LINEAR;
+    var minFilter       = (options && options.minFilter ) || gl.LINEAR;
     var lod             = 0;
     var compressed      = (options && options.compressed) || false;
 
@@ -95,7 +95,7 @@ Texture2D.prototype.update = function(data, width, height, options) {
     else { //assuming Plask
         if (data instanceof plask.SkCanvas) {
             //FIXME: using SKCanvas methods ignores format and internal format which forces RGBA and doesn't allow e.g. SRGB
-            if (flip) {
+            if (flipY) {
               gl.texImage2DSkCanvas(this._target, lod, data);
             }
             else {
