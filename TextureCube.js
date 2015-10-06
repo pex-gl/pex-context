@@ -14,14 +14,14 @@ function TextureCube(ctx, facesData, width, height, options) {
     var gl           = ctx.getGL();
     this._handle     = gl.createTexture();
     this._target     = gl.TEXTURE_CUBE_MAP;
-    this._width      = width;
-    this._height     = height;
 
     var internalFormat  = (options && options.format) || gl.RGBA;
     var format          = (options && options.format) || gl.RGBA;
     var repeat          = (options && options.repeat) || false;
     var dataType        = (options && options.type  ) || gl.UNSIGNED_BYTE;
     var flip            = (options && options.flip  ) || false;
+    this._width      = width  || (facesData && facesData[0] && facesData[0].data.width ) || 0;
+    this._height     = height || (facesData && facesData[0] && facesData[0].data.height) || 0;
     var magFilter       = (options && options.magFilter  ) || gl.LINEAR;
     var minFilter       = (options && options.minFilter  ) || gl.LINEAR;
     var lod            = 0;
@@ -72,6 +72,8 @@ TextureCube.prototype.update = function(facesData, width, height, options) {
 
     var numFaces = facesData ? facesData.length : 6;
 
+    this._width      = width  || (facesData && facesData[0] && facesData[0].data.width ) || 0;
+    this._height     = height || (facesData && facesData[0] && facesData[0].data.height) || 0;
     for(var i=0; i<numFaces; i++) {
         var face = facesData ? facesData[i] : null;
         var data = facesData ? face.data : null;
