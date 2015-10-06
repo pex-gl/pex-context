@@ -10,15 +10,10 @@ function Texture2D(ctx, data, width, height, options) {
     this._width      = width  || (data && data.width ) || 0;
     this._height     = height || (data && data.height) || 0;
 
-    var internalFormat  = (options && options.format    ) || gl.RGBA;
-    var format          = (options && options.format    ) || gl.RGBA;
     var repeat          = (options && options.repeat    ) || false;
     var dataType        = (options && options.type      ) || gl.UNSIGNED_BYTE;
-    var flipY           = (options && options.flipY     ) || ((options && options.compressed) ? false : true);
     var magFilter       = (options && options.magFilter ) || gl.LINEAR;
     var minFilter       = (options && options.minFilter ) || gl.LINEAR;
-    var lod             = 0;
-    var compressed      = (options && options.compressed) || false;
 
     //TODO: Should we push stack here?
     ctx.bindTexture(this, 0);
@@ -31,22 +26,11 @@ function Texture2D(ctx, data, width, height, options) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
 
-    if (format == gl.DEPTH_COMPONENT && !ctx.isSupported(ctx.CAPS_DEPTH_TEXTURE)) {
-        throw new Error('Texture2D - Depth Texture format is not supported');
-    }
-
-    if (dataType == gl.FLOAT && !ctx.isSupported(ctx.CAPS_TEXTURE_FLOAT)) {
-        throw new Error('Texture2D - Float type is not supported');
-    }
-
-    if (dataType == gl.HALF_FLOAT && !ctx.isSupported(ctx.CAPS_TEXTURE_HALF_FLOAT)) {
-        throw new Error('Texture2D - Half Float type is not supported');
-    }
-
     this.update(data, width, height, options);
 }
 
 //TODO: update width and height if not passed but data is Image or Canvas
+//NOTE: flipY for compressed images is not supported
 Texture2D.prototype.update = function(data, width, height, options) {
     var ctx = this._ctx;
     var gl  = ctx.getGL();
@@ -62,9 +46,23 @@ Texture2D.prototype.update = function(data, width, height, options) {
     var format          = (options && options.format) || gl.RGBA;
     var repeat          = (options && options.repeat) || false;
     var dataType        = (options && options.type  ) || gl.UNSIGNED_BYTE;
-    var flipY           = (options && options.flipY ) || true;
     var lod             = (options && options.lod   ) || 0;
+    //TODO: redo this so we don't depend on strings
     var compressed      = (options && options.compressed) || false;
+    var flipY           = (options && options.flipY !== undefined) ? options.flipY : true;
+
+    if (format == ctx.DEPTH_COMPONENT && !ctx.isSupported(ctx.CAPS_DEPTH_TEXTURE)) {
+        throw new Error('Texture2D - Depth Texture format is not supported');
+    }
+
+    if (dataType == ctx.FLOAT && !ctx.isSupported(ctx.CAPS_TEXTURE_FLOAT)) {
+        throw new Error('Texture2D - Float type is not supported');
+    }
+
+    //TODO: is that working at all?, if extension is not supported then ctx.HALF_FLOAT is undefined?
+    if (dataType == ctx.HALF_FLOAT && !ctx.isSupported(ctx.CAPS_TEXTURE_HALF_FLOAT)) {
+        throw new Error('Texture2D - Half Float type is not supported');
+    }
 
     if (!data) {
         gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, null);
