@@ -85,7 +85,6 @@ Texture2D.prototype.update = function(data, width, height, options) {
             }
             //Array buffer
             else {
-                //TODO: set flip flag
                 gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
             }
         }
@@ -110,7 +109,14 @@ Texture2D.prototype.update = function(data, width, height, options) {
                 }
             }
             else {
+                if (flipY) {
+                    flipImageData(data, width, height);
+                }
                 gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
+                if (flipY) {
+                    //unflip it
+                    flipImageData(data, width, height);
+                }
             }
         }
     }
@@ -144,5 +150,21 @@ Texture2D.prototype.dispose = function(){
     this._width = 0;
     this._height = 0;
 };
+
+function flipImageData(data, width, height) {
+    var numComponents = data.length / (width * height);
+    //flipping array buffer in place
+    for(var y=0; y<height/2; y++) {
+        for(var x=0; x<width; x++) {
+            for(var c=0; c<numComponents; c++) {
+                var i = (y * width + x) * numComponents + c;
+                var flippedI = ((height - y - 1) * width + x) * numComponents + c;
+                var tmp = data[i];
+                data[i] = data[flippedI];
+                data[flippedI] = tmp
+            }
+        }
+    }
+}
 
 module.exports = Texture2D;
