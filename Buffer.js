@@ -48,7 +48,7 @@ function Buffer(ctx, target, sizeOrData, usage, preserveData) {
     this._preserveData = preserveData === undefined ? false : preserveData;
     this._handle       = gl.createBuffer();
 
-    if(sizeOrData !== undefined && sizeOrData != 0){
+    if(sizeOrData !== undefined && sizeOrData !== 0){
         this.bufferData(sizeOrData);
     }
 }
