@@ -716,7 +716,9 @@ Context.prototype.popState = function(){
         }
         stack = this._textureStack.pop();
         for(var i = 0, l = stack.length; i < l; ++i){
-            this.bindTexture(stack[i],i);
+            if (stack[i]) {
+                this.bindTexture(stack[i],i);
+            }
         }
     }
 
