@@ -10,22 +10,6 @@ function Texture2D(ctx, data, width, height, options) {
     this._width      = width  || (data && data.width ) || 0;
     this._height     = height || (data && data.height) || 0;
 
-    var repeat          = (options && options.repeat    ) || false;
-    var dataType        = (options && options.type      ) || gl.UNSIGNED_BYTE;
-    var magFilter       = (options && options.magFilter ) || gl.LINEAR;
-    var minFilter       = (options && options.minFilter ) || gl.LINEAR;
-
-    //TODO: Should we push stack here?
-    ctx.bindTexture(this, 0);
-
-    var wrapS = repeat ? gl.REPEAT : gl.CLAMP_TO_EDGE;
-    var wrapT = repeat ? gl.REPEAT : gl.CLAMP_TO_EDGE;
-
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, magFilter);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
-
     this.update(data, width, height, options);
 }
 
@@ -38,7 +22,7 @@ Texture2D.prototype.update = function(data, width, height, options) {
     width  = this._width  = width  || (data && data.width ) || 0;
     height = this._height = height || (data && data.height) || 0;
 
-    //TODO: Should we push stack here?
+    ctx.pushState(gl.TEXTURE_BIT);
     ctx.bindTexture(this, 0);
 
     //TODO: this should remember settings from constructor
@@ -50,6 +34,22 @@ Texture2D.prototype.update = function(data, width, height, options) {
     //TODO: redo this so we don't depend on strings
     var compressed      = (options && options.compressed) || false;
     var flipY           = (options && options.flipY !== undefined) ? options.flipY : true;
+
+    var repeat          = (options && options.repeat    ) || false;
+    var magFilter       = (options && options.magFilter ) || gl.LINEAR;
+    var minFilter       = (options && options.minFilter ) || gl.LINEAR;
+
+    if (options && options.mipmap) {
+        minFilter = gl.LINEAR_MIPMAP_LINEAR;
+    }
+
+    var wrapS = repeat ? gl.REPEAT : gl.CLAMP_TO_EDGE;
+    var wrapT = repeat ? gl.REPEAT : gl.CLAMP_TO_EDGE;
+
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, magFilter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
 
     if (format == ctx.DEPTH_COMPONENT && !ctx.isSupported(ctx.CAPS_DEPTH_TEXTURE)) {
         throw new Error('Texture2D - Depth Texture format is not supported');
@@ -120,6 +120,12 @@ Texture2D.prototype.update = function(data, width, height, options) {
             }
         }
     }
+
+    if (options && options.mipmap) {
+        gl.generateMipmap(gl.TEXTURE_2D);
+    }
+
+    ctx.popState(gl.TEXTURE_BIT);
 }
 
 Texture2D.prototype._bindInternal = function() {
