@@ -63,14 +63,24 @@ function Framebuffer(ctx, colorAttachments, depthAttachment) {
     ctx.bindFramebuffer(null);
 }
 
+//TODO: should i save setColorAttachment to _colorAttachments
 Framebuffer.prototype.setColorAttachment = function(attachment, textureTarget, textureHandle, level) {
     var gl = this._ctx.getGL();
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + attachment, textureTarget, textureHandle, level);
 }
 
+Framebuffer.prototype.getColorAttachment = function(attachment) {
+    return this._colorAttachments[attachment];
+}
+
+//TODO: should i save setDepthAttachment to _depthAttachment
 Framebuffer.prototype.setDepthAttachment = function(textureTarget, textureHandle, level) {
     var gl = this._ctx.getGL();
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, textureTarget, textureHandle, level);
+}
+
+Framebuffer.prototype.getDepthAttachment = function() {
+    return this._depthAttachment;
 }
 
 Framebuffer.prototype.getWidth = function() {
