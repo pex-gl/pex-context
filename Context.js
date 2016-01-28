@@ -716,9 +716,7 @@ Context.prototype.popState = function(){
         }
         stack = this._textureStack.pop();
         for(var i = 0, l = stack.length; i < l; ++i){
-            if (stack[i]) {
-                this.bindTexture(stack[i],i);
-            }
+            this.bindTexture(stack[i],i);
         }
     }
 
@@ -1695,6 +1693,12 @@ Context.prototype.bindProgram = function(program) {
         return;
     }
 
+    if (!program) {
+        this._program = null;
+        this._matrixTypesByUniformInProgram = {};
+        return;
+    }
+
     program._bindInternal();
 
     this._program = program;
@@ -1775,6 +1779,14 @@ Context.prototype.createVertexArray = function(attributes, indexBuffer) {
 
 Context.prototype.bindVertexArray = function(vertexArray) {
     if(vertexArray === this._vertexArray){
+        return;
+    }
+
+    if (!vertexArray) {
+        this._vertexArray = null;
+        this._vertexArrayHasIndexBuffer = false;
+        this._vertexArrayIndexBufferDataType = null;
+        this._vertexArrayHasDivisor = false;
         return;
     }
 
@@ -1904,7 +1916,9 @@ Context.prototype.bindTexture = function(texture, textureUnit) {
         return;
     }
     this._gl.activeTexture(this._gl.TEXTURE0 + textureUnit);
-    texture._bindInternal();
+    if (texture) {
+        texture._bindInternal();
+    }
     this._textures[textureUnit] = texture;
 };
 
