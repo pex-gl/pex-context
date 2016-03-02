@@ -80,7 +80,7 @@ Texture2D.prototype.update = function(data, width, height, options) {
             //gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
             //Image, ImageData or Canvas
-            if (data.width && data.height) {
+            if ((data.width && data.height) || (data.videoWidth && data.videoHeight)) {
                 gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, format, dataType, data);
             }
             //Array buffer
