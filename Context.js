@@ -58,6 +58,7 @@ var CAPS_TEXTURE_HALF_FLOAT_LINEAR = 5;
 var CAPS_DEPTH_TEXTURE             = 6;
 var CAPS_SRGB                      = 7;
 var CAPS_ELEMENT_INDEX_UINT        = 8;
+var CAPS_DRAW_BUFFERS              = 9;
 
 //UITLS
 
@@ -399,6 +400,7 @@ function Context(gl){
     this.CAPS_DEPTH_TEXTURE                 = CAPS_DEPTH_TEXTURE;
     this.CAPS_SRGB                          = CAPS_SRGB;
     this.CAPS_ELEMENT_INDEX_UINT            = CAPS_ELEMENT_INDEX_UINT;
+    this.CAPS_DRAW_BUFFERS                  = CAPS_DRAW_BUFFERS;
 
     //TODO: implement webgl 2 check
     var isWebGL2              = false;
@@ -480,6 +482,20 @@ function Context(gl){
         else {
             this._caps[CAPS_ELEMENT_INDEX_UINT] = false;
         }
+    }
+
+    if (isPlask || isWebGL2) {
+        this._caps[CAPS_DRAW_BUFFERS] = true;
+    }
+    else {
+        var ext = gl.getExtension('WEBGL_draw_buffers');
+        if (ext) {
+            this._caps[CAPS_DRAW_BUFFERS] = true;
+        }
+        else {
+            this._caps[CAPS_DRAW_BUFFERS] = false;
+        }
+
     }
 }
 
