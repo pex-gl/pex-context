@@ -166,6 +166,7 @@ Program.prototype._updateUniformSetterMap = function(){
                 case gl.INT:
                 case gl.BOOL:
                 case gl.SAMPLER_2D:
+                case gl.SAMPLER_2D_RECT: //Plask/OpenGL only
                 case gl.SAMPLER_CUBE:
                     this._uniformSetterMap[gl.INT] = this._uniformSetterMap[gl.INT] || function(location,x,y,z,w){
                         if(x === undefined || y !== undefined){
