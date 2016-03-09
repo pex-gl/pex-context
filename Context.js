@@ -17,8 +17,7 @@ var Framebuffer = require('./Framebuffer');
 var Texture2D   = require('./Texture2D');
 var TextureCube = require('./TextureCube');
 
-var isBrowser   = require('is-browser');
-var isPlask     = !isBrowser;
+var isPlask     = require('is-plask');
 
 var STR_ERROR_STACK_POP_BIT = 'Invalid pop. Bit %s stack is empty.';
 

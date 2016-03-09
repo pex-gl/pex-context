@@ -1,5 +1,5 @@
-var isBrowser = require('is-browser');
-var plask     = isBrowser ? {} : require('plask');
+var isPlask = require('is-plask');
+var plask   = isPlask ? require('plask') : {};
 
 //TODO: update width and height if not passed but data is Image or Canvas
 function Texture2D(ctx, data, width, height, options) {
@@ -67,29 +67,7 @@ Texture2D.prototype.update = function(data, width, height, options) {
     if (!data) {
         gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, null);
     }
-    else if (isBrowser) {
-        if (compressed == 'dxt1') {
-            var ext = gl.getExtension('WEBGL_compressed_texture_s3tc');
-            gl.compressedTexImage2D(gl.TEXTURE_2D, lod, ext.COMPRESSED_RGB_S3TC_DXT1_EXT, width, height, 0, data);
-        }
-        if (compressed == 'dxt5') {
-            var ext = gl.getExtension('WEBGL_compressed_texture_s3tc');
-            gl.compressedTexImage2D(gl.TEXTURE_2D, lod, ext.COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, data);
-        }
-        else {
-            //gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
-            //Image, ImageData or Canvas
-            if ((data.width && data.height) || (data.videoWidth && data.videoHeight)) {
-                gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, format, dataType, data);
-            }
-            //Array buffer
-            else {
-                gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
-            }
-        }
-    }
-    else { //assuming Plask
+    else if (isPlask) { //assuming Plask
         if (data instanceof plask.SkCanvas) {
             //FIXME: using SKCanvas methods ignores format and internal format which forces RGBA and doesn't allow e.g. SRGB
             if (flipY) {
@@ -117,6 +95,28 @@ Texture2D.prototype.update = function(data, width, height, options) {
                     //unflip it
                     flipImageData(data, width, height);
                 }
+            }
+        }
+    }
+    else { //assuming browser
+        if (compressed == 'dxt1') {
+            var ext = gl.getExtension('WEBGL_compressed_texture_s3tc');
+            gl.compressedTexImage2D(gl.TEXTURE_2D, lod, ext.COMPRESSED_RGB_S3TC_DXT1_EXT, width, height, 0, data);
+        }
+        if (compressed == 'dxt5') {
+            var ext = gl.getExtension('WEBGL_compressed_texture_s3tc');
+            gl.compressedTexImage2D(gl.TEXTURE_2D, lod, ext.COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, data);
+        }
+        else {
+            //gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+            //Image, ImageData or Canvas
+            if ((data.width && data.height) || (data.videoWidth && data.videoHeight)) {
+                gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, format, dataType, data);
+            }
+            //Array buffer
+            else {
+                gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, dataType, data);
             }
         }
     }

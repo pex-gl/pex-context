@@ -1,4 +1,4 @@
-var isBrowser = require('is-browser');
+var isBrowser = !require('is-plask');
 
 /**
  * Assumptions:

@@ -1,5 +1,5 @@
-var isBrowser = require('is-browser');
-var plask     = isBrowser ? {} : require('plask');
+var isPlask = require('is-plask');
+var plask   = isPlask ? require('plask') : {};
 
 //TODO: update width and height if not passed but data is Image or Canvas
 //facesData = Array of {
@@ -86,19 +86,7 @@ TextureCube.prototype.update = function(facesData, width, height, options) {
         if (!data) {
             gl.texImage2D(target, lod, internalFormat, width, height, 0, format, dataType, null);
         }
-        else if (isBrowser) {
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
-            //Image, ImageData or Canvas
-            if (data.width && data.height) {
-                gl.texImage2D(target, lod, internalFormat, format, dataType, data);
-            }
-            //Array buffer
-            else {
-                console.log(dataType, 'gl.FLOAT', ctx.FLOAT);
-                gl.texImage2D(target, lod, internalFormat, width, height, 0, format, dataType, data);
-            }
-        }
-        else { //assuming Plask
+        else if (isPlask) {
             if (data instanceof plask.SkCanvas) {
                 if (flipY) {
                   gl.texImage2DSkCanvas(target, lod, data);
@@ -108,6 +96,18 @@ TextureCube.prototype.update = function(facesData, width, height, options) {
                 }
             }
             else {
+                gl.texImage2D(target, lod, internalFormat, width, height, 0, format, dataType, data);
+            }
+        }
+        else { //assuming Browser
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+            //Image, ImageData or Canvas
+            if (data.width && data.height) {
+                gl.texImage2D(target, lod, internalFormat, format, dataType, data);
+            }
+            //Array buffer
+            else {
+                console.log(dataType, 'gl.FLOAT', ctx.FLOAT);
                 gl.texImage2D(target, lod, internalFormat, width, height, 0, format, dataType, data);
             }
         }
