@@ -22,7 +22,7 @@ Texture2D.prototype.update = function(data, width, height, options) {
     width  = this._width  = width  || (data && data.width ) || 0;
     height = this._height = height || (data && data.height) || 0;
 
-    ctx.pushState(gl.TEXTURE_BIT);
+    ctx.pushState(ctx.TEXTURE_BIT);
     ctx.bindTexture(this, 0);
 
     //TODO: this should remember settings from constructor
