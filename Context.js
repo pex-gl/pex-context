@@ -1828,6 +1828,9 @@ Context.prototype.bindVertexArray = function(vertexArray) {
     if(vertexArray === this._vertexArray){
         return;
     }
+    else if (this._vertexArray){
+        this._vertexArray._unbindInternal()
+    }
 
     if (!vertexArray) {
         this._vertexArray = null;

@@ -140,6 +140,29 @@ VertexArray.prototype.hasDivisor = function(){
     return this._hasDivisor;
 };
 
+VertexArray.prototype._unbindInternal = function(){
+    var ctx = this._ctx;
+    var gl  = ctx.getGL();
+
+    var arrayBuffers = this._arrayBuffers;
+    var attributes   = this._attributes;
+
+    var bufferAttributes, attribute, location;
+
+    for(var i = 0, numArrayBuffers = arrayBuffers.length; i < numArrayBuffers; ++i) {
+        ctx._bindBuffer(arrayBuffers[i]);
+        bufferAttributes = attributes[i];
+
+        for(var j = 0, numBufferAttribs = bufferAttributes.length; j < numBufferAttribs; ++j){
+
+            attribute = bufferAttributes[j];
+            location  = attribute.location;
+
+            gl.disableVertexAttribArray(location);
+        }
+    }
+}
+
 VertexArray.prototype._bindInternal = function(){
     var ctx = this._ctx;
     var gl  = ctx.getGL();
