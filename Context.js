@@ -59,6 +59,8 @@ var CAPS_SRGB                      = 7;
 var CAPS_ELEMENT_INDEX_UINT        = 8;
 var CAPS_DRAW_BUFFERS              = 9;
 var CAPS_SHADER_TEXTURE_LOD        = 10;
+var CAPS_STANDARD_DERIVATIVES      = 11;
+
 
 //UITLS
 
@@ -402,6 +404,7 @@ function Context(gl){
     this.CAPS_ELEMENT_INDEX_UINT            = CAPS_ELEMENT_INDEX_UINT;
     this.CAPS_DRAW_BUFFERS                  = CAPS_DRAW_BUFFERS;
     this.CAPS_SHADER_TEXTURE_LOD            = CAPS_SHADER_TEXTURE_LOD;
+    this.CAPS_STANDARD_DERIVATIVES          = CAPS_STANDARD_DERIVATIVES;
 
     //TODO: implement webgl 2 check
     var isWebGL2              = false;
@@ -509,6 +512,19 @@ function Context(gl){
         }
         else {
             this._caps[CAPS_SHADER_TEXTURE_LOD] = false;
+        }
+    }
+
+    if (isPlask || isWebGL2) {
+        this._caps[CAPS_STANDARD_DERIVATIVES] = true;
+    }
+    else {
+        var ext = gl.getExtension('OES_standard_derivatives');
+        if (ext) {
+            this._caps[CAPS_STANDARD_DERIVATIVES] = true;
+        }
+        else {
+            this._caps[CAPS_STANDARD_DERIVATIVES] = false;
         }
 
     }
