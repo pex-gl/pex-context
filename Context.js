@@ -1829,7 +1829,7 @@ Context.prototype.bindVertexArray = function(vertexArray) {
         return;
     }
     else if (this._vertexArray){
-        this._vertexArray._unbindInternal()
+        this._vertexArray._unbindInternal(vertexArray);
     }
 
     if (!vertexArray) {
