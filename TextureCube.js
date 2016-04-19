@@ -68,12 +68,14 @@ TextureCube.prototype.update = function(facesData, width, height, options) {
     var repeat          = (options && options.repeat    ) || false;
     var dataType        = (options && options.type      ) || gl.UNSIGNED_BYTE;
     var flipY           = (options && options.flipY     ) || false;
+    var flipEnvMap      = (options && options.flipEnvMap ) || -1; //dynamic cubemaps should have this set to 1
     var lod             = (options && options.lod       ) || 0;
 
     var numFaces = facesData ? facesData.length : 6;
 
     this._width      = width  || (facesData && facesData[0] && facesData[0].data.width ) || 0;
     this._height     = height || (facesData && facesData[0] && facesData[0].data.height) || 0;
+    this._flipEnvMap = flipEnvMap;
 
     for(var i=0; i<numFaces; i++) {
         var face = facesData ? facesData[i] : null;
@@ -133,6 +135,10 @@ TextureCube.prototype.getWidth = function() {
 
 TextureCube.prototype.getHeight = function() {
     return this._height;
+}
+
+TextureCube.prototype.getFlipEnvMap = function() {
+    return this._flipEnvMap;
 }
 
 TextureCube.prototype.dispose = function(){
