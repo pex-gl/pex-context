@@ -327,8 +327,8 @@ function Context(gl){
 
     //Blend
     this.FUNC_ADD               = gl.FUNC_ADD;
-    this.FUNC_SUBSTRACT         = gl.FUNC_SUBSTRACT;
-    this.FUNC_REVERSE_SUBSTRACT = gl.FUNC_REVERSE_SUBSTRACT;
+    this.FUNC_SUBTRACT         = gl.FUNC_SUBTRACT;
+    this.FUNC_REVERSE_SUBTRACT = gl.FUNC_REVERSE_SUBTRACT;
     this.ZERO                = gl.ZERO;
     this.ONE                 = gl.ONE;
     this.SRC_COLOR           = gl.SRC_COLOR;
