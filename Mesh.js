@@ -33,8 +33,10 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
         var attributeInfo = attributes[i];
         var data = attributeInfo.data;
         var location = attributeInfo.location;
-        var elementSize = attributeInfo.size || (data[0] && data[0].length) ? data[0].length : 1;
-        //TODO: this can be done with !isNaN(data[0])
+        var elementSize = attributeInfo.size;
+        if (!elementSize) {
+            elementSize = (data[0] && data[0].length) ? data[0].length : 1
+        }
 
         //TODO: are we allowing empty attributes e.g. data=[] ?
         if (!data.length) {
@@ -89,7 +91,10 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
 
     if (indicesInfo) {
         var indicesData = indicesInfo.data;
-        var indicesDataElementSize = indicesInfo.size || ((indicesData[0] && indicesData[0].length) ? indicesData[0].length : 1);
+        var indicesDataElementSize = indicesInfo.size;
+        if (!indicesDataElementSize) {
+            indicesDataElementSize = (indicesData[0] && indicesData[0].length) ? indicesData[0].length : 1;
+        }
         var indicesDataType = indicesInfo.type;
         if (!indicesDataType) {
             if (ctx.isSupported(ctx.CAPS_ELEMENT_INDEX_UINT)) {
