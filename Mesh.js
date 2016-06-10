@@ -48,7 +48,8 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
         }
 
         var dataArray = new Float32Array(data.length * elementSize);
-        if (isFlatArray(data)) {
+        var isFlat = isFlatArray(data);
+        if (isFlat) {
             dataArray.set(data);
         }
         else {
@@ -79,7 +80,12 @@ function Mesh(ctx, attributes, indicesInfo, primitiveType) {
         this._attributesMap[location] = attribute;
 
         if (location == ctx.ATTRIB_POSITION) {
-            vertexCount = data.length;
+            if (isFlat) {
+                vertexCount = data.length / elementSize;
+            }
+            else {
+                vertexCount = data.length;
+            }
         }
 
         if (attributeDesc.divisor !== null) {
