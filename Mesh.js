@@ -169,7 +169,8 @@ Mesh.prototype.updateAttribute = function(location, data) {
         attribute.dataArray = new Float32Array(data.length * attribute.size);
     }
 
-    if (isFlatArray(data)) {
+    var isFlat = isFlatArray(data)
+    if (isFlat) {
         attribute.dataArray.set(data);
     }
     else {
@@ -181,7 +182,12 @@ Mesh.prototype.updateAttribute = function(location, data) {
 
     //TODO: test this
     if (location == ctx.ATTRIB_POSITION && this._indices === null) {
-        this._count = data.length;
+        if (isFlat) {
+            this._count = data.length / attribute.size;
+        }
+        else {
+            this._count = data.length;
+        }
     }
 
     attribute.buffer.bufferData(attribute.dataArray);
