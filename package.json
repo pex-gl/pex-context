@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/pex-gl/pex-context",
   "dependencies": {
-    "is-plask": "^1.0.0"
+    "is-plask": "^1.1.0",
+    "plask-wrap": "^1.0.0"
   }
 }

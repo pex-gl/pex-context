@@ -1,5 +1,5 @@
 var isPlask = require('is-plask');
-var plask   = isPlask ? require('plask') : {};
+var plask = require('plask-wrap');
 
 //TODO: update width and height if not passed but data is Image or Canvas
 //facesData = Array of {
