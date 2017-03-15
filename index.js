@@ -82,11 +82,11 @@ function createContext (gl) {
       this.debugMode = enabled
       if (enabled) {
         this.debuggraph = ''
+        this.debugCommands = []
         if (isBrowser) {
           window.R = R
-          window.commands = window.commands
+          window.commands = this.debugCommands
         }
-        this.debugCommands = window.commands
         this.debugGraph = ''
         this.debugGraph += 'digraph frame {\n'
         this.debugGraph += 'size="6,12";\n'
@@ -286,9 +286,10 @@ function createContext (gl) {
         if (opts.data instanceof Uint8Array
          || opts.data instanceof Float32Array
          || opts.data instanceof Uint16Array
-         || opts.data instanceof window.HTMLImageElement
-         || opts.data instanceof window.HTMLCanvasElement
-         || opts.data instanceof window.HTMLVideoElement
+          // TODO
+         // || opts.data instanceof window.HTMLImageElement
+         // || opts.data instanceof window.HTMLCanvasElement
+         // || opts.data instanceof window.HTMLVideoElement
         ) {
           if (opts.data.length && isNaN(opts.data[0])) {
             throw new Error('Trying to update resource with NaN data')
