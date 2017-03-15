@@ -1,3 +1,5 @@
+const log = require('debug')('context/Program')
+
 var DEFAULT_ATTRIB_LOCATION_BINDING = {
     0 : 'aPosition',
     1 : 'aColor',
@@ -77,8 +79,9 @@ Program.prototype.update = function(vertSrc, fragSrc, attributeLocationBinding){
 
     gl.attachShader(program, vertShader);
     gl.attachShader(program, fragShader);
-
-    for(var location = 0; location < NUM_VERTEX_ATTRIBUTES_MAX; location++){
+ 
+    var numAttribs = attributeLocationBinding ? attributeLocationBinding.length : NUM_VERTEX_ATTRIBUTES_MAX
+    for(var location = 0; location < numAttribs; location++){
         var attributeName = (attributeLocationBinding && attributeLocationBinding[location]) || DEFAULT_ATTRIB_LOCATION_BINDING[location];
         gl.bindAttribLocation(program, location, attributeName);
     }
@@ -119,6 +122,15 @@ Program.prototype._updateUniforms = function(){
             type : info.type,
             location : gl.getUniformLocation(program, name)
         };
+        if (info.size > 1) {
+          for (var j = 1; j < info.size; j++) {
+            var name = info.name.substr(0, info.name.indexOf('[') + 1) + j + ']'
+            uniforms[name] = {
+                type : info.type,
+                location : gl.getUniformLocation(program, name)
+            };
+          }
+        }
     }
 };
 
@@ -148,8 +160,8 @@ Program.prototype._compileSource = function(type, src){
     gl.compileShader(shader);
     if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
         var shaderType = (type === gl.VERTEX_SHADER) ? 'Vertex' : 'Fragment';
-        console.log(shaderType + ' shader compilation failed');
-        console.log(src);
+        log(shaderType + ' shader compilation failed');
+        log(src);
         throw new Error(shaderType + ' shader error: ' + gl.getShaderInfoLog(shader));
     }
     return shader;
@@ -203,6 +215,7 @@ Program.prototype._updateUniformSetterMap = function(){
                             throw new Error(STR_ERROR_WRONG_NUM_ARGS);
                         }
                         if(y === undefined){
+                          // log('glsl', entry)
                             gl.uniform3fv(location,x);
                         }
                         else {

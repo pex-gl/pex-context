@@ -6,7 +6,7 @@
  *     new Float32Array([
  *         1,1,1,1
  *     ]),ctx.STATIC_DRAW
- * );
+ * )
  *
  * @example
  * //Create dynamic buffer with preserved data
@@ -16,7 +16,7 @@
  *         1,1,1,1
  *     ]),ctx.DYNAMIC_DRAW,
  *     true
- * );
+ * )
  *
  * @example
  * //Create index buffer
@@ -26,7 +26,7 @@
  *         0,1,2
  *         3,2,1
  *     ]), ctx.STATIC_DRAW
- * );
+ * )
  *
  * @param {Context} ctx
  * @param {Number} target - The target buffer object
@@ -35,181 +35,201 @@
  * @param {Boolean} [preserveData] - If true the buffered data will be preserved locally for fast access and rebuffering
  * @constructor
  */
-function Buffer(ctx, target, sizeOrData, usage, preserveData) {
-    var gl = ctx.getGL();
 
-    this._ctx          = ctx;
-    this._target       = target === undefined ? gl.ARRAY_BUFFER : target;
-    this._usage        = usage  === undefined ? gl.STATIC_DRAW  : usage;
-    this._length       = 0;
-    this._byteLength   = 0;
-    this._data         = null;
-    this._dataType     = null;
-    this._preserveData = preserveData === undefined ? false : preserveData;
-    this._handle       = gl.createBuffer();
+const log = require('debug')('context/Buffer')
 
-    if(sizeOrData !== undefined && sizeOrData !== 0){
-        this.bufferData(sizeOrData);
-    }
+function Buffer (ctx, target, sizeOrData, usage, preserveData) {
+  var gl = ctx.getGL()
+
+  this._ctx = ctx
+  this._target = target === undefined ? gl.ARRAY_BUFFER : target
+  this._usage = usage === undefined ? gl.STATIC_DRAW : usage
+  this._length = 0
+  this._byteLength = 0
+  this._data = null
+  this._dataType = null
+  this._preserveData = preserveData === undefined ? false : preserveData
+  this._handle = gl.createBuffer()
+
+  if (sizeOrData !== undefined && sizeOrData !== 0) {
+    this.bufferData(sizeOrData)
+  }
 }
 
-Buffer.prototype._getHandle = function(){
-    return this._handle;
-};
+Buffer.prototype._getHandle = function () {
+  return this._handle
+}
 
 /**
  * Sets the target buffer object.
  * @param {Number} target
  */
-Buffer.prototype.setTarget = function(target){
-    this._target = target;
-};
+Buffer.prototype.setTarget = function (target) {
+  this._target = target
+}
 
 /**
  * Returns the target buffer object.
  * @returns {Number}
  */
-Buffer.prototype.getTarget = function(){
-    return this._target;
-};
+Buffer.prototype.getTarget = function () {
+  return this._target
+}
 
 /**
  * Sets the usage pattern of the data store.
  * @param {Number} usage
  */
-Buffer.prototype.setUsage = function(usage){
-    this._usage = usage;
-};
+Buffer.prototype.setUsage = function (usage) {
+  this._usage = usage
+}
 
 /**
  * Returns the usage pattern of the data store set.
  * @returns {Number}
  */
-Buffer.prototype.getUsage = function(){
-    return this._usage;
-};
+Buffer.prototype.getUsage = function () {
+  return this._usage
+}
 
 /**
  * Returns the length of the data.
  * @returns {Number}
  */
-Buffer.prototype.getLength = function(){
-    return this._length;
-};
+Buffer.prototype.getLength = function () {
+  return this._length
+}
 
 /**
  * Returns the byte length of the data.
  * @returns {null|Number}
  */
-Buffer.prototype.getByteLength = function(){
-    return this._byteLength;
-};
+Buffer.prototype.getByteLength = function () {
+  return this._byteLength
+}
 
 /**
  * Returns the type of tha data stored.
  * @returns {Number}
  */
-Buffer.prototype.getDataType = function(){
-    return this._dataType;
-};
+Buffer.prototype.getDataType = function () {
+  return this._dataType
+}
 
 /**
  * Returns the data send to the buffer. (Returns null if preserveData is set to false on creation)
  * @returns {null|Uint8Array|Uint16Array|Uint32Array|Float32Array}
  */
-Buffer.prototype.getData = function(){
-    return this._data;
-};
+Buffer.prototype.getData = function () {
+  return this._data
+}
 
 /**
  * Allocates a size or copies data into the data store.
  * @param {Number|Uint8Array|Uint16Array|Uint32Array|Float32Array} [sizeOrData]
  */
-Buffer.prototype.bufferData = function(sizeOrData){
-    var ctx = this._ctx;
-    var gl  = ctx.getGL();
+Buffer.prototype.bufferData = function (sizeOrData) {
+  var ctx = this._ctx
+  var gl = ctx.getGL()
+  // log('bufferData', sizeOrData)
 
-    ctx._bindBuffer(this);
+  ctx._bindBuffer(this)
 
-    if(sizeOrData === undefined){
-        if(this._data !== null){
-            gl.bufferData(this._target,this._data,this._usage);
-            ctx._unbindBuffer(this);
-            return;
-        } else {
-            throw new Error('No size or data passed. Or no preserved data set.');
-        }
+  if (sizeOrData === undefined) {
+    // TODO: wat is this even doing?
+    if (this._data !== null) {
+      gl.bufferData(this._target, this._data, this._usage)
+      ctx._unbindBuffer(this)
+      return
+    } else {
+      throw new Error('No size or data passed. Or no preserved data set.')
     }
+  }
 
-    if(sizeOrData !== this._data){
-        if(sizeOrData.byteLength !== undefined){
-            this._length     = sizeOrData.length;
-            this._byteLength = sizeOrData.byteLength;
-            var data_ctor    = sizeOrData.constructor;
+  if (sizeOrData !== this._data) {
+    // log('update', sizeOrData.byteLength)
+    if (sizeOrData.byteLength !== undefined) {
+      this._length = sizeOrData.length
+      this._byteLength = sizeOrData.byteLength
+      const DataCtor = sizeOrData.constructor
 
-            switch(data_ctor){
-                case Float32Array:
-                    this._dataType = gl.FLOAT;
-                    break;
-                case Uint16Array:
-                    this._dataType = gl.UNSIGNED_SHORT;
-                    break;
-                case Uint32Array:
-                    this._dataType = gl.UNSIGNED_INT;
-                    break;
-                default:
-                    throw new TypeError('Unsupported data type.');
-                    break;
-            }
+      switch (DataCtor) {
+        case Float32Array:
+          this._dataType = gl.FLOAT
+          break
+        case Uint16Array:
+          this._dataType = gl.UNSIGNED_SHORT
+          break
+        case Uint32Array:
+          this._dataType = gl.UNSIGNED_INT
+          break
+        default:
+          throw new TypeError('Unsupported data type.')
+      }
 
-            if(this._preserveData && sizeOrData){
-                if(this._data !== null && this._data.length == sizeOrData.length){
-                    this._data.set(sizeOrData);
-                }
-                else {
-                    this._data = new data_ctor(sizeOrData);
-                }
-            }
+      if (this._preserveData && sizeOrData) {
+        if (this._data !== null && this._data.length === sizeOrData.length) {
+          this._data.set(sizeOrData)
         } else {
-            this._length     = sizeOrData;
-            this._byteLength = null;
-            this._dataType   = null;
-            this._data       = null;
+          this._data = new DataCtor(sizeOrData)
         }
+      }
+    } else if (sizeOrData.length) {
+      throw new TypeError('Array is an unsupported data type. Use typed array.')
+    } else {
+      this._length = sizeOrData
+      this._byteLength = null
+      this._dataType = null
+      this._data = null
     }
+  }
 
-    gl.bufferData(this._target,sizeOrData,this._usage);
+  gl.bufferData(this._target, sizeOrData, this._usage)
 
-    ctx._unbindBuffer(this);
-};
+  ctx._unbindBuffer(this)
+}
 
 /**
  * Redefines some or all of the data store.
  * @param {Number} offset - The offset into the buffers data store where the data replacement will begin, measure in bytes
  * @param {Uint8Array|Uint16Array|Uint32Array|Float32Array} data - The new data that will be copied into the data store
  */
-Buffer.prototype.bufferSubData = function(offset,data){
-    var gl = this._ctx.getGL();
-    gl.bufferSubData(this._target,offset,data);
+// Buffer.prototype.bufferSubData = function(offset,data){
+// var gl = this._ctx.getGL()
+// gl.bufferSubData(this._target,offset,data)
 
-    if(this._preserveData && data != this._data){
-        offset = offset / this._data.BYTES_PER_ELEMENT;
-        for(var i = 0, l = this._data.length; offset < l; ++i, offset+=1){
-            this._data[offset] = data[i];
-        }
-    }
-};
+// if(this._preserveData && data != this._data){
+// offset = offset / this._data.BYTES_PER_ELEMENT
+// for(var i = 0, l = this._data.length offset < l ++i, offset+=1){
+// this._data[offset] = data[i]
+// }
+// }
+// }
+
+Buffer.prototype.update = function (opts) {
+  // const offset = opts.offset || 0
+  // const ctx = this._ctx
+  // TODO: are we updating or resizing?
+  // ctx._bindBuffer(this)
+  // if (offset) {
+    // gl.bufferSubData(this._target, offset, opts.buffer)
+  // } else {
+    // gl.bufferData(this._target, opts.buffer, this._usage)
+  // }
+  // ctx._unbindBuffer(this)
+  this.bufferData(opts.buffer)
+}
 
 /**
  * Disposes the buffer and removes its content.
  */
-Buffer.prototype.dispose = function(){
-    if(!this._handle){
-        throw new Error('Buffer already disposed.');
-    }
-    this._gl.deleteBuffer(this._handle);
-    this._handle = null;
-    this._data = null;
-};
+Buffer.prototype.dispose = function () {
+  if (!this._handle) {
+    throw new Error('Buffer already disposed.')
+  }
+  this._gl.deleteBuffer(this._handle)
+  this._handle = null
+  this._data = null
+}
 
-module.exports = Buffer;
+module.exports = Buffer
