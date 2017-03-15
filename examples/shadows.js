@@ -41,7 +41,6 @@ const flatten = require('flatten')
 // var glslify = require('glslify-promise')
 
 const createContext = require('../../pex-context')
-const createGL = require('pex-gl')
 const raf = require('raf')
 const createCamera = require('pex-cam/perspective')
 const createOrbiter = require('pex-cam/orbiter')
@@ -50,8 +49,7 @@ const Mat4 = require('pex-math/Mat4')
 const glsl = require('glslify')
 const isBrowser = require('is-browser')
 
-const gl = createGL(isBrowser ? window.innerWidth : 1280, isBrowser ? window.innerHeight : 720)
-const ctx = createContext(gl)
+const ctx = createContext()
 
 let elapsedSeconds = 0
 let prevTime = Date.now()
@@ -59,7 +57,7 @@ const noise = new SimplexNoise()
 
 const camera = createCamera({
   fov: 45, // TODO: change fov to radians
-  aspect: gl.canvas.width / gl.canvas.height,
+  aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
   position: [3, 0.5, 3],
   target: [0, 0, 0]
 })
@@ -76,7 +74,10 @@ const lightCamera = createCamera({
 })
 
 const depthMapSize = 512
-const depthMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize, format: ctx.PixelFormat.Depth, minFilter: gl.NEAREST, magFilter: gl.NEAREST })
+const depthMap = ctx.texture2D({
+  width: depthMapSize, height: depthMapSize,
+  format: ctx.PixelFormat.Depth,
+})
 const colorMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize })
 
 // FIXME: why we need { texture: } ?

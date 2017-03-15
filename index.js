@@ -4,6 +4,8 @@ const R = require('ramda')
 const log = require('debug')('context')
 // const viz = require('viz.js')
 const isBrowser = require('is-browser')
+const createGL = require('pex-gl')
+const assert = require('assert')
 
 // command documentation
 // vert: String
@@ -22,7 +24,12 @@ const isBrowser = require('is-browser')
 
 let ID = 0
 
-function createContext (gl) {
+function createContext (opts) {
+  assert(!opts || (typeof opts === 'object'), 'pex-context: createContext requires opts argument to be null or an object')
+  let gl = null
+  if (!opts || !opts.gl) gl = createGL(opts)
+  else if (opts && opts.gl) gl = opts.gl
+
   const PixelFormat = {
     RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
     RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
