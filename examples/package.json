@@ -1,0 +1,26 @@
+{
+  "name": "pex-context-examples",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Marcin Ignac <marcin.ignac@gmail.com> (http://marcinignac.com/)",
+  "license": "MIT",
+  "dependencies": {
+    "budo": "^9.4.7",
+    "bunny": "^1.0.1",
+    "flatten": "^1.0.2",
+    "geom-center-and-normalize": "^1.0.1",
+    "glsl-gamma": "^2.0.0",
+    "glslify": "^6.0.1",
+    "normals": "^1.1.0",
+    "pex-cam": "pex-gl/pex-cam#066b18cbd0a54086f2a0d8ae6c4f879e0e13a9fd",
+    "pex-gl": "^1.4.1",
+    "pex-math": "^1.0.1",
+    "primitive-cube": "^2.0.0",
+    "raf": "^3.3.0",
+    "simplex-noise": "^2.3.0"
+  }
+}
