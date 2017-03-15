@@ -21,8 +21,6 @@ var isPlask     = require('is-plask');
 
 var STR_ERROR_STACK_POP_BIT = 'Invalid pop. Bit %s stack is empty.';
 
-var lookup = require('gl-constants/lookup')
-
 //STATE BITS
 
 var ALL_BIT        = (1 << 30) - 1;

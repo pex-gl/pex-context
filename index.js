@@ -1,7 +1,9 @@
 const Context = require('./Context')
+// TODO: get rid of Ramda
 const R = require('ramda')
 const log = require('debug')('context')
 // const viz = require('viz.js')
+const isBrowser = require('is-browser')
 
 // command documentation
 // vert: String
@@ -80,8 +82,11 @@ function createContext (gl) {
       this.debugMode = enabled
       if (enabled) {
         this.debuggraph = ''
-        window.R = R
-        this.debugCommands = window.commands = []
+        if (isBrowser) {
+          window.R = R
+          window.commands = window.commands
+        }
+        this.debugCommands = window.commands
         this.debugGraph = ''
         this.debugGraph += 'digraph frame {\n'
         this.debugGraph += 'size="6,12";\n'
