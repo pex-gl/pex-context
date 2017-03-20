@@ -97,6 +97,7 @@ Program.prototype.update = function(vertSrc, fragSrc, attributeLocationBinding){
     gl.deleteShader(fragShader);
 
     this._updateUniforms();
+    this._updateUniformBlocks();
     this._updateAttributes();
 
     for(var location in attributeLocationBinding){
@@ -133,6 +134,41 @@ Program.prototype._updateUniforms = function(){
         }
     }
 };
+
+Program.prototype._updateUniformBlocks = function(){
+    var gl = this._gl;
+    var program     = this._handle;
+    var numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
+    var uniformBlocks    = this._uniformBlocks = {};
+
+    for(var i = 0, info, name; i < numUniformBlocks; ++i){
+        name = gl.getActiveUniformBlockName(program, i);
+        console.log(`Program.uniformBlock: ${name}`)
+        // name = info.name;
+        uniformBlocks[name] = {
+            // type : info.type,
+            name: name,
+            binding : gl.getActiveUniformBlockParameter(program, name, gl.UNIFORM_BLOCK_BINDING)
+        }
+        var blockUniforms = gl.getActiveUniformBlockParameter(program, name, gl.UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES);
+        console.log(`Program.uniformBlock: ${name} at binding:${uniformBlocks[name].binding}`)
+        for (var i = 0; i < blockUniforms.length; i++) {
+          info = gl.getActiveUniform(program, blockUniforms[i]);
+          console.log(`Program.uniformBlock: ${name} with uniform: ${info.name}`)
+          this._uniforms[info.name].block = uniformBlocks[name]
+        }
+        console.log(`Program.uniformBlock: ${name} with uniform: ${info.name}`)
+        // if (info.size > 1) {
+          // for (var j = 1; j < info.size; j++) {
+            // var name = info.name.substr(0, info.nameu.indexOf('[') + 1) + j + ']'
+            // uniforms[name] = {
+                // type : info.type,
+                // location : gl.getUniformLocation(program, name)
+            // };
+          // }
+        // }
+    }
+}
 
 Program.prototype._updateAttributes = function(){
     var gl = this._gl;

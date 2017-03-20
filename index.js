@@ -130,7 +130,8 @@ function createContext (opts) {
           // div.style.top = '0'
           // div.style.left = '0'
           // div.style.transformOrigin = '0 0'
-          // div.style.transform = 'scale(0.75, 0.75)'
+          // // div.style.transform = 'scale(0.75, 0.75)'
+          // div.style.transform = 'scale(1.5, 1.5)'
           // document.body.appendChild(div)
         }
       }
@@ -148,9 +149,12 @@ function createContext (opts) {
           if (opts.format === PixelFormat.Depth) {
             opts.format = ctx.DEPTH_COMPONENT
             opts.type = ctx.UNSIGNED_SHORT
+            console.log(ctx)
+            opts.internalFormat = gl.DEPTH_COMPONENT16
           } else if (opts.format === PixelFormat.RGBA32F) {
             opts.format = ctx.RGBA
             opts.type = ctx.FLOAT
+            opts.internalFormat = gl.RGBA32F
           } else {
             throw new Error(`Unknown texture pixel format "${opts.format}"`)
           }
@@ -164,6 +168,8 @@ function createContext (opts) {
       } else {
         throw new Error('Invalid parameters. Object { data: Uint8Array/Float32Array, width: Int, height: Int} required.')
       }
+      var error = gl.getError()
+      if (error) throw new Error('GL ERROR')
     },
     // textureCube({ width: Int, height: Int, format: PixelFormat })
     textureCube: function (opts) {
@@ -214,6 +220,18 @@ function createContext (opts) {
       // FIXME: don't flatten if unnecesary
       const res = this.ctx.createBuffer(gl.ELEMENT_ARRAY_BUFFER, data, gl.STATIC_DRAW, true)
       res.id = 'elementsBuffer_' + ID++
+      this.resources.push(res)
+      return res
+    },
+    uniformBuffer: function (data) {
+      // FIXME: don't flatten if unnecesary
+      log('uniformBuffer', data, Array.isArray(data))
+      if (Array.isArray(data)) {
+        data = R.flatten(data)
+      }
+      data = new Float32Array(data)
+      const res = this.ctx.createBuffer(gl.UNIFORM_BUFFER, data, gl.STATIC_DRAW, true)
+      res.id = 'vertexBuffer_' + ID++
       this.resources.push(res)
       return res
     },
@@ -330,6 +348,7 @@ function createContext (opts) {
 
       // merge uniforms
       newCmd.uniforms = Object.assign({}, parent.uniforms, cmd.uniforms)
+      newCmd.uniformBlocks = Object.assign({}, parent.uniformBlocks, cmd.uniformBlocks)
       return newCmd
     },
     // TODO: switching to lightweight resources would allow to just clone state
@@ -416,7 +435,23 @@ function createContext (opts) {
           throw new Error('Trying to draw without an active program')
         }
         let numTextures = 0
-        const requiredUniforms = Object.keys(state.program._uniforms)
+        const requiredUniforms = Object.keys(state.program._uniforms).filter((name) => {
+          return !state.program._uniforms[name].block
+        })
+        const requiredBlocks = []
+        Object.keys(state.program._uniforms).filter((name) => {
+          var block = state.program._uniforms[name].block
+          if (!block) return
+          if (requiredBlocks.indexOf(block.name) === -1) {
+            requiredBlocks.push(block.name)
+          }
+        })
+        Object.keys(cmd.uniformBlocks).forEach((name) => {
+          if (state.program._uniformBlocks[name]) {
+            requiredBlocks.splice(requiredBlocks.indexOf(name), 1)
+            gl.bindBufferBase(gl.UNIFORM_BUFFER, state.program._uniformBlocks[name].binding, cmd.uniformBlocks[name]._handle);
+          }
+        })
         Object.keys(cmd.uniforms).forEach((name) => {
           let value = cmd.uniforms[name]
           if (typeof value === 'function') {
@@ -459,6 +494,10 @@ function createContext (opts) {
         if (requiredUniforms.length > 0) {
           log('invalid command', cmd)
           throw new Error(`Trying to draw with missing uniforms: ${requiredUniforms.join(', ')}`)
+        }
+        if (requiredBlocks.length > 0) {
+          log('invalid command', cmd)
+          throw new Error(`Trying to draw with missing uniform blocks: ${requiredBlocks.join(', ')}`)
         }
 
         if (vertexLayout.length !== Object.keys(state.program._attributes).length) {

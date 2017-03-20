@@ -120,12 +120,12 @@ Framebuffer.prototype._bindInternal = function() {
   gl.bindFramebuffer(gl.FRAMEBUFFER, this._handle);
 
   if (this._colorAttachmentsPositions.length > 1) {
-    if (isBrowser) {
-      this._webglDrawBuffersExt.drawBuffersWEBGL(this._colorAttachmentsPositions);
-    }
-    else {
+    // if (isBrowser) {
+      // this._webglDrawBuffersExt.drawBuffersWEBGL(this._colorAttachmentsPositions);
+    // }
+    // else {
       gl.drawBuffers(this._colorAttachmentsPositions);
-    }
+    // }
   }
 }
 

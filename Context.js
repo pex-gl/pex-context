@@ -253,9 +253,11 @@ function Context(gl){
     this._bufferPrev = {};
     this._bufferPrev[gl.ARRAY_BUFFER] = null;
     this._bufferPrev[gl.ELEMENT_ARRAY_BUFFER] = null;
+    this._bufferPrev[gl.UNIFORM_BUFFER] = null;
     this._buffer = {};
     this._buffer[gl.ARRAY_BUFFER] = null;
     this._buffer[gl.ELEMENT_ARRAY_BUFFER] = null;
+    this._buffer[gl.UNIFORM_BUFFER] = null;
 
     /**
      * [BIT description here]
@@ -408,7 +410,7 @@ function Context(gl){
     this.CAPS_STANDARD_DERIVATIVES          = CAPS_STANDARD_DERIVATIVES;
 
     //TODO: implement webgl 2 check
-    var isWebGL2              = false;
+    var isWebGL2              = typeof WebGL2RenderingContext === 'function';
     this._caps[CAPS_WEBGL2]   = isWebGL2;
 
     //ANGLE_instanced_arrays
