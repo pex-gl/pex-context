@@ -58,6 +58,14 @@ var pass = ctx.pass({
 })
 ```
 
+```
+// WebGL 2
+// var tex2DArray = ctx.texture2DArray()
+// var tex3D = ctx.texture2D()
+// var ubo = ctx.uniformBuffer()
+
+```
+
 ## Command submission
 
 ```javascript
@@ -74,13 +82,6 @@ ctx.submit({
   count: Number,
   instances: Number
 })
-```
-
-// WebGL 2
-// var tex2DArray = ctx.texture2DArray()
-// var tex3D = ctx.texture2D()
-// var ubo = ctx.uniformBuffer()
-
 ```
 
 # Examples
