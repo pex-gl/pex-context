@@ -32,7 +32,7 @@ Texture2D.prototype.update = function(options) {
     ctx.bindTexture(this, 0);
 
     //TODO: this should remember settings from constructor
-    var internalFormat  = (options && options.format) || gl.RGBA;
+    var internalFormat  = (options && options.internalFormat) || (options && options.format) || gl.RGBA;
     var format          = (options && options.format) || gl.RGBA;
     var repeat          = (options && options.repeat) || false;
     var dataType        = (options && options.type  ) || gl.UNSIGNED_BYTE;
