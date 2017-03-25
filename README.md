@@ -47,7 +47,9 @@ var pipeline = ctx.pipeline({
   blendSrcRGBFactor: BlendFactor,
   blendSrcAlphaFactor: BlendFactor,
   blendDstRGBFactor: BlendFactor,
-  blendDstAlphaFactor: BlendFactor
+  blendDstAlphaFactor: BlendFactor,
+  cullFaceEnabled: Boolean,
+  cullFace: Face
 })
 
 var pass = ctx.pass({
@@ -66,6 +68,12 @@ var pass = ctx.pass({
 
 ```
 
+## Resource update
+
+```javascript
+ctx.update(res, { data: Array })
+```
+
 ## Command submission
 
 ```javascript
@@ -80,7 +88,12 @@ ctx.submit({
   elements: { buffer: ElementsBuffer, offset: Number },
   primitiveType: PrimitiveType,
   count: Number,
-  instances: Number
+  instances: Number,
+  uniforms: {
+    name: Number,
+    name: Array,
+    name: Texture2D
+  }
 })
 ```
 
