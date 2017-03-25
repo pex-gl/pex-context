@@ -10,7 +10,7 @@ function createPass (ctx, opts) {
   checkProps(allowedProps, opts)
 
   const pass = {
-    type: 'pass',
+    class: 'pass',
     framebuffer: opts.framebuffer,
     clearColor: opts.clearColor,
     clearDepth: opts.clearDepth

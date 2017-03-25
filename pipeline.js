@@ -14,7 +14,7 @@ function createPipeline (ctx, opts) {
   const gl = ctx.gl
 
   const pipeline = Object.assign({
-    type: 'pipeline'
+    class: 'pipeline'
   }, opts)
 
   if (opts.vert && opts.frag) {
