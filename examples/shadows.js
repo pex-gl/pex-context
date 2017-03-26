@@ -101,8 +101,6 @@ const shadowMappedFrag = glsl(__dirname + '/glsl/shadow-mapped.frag')
 
 const clearCmd = {
   pass: ctx.pass({
-    // TODO: how to provide default framebuffer?
-    framebuffer: { target: ctx.gl.FRAMEBUFFER, handle: null },
     clearColor: [0.5, 0.5, 0.5, 1.0],
     clearDepth: 1
   })
@@ -325,9 +323,10 @@ raf(function frame () {
     ctx.submit(drawFloorDepthCmd)
     ctx.submit(drawBunnyDepthCmd)
   })
-  ctx.submit(clearCmd)
-  ctx.submit(drawFloorCmd)
-  ctx.submit(drawBunnyCmd)
-  ctx.submit(drawFullscreenQuadCmd)
+  ctx.submit(clearCmd, () => {
+    ctx.submit(drawFloorCmd)
+    ctx.submit(drawBunnyCmd)
+    ctx.submit(drawFullscreenQuadCmd)
+  })
   raf(frame)
 })

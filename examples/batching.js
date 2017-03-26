@@ -49,7 +49,6 @@ const createCamera = require('pex-cam/perspective')
 const createOrbiter = require('pex-cam/orbiter')
 // const load = require('pex-io/load')
 const glsl = require('glslify')
-const isBrowser = require('is-browser')
 
 const ctx = createContext()
 
@@ -71,7 +70,7 @@ const lightCamera = createCamera({
   aspect: 1,
   near: 1,
   far: 50,
-  position: [7, 4, 7],
+  position: [3, 14, 3],
   target: [0, 0, 0]
 })
 
@@ -83,17 +82,23 @@ const depthMap = ctx.texture2D({
 })
 const colorMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize })
 
-// FIXME: why we need { texture: } ?
-const shadowFramebuffer = ctx.framebuffer({ color: [ { texture: colorMap } ], depth: { texture: depthMap } })
+const depthPassCmd = {
+  name: 'depthPass',
+  pass: ctx.pass({
+    color: [ colorMap ],
+    depth: depthMap,
+    clearColor: [1, 0, 0, 1],
+    clearDepth: 1
+  })
+}
 
-// TODO: i could probably replace framebuffer with color, depth, stencil attachments props
-// same way we don't declare vertex array, fbo would be created on demand?
-const depthPassCmd = ctx.command({
-  framebuffer: shadowFramebuffer,
-  viewport: [0, 0, depthMapSize, depthMapSize],
-  clearColor: [1, 0, 0, 1],
-  clearDepth: 1
-})
+const drawPassCmd = {
+  name: 'drawPass',
+  pass: ctx.pass({
+    clearColor: [1, 0, 0, 1],
+    clearDepth: 1
+  })
+}
 
 const showNormalsVert = glsl(__dirname + '/glsl/show-normals.vert')
 const showNormalsFrag = glsl(__dirname + '/glsl/show-normals.frag')
@@ -102,15 +107,14 @@ const shadowMappedFrag = glsl(__dirname + '/glsl/shadow-mapped.frag')
 // BlitVert: glslify(__dirname + '/sh/materials/Blit.vert'),
 // BlitFrag: glslify(__dirname + '/sh/materials/Blit.frag')
 
-const clearCmd = ctx.command({
-  clearColor: [0.5, 0.5, 0.5, 1.0],
-  clearDepth: 1
-})
-
 const floor = createCube(5, 0.1, 5)
-const drawFloorCmd = ctx.command({
-  vert: shadowMappedVert,
-  frag: shadowMappedFrag,
+const drawFloorCmd = {
+  name: 'drawFloor',
+  pipeline: ctx.pipeline({
+    vert: shadowMappedVert,
+    frag: shadowMappedFrag,
+    depthEnabled: true
+  }),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
@@ -125,12 +129,6 @@ const drawFloorCmd = ctx.command({
     uAmbientColor: [0, 0, 0, 1],
     uDiffuseColor: [1, 1, 1, 1]
   },
-  vertexLayout: [
-    // FIXME: second parameter 'location' is redundand?
-    // or is it so we can interleave attributes?
-    ['aPosition', 0, 3],
-    ['aNormal', 1, 3]
-  ],
   attributes: {
     aPosition: {
       buffer: ctx.vertexBuffer(floor.positions)
@@ -139,25 +137,23 @@ const drawFloorCmd = ctx.command({
       buffer: ctx.vertexBuffer(floor.normals)
     }
   },
-  // FIXME: rename this to indexBuffer?
-  elements: {
-    buffer: ctx.elementsBuffer(floor.cells)
-  },
-  depthEnable: true
-})
+  indices: {
+    buffer: ctx.indexBuffer(floor.cells)
+  }
+}
 
-const drawFloorDepthCmd = ctx.command({
-  vert: showNormalsVert,
-  frag: showNormalsFrag,
+const drawFloorDepthCmd = {
+  name: 'drawFloorDepth',
+  pipeline: ctx.pipeline({
+    vert: showNormalsVert,
+    frag: showNormalsFrag,
+    depthEnabled: true
+  }),
   uniforms: {
     uProjectionMatrix: lightCamera.projectionMatrix,
     uViewMatrix: lightCamera.viewMatrix,
     uModelMatrix: Mat4.create()
   },
-  vertexLayout: [
-    ['aPosition', 0, 3],
-    ['aNormal', 1, 3]
-  ],
   attributes: {
     aPosition: {
       buffer: ctx.vertexBuffer(floor.positions)
@@ -167,11 +163,10 @@ const drawFloorDepthCmd = ctx.command({
     }
   },
   // FIXME: rename this to indexBuffer?
-  elements: {
-    buffer: ctx.elementsBuffer(floor.cells)
-  },
-  depthEnable: true
-})
+  indices: {
+    buffer: ctx.indexBuffer(floor.cells)
+  }
+}
 
 const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) => Vec3.scale(p, 2))
 const bunnyBaseNormals = normals.vertexNormals(bunny.cells, bunny.positions)
@@ -180,9 +175,13 @@ const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) => Vec3.s
 const bunnyPositionBuffer = ctx.vertexBuffer(bunnyBaseVertices)
 const bunnyNormalBuffer = ctx.vertexBuffer(bunnyBaseNormals)
 
-const drawBunnyCmd = ctx.command({
-  vert: shadowMappedVert,
-  frag: shadowMappedFrag,
+const drawBunnyCmd = {
+  name: 'drawBunny',
+  pipeline: ctx.pipeline({
+    vert: shadowMappedVert,
+    frag: shadowMappedFrag,
+    depthEnabled: true
+  }),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     // FIXME: because we pass by reference this matrix will keep updating without us
@@ -200,12 +199,6 @@ const drawBunnyCmd = ctx.command({
     uAmbientColor: [0, 0, 0, 1],
     uDiffuseColor: [1, 1, 1, 1]
   },
-  vertexLayout: [
-    // FIXME: second parameter 'location' is redundand?
-    // or is it so we can interleave attributes?
-    ['aPosition', 0, 3],
-    ['aNormal', 1, 3]
-  ],
   attributes: {
     aPosition: {
       buffer: bunnyPositionBuffer
@@ -215,24 +208,23 @@ const drawBunnyCmd = ctx.command({
     }
   },
   // FIXME: rename this to indexBuffer?
-  elements: {
-    buffer: ctx.elementsBuffer(bunny.cells)
-  },
-  depthEnable: true
-})
+  indices: {
+    buffer: ctx.indexBuffer(bunny.cells)
+  }
+}
 
-const drawBunnyDepthCmd = ctx.command({
-  vert: showNormalsVert,
-  frag: showNormalsFrag,
+const drawBunnyDepthCmd = {
+  name: 'drawBunnyDepth',
+  pipeline: ctx.pipeline({
+    vert: showNormalsVert,
+    frag: showNormalsFrag,
+    depthEnabled: true
+  }),
   uniforms: {
     uProjectionMatrix: lightCamera.projectionMatrix,
     uViewMatrix: lightCamera.viewMatrix,
     uModelMatrix: Mat4.translate(Mat4.create(), [0, 1, 0])
   },
-  vertexLayout: [
-    ['aPosition', 0, 3],
-    ['aNormal', 1, 3]
-  ],
   attributes: {
     aPosition: {
       buffer: bunnyPositionBuffer
@@ -242,11 +234,10 @@ const drawBunnyDepthCmd = ctx.command({
     }
   },
   // FIXME: rename this to indexBuffer?
-  elements: {
-    buffer: ctx.elementsBuffer(bunny.cells)
-  },
-  depthEnable: true
-})
+  indices: {
+    buffer: ctx.indexBuffer(bunny.cells)
+  }
+}
 
 function updateTime () {
   const now = Date.now()
@@ -276,11 +267,7 @@ function updateBunny (ctx) {
     v[2] += n[2] * noiseScale * (f + 1)
   }
 
-  // FIXME: pre-allocate buffer
-  // FIXME: add update command
-  const positionData = new Float32Array(R.flatten(bunnyNoiseVertices))
-  // bunnyPositionBuffer.bufferData(positionData)
-  ctx.update(bunnyPositionBuffer, { buffer: positionData })
+  ctx.update(bunnyPositionBuffer, { data: bunnyNoiseVertices })
 
   // Update options:
   // 1) direct update buffer
@@ -296,31 +283,30 @@ function updateBunny (ctx) {
   // FIXME: pre-allocate buffer
   // FIXME: add update command
   // What are the update patterns in other APIs?
-  const normalData = new Float32Array(R.flatten(normals.vertexNormals(bunny.cells, bunnyNoiseVertices)))
+  const normalData = normals.vertexNormals(bunny.cells, bunnyNoiseVertices)
   // bunnyNormalBuffer.bufferData(normalData)
-  ctx.update(bunnyNormalBuffer, { buffer: normalData })
+  ctx.update(bunnyNormalBuffer, { data: normalData })
 }
 
-const drawFullscreenQuadCmd = ctx.command({
-  vert: glsl(__dirname + '/glsl/screen-image.vert'),
-  frag: glsl(__dirname + '/glsl/screen-image.frag'),
-  vertexLayout: [
-    ['aPosition', 0, 2],
-    ['aTexCoord0', 1, 2]
-  ],
+const drawFullscreenQuadCmd = {
+  name: 'drawFullscreenQuad',
+  pipeline: ctx.pipeline({
+    vert: glsl(__dirname + '/glsl/screen-image.vert'),
+    frag: glsl(__dirname + '/glsl/screen-image.frag'),
+    depthEnabled: false
+  }),
   attributes: {
     // aPosition: { buffer: ctx.vertexBuffer(new Float32Array(R.flatten([[-1, -1], [1, -1], [1, 1], [-1, 1]]))) },
     aPosition: { buffer: ctx.vertexBuffer(new Float32Array(R.flatten([[-1, -1], [-2 / 4, -1], [-2 / 4, -1 / 3], [-1, -1 / 3]]))) },
     aTexCoord0: { buffer: ctx.vertexBuffer(new Float32Array(R.flatten([[0, 0], [1, 0], [1, 1], [ 0, 1]]))) }
   },
-  elements: {
-    buffer: ctx.elementsBuffer(new Uint16Array(R.flatten([[0, 1, 2], [0, 2, 3]])))
+  indices: {
+    buffer: ctx.indexBuffer(new Uint16Array(R.flatten([[0, 1, 2], [0, 2, 3]])))
   },
   uniforms: {
     uTexture: depthMap
-  },
-  depthEnable: false
-})
+  }
+}
 
 // console.time('frame')
 
@@ -361,10 +347,11 @@ raf(function frame () {
     ctx.submit(drawFloorDepthCmd)
     ctx.submit(drawBunnyDepthCmd, shadowBatches)
   })
-  ctx.submit(clearCmd)
-  ctx.submit(drawFloorCmd)
-  ctx.submit(drawBunnyCmd, batches)
-  ctx.submit(drawFullscreenQuadCmd)
+  ctx.submit(drawPassCmd, () => {
+    ctx.submit(drawFloorCmd)
+    ctx.submit(drawBunnyCmd, batches)
+    ctx.submit(drawFullscreenQuadCmd)
+  })
 
   raf(frame)
 })
