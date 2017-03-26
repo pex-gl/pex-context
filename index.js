@@ -330,7 +330,7 @@ function createContext (opts) {
         }
         if (value === null || value === undefined) {
           log('invalid command', cmd)
-          throw new Error(`Can set uniform "${name}" with a null value`)
+          assert.fail(`Can set uniform "${name}" with a null value`)
         }
         // FIXME: uniform array hack
         if (Array.isArray(value) && !state.program.uniforms[name]) {
@@ -352,7 +352,7 @@ function createContext (opts) {
           requiredUniforms.splice(requiredUniforms.indexOf(name), 1)
         } else if (!Array.isArray(value) && typeof value === 'object') {
           log('invalid command', cmd)
-          throw new Error(`Can set uniform "${name}" with an Object value`)
+          assert.fail(`Can set uniform "${name}" with an Object value`)
         } else {
           state.program.setUniform(name, value)
           requiredUniforms.splice(requiredUniforms.indexOf(name), 1)
@@ -360,7 +360,7 @@ function createContext (opts) {
       })
       if (requiredUniforms.length > 0) {
         log('invalid command', cmd)
-        throw new Error(`Trying to draw with missing uniforms: ${requiredUniforms.join(', ')}`)
+        assert.fail(`Trying to draw with missing uniforms: ${requiredUniforms.join(', ')}`)
       }
     },
     drawVertexData: function (cmd) {
@@ -368,12 +368,12 @@ function createContext (opts) {
       const vertexLayout = state.vertexLayout
 
       if (!state.program) {
-        throw new Error('Trying to draw without an active program')
+        assert.fail('Trying to draw without an active program')
       }
 
       if (vertexLayout.length !== Object.keys(state.program.attributes).length) {
         log('Invalid vertex layout not matching the shader', vertexLayout, state.program._attributes, cmd)
-        throw new Error('Invalid vertex layout not matching the shader')
+        assert.fail('Invalid vertex layout not matching the shader')
       }
 
       let instanced = false
@@ -392,17 +392,17 @@ function createContext (opts) {
 
         if (!attrib || !attrib.buffer) {
           log('Invalid command', cmd, 'doesn\'t satisfy vertex layout', vertexLayout)
-          throw new Error(`Command is missing attribute "${name}" at location ${location} with ${attrib}`)
+          assert.fail(`Command is missing attribute "${name}" at location ${location} with ${attrib}`)
         }
 
         if (attrib.buffer._length === 0) {
           log('Invalid command', cmd)
-          throw new Error(`Trying to draw arrays with no data for attribute : ${name}`)
+          assert.fail(`Trying to draw arrays with no data for attribute : ${name}`)
         }
 
         if (!attrib.buffer || !attrib.buffer.target) {
           log('Invalid command', cmd)
-          throw new Error(`Trying to draw arrays with invalid buffer for attribute : ${name}`)
+          assert.fail(`Trying to draw arrays with invalid buffer for attribute : ${name}`)
         }
         gl.bindBuffer(attrib.buffer.target, attrib.buffer.handle)
         gl.enableVertexAttribArray(location)
@@ -427,7 +427,7 @@ function createContext (opts) {
       if (cmd.indices) {
         if (!cmd.indices.buffer || !cmd.indices.buffer.target) {
           log('Invalid command', cmd)
-          throw new Error(`Trying to draw arrays with invalid buffer for elements`)
+          assert.fail(`Trying to draw arrays with invalid buffer for elements`)
         }
         gl.bindBuffer(cmd.indices.buffer.target, cmd.indices.buffer.handle)
         var count = cmd.indices.buffer.length
@@ -447,7 +447,7 @@ function createContext (opts) {
           gl.drawArrays(primitive, 0, cmd.count)
         }
       } else {
-        throw new Error('Vertex arrays requres elements or count to draw')
+        assert.fail('Vertex arrays requres elements or count to draw')
       }
       // if (self.debugMode) {
       // var error = gl.getError()
@@ -562,7 +562,7 @@ function createContext (opts) {
               const value = cmd.uniforms[uniformName]
               if (value === null || value === undefined) {
                 log('Invalid command', cmd)
-                throw new Error(`Trying to draw with uniform "${uniformName}" = null`)
+                assert.fail(`Trying to draw with uniform "${uniformName}" = null`)
               }
               if (value.id) {
                 this.debugGraph += `${value.id} -> ${cmd.name || cmd.id}:u${index}\n`

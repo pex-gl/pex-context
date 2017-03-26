@@ -258,10 +258,10 @@ function updateBunny (ctx) {
   const noiseFrequency = 1
   const noiseScale = 0.1
   for (let i = 0; i < bunnyBaseVertices.length; i++) {
-    var v = bunnyNoiseVertices[i]
-    var n = bunnyBaseNormals[i]
+    const v = bunnyNoiseVertices[i]
+    const n = bunnyBaseNormals[i]
     Vec3.set(v, bunnyBaseVertices[i])
-    var f = noise.noise3D(v[0] * noiseFrequency, v[1] * noiseFrequency, v[2] * noiseFrequency + elapsedSeconds)
+    const f = noise.noise3D(v[0] * noiseFrequency, v[1] * noiseFrequency, v[2] * noiseFrequency + elapsedSeconds)
     v[0] += n[0] * noiseScale * (f + 1)
     v[1] += n[1] * noiseScale * (f + 1)
     v[2] += n[2] * noiseScale * (f + 1)

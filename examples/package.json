@@ -21,6 +21,7 @@
     "pex-random": "^1.0.1",
     "primitive-cube": "^2.0.0",
     "raf": "^3.3.0",
-    "simplex-noise": "^2.3.0"
+    "simplex-noise": "^2.3.0",
+    "unassertify": "^2.0.4"
   }
 }
