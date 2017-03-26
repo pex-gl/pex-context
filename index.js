@@ -46,21 +46,22 @@ function createContext (opts) {
   }
 
   const defaultState = {
-    clearColor: [0, 0, 0, 1],
-    clearDepth: 1,
-    program: undefined,
-    framebuffer: { target: gl.FRAMEBUFFER, handle: null },
-    // attribures: undefined,
-    // vertexLayout: undefined,
-    viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight],
-    depthEnabled: false,
-    blendEnabled: false,
-    cullFaceEnabled: false,
-    cullFace: Face.Back,
-    activeTextures: []
+    pass: {
+      framebuffer: { target: gl.FRAMEBUFFER, handle: null },
+      clearColor: [0, 0, 0, 1],
+      clearDepth: 1
+    },
+    pipeline: {
+      program: null,
+      depthEnabled: false,
+      blendEnabled: false,
+      cullFaceEnabled: false,
+      cullFace: Face.Back
+    },
+    viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]
   }
 
-  return {
+  const ctx = {
     gl: gl,
     DataType: DataType,
     PixelFormat: PixelFormat,
@@ -71,7 +72,10 @@ function createContext (opts) {
     debugCommands: [],
     resources: [],
     stack: [ defaultState ],
-    state: Object.assign({}, defaultState),
+    defaultState: defaultState,
+    state: {
+      activeTextures: []
+    },
     getGLString: function (glEnum) {
       let str = 'UNDEFINED'
       Object.keys(gl).forEach((key) => {
@@ -215,10 +219,10 @@ function createContext (opts) {
       const newCmd = Object.assign({}, parent)
 
       if (!inherit) {
-        // TODO:
         // clear values are not merged as they are applied only in the parent command
-        newCmd.clearColor = undefined
-        newCmd.clearDepth = undefined
+        newCmd.pass = Object.assign({}, parent.pass)
+        newCmd.pass.clearColor = undefined
+        newCmd.pass.clearDepth = undefined
       }
 
       // overwrite properties from new command
@@ -233,17 +237,16 @@ function createContext (opts) {
       const state = this.state
 
       if (pass.framebuffer !== state.framebuffer) {
+        if (this.debugMode) log('change framebuffer', state.framebuffer, '->', pass.framebuffer)
         state.framebuffer = pass.framebuffer
-        if (state.framebuffer) {
-          gl.bindFramebuffer(state.framebuffer.target, state.framebuffer.handle)
-          if (state.framebuffer.color) {
-            gl.viewport(0, 0,
-              state.framebuffer.color[0].texture.width,
-              state.framebuffer.color[0].texture.height
-            )
-          } else {
-            gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
-          }
+        gl.bindFramebuffer(state.framebuffer.target, state.framebuffer.handle)
+        if (state.framebuffer.color) {
+          gl.viewport(0, 0,
+            state.framebuffer.color[0].texture.width,
+            state.framebuffer.color[0].texture.height
+          )
+        } else {
+          gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
         }
       }
 
@@ -256,6 +259,7 @@ function createContext (opts) {
       }
 
       if (pass.clearDepth !== undefined) {
+        if (this.debugMode) log('clearing depth', pass.clearDepth)
         clearBits |= gl.DEPTH_BUFFER_BIT
         // TODO this might be unnecesary but we don't know because we don't store the clearDepth in state
         gl.clearDepth(pass.clearDepth)
@@ -457,7 +461,7 @@ function createContext (opts) {
     },
     // TODO: switching to lightweight resources would allow to just clone state
     // and use commands as state modifiers?
-    applyCommand: function (cmd) {
+    apply: function (cmd) {
       const state = this.state
 
       if (this.debugMode) log('apply', cmd.name || cmd.id, { cmd: cmd, state: state })
@@ -496,10 +500,9 @@ function createContext (opts) {
         }
       }
 
-      // this.pushState()
       const parentState = this.stack[this.stack.length - 1]
       const cmdState = this.mergeCommands(parentState, cmd, false)
-      this.applyCommand(cmdState)
+      this.apply(cmdState)
       if (subCommand) {
         if (this.debugMode) {
           this.debugGraph += `subgraph cluster_${cmd.name || cmd.id} {\n`
@@ -571,9 +574,10 @@ function createContext (opts) {
           this.debugGraph += `${s}\n`
         }
       }
-      // this.popState()
     }
   }
+  ctx.apply(defaultState)
+  return ctx
 }
 
 module.exports = createContext

@@ -23,6 +23,10 @@ function createPass (ctx, opts) {
     })
   }
 
+  if (!pass.framebuffer) {
+    pass.framebuffer = ctx.defaultState.pass.framebuffer
+  }
+
   return pass
 }
 
