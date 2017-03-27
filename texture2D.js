@@ -72,7 +72,7 @@ function updateTexture2D (ctx, texture, opts) {
     data = opts
     width = opts.width
     height = opts.height
-    gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, format, type, gl.UNSIGNED_BYTE, data)
+    gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, format, type, data)
   } else if (typeof opts === 'object') {
     assert(!data || Array.isArray(opts.data)
       || opts.data instanceof Uint8Array
