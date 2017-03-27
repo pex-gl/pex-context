@@ -390,27 +390,28 @@ function createContext (opts) {
         const size = layout[2]
         const attrib = cmd.attributes[i] || cmd.attributes[name]
 
-        if (!attrib || !attrib.buffer) {
+        if (!attrib) {
           log('Invalid command', cmd, 'doesn\'t satisfy vertex layout', vertexLayout)
           assert.fail(`Command is missing attribute "${name}" at location ${location} with ${attrib}`)
         }
 
-        if (attrib.buffer._length === 0) {
-          log('Invalid command', cmd)
-          assert.fail(`Trying to draw arrays with no data for attribute : ${name}`)
+        let buffer = attrib.buffer
+        if (!buffer && attrib.class === 'vertexBuffer') {
+          buffer = attrib;
         }
 
-        if (!attrib.buffer || !attrib.buffer.target) {
+        if (!buffer || !buffer.target || !buffer.length) {
           log('Invalid command', cmd)
           assert.fail(`Trying to draw arrays with invalid buffer for attribute : ${name}`)
         }
-        gl.bindBuffer(attrib.buffer.target, attrib.buffer.handle)
+
+        gl.bindBuffer(buffer.target, buffer.handle)
         gl.enableVertexAttribArray(location)
         // logSometimes('drawVertexData', name, location, attrib.buffer._length)
         gl.vertexAttribPointer(
           location,
           size,
-          attrib.buffer._type || gl.FLOAT,
+          buffer.type || gl.FLOAT,
           attrib.normalized || false,
           attrib.stride || 0,
           attrib.offset || 0
@@ -422,22 +423,26 @@ function createContext (opts) {
         // TODO: how to match index with vertexLayout location?
       })
 
-      var primitive = gl.TRIANGLES
+      let primitive = gl.TRIANGLES
       if (cmd.primitive === 'lines') primitive = gl.LINES
       if (cmd.indices) {
-        if (!cmd.indices.buffer || !cmd.indices.buffer.target) {
+        let indexBuffer = cmd.indices.buffer
+        if (!indexBuffer && cmd.indices.class === 'indexBuffer') {
+          indexBuffer = cmd.indices
+        }
+        if (!indexBuffer || !indexBuffer.target) {
           log('Invalid command', cmd)
           assert.fail(`Trying to draw arrays with invalid buffer for elements`)
         }
-        gl.bindBuffer(cmd.indices.buffer.target, cmd.indices.buffer.handle)
-        var count = cmd.indices.buffer.length
+        gl.bindBuffer(indexBuffer.target, indexBuffer.handle)
+        var count = indexBuffer.length
         // TODO: support for unint32 type
         // TODO: support for offset
         if (instanced) {
           // TODO: check if instancing available
-          gl.drawElementsInstanced(primitive, count, cmd.indices.buffer.type, 0, cmd.instances)
+          gl.drawElementsInstanced(primitive, count, indexBuffer.type, 0, cmd.instances)
         } else {
-          gl.drawElements(primitive, count, cmd.indices.buffer.type, 0)
+          gl.drawElements(primitive, count, indexBuffer.type, 0)
         }
       } else if (cmd.count) {
         if (instanced) {
