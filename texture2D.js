@@ -64,15 +64,15 @@ function updateTexture2D (ctx, texture, opts) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 
-  if (opts.src) {
-    assert(opts instanceof window.HTMLImageElement
-      || opts instanceof window.HTMLCanvasElement,
+  if (opts.src || (opts.data && opts.data.src)) {
+    const img = opts.data ? opts.data : opts
+    assert(img instanceof window.HTMLImageElement
+      || img instanceof window.HTMLCanvasElement,
       'Texture2D.update opts has to be Image, Canvas or Video element')
     // TODO: add support for HTMLVideoElement with videoWidth and videoHeight
-    data = opts
-    width = opts.width
-    height = opts.height
-    gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, format, type, data)
+    width = img.width
+    height = img.height
+    gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, format, type, img)
   } else if (typeof opts === 'object') {
     assert(!data || Array.isArray(opts.data)
       || opts.data instanceof Uint8Array
