@@ -403,7 +403,7 @@ function createContext (opts) {
 
         let buffer = attrib.buffer
         if (!buffer && attrib.class === 'vertexBuffer') {
-          buffer = attrib;
+          buffer = attrib
         }
 
         if (!buffer || !buffer.target || !buffer.length) {
@@ -542,20 +542,20 @@ function createContext (opts) {
           let s = `${cmd.name || cmd.id} [style=filled fillcolor = "#DDFFDD" label="`
           let cells = [cmd.name || cmd.id]
           // this.debugGraph += `cluster_${cmd.name || cmd.id} [style=filled fillcolor = "#DDFFDD"] {\n`
-          if (cmd.attributes) {
-            cells.push(' ')
-            cells.push('vertex arrays')
-            Object.keys(cmd.attributes).forEach((attribName, index) => {
-              const attrib = cmd.attributes[attribName]
-              cells.push(`<a${index}>${attribName}`)
-              this.debugGraph += `${attrib.buffer.id} -> ${cmd.name || cmd.id}:a${index}\n`
-            })
-          }
-          if (cmd.elements) {
-            cells.push(' ')
-            cells.push(`<e>elements`)
-            this.debugGraph += `${cmd.elements.buffer.id} -> ${cmd.name || cmd.id}:e\n`
-          }
+          // if (cmd.attributes) {
+            // cells.push(' ')
+            // cells.push('vertex arrays')
+            // Object.keys(cmd.attributes).forEach((attribName, index) => {
+              // const attrib = cmd.attributes[attribName]
+              // cells.push(`<a${index}>${attribName}`)
+              // this.debugGraph += `${attrib.buffer.id} -> ${cmd.name || cmd.id}:a${index}\n`
+            // })
+          // }
+          // if (cmd.indices) {
+            // cells.push(' ')
+            // cells.push(`<e>elements`)
+            // this.debugGraph += `${cmd.elements.buffer.id} -> ${cmd.name || cmd.id}:e\n`
+          // }
           // if (cmd.program) {
             // this.debugGraph += `${cmd.program.id} -> ${cmd.name || cmd.id}\n`
           // }
