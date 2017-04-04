@@ -30,11 +30,20 @@ function updateBuffer (ctx, buffer, opts) {
   checkProps(allowedProps, opts)
 
   const gl = ctx.gl
-  let data = opts.data
+  let data = opts.data || opts
   let type = opts.type || buffer.type
 
-  if (Array.isArray(opts.data)) {
+  if (Array.isArray(data)) {
     data = flatten(data)
+    if (!type) {
+      if (opts.target === gl.ARRAY_BUFFER) type = ctx.DataType.Float32
+      else if (opts.target === gl.ELEMENT_ARRAY_BUFFER) type = ctx.DataType.Uint16
+      else throw new Error('Missing buffer type')
+    }
+    if (type === ctx.DataType.Float32) data = new Float32Array(data)
+    else if (type === ctx.DataType.Uint16) data = new Uint16Array(data)
+    else throw new Error(`Unknown buffer type: ${type}`)
+  } else if (data instanceof ArrayBuffer) {
     if (!type) {
       if (opts.target === gl.ARRAY_BUFFER) type = ctx.DataType.Float32
       else if (opts.target === gl.ELEMENT_ARRAY_BUFFER) type = ctx.DataType.Uint16
