@@ -372,7 +372,7 @@ function createContext (opts) {
       }
 
       if (vertexLayout.length !== Object.keys(state.program.attributes).length) {
-        log('Invalid vertex layout not matching the shader', vertexLayout, state.program._attributes, cmd)
+        log('Invalid vertex layout not matching the shader', vertexLayout, state.program.attributes, cmd)
         assert.fail('Invalid vertex layout not matching the shader')
       }
 
