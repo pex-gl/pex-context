@@ -45,6 +45,11 @@ function createContext (opts) {
     FrontAndBack: gl.FRONT_AND_BACK
   }
 
+  const Wrap = {
+    ClampToEdge: gl.CLAMP_TO_EDGE,
+    Repeat: gl.REPEAT
+  }
+
   const defaultState = {
     pass: {
       framebuffer: { target: gl.FRAMEBUFFER, handle: null },
@@ -67,7 +72,8 @@ function createContext (opts) {
     PixelFormat: PixelFormat,
     BlendFactor: BlendFactor,
     Face: Face,
-    // debugMode: false,
+    Wrap: Wrap,
+    debugMode: false,
     // debugGraph: '',
     debugCommands: [],
     resources: [],
