@@ -69,7 +69,12 @@ const drawCmd = {
 loadImage(ASSETS_DIR + '/images/pex.png', (err, img) => {
   if (err) console.log(err)
 
-  drawCmd.uniforms.uTexture = ctx.texture2D(img)
+  drawCmd.uniforms.uTexture = ctx.texture2D({
+    data: img.data || img,
+    width: img.width,
+    height: img.height,
+    flipY: true
+  })
 
   raf(function frame () {
     ctx.submit(drawCmd)
