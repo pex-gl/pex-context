@@ -49,7 +49,7 @@ function updateTexture2D (ctx, texture, opts) {
   let internalFormat = gl.RGBA
   let format = gl.RGBA
   let type = gl.UNSIGNED_BYTE
-  let flipY = true
+  let flipY = opts.flipY || false
 
   gl.getExtension('WEBGL_depth_texture')
 
@@ -61,11 +61,11 @@ function updateTexture2D (ctx, texture, opts) {
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, opts.wrap || gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, opts.wrap || gl.CLAMP_TO_EDGE)
 
-  if (opts.src || (opts.data && opts.data.src)) {
-    const img = opts.data ? opts.data : opts
+  const img = opts.data ? opts.data : opts
+  if (opts.nodeName || (opts.data && opts.data.nodeName)) {
     assert(img instanceof window.HTMLImageElement
       || img instanceof window.HTMLCanvasElement,
       'Texture2D.update opts has to be Image, Canvas or Video element')
