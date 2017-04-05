@@ -1,27 +1,3 @@
-// utils
-// var debug = require('debug').enable('*')
-// var extend = require('extend')
-
-// sys
-// var createWindow = require('./sys/createWindow')
-// var loadImage = require('./sys/loadImage')
-// var Time = require('./sys/Time')
-// var Platform = require('./sys/Platform')
-
-// glu
-// var Program = require('./glu/Program')
-// var VertexArray = require('./glu/VertexArray')
-// var Context = require('./glu/Context')
-// var ClearCommand = require('./glu/ClearCommand')
-// var DrawCommand = require('./glu/DrawCommand')
-// var TextureCube = require('./glu/TextureCube')
-// var Framebuffer = require('./glu/Framebuffer')
-// var Texture2D = require('./glu/Texture2D')
-// var toVertexArray = require('./glu/createVertexArrayFromGeometry')
-
-// geom
-// var createCube = require('./agen/createCube')
-// var createFSQ = require('./vgen/createFullScreenQuad')
 const createCube = require('primitive-cube')
 const bunny = require('bunny')
 const normals = require('normals')
@@ -33,21 +9,10 @@ const SimplexNoise = require('simplex-noise')
 const R = require('ramda')
 const random = require('pex-random')
 
-// math
-// var createMat4 = require('gl-mat4/create')
-// var lookAt = require('gl-mat4/lookAt')
-// var perspective = require('gl-mat4/perspective')
-// var translate = require('gl-mat4/translate')
-// var copy3 = require('gl-vec3/copy')
-
-// shaders
-// var glslify = require('glslify-promise')
-
 const createContext = require('../../pex-context')
 const raf = require('raf')
 const createCamera = require('pex-cam/perspective')
 const createOrbiter = require('pex-cam/orbiter')
-// const load = require('pex-io/load')
 const glsl = require('glslify')
 
 const ctx = createContext()
@@ -104,8 +69,6 @@ const showNormalsVert = glsl(__dirname + '/glsl/show-normals.vert')
 const showNormalsFrag = glsl(__dirname + '/glsl/show-normals.frag')
 const shadowMappedVert = glsl(__dirname + '/glsl/shadow-mapped.vert')
 const shadowMappedFrag = glsl(__dirname + '/glsl/shadow-mapped.frag')
-// BlitVert: glslify(__dirname + '/sh/materials/Blit.vert'),
-// BlitFrag: glslify(__dirname + '/sh/materials/Blit.frag')
 
 const floor = createCube(5, 0.1, 5)
 const drawFloorCmd = {
