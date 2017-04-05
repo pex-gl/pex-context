@@ -1,7 +1,7 @@
 // TODO: get rid of Ramda
 const log = require('debug')('context')
 // const viz = require('viz.js')
-// const isBrowser = require('is-browser')
+const isBrowser = require('is-browser')
 const createGL = require('pex-gl')
 const assert = require('assert')
 const createTexture2D = require('./texture2D')
@@ -106,10 +106,11 @@ function createContext (opts) {
       activeAttributes: []
     },
     getGLString: function (glEnum) {
-      let str = 'UNDEFINED'
+      let str = ''
       Object.keys(gl).forEach((key) => {
-        if (gl[key] === glEnum) str = key
+        if (gl[key] === glEnum && !str) str = key
       })
+      if (!str) str == 'UNDEFINED'
       return str
     },
     debug: function (enabled) {
@@ -162,9 +163,19 @@ function createContext (opts) {
         // }
       // }
     },
+    checkError: function () {
+      if (this.debugMode) {
+        var error = gl.getError()
+        if (error) {
+          if (isBrowser) log('State', this.state.state)
+          throw new Error(`GL error ${error} : ${this.getGLString(error)}`)
+        }
+      }
+    },
     resource: function (res) {
       res.id = res.class + '_' + ID++
       this.resources.push(res)
+      this.checkError()
       return res
     },
     // texture2D({ data: TypedArray, width: Int, height: Int, format: PixelFormat, flipY: Boolean })
@@ -297,6 +308,7 @@ function createContext (opts) {
       if (clearBits) {
         gl.clear(clearBits)
       }
+      this.checkError()
     },
     applyPipeline: function (pipeline) {
       const gl = this.gl
@@ -344,6 +356,7 @@ function createContext (opts) {
       if (pipeline.vertexLayout) {
         state.vertexLayout = pipeline.vertexLayout
       }
+      this.checkError()
     },
     applyUniforms: function (uniforms, cmd) {
       const gl = this.gl
@@ -391,6 +404,7 @@ function createContext (opts) {
         log('invalid command', cmd)
         assert.fail(`Trying to draw with missing uniforms: ${requiredUniforms.join(', ')}`)
       }
+      this.checkError()
     },
     drawVertexData: function (cmd) {
       const state = this.state
@@ -497,13 +511,7 @@ function createContext (opts) {
       // }
       // log('draw elements', count, error)
       // }
-      if (this.debugMode) {
-        var error = gl.getError()
-        if (error) {
-          log('State', state)
-          throw new Error(`GL Error ${error} : ${this.getGLString(error)}`)
-        }
-      }
+      this.checkError()
     },
     // TODO: switching to lightweight resources would allow to just clone state
     // and use commands as state modifiers?
@@ -512,6 +520,7 @@ function createContext (opts) {
 
       if (this.debugMode) log('apply', cmd.name || cmd.id, { cmd: cmd, state: JSON.parse(JSON.stringify(state)) })
 
+      this.checkError()
       if (cmd.pass) this.applyPass(cmd.pass)
       if (cmd.pipeline) this.applyPipeline(cmd.pipeline)
       if (cmd.uniforms) this.applyUniforms(cmd.uniforms)
@@ -620,6 +629,7 @@ function createContext (opts) {
           this.debugGraph += `${s}\n`
         }
       }
+      this.checkError()
     }
   }
   ctx.apply(defaultState)
