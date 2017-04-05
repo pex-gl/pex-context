@@ -58,7 +58,9 @@ function updateTexture2D (ctx, texture, opts) {
   gl.bindTexture(texture.target, texture.handle)
   // TODO: push state (current texture binding)
 
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY)
+  if (!isPlask) {
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY)
+  }
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, opts.wrap || gl.CLAMP_TO_EDGE)
