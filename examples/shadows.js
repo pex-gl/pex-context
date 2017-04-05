@@ -41,7 +41,6 @@ const flatten = require('flatten')
 // var glslify = require('glslify-promise')
 
 const createContext = require('../../pex-context')
-const raf = require('raf')
 const createCamera = require('pex-cam/perspective')
 const createOrbiter = require('pex-cam/orbiter')
 const Mat4 = require('pex-math/Mat4')
@@ -312,7 +311,7 @@ const drawFullscreenQuadCmd = {
 
 let frameNumber = 0
 
-raf(function frame () {
+ctx.frame(() => {
   // console.timeEnd('frame')
   // console.time('frame')
   updateTime()
@@ -328,5 +327,4 @@ raf(function frame () {
     ctx.submit(drawBunnyCmd)
     ctx.submit(drawFullscreenQuadCmd)
   })
-  raf(frame)
 })
