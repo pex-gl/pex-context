@@ -10,6 +10,7 @@ const createPass = require('./pass')
 const createPipeline = require('./pipeline')
 const createProgram = require('./program')
 const createBuffer = require('./buffer')
+const raf = require('raf')
 
 let ID = 0
 
@@ -512,6 +513,12 @@ function createContext (opts) {
       // log('draw elements', count, error)
       // }
       this.checkError()
+    },
+    frame: function (cb) {
+      raf(function frame () {
+        cb()
+        raf(frame)
+      })
     },
     // TODO: switching to lightweight resources would allow to just clone state
     // and use commands as state modifiers?
