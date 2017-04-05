@@ -66,6 +66,28 @@ function createContext (opts) {
     viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]
   }
 
+  // extensions
+  if (!gl.drawElementsInstanced) {
+    const ext = gl.getExtension('ANGLE_instanced_arrays')
+    if (!ext) {
+      // TODO: this._caps[CAPS_INSTANCED_ARRAYS] = false;
+      gl.drawElementsInstanced = function () {
+        throw new Error('ANGLE_instanced_arrays not supported')
+      }
+      gl.drawArraysInstanced = function () {
+        throw new Error('ANGLE_instanced_arrays not supported')
+      }
+      gl.vertexAttribDivisor = function () {
+        throw new Error('ANGLE_instanced_arrays not supported')
+      }
+    } else {
+      // TODO: this._caps[CAPS_INSTANCED_ARRAYS] = true;
+      gl.drawElementsInstanced = ext.drawElementsInstancedANGLE.bind(ext)
+      gl.drawArraysInstanced = ext.drawArraysInstancedANGLE.bind(ext)
+      gl.vertexAttribDivisor = ext.vertexAttribDivisorANGLE.bind(ext)
+    }
+  }
+
   const ctx = {
     gl: gl,
     DataType: DataType,
@@ -80,7 +102,8 @@ function createContext (opts) {
     stack: [ defaultState ],
     defaultState: defaultState,
     state: {
-      activeTextures: []
+      activeTextures: [],
+      activeAttributes: []
     },
     getGLString: function (glEnum) {
       let str = 'UNDEFINED'
@@ -385,9 +408,10 @@ function createContext (opts) {
       let instanced = false
       // TODO: disable unused vertex array slots
       // TODO: disable divisor if attribute not instanced?
-      // for (var i = 0; i < 16; i++) {
-      // gl.disableVertexAttribArray(i)
-      // }
+      for (var i = 0; i < 16; i++) {
+        state.activeAttributes[i] = null
+        gl.disableVertexAttribArray(i)
+      }
 
       // TODO: the same as i support [tex] and { texture: tex } i should support buffers in attributes?
       vertexLayout.forEach((layout, i) => {
@@ -413,6 +437,7 @@ function createContext (opts) {
 
         gl.bindBuffer(buffer.target, buffer.handle)
         gl.enableVertexAttribArray(location)
+        state.activeAttributes[location] = buffer
         // logSometimes('drawVertexData', name, location, attrib.buffer._length)
         gl.vertexAttribPointer(
           location,
@@ -425,6 +450,8 @@ function createContext (opts) {
         if (attrib.divisor) {
           gl.vertexAttribDivisor(location, attrib.divisor)
           instanced = true
+        } else {
+          gl.vertexAttribDivisor(location, 0)
         }
         // TODO: how to match index with vertexLayout location?
       })
@@ -440,6 +467,7 @@ function createContext (opts) {
           log('Invalid command', cmd)
           assert.fail(`Trying to draw arrays with invalid buffer for elements`)
         }
+        state.indexBuffer = indexBuffer
         gl.bindBuffer(indexBuffer.target, indexBuffer.handle)
         var count = indexBuffer.length
         // TODO: support for unint32 type
@@ -469,13 +497,20 @@ function createContext (opts) {
       // }
       // log('draw elements', count, error)
       // }
+      if (this.debugMode) {
+        var error = gl.getError()
+        if (error) {
+          log('State', state)
+          throw new Error(`GL Error ${error} : ${this.getGLString(error)}`)
+        }
+      }
     },
     // TODO: switching to lightweight resources would allow to just clone state
     // and use commands as state modifiers?
     apply: function (cmd) {
       const state = this.state
 
-      if (this.debugMode) log('apply', cmd.name || cmd.id, { cmd: cmd, state: state })
+      if (this.debugMode) log('apply', cmd.name || cmd.id, { cmd: cmd, state: JSON.parse(JSON.stringify(state)) })
 
       if (cmd.pass) this.applyPass(cmd.pass)
       if (cmd.pipeline) this.applyPipeline(cmd.pipeline)
