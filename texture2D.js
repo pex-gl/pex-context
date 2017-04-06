@@ -97,6 +97,18 @@ function updateTexture2D (ctx, texture, opts) {
       format = gl.RGBA
       internalFormat = gl.RGBA
       type = gl.FLOAT
+      if (Array.isArray(data)) {
+        data = new Float32Array(data)
+      }
+    } else if (opts.format === PixelFormat.R32F) {
+      format = gl.ALPHA
+      internalFormat = gl.ALPHA
+      type = gl.FLOAT
+      if (Array.isArray(data)) {
+        data = new Float32Array(data)
+      }
+    } else if (opts.format) {
+      assert.fail(`Unknown texture format: ${opts.format}`)
     }
 
     if (!data) {

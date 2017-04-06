@@ -24,6 +24,9 @@ function createContext (opts) {
   const PixelFormat = {
     RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
     RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
+    // RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
+    R32F: 'r32f', //gl.ALPHA + gl.FLOAT
+    // R16F: 'r16f', //gl.ALPHA + gl.HALF_FLOAT
     Depth: 'depth' // gl.DEPTH_COMPONENT
   }
 
