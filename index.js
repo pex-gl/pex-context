@@ -396,7 +396,7 @@ function createContext (opts) {
           }
           state.program.setUniform(name, slot)
           requiredUniforms.splice(requiredUniforms.indexOf(name), 1)
-        } else if (!Array.isArray(value) && typeof value === 'object') {
+        } else if (!value.length && typeof value === 'object') {
           log('invalid command', cmd)
           assert.fail(`Can set uniform "${name}" with an Object value`)
         } else {
