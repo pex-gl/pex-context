@@ -340,8 +340,9 @@ function createContext (opts) {
         }
       }
 
-      if (pipeline.cullFaceEnabled !== state.cullFaceEnabled) {
+      if (pipeline.cullFaceEnabled !== state.cullFaceEnabled || pipeline.cullFace !== state.cullFace) {
         state.cullFaceEnabled = pipeline.cullFaceEnabled
+        state.cullFace = pipeline.cullFace
         state.cullFaceEnabled ? gl.enable(gl.CULL_FACE) : gl.disable(gl.CULL_FACE)
         if (state.cullFaceEnabled) {
           gl.cullFace(state.cullFace)
