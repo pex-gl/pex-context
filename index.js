@@ -54,6 +54,17 @@ function createContext (opts) {
     Repeat: gl.REPEAT
   }
 
+  const DepthFunc = {
+    Never: gl.NEVER,
+    Less: gl.LESS,
+    Equal: gl.EQUAL,
+    LessEqual: gl.LEQUAL,
+    Greater: gl.GREATER,
+    NotEqual: gl.NOTEQUAL,
+    GreaterEqual: gl.GEQUAL,
+    Always: gl.ALWAYS
+  }
+
   const defaultState = {
     pass: {
       framebuffer: { target: gl.FRAMEBUFFER, handle: null },
@@ -63,6 +74,7 @@ function createContext (opts) {
     pipeline: {
       program: null,
       depthEnabled: false,
+      depthFunc: DepthFunc.LessEqual,
       blendEnabled: false,
       cullFaceEnabled: false,
       cullFace: Face.Back
@@ -97,6 +109,7 @@ function createContext (opts) {
     DataType: DataType,
     PixelFormat: PixelFormat,
     BlendFactor: BlendFactor,
+    DepthFunc: DepthFunc,
     Face: Face,
     Wrap: Wrap,
     debugMode: false,
@@ -321,6 +334,12 @@ function createContext (opts) {
       if (pipeline.depthEnabled !== state.depthEnabled) {
         state.depthEnabled = pipeline.depthEnabled
         state.depthEnabled ? gl.enable(gl.DEPTH_TEST) : gl.disable(gl.DEPTH_TEST)
+      }
+
+      // TODO: should we flip it only when depth is enabled?
+      if (pipeline.depthFunc !== state.depthFunc) {
+        state.depthFunc = pipeline.depthFunc
+        gl.depthFunc(state.depthFunc)
       }
 
       if (pipeline.blendEnabled !== state.blendEnabled) {

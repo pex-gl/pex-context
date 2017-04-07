@@ -2,7 +2,7 @@ const checkProps = require('./check-props')
 
 const allowedProps = [
   'vert', 'frag', 'program',
-  'depthEnabled',
+  'depthEnabled', 'depthFunc',
   'blendEnabled', 'blendSrcRGBFactor', 'blendSrcAlphaFactor',
   'blendDstRGBFactor', 'blendDstAlphaFactor',
   'cullFaceEnabled', 'cullFace'
@@ -14,7 +14,9 @@ function createPipeline (ctx, opts) {
   const gl = ctx.gl
 
   const pipeline = Object.assign({
-    class: 'pipeline'
+    class: 'pipeline',
+    depthEnabled: false,
+    depthFunc: ctx.DepthFunc.LessEqual
   }, opts)
 
   if (opts.vert && opts.frag) {
