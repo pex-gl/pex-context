@@ -334,12 +334,12 @@ function createContext (opts) {
       if (pipeline.depthEnabled !== state.depthEnabled) {
         state.depthEnabled = pipeline.depthEnabled
         state.depthEnabled ? gl.enable(gl.DEPTH_TEST) : gl.disable(gl.DEPTH_TEST)
-      }
 
-      // TODO: should we flip it only when depth is enabled?
-      if (pipeline.depthFunc !== state.depthFunc) {
-        state.depthFunc = pipeline.depthFunc
-        gl.depthFunc(state.depthFunc)
+        // TODO: should we flip it only when depth is enabled?
+        if (pipeline.depthFunc !== state.depthFunc) {
+          state.depthFunc = pipeline.depthFunc
+          gl.depthFunc(state.depthFunc)
+        }
       }
 
       if (pipeline.blendEnabled !== state.blendEnabled) {
