@@ -124,9 +124,9 @@ function createContext (opts) {
     },
     getGLString: function (glEnum) {
       let str = ''
-      Object.keys(gl).forEach((key) => {
-        if (gl[key] === glEnum && !str) str = key
-      })
+      for (let key in gl) {
+        if ((gl[key] === glEnum)) str = key
+      }
       if (!str) str == 'UNDEFINED'
       return str
     },
