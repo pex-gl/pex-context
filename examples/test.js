@@ -6,6 +6,9 @@ const tex = ctx.texture2D({ data: new Uint8Array([0, 0, 0, 0]), width: 1, height
 assert.equal(tex.type, ctx.DataType.Uint8)
 assert.equal(tex.class, 'texture2D', 'Wrong texture2D class')
 
+// update with array, should default to Uint8
+const tex2 = ctx.texture2D({ data: [0, 0, 0, 0], width: 1, height: 1 })
+
 const vertexBuffers = [
   ctx.vertexBuffer([0, 1, 2, 3, 4, 5]),
   ctx.vertexBuffer([[0, 1, 2], [3, 4, 5]]),

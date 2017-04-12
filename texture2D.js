@@ -109,6 +109,10 @@ function updateTexture2D (ctx, texture, opts) {
       }
     } else if (opts.format) {
       assert.fail(`Unknown texture format: ${opts.format}`)
+    } else {
+      if (Array.isArray(data)) {
+        data = new Uint8Array(data)
+      }
     }
 
     if (!data) {
