@@ -68,17 +68,17 @@ function updateTexture2D (ctx, texture, opts) {
 
   const img = opts.data ? opts.data : opts
   if (opts.nodeName || (opts.data && opts.data.nodeName)) {
-    assert(img instanceof window.HTMLImageElement
-      || img instanceof window.HTMLCanvasElement,
+    assert(img instanceof window.HTMLImageElement ||
+      img instanceof window.HTMLCanvasElement,
       'Texture2D.update opts has to be Image, Canvas or Video element')
     // TODO: add support for HTMLVideoElement with videoWidth and videoHeight
     width = img.width
     height = img.height
     gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, format, type, img)
   } else if (typeof opts === 'object') {
-    assert(!data || Array.isArray(opts.data)
-      || opts.data instanceof Uint8Array
-      || opts.data instanceof Float32Array,
+    assert(!data || Array.isArray(opts.data) ||
+      opts.data instanceof Uint8Array ||
+      opts.data instanceof Float32Array,
       'Texture2D.update opts.data has to be null or an Array, Uint8Array or Float32Array')
 
     data = opts.data
