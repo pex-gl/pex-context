@@ -43,6 +43,7 @@ var pipeline = ctx.pipeline({
   frag: String,
   // vertexLayout: { } // disabled ATM
   depthEnabled: Boolean,
+  depthFunc: DepthFunc,
   blendEnabled: Boolean,
   blendSrcRGBFactor: BlendFactor,
   blendSrcAlphaFactor: BlendFactor,
@@ -95,6 +96,64 @@ ctx.submit({
     name: Texture2D
   }
 })
+```
+
+# Enums
+
+```
+  const PixelFormat = {
+    RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
+    RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
+    // RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
+    R32F: 'r32f', //gl.ALPHA + gl.FLOAT
+    // R16F: 'r16f', //gl.ALPHA + gl.HALF_FLOAT
+    Depth: 'depth' // gl.DEPTH_COMPONENT
+  }
+```
+
+```
+  const DataType = {
+    Float32: gl.FLOAT,
+    Uint8: gl.UNSIGNED_BYTE,
+    Uint16: gl.UNSIGNED_SHORT
+  }
+```
+
+```
+  const BlendFactor = {
+    One: gl.ONE,
+    Zero: gl.ZERO,
+    SrcAlpha: gl.SRC_ALPHA,
+    OneMinusSrcAlpha: gl.ONE_MINUS_SRC_ALPHA
+  }
+```
+
+```
+  const Face = {
+    Front: gl.FRONT,
+    Back: gl.BACK,
+    FrontAndBack: gl.FRONT_AND_BACK
+  }
+```
+
+```
+  const Wrap = {
+    ClampToEdge: gl.CLAMP_TO_EDGE,
+    Repeat: gl.REPEAT
+  }
+```
+
+```
+  const DepthFunc = {
+    Never: gl.NEVER,
+    Less: gl.LESS,
+    Equal: gl.EQUAL,
+    LessEqual: gl.LEQUAL,
+    Greater: gl.GREATER,
+    NotEqual: gl.NOTEQUAL,
+    GreaterEqual: gl.GEQUAL,
+    Always: gl.ALWAYS
+  }
 ```
 
 # Examples
