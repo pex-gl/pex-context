@@ -115,6 +115,10 @@ function updateTexture2D (ctx, texture, opts) {
       }
     }
 
+    texture.data = data
+    texture.width = width
+    texture.height = height
+
     if (!data) {
       gl.texImage2D(gl.TEXTURE_2D, lod, internalFormat, width, height, 0, format, type, null)
     } else if (isPlask) {
