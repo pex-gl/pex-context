@@ -4,7 +4,7 @@ const log = require('debug')('context')
 const isBrowser = require('is-browser')
 const createGL = require('pex-gl')
 const assert = require('assert')
-const createTexture2D = require('./texture2D')
+const createTexture = require('./texture')
 const createFramebuffer = require('./framebuffer')
 const createPass = require('./pass')
 const createPipeline = require('./pipeline')
@@ -198,7 +198,9 @@ function createContext (opts) {
     // texture2D({ data: TypedArray, width: Int, height: Int, format: PixelFormat, flipY: Boolean })
     texture2D: function (opts) {
       log('texture2D', opts)
-      return this.resource(createTexture2D(this, opts))
+      opts.target = gl.TEXTURE_2D
+      return this.resource(createTexture(this, opts))
+    },
     },
     // framebuffer({ color: [ Texture2D, .. ], depth: Texture2D }
     // framebuffer({ color: [ { texture: Texture2D, target: Enum, level: int }, .. ], depth: { texture: Texture2D }})
