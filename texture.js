@@ -36,17 +36,31 @@ function updateTexture2D (ctx, texture, opts) {
   let target = opts.target || texture.target
 
   gl.getExtension('WEBGL_depth_texture')
+  gl.getExtension('EXT_shader_texture_lod')
+  gl.getExtension('OES_texture_float')
+  gl.getExtension('OES_texture_float_linear')
+  gl.getExtension('OES_texture_half_float')
+  gl.getExtension('OES_texture_half_float_linear')
 
   const textureUnit = 0
   gl.activeTexture(gl.TEXTURE0 + textureUnit)
   gl.bindTexture(texture.target, texture.handle)
   // TODO: push state (current texture binding)
 
+  if (opts.mipmap) {
+    if (opts.data || opts.width || opts.height) {
+      throw new Error('Updating and generating mipmaps at the same time is currently not supported')
+    }
+    gl.generateMipmap(texture.target)
+    return
+  }
+
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY)
-  gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-  gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+  gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, opts.min || gl.NEAREST)
+  gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, opts.mag || gl.NEAREST)
   gl.texParameteri(target, gl.TEXTURE_WRAP_S, opts.wrap || gl.CLAMP_TO_EDGE)
   gl.texParameteri(target, gl.TEXTURE_WRAP_T, opts.wrap || gl.CLAMP_TO_EDGE)
+
 
   // just an image
   // opts = HTMLImage
