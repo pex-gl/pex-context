@@ -81,7 +81,7 @@ function updateTexture2D (ctx, texture, opts) {
   // opts = { data: [ { data: Array, width: Number, height: Number }, ..], flipY: Boolean }
 
   const img = opts.data ? opts.data : opts
-  if (opts.nodeName || (opts.data && opts.data.nodeName)) {
+  if (img && img.nodeName) {
     assert(img instanceof window.HTMLImageElement ||
       img instanceof window.HTMLCanvasElement,
       'Texture2D.update opts has to be Image, Canvas or Video element')
@@ -95,7 +95,7 @@ function updateTexture2D (ctx, texture, opts) {
       opts.data instanceof Float32Array,
       'Texture2D.update opts.data has to be null or an Array, Uint8Array or Float32Array')
 
-    data = opts.data.data || opts.data
+    data = opts.data ? (opts.data.data || opts.data) : null
 
     assert(opts.width && opts.height,
       'Texture2D.update opts.width and opts.height are required when providing opts.data')
@@ -111,12 +111,16 @@ function updateTexture2D (ctx, texture, opts) {
       format = gl.RGBA
       internalFormat = gl.RGBA
       type = gl.FLOAT
+    } else if (opts.format === PixelFormat.RGBA16F) {
+      format = gl.RGBA
+      internalFormat = gl.RGBA
+      type = gl.HALF_FLOAT
     } else if (opts.format === PixelFormat.R32F) {
       format = gl.ALPHA
       internalFormat = gl.ALPHA
       type = gl.FLOAT
     } else if (opts.format) {
-      assert.fail(`Unknown texture format: ${opts.format}`)
+      assert.fail(`Unknown texture pixel format: ${opts.format}`)
     }
 
     if (target === gl.TEXTURE_2D) {
