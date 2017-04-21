@@ -57,6 +57,15 @@ function createContext (opts) {
     Repeat: gl.REPEAT
   }
 
+  const Filter = {
+    Nearest: gl.NEAREST,
+    Linear: gl.LINEAR,
+    NearestMipmapNearest: gl.NEAREST_MIPMAP_NEAREST,
+    NearestMipmapLinear: gl.NEAREST_MIPMAP_LINEAR,
+    LinearMipmapNearest: gl.LINEAR_MIPMAP_NEAREST,
+    LinearMipmapLinear: gl.LINEAR_MIPMAP_LINEAR
+  }
+
   const DepthFunc = {
     Never: gl.NEVER,
     Less: gl.LESS,
@@ -115,6 +124,7 @@ function createContext (opts) {
     DepthFunc: DepthFunc,
     Face: Face,
     Wrap: Wrap,
+    Filter: Filter,
     debugMode: false,
     // debugGraph: '',
     debugCommands: [],
