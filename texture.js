@@ -119,15 +119,40 @@ function updateTexture2D (ctx, texture, opts) {
       assert.fail(`Unknown texture format: ${opts.format}`)
     }
 
-    if (Array.isArray(data)) {
-      if (type === gl.UNSIGNED_BYTE) {
-        data = new Uint8Array(data)
-      } else if (type === gl.FLOAT) {
-        data = new Float32Array(data)
+    if (target === gl.TEXTURE_2D) {
+      if (Array.isArray(data)) {
+        if (type === gl.UNSIGNED_BYTE) {
+          data = new Uint8Array(data)
+        } else if (type === gl.FLOAT) {
+          data = new Float32Array(data)
+        } else if (type === gl.HALF_FLOAT) {
+          data = new Float32Array(data)
+        } else {
+          assert.fail(`Unknown texture data type: ${type}`)
+        }
+      }
+      gl.texImage2D(target, lod, internalFormat, width, height, 0, format, type, data)
+    } else if (target === gl.TEXTURE_CUBE_MAP) {
+      assert(!data || (Array.isArray(data) && data.length === 6), 'TextureCube requires data for 6 faces')
+      for (let i = 0; i < 6; i++) {
+        let faceData = data ? (data[i].data || data[i]) : null
+        const faceTarget = gl.TEXTURE_CUBE_MAP_POSITIVE_X + i
+        if (Array.isArray(faceData)) {
+          if (type === gl.UNSIGNED_BYTE) {
+            faceData = new Uint8Array(faceData)
+          } else if (type === gl.FLOAT) {
+            faceData = new Float32Array(data)
+          } else {
+            assert.fail(`Unknown texture data type: ${type}`)
+          }
+          gl.texImage2D(faceTarget, lod, internalFormat, width, height, 0, format, type, faceData)
+        } else if (faceData && faceData.nodeName) {
+          gl.texImage2D(faceTarget, lod, internalFormat, format, type, faceData)
+        } else {
+          gl.texImage2D(faceTarget, lod, internalFormat, width, height, 0, format, type, faceData)
+        }
       }
     }
-
-    gl.texImage2D(target, lod, internalFormat, width, height, 0, format, type, data)
   } else {
     // TODO: should i assert of throw new Error(msg)?
     assert.fail('Texture2D.update opts has to be a HTMLElement or Object')

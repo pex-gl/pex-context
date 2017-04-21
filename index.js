@@ -201,6 +201,11 @@ function createContext (opts) {
       opts.target = gl.TEXTURE_2D
       return this.resource(createTexture(this, opts))
     },
+    // textureCube({ data: [negxData, negyData,...], width: Int, height: Int, format: PixelFormat, flipY: Boolean })
+    textureCube: function (opts) {
+      log('textureCube', opts)
+      opts.target = gl.TEXTURE_CUBE_MAP
+      return this.resource(createTexture(this, opts))
     },
     // framebuffer({ color: [ Texture2D, .. ], depth: Texture2D }
     // framebuffer({ color: [ { texture: Texture2D, target: Enum, level: int }, .. ], depth: { texture: Texture2D }})
