@@ -12,7 +12,9 @@ function createFramebuffer (ctx, opts) {
     _update: updateFramebuffer
   }
 
-  updateFramebuffer(ctx, framebuffer, opts)
+  if (opts.color || opts.depth) {
+    updateFramebuffer(ctx, framebuffer, opts)
+  }
 
   return framebuffer
 }
