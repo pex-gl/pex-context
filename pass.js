@@ -11,16 +11,22 @@ function createPass (ctx, opts) {
 
   const pass = {
     class: 'pass',
+    opts: opts,
     framebuffer: opts.framebuffer,
     clearColor: opts.clearColor,
     clearDepth: opts.clearDepth
   }
 
   if (opts.color || opts.depth) {
-    pass.framebuffer = ctx.framebuffer({
-      color: opts.color,
-      depth: opts.depth
-    })
+    if (!ctx.defaultState.pass.sharedFramebuffer) {
+      ctx.defaultState.pass.sharedFramebuffer = ctx.framebuffer({})
+    }
+    pass.framebuffer = {
+      target: ctx.defaultState.pass.sharedFramebuffer.target,
+      handle: ctx.defaultState.pass.sharedFramebuffer.handle,
+      shared: ctx.defaultState.pass.sharedFramebuffer
+    }
+    // pass.framebuffer = ctx.framebuffer(opts)
   }
 
   if (!pass.framebuffer) {

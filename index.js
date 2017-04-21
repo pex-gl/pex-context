@@ -316,14 +316,25 @@ function createContext (opts) {
       if (pass.framebuffer !== state.framebuffer) {
         if (this.debugMode) log('change framebuffer', state.framebuffer, '->', pass.framebuffer)
         state.framebuffer = pass.framebuffer
-        gl.bindFramebuffer(state.framebuffer.target, state.framebuffer.handle)
-        if (state.framebuffer.color) {
-          gl.viewport(0, 0,
-            state.framebuffer.color[0].texture.width,
-            state.framebuffer.color[0].texture.height
-          )
+        if (state.framebuffer.shared) {
+          this.update(state.framebuffer.shared, pass.opts)
+          gl.bindFramebuffer(state.framebuffer.target, state.framebuffer.handle)
+          if (state.framebuffer.shared.color) {
+            gl.viewport(0, 0,
+              state.framebuffer.shared.color[0].texture.width,
+              state.framebuffer.shared.color[0].texture.height
+            )
+          }
         } else {
-          gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+          gl.bindFramebuffer(state.framebuffer.target, state.framebuffer.handle)
+          if (state.framebuffer.color) {
+            gl.viewport(0, 0,
+              state.framebuffer.color[0].texture.width,
+              state.framebuffer.color[0].texture.height
+            )
+          } else {
+            gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+          }
         }
       }
 
