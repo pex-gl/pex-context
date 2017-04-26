@@ -1,12 +1,12 @@
 const assert = require('assert')
 
-function createTexture2D (ctx, opts) {
+function createTexture (ctx, opts) {
   const gl = ctx.gl
 
   // TODO: implement filtering options
 
   const texture = {
-    class: 'texture2D',
+    class: 'texture',
     handle: gl.createTexture(),
     target: opts.target,
     width: 0,
@@ -60,7 +60,6 @@ function updateTexture2D (ctx, texture, opts) {
   gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, opts.mag || gl.NEAREST)
   gl.texParameteri(target, gl.TEXTURE_WRAP_S, opts.wrap || gl.CLAMP_TO_EDGE)
   gl.texParameteri(target, gl.TEXTURE_WRAP_T, opts.wrap || gl.CLAMP_TO_EDGE)
-
 
   // just an image
   // opts = HTMLImage
@@ -172,4 +171,4 @@ function updateTexture2D (ctx, texture, opts) {
   return texture
 }
 
-module.exports = createTexture2D
+module.exports = createTexture
