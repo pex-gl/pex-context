@@ -5,6 +5,7 @@ function createFramebuffer (ctx, opts) {
     class: 'framebuffer',
     handle: gl.createFramebuffer(),
     target: gl.FRAMEBUFFER,
+    drawBuffers: [],
     color: [],
     depth: null,
     width: 0,
@@ -42,26 +43,36 @@ function updateFramebuffer (ctx, framebuffer, opts) {
 
   framebuffer.width = framebuffer.color[0].texture.width
   framebuffer.height = framebuffer.color[0].texture.height
+
   // TODO: ctx push framebuffer
   gl.bindFramebuffer(framebuffer.target, framebuffer.handle)
 
+  const maxRenderTargets = 4
+
+  framebuffer.drawBuffers.length = 0
+
   for (let i = 0; i < framebuffer.color.length; i++) {
     const colorAttachment = framebuffer.color[i]
-    console.log('fbo attaching color', colorAttachment)
+    framebuffer.drawBuffers.push(gl.COLOR_ATTACHMENT0 + i)
     gl.framebufferTexture2D(framebuffer.target, gl.COLOR_ATTACHMENT0 + i,
        colorAttachment.target, colorAttachment.texture.handle, colorAttachment.level)
   }
-  console.log('fbo', gl.getError())
-  console.log('fbo', ctx.getGLString(gl, gl.checkFramebufferStatus(gl.FRAMEBUFFER)))
+  for (let i = framebuffer.color.length; i < maxRenderTargets; i++) {
+    gl.framebufferTexture2D(framebuffer.target, gl.COLOR_ATTACHMENT0 + i, gl.TEXTURE_2D, null, 0)
+  }
+  // console.log('fbo', gl.getError())
+  // console.log('fbo', ctx.getGLString(gl, gl.checkFramebufferStatus(gl.FRAMEBUFFER)))
 
   if (framebuffer.depth) {
-    console.log('fbo attaching depth', framebuffer.depth)
+    // console.log('fbo attaching depth', framebuffer.depth)
     const depthAttachment = framebuffer.depth
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
       depthAttachment.texture.target, depthAttachment.texture.handle, depthAttachment.level)
+  } else {
+    gl.framebufferTexture2D(framebuffer.target, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, null, 0)
   }
-  console.log('fbo', gl.getError())
-  console.log('fbo', ctx.getGLString(gl, gl.checkFramebufferStatus(gl.FRAMEBUFFER)))
+  // console.log('fbo', gl.getError())
+  // console.log('fbo', ctx.getGLString(gl, gl.checkFramebufferStatus(gl.FRAMEBUFFER)))
 
   // TODO: ctx. pop framebuffer
   gl.bindFramebuffer(framebuffer.target, null)

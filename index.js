@@ -79,7 +79,12 @@ function createContext (opts) {
 
   const defaultState = {
     pass: {
-      framebuffer: { target: gl.FRAMEBUFFER, handle: null },
+      framebuffer: {
+        target: gl.FRAMEBUFFER,
+        handle: null,
+        width: gl.drawingBufferWidth,
+        height: gl.drawingBufferHeight
+      },
       clearColor: [0, 0, 0, 1],
       clearDepth: 1
     },
@@ -90,8 +95,8 @@ function createContext (opts) {
       blendEnabled: false,
       cullFaceEnabled: false,
       cullFace: Face.Back
-    },
-    viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]
+    }
+    // viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]
   }
 
   // extensions
@@ -115,6 +120,16 @@ function createContext (opts) {
       gl.vertexAttribDivisor = ext.vertexAttribDivisorANGLE.bind(ext)
     }
   }
+  if (!gl.drawingBuffers) {
+    const ext = gl.getExtension('WEBGL_draw_buffers')
+    if (!ext) {
+      gl.drawingBufferWidths = function () {
+        throw new Error('WEBGL_draw_buffers not supported')
+      }
+    } else {
+      gl.drawBuffers = ext.drawBuffersWEBGL.bind(ext)
+    }
+  }
 
   const ctx = {
     gl: gl,
@@ -132,6 +147,9 @@ function createContext (opts) {
     stack: [ defaultState ],
     defaultState: defaultState,
     state: {
+      pass: {
+        framebuffer: defaultState.pass.framebuffer
+      },
       activeTextures: [],
       activeAttributes: []
     },
@@ -161,7 +179,7 @@ function createContext (opts) {
         // this.debugGraph += 'node [shape=record];\n'
         // if (this.debugMode) {
           // const res = this.resources.map((res) => {
-            // return { id: res.id, type: res.id.split('_')[0] }
+      // return { id: res.id, type: res.id.split('_')[0] }
           // })
           // const groups = R.groupBy(R.prop('type'), res)
           // Object.keys(groups).forEach((g) => {
@@ -305,6 +323,14 @@ function createContext (opts) {
       // overwrite properties from new command
       Object.assign(newCmd, cmd)
 
+      // set viewport to FBO sizes when rendering to a texture
+      if (!cmd.viewport && cmd.pass && cmd.pass.opts.color) {
+        const tex = cmd.pass.opts.color[0] || cmd.pass.opts.depth
+        if (tex) {
+          newCmd.viewport = [0, 0, tex.width, tex.height]
+        }
+      }
+
       // merge uniforms
       newCmd.uniforms = (parent.uniforms || cmd.uniforms) ? Object.assign({}, parent.uniforms, cmd.uniforms) : null
       return newCmd
@@ -313,28 +339,17 @@ function createContext (opts) {
       const gl = this.gl
       const state = this.state
 
-      if (pass.framebuffer !== state.framebuffer) {
-        if (this.debugMode) log('change framebuffer', state.framebuffer, '->', pass.framebuffer)
-        state.framebuffer = pass.framebuffer
-        if (state.framebuffer.shared) {
-          this.update(state.framebuffer.shared, pass.opts)
-          gl.bindFramebuffer(state.framebuffer.target, state.framebuffer.handle)
-          if (state.framebuffer.shared.color) {
-            gl.viewport(0, 0,
-              state.framebuffer.shared.color[0].texture.width,
-              state.framebuffer.shared.color[0].texture.height
-            )
-          }
-        } else {
-          gl.bindFramebuffer(state.framebuffer.target, state.framebuffer.handle)
-          if (state.framebuffer.color) {
-            gl.viewport(0, 0,
-              state.framebuffer.color[0].texture.width,
-              state.framebuffer.color[0].texture.height
-            )
-          } else {
-            gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
-          }
+      // if (pass.framebuffer !== state.framebuffer) {
+      if (state.pass.id !== pass.id) {
+        if (this.debugMode) log('change framebuffer', state.pass.framebuffer, '->', pass.framebuffer)
+        state.pass = pass
+        if (pass.framebuffer._update) {
+          // rebind pass' color and depth to shared FBO
+          this.update(pass.framebuffer, pass.opts)
+        }
+        gl.bindFramebuffer(pass.framebuffer.target, pass.framebuffer.handle)
+        if (pass.framebuffer.drawBuffers) {
+          gl.drawBuffers(pass.framebuffer.drawBuffers)
         }
       }
 
@@ -586,9 +601,11 @@ function createContext (opts) {
       if (cmd.pipeline) this.applyPipeline(cmd.pipeline)
       if (cmd.uniforms) this.applyUniforms(cmd.uniforms)
 
-      if (cmd.viewport && (cmd.viewport !== state.viewport)) {
-        state.viewport = cmd.viewport
-        gl.viewport(state.viewport[0], state.viewport[1], state.viewport[2], state.viewport[3])
+      if (cmd.viewport) {
+        if (cmd.viewport !== state.viewport) {
+          state.viewport = cmd.viewport
+          gl.viewport(state.viewport[0], state.viewport[1], state.viewport[2], state.viewport[3])
+        }
       }
 
       if (cmd.attributes) {
