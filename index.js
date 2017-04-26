@@ -236,7 +236,6 @@ function createContext (opts) {
     //    type: 'float', 'uint16' etc
     // }
     vertexBuffer: function (opts) {
-      console.log('vertexBuffer', opts)
       if (opts.length) {
         opts = { data: opts }
       }
@@ -244,7 +243,6 @@ function createContext (opts) {
       return this.resource(createBuffer(this, opts))
     },
     indexBuffer: function (opts) {
-      console.log('indexBuffer', opts)
       if (opts.length) {
         opts = { data: opts }
       }
