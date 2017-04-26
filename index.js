@@ -21,14 +21,14 @@ function createContext (opts) {
   else if (opts && opts.gl) gl = opts.gl
   assert(gl, 'pex-context: createContext failed')
 
-  ext = gl.getExtension("OES_texture_half_float")
+  const ext = gl.getExtension('OES_texture_half_float')
   gl.HALF_FLOAT = ext.HALF_FLOAT_OES
 
   const PixelFormat = {
     RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
     RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
     RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
-    R32F: 'r32f', //gl.ALPHA + gl.FLOAT
+    R32F: 'r32f', // gl.ALPHA + gl.FLOAT
     // R16F: 'r16f', //gl.ALPHA + gl.HALF_FLOAT
     Depth: 'depth' // gl.DEPTH_COMPONENT
   }
@@ -140,7 +140,9 @@ function createContext (opts) {
       for (let key in gl) {
         if ((gl[key] === glEnum)) str = key
       }
-      if (!str) str == 'UNDEFINED'
+      if (!str) {
+        str = 'UNDEFINED'
+      }
       return str
     },
     debug: function (enabled) {
