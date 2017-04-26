@@ -45,7 +45,7 @@ function updateTexture2D (ctx, texture, opts) {
   const textureUnit = 0
   gl.activeTexture(gl.TEXTURE0 + textureUnit)
   gl.bindTexture(texture.target, texture.handle)
-  // TODO: push state (current texture binding)
+  ctx.state.activeTextures[textureUnit] = texture
 
   if (opts.mipmap) {
     if (opts.data || opts.width || opts.height) {
@@ -168,6 +168,7 @@ function updateTexture2D (ctx, texture, opts) {
   texture.format = format
   texture.internalFormat = internalFormat
   texture.type = type
+
   return texture
 }
 

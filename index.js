@@ -443,9 +443,9 @@ function createContext (opts) {
           // FIXME: texture binding hack
           const slot = numTextures++
           gl.activeTexture(gl.TEXTURE0 + slot)
-          if (state.activeTextures[slot] !== value.id) {
+          if (state.activeTextures[slot] !== value) {
             gl.bindTexture(value.target, value.handle)
-            state.activeTextures[slot] = value.id
+            state.activeTextures[slot] = value
           }
           state.program.setUniform(name, slot)
           requiredUniforms.splice(requiredUniforms.indexOf(name), 1)
