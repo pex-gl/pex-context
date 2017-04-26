@@ -254,6 +254,7 @@ function createContext (opts) {
     //    type: 'float', 'uint16' etc
     // }
     vertexBuffer: function (opts) {
+      log('framebuffer', opts)
       if (opts.length) {
         opts = { data: opts }
       }
@@ -261,6 +262,7 @@ function createContext (opts) {
       return this.resource(createBuffer(this, opts))
     },
     indexBuffer: function (opts) {
+      log('indexBuffer', opts)
       if (opts.length) {
         opts = { data: opts }
       }
@@ -268,15 +270,15 @@ function createContext (opts) {
       return this.resource(createBuffer(this, opts))
     },
     program: function (opts) {
-      console.log('program', opts)
+      log('program', opts)
       return this.resource(createProgram(this, opts))
     },
     pipeline: function (opts) {
-      console.log('pipeline', opts)
+      log('pipeline', opts)
       return this.resource(createPipeline(this, opts))
     },
     pass: function (opts) {
-      console.log('pass', opts)
+      log('pass', opts)
       return this.resource(createPass(this, opts))
     },
     readPixels: function (opts) {
