@@ -327,7 +327,9 @@ function createContext (opts) {
 
       // set viewport to FBO sizes when rendering to a texture
       if (!cmd.viewport && cmd.pass && cmd.pass.opts.color) {
-        const tex = cmd.pass.opts.color[0] || cmd.pass.opts.depth
+        let tex = null
+        if (cmd.pass.opts.color[0]) tex = cmd.pass.opts.color[0].texture || cmd.pass.opts.color[0]
+        if (cmd.pass.opts.depth) tex = cmd.pass.opts.depth.texture || cmd.pass.opts.depth
         if (tex) {
           newCmd.viewport = [0, 0, tex.width, tex.height]
         }
