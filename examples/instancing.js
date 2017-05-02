@@ -1,5 +1,6 @@
 const createCube = require('primitive-cube')
 const bunny = require('bunny')
+// const bunny = require('primitive-cube')()
 const normals = require('normals')
 const centerAndNormalize = require('geom-center-and-normalize')
 const Vec3 = require('pex-math/Vec3')
@@ -25,16 +26,14 @@ const camera = createCamera({
   fov: 45, // TODO: change fov to radians
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
   position: [3, 0.5, 3],
-  target: [0, 0, 0]
+  target: [0, 2, 0]
 })
-
-createOrbiter({ camera: camera, distance: 10 })
 
 const lightCamera = createCamera({
   fov: 45, // TODO: change fov to radians,
   aspect: 1,
-  near: 1,
-  far: 50,
+  near: 5,
+  far: 20,
   position: [1, 14, 1],
   target: [0, 0, 0]
 })
@@ -43,7 +42,9 @@ const depthMapSize = 1024
 const depthMap = ctx.texture2D({
   width: depthMapSize,
   height: depthMapSize,
-  format: ctx.PixelFormat.Depth
+  format: ctx.PixelFormat.Depth,
+  min: ctx.Filter.Linear,
+  mag: ctx.Filter.Linear
 })
 const colorMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize })
 
@@ -113,14 +114,16 @@ void main() {
   gl_FragColor = vColor;
 }
 `
-const shadowMappedVert = `
+const shadowMappedVert = glsl`
+#pragma glslify: inverse=require(glsl-inverse)
+#pragma glslify: transpose=require(glsl-transpose)
 uniform mat4 uProjectionMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uModelMatrix;
-uniform vec4 uDiffuseColor;
+uniform vec4 uAlbedoColor;
 attribute vec3 aPosition;
 attribute vec3 aNormal;
-varying vec3 vNormal;
+varying vec3 vNormalWorld;
 varying vec3 vWorldPosition;
 varying vec4 vColor;
 
@@ -128,8 +131,10 @@ void main() {
   mat4 modelView = uViewMatrix * uModelMatrix;
   gl_Position = uProjectionMatrix * modelView * vec4(aPosition, 1.0);
   vWorldPosition = (uModelMatrix * vec4(aPosition, 1.0)).xyz;
-  vNormal = mat3(modelView) * aNormal;
-  vColor = uDiffuseColor;
+  mat4 invViewMatrix = inverse(uViewMatrix);
+  vec3 normalView = mat3(transpose(inverse(modelView))) * aNormal;
+  vNormalWorld = vec3(invViewMatrix * vec4(normalView, 0.0));
+  vColor = uAlbedoColor;
 }
 `
 
@@ -143,21 +148,26 @@ attribute vec3 aOffset;
 attribute vec3 aScale;
 attribute vec4 aRotation;
 attribute vec4 aColor;
-varying vec3 vNormal;
+varying vec3 vNormalWorld;
 varying vec3 vWorldPosition;
 varying vec4 vColor;
 
 #pragma glslify: quatToMat4=require(./assets/quat2mat4.glsl)
+#pragma glslify: transpose=require(glsl-transpose)
+#pragma glslify: inverse=require(glsl-inverse)
 
 void main() {
   mat4 modelView = uViewMatrix * uModelMatrix;
   vec4 position = vec4(aPosition, 1.0);
-  position = quatToMat4(aRotation) * position;
   position.xyz *= aScale;
+  mat4 rotationMat = quatToMat4(aRotation);
+  position =  rotationMat * position;
   position.xyz += aOffset;
   gl_Position = uProjectionMatrix * modelView * position;
   vWorldPosition = (uModelMatrix * position).xyz;
-  vNormal = mat3(modelView) * aNormal;
+  mat4 invViewMatrix = inverse(uViewMatrix);
+  vec3 normalView = mat3(transpose(inverse(modelView)) * rotationMat) * aNormal;
+  vNormalWorld = vec3(uModelMatrix * vec4(normalView, 0.0));
   vColor = aColor;
 }
 `
@@ -175,7 +185,7 @@ uniform sampler2D uDepthMap;
 uniform mat4 uLightProjectionMatrix;
 uniform mat4 uLightViewMatrix;
 
-varying vec3 vNormal;
+varying vec3 vNormalWorld;
 varying vec3 vWorldPosition;
 varying vec4 vColor;
 
@@ -198,10 +208,10 @@ float readDepth(sampler2D depthMap, vec2 coord) {
 
 void main() {
   vec3 L = normalize(uLightPos);
-  vec3 N = normalize(vNormal);
+  vec3 N = normalize(vNormalWorld);
   float NdotL = max(0.0, (dot(N, L) + uWrap) / (1.0 + uWrap));
   vec3 ambient = toLinear(uAmbientColor.rgb);
-  vec3 diffuse = toLinear(vColor.rgb);
+  vec3 albedo = toLinear(vColor.rgb);
 
   vec4 lightViewPosition = uLightViewMatrix * vec4(vWorldPosition, 1.0);
   float lightDist1 = -lightViewPosition.z;
@@ -211,12 +221,13 @@ void main() {
   float bias = 0.1;
   float lightDist2 = readDepth(uDepthMap, lightUV);
   
-  gl_FragColor.rgb = ambient + NdotL * diffuse;
 
-  if (lightDist1 < lightDist2 + bias)
-    gl_FragColor = min(gl_FragColor,  gl_FragColor * vec4(1.0, 1.0, 1.0, 1.0));
-  else
-    gl_FragColor = min(gl_FragColor, gl_FragColor * vec4(0.05, 0.05, 0.05, 1.0));
+  float illuminated = 1.0;
+  if (lightDist1 > lightDist2 + bias) {
+    illuminated = 0.0;
+  }
+
+  gl_FragColor.rgb = albedo * (ambient + NdotL * illuminated);
 
   gl_FragColor.rgb = toGamma(gl_FragColor.rgb);
 
@@ -236,15 +247,15 @@ const drawFloorCmd = {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
     uModelMatrix: Mat4.create(),
-    uWrap: 0,
+    uWrap: 1,
     uLightNear: lightCamera.near,
     uLightFar: lightCamera.far,
     uLightProjectionMatrix: lightCamera.projectionMatrix,
     uLightViewMatrix: lightCamera.viewMatrix,
     uLightPos: lightCamera.position,
     uDepthMap: depthMap,
-    uAmbientColor: [0, 0, 0, 1],
-    uDiffuseColor: [1, 1, 1, 1]
+    uAmbientColor: [0.2, 0.2, 0.2, 1],
+    uAlbedoColor: [1, 1, 1, 1]
   },
   attributes: {
     aPosition: {
@@ -290,11 +301,12 @@ const rotations = []
 const scales = []
 const colors = []
 const numBunnies = 200 // for some reason this is much slower than batching
+random.seed(0)
 for (let i = 0; i < numBunnies; i++) {
   const pos = [random.float(-5, 5), random.float(0, 5), random.float(-5, 5)]
   const rotation = Quat.fromDirection(Quat.create(), random.vec3())
   const scale = [0.2, 0.2, 0.2]
-  const color = [random.float(), random.float(), random.float(), 1.0]
+  const color = [random.float(0.1, 1.0), random.float(0.1, 1.0), random.float(0.1, 1.0), 1.0]
 
   offsets.push(pos)
   rotations.push(rotation)
@@ -327,15 +339,15 @@ const drawBunnyCmd = {
     // to mark the uniform as "dynamic" ?
     uViewMatrix: camera.viewMatrix,
     uModelMatrix: Mat4.translate(Mat4.create(), [0, 1, 0]),
-    uWrap: 0,
+    uWrap: 1,
     uLightNear: lightCamera.near,
     uLightFar: lightCamera.far,
     uLightProjectionMatrix: lightCamera.projectionMatrix,
     uLightViewMatrix: lightCamera.viewMatrix,
     uLightPos: lightCamera.position,
     uDepthMap: depthMap,
-    uAmbientColor: [0, 0, 0, 1],
-    uDiffuseColor: [1, 1, 1, 1]
+    uAmbientColor: [0.2, 0.2, 0.2, 1],
+    uAlbedoColor: [1, 1, 1, 1]
   },
   attributes: {
     aPosition: { buffer: bunnyPositionBuffer },
@@ -369,7 +381,7 @@ const drawBunnyDepthCmd = {
     aNormal: { buffer: bunnyNormalBuffer },
     aOffset: { buffer: bunnyOffsetsBuffer, divisor: 1 },
     aRotation: { buffer: bunnyRotationsBuffer, divisor: 1 },
-    aScale: { buffer: bunnyScalesBuffer, divisor: 1 },
+    aScale: { buffer: bunnyScalesBuffer, divisor: 1 }
   },
   // FIXME: rename this to indexBuffer?
   indices: {
@@ -386,10 +398,10 @@ function updateTime () {
 }
 
 function updateCamera () {
-  const t = elapsedSeconds / 10
-  const x = 6 * Math.cos(Math.PI * t)
-  const y = 3
-  const z = 6 * Math.sin(Math.PI * t)
+  const t = elapsedSeconds / 10 + 0.5
+  const x = 8 * Math.cos(Math.PI * t)
+  const y = 5
+  const z = 8 * Math.sin(Math.PI * t)
   camera({ position: [x, y, z] })
 }
 
