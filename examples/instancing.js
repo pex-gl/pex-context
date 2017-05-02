@@ -95,8 +95,8 @@ varying vec4 vColor;
 
 void main() {
   vec4 position = vec4(aPosition, 1.0);
-  position = quatToMat4(aRotation) * position;
   position.xyz *= aScale;
+  position = quatToMat4(aRotation) * position;
   position.xyz += aOffset;
   gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * position;
   vColor = vec4(aNormal / 2.0 + 0.5, 1.0);
