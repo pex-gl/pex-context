@@ -1,5 +1,4 @@
-#ifdef GL_ES
-mat4 transpose(mat4 m) {
+mat4 transposeMat2(mat4 m) {
   return mat4(
     m[0][0], m[1][0], m[2][0], m[3][0],
     m[0][1], m[1][1], m[2][1], m[3][1],
@@ -7,7 +6,6 @@ mat4 transpose(mat4 m) {
     m[0][3], m[1][3], m[2][3], m[3][3]
   );
 }
-#endif
 
 mat4 quatToMat4(vec4 q) {
     float xs = q.x + q.x;
@@ -22,7 +20,7 @@ mat4 quatToMat4(vec4 q) {
     float yy = q.y * ys;
     float yz = q.y * zs;
     float zz = q.z * zs;
-    return transpose(
+    return transposeMat2(
         mat4(
             1.0 - (yy + zz), xy - wz, xz + wy, 0.0,
             xy + wz, 1.0 - (xx + zz), yz - wx, 0.0,

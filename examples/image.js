@@ -52,7 +52,7 @@ const drawCmd = {
         gl_FragColor = texture2D(uTexture, vTexCoord) * 0.7 + 0.3 * vec4(vTexCoord, 0.0, 1.0);
       }
     `,
-    depthEnabled: true
+    depthTest: true
   }),
   attributes: {
     aPosition: ctx.vertexBuffer(cube.positions),

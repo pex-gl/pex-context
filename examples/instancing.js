@@ -1,3 +1,4 @@
+require('debug').enable('*')
 const createCube = require('primitive-cube')
 const bunny = require('bunny')
 // const bunny = require('primitive-cube')()
@@ -116,7 +117,9 @@ void main() {
 `
 const shadowMappedVert = glsl`
 #pragma glslify: inverse=require(glsl-inverse)
+#ifdef GL_ES
 #pragma glslify: transpose=require(glsl-transpose)
+#endif
 uniform mat4 uProjectionMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uModelMatrix;
@@ -153,7 +156,9 @@ varying vec3 vWorldPosition;
 varying vec4 vColor;
 
 #pragma glslify: quatToMat4=require(./assets/quat2mat4.glsl)
+#ifdef GL_ES
 #pragma glslify: transpose=require(glsl-transpose)
+#endif
 #pragma glslify: inverse=require(glsl-inverse)
 
 void main() {
@@ -241,7 +246,7 @@ const drawFloorCmd = {
   pipeline: ctx.pipeline({
     vert: shadowMappedVert,
     frag: shadowMappedFrag,
-    depthEnabled: true
+    depthTest: true
   }),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
@@ -275,7 +280,7 @@ const drawFloorDepthCmd = {
   pipeline: ctx.pipeline({
     vert: showNormalsVert,
     frag: showNormalsFrag,
-    depthEnabled: true
+    depthTest: true
   }),
   uniforms: {
     uProjectionMatrix: lightCamera.projectionMatrix,
@@ -330,7 +335,7 @@ const drawBunnyCmd = {
   pipeline: ctx.pipeline({
     vert: shadowMappedInstancedVert,
     frag: shadowMappedFrag,
-    depthEnabled: true
+    depthTest: true
   }),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
@@ -369,7 +374,7 @@ const drawBunnyDepthCmd = {
   pipeline: ctx.pipeline({
     vert: showNormalsInstancedVert,
     frag: showNormalsFrag,
-    depthEnabled: true
+    depthTest: true
   }),
   uniforms: {
     uProjectionMatrix: lightCamera.projectionMatrix,
@@ -429,7 +434,7 @@ const drawFullscreenQuadCmd = {
   pipeline: ctx.pipeline({
     vert: glsl(__dirname + '/glsl/screen-image.vert'),
     frag: glsl(__dirname + '/glsl/screen-image.frag'),
-    depthEnabled: false
+    depthTest: false
   }),
   attributes: {
     aPosition: { buffer: ctx.vertexBuffer(new Float32Array(R.flatten([[-1, -1], [-2 / 4, -1], [-2 / 4, -1 / 3], [-1, -1 / 3]]))) },

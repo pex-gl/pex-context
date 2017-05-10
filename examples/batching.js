@@ -76,7 +76,7 @@ const drawFloorCmd = {
   pipeline: ctx.pipeline({
     vert: shadowMappedVert,
     frag: shadowMappedFrag,
-    depthEnabled: true
+    depthTest: true
   }),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
@@ -110,7 +110,7 @@ const drawFloorDepthCmd = {
   pipeline: ctx.pipeline({
     vert: showNormalsVert,
     frag: showNormalsFrag,
-    depthEnabled: true
+    depthTest: true
   }),
   uniforms: {
     uProjectionMatrix: lightCamera.projectionMatrix,
@@ -143,7 +143,7 @@ const drawBunnyCmd = {
   pipeline: ctx.pipeline({
     vert: shadowMappedVert,
     frag: shadowMappedFrag,
-    depthEnabled: true
+    depthTest: true
   }),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
@@ -181,7 +181,7 @@ const drawBunnyDepthCmd = {
   pipeline: ctx.pipeline({
     vert: showNormalsVert,
     frag: showNormalsFrag,
-    depthEnabled: true
+    depthTest: true
   }),
   uniforms: {
     uProjectionMatrix: lightCamera.projectionMatrix,
@@ -256,7 +256,7 @@ const drawFullscreenQuadCmd = {
   pipeline: ctx.pipeline({
     vert: glsl(__dirname + '/glsl/screen-image.vert'),
     frag: glsl(__dirname + '/glsl/screen-image.frag'),
-    depthEnabled: false
+    depthTest: false
   }),
   attributes: {
     // aPosition: { buffer: ctx.vertexBuffer(new Float32Array(R.flatten([[-1, -1], [1, -1], [1, 1], [-1, 1]]))) },

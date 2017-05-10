@@ -25,7 +25,7 @@ const clearScreenCmd = {
   pass: ctx.pass({
     clearColor: [0.5, 0.5, 0.5, 1],
     clearDepth: 1
-  }),
+  })
 }
 
 const sphere = createSphere()
@@ -65,7 +65,7 @@ const drawCmd = {
         gl_FragColor = textureCube(uEnvMap, R);
       }
     `,
-    depthEnabled: true
+    depthTest: true
   }),
   attributes: {
     aPosition: ctx.vertexBuffer(sphere.positions),

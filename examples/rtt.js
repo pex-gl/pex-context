@@ -85,7 +85,7 @@ const drawFloorCmd = {
   pipeline: ctx.pipeline({
     vert: showNormalsVert,
     frag: showNormalsMRTFrag,
-    depthEnabled: true
+    depthTest: true
   }),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,

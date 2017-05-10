@@ -112,13 +112,13 @@ const floorNormalsBuf = ctx.vertexBuffer(floor.normals)
 const shadowMappedPipeline = ctx.pipeline({
   vert: shadowMappedVert,
   frag: shadowMappedFrag,
-  depthEnabled: true
+  depthTest: true
 })
 
 const drawDepthPipeline = ctx.pipeline({
   vert: showNormalsVert,
   frag: showNormalsFrag,
-  depthEnabled: true
+  depthTest: true
 })
 
 const drawFloorCmd = {
@@ -292,7 +292,7 @@ const drawFullscreenQuadCmd = {
   pipeline: ctx.pipeline({
     vert: glsl(__dirname + '/glsl/screen-image.vert'),
     frag: glsl(__dirname + '/glsl/screen-image.frag'),
-    depthEnabled: false
+    depthTest: false
   }),
   attributes: {
     // aPosition: { buffer: ctx.vertexBuffer(new Float32Array(flatten([[-1, -1], [1, -1], [1, 1], [-1, 1]]))) },
