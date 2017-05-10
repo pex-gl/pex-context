@@ -54,7 +54,8 @@ var pipeline = ctx.pipeline({
 })
 
 var pass = ctx.pass({
-  color: Array of Texture2D | Array of { texture: Texture2D, target: Enum }
+  color: [Texture2D, ...]
+  color: [{ texture: Texture2D | TextureCube, target: CubemapFace }, ...]
   depth: Texture2D
   clearColor: Array,
   clearDepth: Number
@@ -82,12 +83,12 @@ ctx.submit({
   pass: Pass
   pipeline: Pipeline,
   attributes: {
-    name: { buffer: VertexBuffer, offset: Number }
-    name:  VertexBuffer
+    name:  VertexBuffer,
+    name: { buffer: VertexBuffer, offset: Number, stride: Number }
   },
   elements: ElementsBuffer,
   elements: { buffer: ElementsBuffer, offset: Number },
-  primitiveType: PrimitiveType,
+  primitive: Primitive,
   count: Number,
   instances: Number,
   uniforms: {
@@ -101,25 +102,6 @@ ctx.submit({
 # Enums
 
 ```
-  const PixelFormat = {
-    RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
-    RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
-    // RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
-    R32F: 'r32f', //gl.ALPHA + gl.FLOAT
-    // R16F: 'r16f', //gl.ALPHA + gl.HALF_FLOAT
-    Depth: 'depth' // gl.DEPTH_COMPONENT
-  }
-```
-
-```
-  const DataType = {
-    Float32: gl.FLOAT,
-    Uint8: gl.UNSIGNED_BYTE,
-    Uint16: gl.UNSIGNED_SHORT
-  }
-```
-
-```
   const BlendFactor = {
     One: gl.ONE,
     Zero: gl.ZERO,
@@ -129,17 +111,21 @@ ctx.submit({
 ```
 
 ```
-  const Face = {
-    Front: gl.FRONT,
-    Back: gl.BACK,
-    FrontAndBack: gl.FRONT_AND_BACK
+  const CubemapFace = {
+    PositiveX: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+    NegativeX: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+    PositiveY: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+    NegativeY: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+    PositiveZ: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+    NegativeZ: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
   }
 ```
 
 ```
-  const Wrap = {
-    ClampToEdge: gl.CLAMP_TO_EDGE,
-    Repeat: gl.REPEAT
+  const DataType = {
+    Float32: gl.FLOAT,
+    Uint8: gl.UNSIGNED_BYTE,
+    Uint16: gl.UNSIGNED_SHORT
   }
 ```
 
@@ -153,6 +139,42 @@ ctx.submit({
     NotEqual: gl.NOTEQUAL,
     GreaterEqual: gl.GEQUAL,
     Always: gl.ALWAYS
+  }
+```
+
+```
+  const Face = {
+    Front: gl.FRONT,
+    Back: gl.BACK,
+    FrontAndBack: gl.FRONT_AND_BACK
+  }
+```
+
+```
+  const PixelFormat = {
+    RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
+    RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
+    // RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
+    R32F: 'r32f', //gl.ALPHA + gl.FLOAT
+    // R16F: 'r16f', //gl.ALPHA + gl.HALF_FLOAT
+    Depth: 'depth' // gl.DEPTH_COMPONENT
+  }
+```
+
+```
+  const Primitive = {
+    Points: gl.POINTS,
+    Lines: gl.LINES,
+    LineStrip: gl.LINE_STRIP,
+    Triangles: gl.TRIANGLES,
+    TriangleStrip: gl.TRIANGLE_STRIP
+  }
+```
+
+```
+  const Wrap = {
+    ClampToEdge: gl.CLAMP_TO_EDGE,
+    Repeat: gl.REPEAT
   }
 ```
 
