@@ -95,8 +95,8 @@ function createContext (opts) {
       blendEnabled: false,
       cullFaceEnabled: false,
       cullFace: Face.Back
-    }
-    // viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]
+    },
+    viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]
   }
 
   // extensions
