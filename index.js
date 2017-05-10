@@ -436,6 +436,11 @@ function createContext (opts) {
       const gl = this.gl
       const state = this.state
       let numTextures = 0
+
+      if (!state.program) {
+        assert.fail('Trying to draw without an active program')
+      }
+
       const requiredUniforms = Object.keys(state.program.uniforms)
 
       Object.keys(uniforms).forEach((name) => {
@@ -446,7 +451,7 @@ function createContext (opts) {
         }
         if (value === null || value === undefined) {
           log('invalid command', cmd)
-          assert.fail(`Can set uniform "${name}" with a null value`)
+          assert.fail(`Can't set uniform "${name}" with a null value`)
         }
         // FIXME: uniform array hack
         if (Array.isArray(value) && !state.program.uniforms[name]) {
