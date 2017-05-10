@@ -2,7 +2,7 @@ const checkProps = require('./check-props')
 
 const allowedProps = [
   'vert', 'frag', 'program',
-  'depthEnabled', 'depthFunc',
+  'depthWrite', 'depthTest', 'depthFunc',
   'blendEnabled', 'blendSrcRGBFactor', 'blendSrcAlphaFactor',
   'blendDstRGBFactor', 'blendDstAlphaFactor',
   'cullFaceEnabled', 'cullFace',
@@ -18,6 +18,8 @@ function createPipeline (ctx, opts) {
     class: 'pipeline',
     depthEnabled: false,
     primitive: ctx.Primitive.Triangles,
+    depthWrite: true,
+    depthTest: false,
     depthFunc: ctx.DepthFunc.LessEqual
   }, opts)
 

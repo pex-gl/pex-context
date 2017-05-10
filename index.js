@@ -108,7 +108,8 @@ function createContext (opts) {
     },
     pipeline: {
       program: null,
-      depthEnabled: false,
+      depthWrite: true,
+      depthTest: false,
       depthFunc: DepthFunc.LessEqual,
       blendEnabled: false,
       cullFaceEnabled: false,
@@ -402,9 +403,14 @@ function createContext (opts) {
       const gl = this.gl
       const state = this.state
 
-      if (pipeline.depthEnabled !== state.depthEnabled) {
-        state.depthEnabled = pipeline.depthEnabled
-        state.depthEnabled ? gl.enable(gl.DEPTH_TEST) : gl.disable(gl.DEPTH_TEST)
+      if (pipeline.depthWrite !== state.depthWrite) {
+        state.depthWrite = pipeline.depthWrite
+        gl.depthMask(state.depthWrite)
+      }
+
+      if (pipeline.depthTest !== state.depthTest) {
+        state.depthTest = pipeline.depthTest
+        state.depthTest ? gl.enable(gl.DEPTH_TEST) : gl.disable(gl.DEPTH_TEST)
 
         // TODO: should we flip it only when depth is enabled?
         if (pipeline.depthFunc !== state.depthFunc) {
