@@ -24,46 +24,11 @@ function createContext (opts) {
   const ext = gl.getExtension('OES_texture_half_float')
   gl.HALF_FLOAT = ext.HALF_FLOAT_OES
 
-  const PixelFormat = {
-    RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
-    RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
-    RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
-    R32F: 'r32f', // gl.ALPHA + gl.FLOAT
-    // R16F: 'r16f', //gl.ALPHA + gl.HALF_FLOAT
-    Depth: 'depth' // gl.DEPTH_COMPONENT
-  }
-
-  const DataType = {
-    Float32: gl.FLOAT,
-    Uint8: gl.UNSIGNED_BYTE,
-    Uint16: gl.UNSIGNED_SHORT
-  }
-
   const BlendFactor = {
     One: gl.ONE,
     Zero: gl.ZERO,
     SrcAlpha: gl.SRC_ALPHA,
     OneMinusSrcAlpha: gl.ONE_MINUS_SRC_ALPHA
-  }
-
-  const Face = {
-    Front: gl.FRONT,
-    Back: gl.BACK,
-    FrontAndBack: gl.FRONT_AND_BACK
-  }
-
-  const Wrap = {
-    ClampToEdge: gl.CLAMP_TO_EDGE,
-    Repeat: gl.REPEAT
-  }
-
-  const Filter = {
-    Nearest: gl.NEAREST,
-    Linear: gl.LINEAR,
-    NearestMipmapNearest: gl.NEAREST_MIPMAP_NEAREST,
-    NearestMipmapLinear: gl.NEAREST_MIPMAP_LINEAR,
-    LinearMipmapNearest: gl.LINEAR_MIPMAP_NEAREST,
-    LinearMipmapLinear: gl.LINEAR_MIPMAP_LINEAR
   }
 
   const DepthFunc = {
@@ -76,6 +41,50 @@ function createContext (opts) {
     GreaterEqual: gl.GEQUAL,
     Always: gl.ALWAYS
   }
+
+  const DataType = {
+    Float32: gl.FLOAT,
+    Uint8: gl.UNSIGNED_BYTE,
+    Uint16: gl.UNSIGNED_SHORT
+  }
+
+  const Face = {
+    Front: gl.FRONT,
+    Back: gl.BACK,
+    FrontAndBack: gl.FRONT_AND_BACK
+  }
+
+  const Filter = {
+    Nearest: gl.NEAREST,
+    Linear: gl.LINEAR,
+    NearestMipmapNearest: gl.NEAREST_MIPMAP_NEAREST,
+    NearestMipmapLinear: gl.NEAREST_MIPMAP_LINEAR,
+    LinearMipmapNearest: gl.LINEAR_MIPMAP_NEAREST,
+    LinearMipmapLinear: gl.LINEAR_MIPMAP_LINEAR
+  }
+
+  const PixelFormat = {
+    RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
+    RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
+    RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
+    R32F: 'r32f', // gl.ALPHA + gl.FLOAT
+    R16F: 'r16f', //gl.ALPHA + gl.HALF_FLOAT
+    Depth: 'depth' // gl.DEPTH_COMPONENT
+  }
+
+  const Primitive = {
+    Points: gl.POINTS,
+    Lines: gl.LINES,
+    LineStrip: gl.LINE_STRIP,
+    Triangles: gl.TRIANGLES,
+    TriangleStrip: gl.TRIANGLE_STRIP
+  }
+
+  const Wrap = {
+    ClampToEdge: gl.CLAMP_TO_EDGE,
+    Repeat: gl.REPEAT
+  }
+
 
   const defaultState = {
     pass: {
@@ -94,7 +103,8 @@ function createContext (opts) {
       depthFunc: DepthFunc.LessEqual,
       blendEnabled: false,
       cullFaceEnabled: false,
-      cullFace: Face.Back
+      cullFace: Face.Back,
+      primitive: Primitive.TRIANGLES
     },
     viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]
   }
@@ -133,13 +143,14 @@ function createContext (opts) {
 
   const ctx = {
     gl: gl,
-    DataType: DataType,
-    PixelFormat: PixelFormat,
     BlendFactor: BlendFactor,
+    DataType: DataType,
     DepthFunc: DepthFunc,
     Face: Face,
-    Wrap: Wrap,
     Filter: Filter,
+    PixelFormat: PixelFormat,
+    Primitive: Primitive,
+    Wrap: Wrap,
     debugMode: false,
     // debugGraph: '',
     debugCommands: [],
@@ -549,8 +560,7 @@ function createContext (opts) {
         // TODO: how to match index with vertexLayout location?
       })
 
-      let primitive = gl.TRIANGLES
-      if (cmd.primitive === 'lines') primitive = gl.LINES
+      let primitive = cmd.pipeline.primitive
       if (cmd.indices) {
         let indexBuffer = cmd.indices.buffer
         if (!indexBuffer && cmd.indices.class === 'indexBuffer') {

@@ -5,7 +5,8 @@ const allowedProps = [
   'depthEnabled', 'depthFunc',
   'blendEnabled', 'blendSrcRGBFactor', 'blendSrcAlphaFactor',
   'blendDstRGBFactor', 'blendDstAlphaFactor',
-  'cullFaceEnabled', 'cullFace'
+  'cullFaceEnabled', 'cullFace',
+  'primitive'
 ]
 
 function createPipeline (ctx, opts) {
@@ -16,6 +17,7 @@ function createPipeline (ctx, opts) {
   const pipeline = Object.assign({
     class: 'pipeline',
     depthEnabled: false,
+    primitive: ctx.Primitive.Triangles,
     depthFunc: ctx.DepthFunc.LessEqual
   }, opts)
 
