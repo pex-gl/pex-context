@@ -31,6 +31,15 @@ function createContext (opts) {
     OneMinusSrcAlpha: gl.ONE_MINUS_SRC_ALPHA
   }
 
+  const CubemapFace = {
+    PositiveX: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+    NegativeX: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+    PositiveY: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+    NegativeY: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+    PositiveZ: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+    NegativeZ: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
+  }
+
   const DepthFunc = {
     Never: gl.NEVER,
     Less: gl.LESS,
@@ -144,6 +153,7 @@ function createContext (opts) {
   const ctx = {
     gl: gl,
     BlendFactor: BlendFactor,
+    CubemapFace: CubemapFace,
     DataType: DataType,
     DepthFunc: DepthFunc,
     Face: Face,
