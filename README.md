@@ -42,9 +42,10 @@ var pipeline = ctx.pipeline({
   vert: String,
   frag: String,
   // vertexLayout: { } // disabled ATM
-  depthEnabled: Boolean,
-  depthFunc: DepthFunc,
-  blendEnabled: Boolean,
+  depthWrite: Boolean, // true
+  depthTest: Boolean,  // false
+  depthFunc: DepthFunc, // LessEqual
+  blendEnabled: Boolean, // false
   blendSrcRGBFactor: BlendFactor,
   blendSrcAlphaFactor: BlendFactor,
   blendDstRGBFactor: BlendFactor,
