@@ -114,7 +114,7 @@ function createContext (opts) {
       blendEnabled: false,
       cullFaceEnabled: false,
       cullFace: Face.Back,
-      primitive: Primitive.TRIANGLES
+      primitive: Primitive.Triangles
     },
     viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]
   }
