@@ -77,8 +77,15 @@ function createContext (opts) {
     RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
     RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
     R32F: 'r32f', // gl.ALPHA + gl.FLOAT
-    R16F: 'r16f', //gl.ALPHA + gl.HALF_FLOAT
+    R16F: 'r16f', // gl.ALPHA + gl.HALF_FLOAT
     Depth: 'depth' // gl.DEPTH_COMPONENT
+  }
+
+  const Encoding = {
+    Linear: 1,
+    Gamma: 2,
+    SRGB: 3,
+    RGBM: 4
   }
 
   const Primitive = {
@@ -93,7 +100,6 @@ function createContext (opts) {
     ClampToEdge: gl.CLAMP_TO_EDGE,
     Repeat: gl.REPEAT
   }
-
 
   const defaultState = {
     pass: {
@@ -160,6 +166,7 @@ function createContext (opts) {
     Face: Face,
     Filter: Filter,
     PixelFormat: PixelFormat,
+    Encoding: Encoding,
     Primitive: Primitive,
     Wrap: Wrap,
     debugMode: false,

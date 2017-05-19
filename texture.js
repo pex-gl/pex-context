@@ -34,6 +34,7 @@ function updateTexture2D (ctx, texture, opts) {
   let type = gl.UNSIGNED_BYTE
   let flipY = opts.flipY || false
   let target = opts.target || texture.target
+  let encoding = opts.encoding || texture.encoding || ctx.Encoding.Linear
 
   gl.getExtension('WEBGL_depth_texture')
   gl.getExtension('EXT_shader_texture_lod')
@@ -168,6 +169,7 @@ function updateTexture2D (ctx, texture, opts) {
   texture.format = format
   texture.internalFormat = internalFormat
   texture.type = type
+  texture.encoding = encoding
 
   return texture
 }
