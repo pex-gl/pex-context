@@ -140,10 +140,10 @@ function createContext (opts) {
       gl.vertexAttribDivisor = ext.vertexAttribDivisorANGLE.bind(ext)
     }
   }
-  if (!gl.drawingBuffers) {
+  if (!gl.drawBuffers) {
     const ext = gl.getExtension('WEBGL_draw_buffers')
     if (!ext) {
-      gl.drawingBufferWidths = function () {
+      gl.drawBuffers = function () {
         throw new Error('WEBGL_draw_buffers not supported')
       }
     } else {
@@ -374,7 +374,7 @@ function createContext (opts) {
           this.update(pass.framebuffer, pass.opts)
         }
         gl.bindFramebuffer(pass.framebuffer.target, pass.framebuffer.handle)
-        if (pass.framebuffer.drawBuffers) {
+        if (pass.framebuffer.drawBuffers && pass.framebuffer.drawBuffers.length > 1) {
           gl.drawBuffers(pass.framebuffer.drawBuffers)
         }
       }
