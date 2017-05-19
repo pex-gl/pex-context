@@ -107,6 +107,10 @@ function updateTexture2D (ctx, texture, opts) {
       format = gl.DEPTH_COMPONENT
       internalFormat = gl.DEPTH_COMPONENT
       type = gl.UNSIGNED_SHORT
+    } else if (opts.format === PixelFormat.RGBA8) {
+      format = gl.RGBA
+      internalFormat = gl.RGBA
+      type = gl.UNSIGNED_BYTE
     } else if (opts.format === PixelFormat.RGBA32F) {
       format = gl.RGBA
       internalFormat = gl.RGBA
