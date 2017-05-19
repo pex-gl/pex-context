@@ -1,6 +1,7 @@
 const checkProps = require('./check-props')
 
 const allowedProps = [
+  'name',
   'framebuffer',
   'color', 'depth',
   'clearColor', 'clearDepth'
