@@ -283,7 +283,7 @@ function createContext (opts) {
     //    type: 'float', 'uint16' etc
     // }
     vertexBuffer: function (opts) {
-      log('framebuffer', opts)
+      log('vertexBuffer', opts)
       if (opts.length) {
         opts = { data: opts }
       }
