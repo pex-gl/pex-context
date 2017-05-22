@@ -307,7 +307,7 @@ function createContext (opts) {
       return this.resource(createPipeline(this, opts))
     },
     pass: function (opts) {
-      log('pass', opts)
+      log('pass', opts, opts.color ? opts.color.map((c) => c.texture ? c.texture.info : c.info) : '')
       return this.resource(createPass(this, opts))
     },
     readPixels: function (opts) {
