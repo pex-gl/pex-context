@@ -397,6 +397,11 @@ function createContext (opts) {
       if (pass.clearDepth !== undefined) {
         if (this.debugMode) log('clearing depth', pass.clearDepth)
         clearBits |= gl.DEPTH_BUFFER_BIT
+
+        if (!state.depthWrite) {
+          state.depthWrite = true
+          gl.depthMask(true)
+        }
         // TODO this might be unnecesary but we don't know because we don't store the clearDepth in state
         gl.clearDepth(pass.clearDepth)
       }
