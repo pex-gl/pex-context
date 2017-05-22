@@ -54,6 +54,7 @@ function updateTexture2D (ctx, texture, opts) {
   let mag = opts.min || texture.mag || gl.NEAREST
   let wrapS = opts.wrapS || texture.wrapS || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
   let wrapT = opts.wrapS || texture.wrapS || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
+  let aniso = opts.aniso || texture.aniso || 0
   let internalFormat = undefined
   let pixelformat = undefined
   let type = undefined
@@ -67,6 +68,7 @@ function updateTexture2D (ctx, texture, opts) {
   gl.getExtension('OES_texture_float_linear')
   gl.getExtension('OES_texture_half_float')
   gl.getExtension('OES_texture_half_float_linear')
+  var anisoExt = gl.getExtension('EXT_texture_filter_anisotropic')
 
   const textureUnit = 0
   gl.activeTexture(gl.TEXTURE0 + textureUnit)
@@ -86,6 +88,9 @@ function updateTexture2D (ctx, texture, opts) {
   gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, mag)
   gl.texParameteri(target, gl.TEXTURE_WRAP_S, wrapS)
   gl.texParameteri(target, gl.TEXTURE_WRAP_T, wrapT)
+  if (anisoExt) {
+    gl.texParameterf(target, anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+  }
 
   // just an image
   // opts = HTMLImage
