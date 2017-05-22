@@ -50,6 +50,8 @@ function updateTexture2D (ctx, texture, opts) {
   let target = opts.target || texture.target
   let pixelFormat = opts.pixelFormat || texture.pixelFormat
   let encoding = opts.encoding || texture.encoding
+  let min = opts.min || texture.min || gl.NEAREST
+  let mag = opts.min || texture.mag || gl.NEAREST
   let internalFormat = undefined
   let pixelformat = undefined
   let type = undefined
@@ -78,10 +80,10 @@ function updateTexture2D (ctx, texture, opts) {
   }
 
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY)
-  gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, opts.min || gl.NEAREST)
-  gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, opts.mag || gl.NEAREST)
   gl.texParameteri(target, gl.TEXTURE_WRAP_S, opts.wrap || gl.CLAMP_TO_EDGE)
   gl.texParameteri(target, gl.TEXTURE_WRAP_T, opts.wrap || gl.CLAMP_TO_EDGE)
+  gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, min)
+  gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, mag)
 
   // just an image
   // opts = HTMLImage
@@ -196,6 +198,8 @@ function updateTexture2D (ctx, texture, opts) {
   texture.height = height
   texture.pixelFormat = pixelFormat
   texture.encoding = encoding
+  texture.min = min
+  texture.mag = mag
   texture.format = format
   texture.internalFormat = internalFormat
   texture.type = type
