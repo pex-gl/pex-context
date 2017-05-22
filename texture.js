@@ -1,6 +1,21 @@
 const assert = require('assert')
+const checkProps = require('./check-props')
+
+const allowedProps = [
+  'name',
+  'data', 'width', 'height',
+  'pixelFormat', 'encoding',
+  'flipY',
+  'mipmap',
+  'target',
+  'min', 'mag',
+  'wrap'
+]
+
 
 function createTexture (ctx, opts) {
+  // checkProps(allowedProps, opts)
+
   const gl = ctx.gl
 
   // TODO: implement filtering options
@@ -20,8 +35,10 @@ function createTexture (ctx, opts) {
 }
 
 // opts = { src, width, height }
-// opts = { data, width, height, format, flipY }
+// opts = { data, width, height, pixelFormat, encoding, flipY }
 function updateTexture2D (ctx, texture, opts) {
+  // checkProps(allowedProps, opts)
+
   const gl = ctx.gl
   const PixelFormat = ctx.PixelFormat
 
@@ -29,12 +46,16 @@ function updateTexture2D (ctx, texture, opts) {
   let width = 0
   let height = 0
   let lod = 0
-  let internalFormat = gl.RGBA
-  let format = gl.RGBA
-  let type = gl.UNSIGNED_BYTE
   let flipY = opts.flipY || false
   let target = opts.target || texture.target
-  let encoding = opts.encoding || texture.encoding || ctx.Encoding.Linear
+  let pixelFormat = opts.pixelFormat || texture.pixelFormat
+  let encoding = opts.encoding || texture.encoding
+  let internalFormat = undefined
+  let pixelformat = undefined
+  let type = undefined
+
+  assert(pixelFormat, 'PixelFormat is required')
+  assert(encoding, 'Encoding is required')
 
   gl.getExtension('WEBGL_depth_texture')
   gl.getExtension('EXT_shader_texture_lod')
@@ -88,6 +109,9 @@ function updateTexture2D (ctx, texture, opts) {
     // TODO: add support for HTMLVideoElement with videoWidth and videoHeight
     width = img.width
     height = img.height
+    internalFormat = gl.RGBA
+    format = gl.RGBA
+    type = gl.UNSIGNED_BYTE
     gl.texImage2D(target, lod, internalFormat, format, type, img)
   } else if (typeof opts === 'object') {
     assert(!data || Array.isArray(opts.data) ||
@@ -103,27 +127,27 @@ function updateTexture2D (ctx, texture, opts) {
     width = opts.width
     height = opts.height
 
-    if (opts.format === PixelFormat.Depth) {
+    if (pixelFormat === PixelFormat.Depth) {
       format = gl.DEPTH_COMPONENT
       internalFormat = gl.DEPTH_COMPONENT
       type = gl.UNSIGNED_SHORT
-    } else if (opts.format === PixelFormat.RGBA8) {
+    } else if (pixelFormat === PixelFormat.RGBA8) {
       format = gl.RGBA
       internalFormat = gl.RGBA
       type = gl.UNSIGNED_BYTE
-    } else if (opts.format === PixelFormat.RGBA32F) {
+    } else if (pixelFormat === PixelFormat.RGBA32F) {
       format = gl.RGBA
       internalFormat = gl.RGBA
       type = gl.FLOAT
-    } else if (opts.format === PixelFormat.RGBA16F) {
+    } else if (pixelFormat === PixelFormat.RGBA16F) {
       format = gl.RGBA
       internalFormat = gl.RGBA
       type = gl.HALF_FLOAT
-    } else if (opts.format === PixelFormat.R32F) {
+    } else if (pixelFormat === PixelFormat.R32F) {
       format = gl.ALPHA
       internalFormat = gl.ALPHA
       type = gl.FLOAT
-    } else if (opts.format) {
+    } else if (pixelFormat) {
       assert.fail(`Unknown texture pixel format: ${opts.format}`)
     }
 
@@ -167,13 +191,18 @@ function updateTexture2D (ctx, texture, opts) {
   }
 
   texture.target = target
-  texture.data = data
+  // texture.data = data
   texture.width = width
   texture.height = height
+  texture.pixelFormat = pixelFormat
+  texture.encoding = encoding
   texture.format = format
   texture.internalFormat = internalFormat
   texture.type = type
-  texture.encoding = encoding
+  texture.info = ''
+  texture.info += Object.keys(ctx.PixelFormat).find((key) => ctx.PixelFormat[key] === pixelFormat)
+  texture.info += '_'
+  texture.info += Object.keys(ctx.Encoding).find((key) => ctx.Encoding[key] === encoding)
 
   return texture
 }
