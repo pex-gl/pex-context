@@ -88,7 +88,7 @@ function updateTexture2D (ctx, texture, opts) {
   gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, mag)
   gl.texParameteri(target, gl.TEXTURE_WRAP_S, wrapS)
   gl.texParameteri(target, gl.TEXTURE_WRAP_T, wrapT)
-  if (anisoExt) {
+  if (anisoExt && aniso > 0) {
     gl.texParameterf(target, anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, aniso);
   }
 
