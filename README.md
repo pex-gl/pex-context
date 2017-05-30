@@ -86,7 +86,7 @@ var ctx = createContext({ webgl2: true, width: Number, height: Number })
 
 ### Textures
 
-Represent pixel data uploaded to the GPU.
+Textires represent pixel data uploaded to the GPU.
 
 ```javascript
 var tex = ctx.texture2D({
@@ -115,12 +115,20 @@ var tex = ctx.textureCube([
 | `height` | texture height  | Number/Int | 0 |
 | `pixelFormat` | pixel data format | ctx.PixelFormat | ctx.PixelFormat.RGB8 |
 | `encoding` | pixel data encoding | ctx.Encoding | ctx.Encoding.Linear |
-| `wrap` | wrap mode | ctx.Wrap | ctx.Wrap.Repeat |
+| `wrapS` | wrapS mode | ctx.Wrap | ctx.Wrap.ClampToEdge |
+| `wrapT` | wrapT mode | ctx.Wrap | ctx.Wrap.ClampToEdge |
+| `wrap` | combines wrapS and wrapT | ctx.Wrap | ctx.Wrap.ClampToEdge |
 | `min` | min filtering mode | ctx.Filter | ctx.Filter.Nearest |
 | `mag` | mag filtering mode | ctx.Filter | ctx.Filter.Nearest |
+| `aniso` | aniso level<sup>1</sup> | Number/Int | 0 |
+| `mipmap` | generate mipmaps on update <sup>2</sup> | Boolean | false |
+| `flipY` | flip pixel data on upload | Boolean | false |
 | `name` | texture name for debugging | String | '' |
-| `target` | texture target [read only] | gl enum | gl.TEXTURE_2D or gl.TEXTURE_CUBE |
+| `target` | texture target <sup>3</sup> | gl enum | gl.TEXTURE_2D or gl.TEXTURE_CUBE |
 
+<sup>1</sup> requries [EXT_texture_filter_anisotropic](https://www.khronos.org/registry/webgl/extensions/EXT_texture_filter_anisotropic/)
+<sup>2</sup> requires `min` to be set to `ctx.Filter.LinearMipmapLinear` or similar
+<sup>3</sup> read only
 
 ### Buffers
 
