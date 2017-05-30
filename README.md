@@ -120,14 +120,14 @@ var tex = ctx.textureCube([
 | `wrap` | combines wrapS and wrapT | ctx.Wrap | ctx.Wrap.ClampToEdge |
 | `min` | min filtering mode | ctx.Filter | ctx.Filter.Nearest |
 | `mag` | mag filtering mode | ctx.Filter | ctx.Filter.Nearest |
-| `aniso` | aniso level<sup>1</sup> | Number/Int | 0 |
+| `aniso` | aniso level <sup>1</sup> | Number/Int | 0 |
 | `mipmap` | generate mipmaps on update <sup>2</sup> | Boolean | false |
 | `flipY` | flip pixel data on upload | Boolean | false |
 | `name` | texture name for debugging | String | '' |
 | `target` | texture target <sup>3</sup> | gl enum | gl.TEXTURE_2D or gl.TEXTURE_CUBE |
 
-<sup>1</sup> requries [EXT_texture_filter_anisotropic](https://www.khronos.org/registry/webgl/extensions/EXT_texture_filter_anisotropic/)
-<sup>2</sup> requires `min` to be set to `ctx.Filter.LinearMipmapLinear` or similar
+<sup>1</sup> requries [EXT_texture_filter_anisotropic](https://www.khronos.org/registry/webgl/extensions/EXT_texture_filter_anisotropic/)  
+<sup>2</sup> requires `min` to be set to `ctx.Filter.LinearMipmapLinear` or similar  
 <sup>3</sup> read only
 
 ### Buffers
