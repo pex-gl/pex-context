@@ -1,10 +1,65 @@
 # pex-context
 
-Thin WebGL state stack and resource management wrapper for the pex library
+Modern WebGL state wrapper for [PEX](http://pex.gl). With `pex-context` you allocate GPU resources (textures, buffers), setup state pipelines and passes and combine them together in commands.
+
+# Example
+
+```javascript
+const createContext = require('pex-context')
+const createCube = require('primitive-cube')
+const Mat4 = require('pex-math/Mat4')
+
+const ctx = createContext({ width: 640, height: 480 })
+const cube = createCube()
+
+const cmd = {
+  pass: ctx.pass({
+    clearColor: [0.2, 0.2, 0.2, 1],
+    clearDepth: 1
+  }),
+  pipeline: ctx.pipeline({
+    depthTest: true,
+    vert: `
+      attribute vec3 aPosition;
+      attribute vec3 aNormal;
+      uniform mat4 uProjectionMatrix;
+      uniform mat4 uViewMatrix;
+      varying vec3 vNormal;
+      void main () {
+        gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
+        vNormal = aNormal;
+      }
+    `,
+    frag: `
+      precision mediump float;
+      varying vec3 vNormal;
+      void main () {
+        gl_FragColor.rgb = vNormal;
+        gl_FragColor.a = 1.0;
+      }
+    `
+  }),
+  attributes: {
+    aPosition: ctx.vertexBuffer(cube.positions),
+    aNormal: ctx.vertexBuffer(cube.normals)
+  },
+  indices: ctx.indexBuffer(cube.cells),
+  uniforms: {
+    uProjectionMatrix: Mat4.perspective(Mat4.create(), 45, 640 / 480, 0.1, 100),
+    uViewMatrix: Mat4.lookAt(Mat4.create(), [2, 2, 5], [0, 0, 0], [0, 1, 0])
+  }
+}
+
+ctx.frame(() => {
+  ctx.submit(cmd)
+})
+```
 
 # API
 
 ## Context creation
+
+Creating gl context wrapper.
 
 ```javascript
 var createContext = require('pex-context')
