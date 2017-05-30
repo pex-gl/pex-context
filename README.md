@@ -84,15 +84,55 @@ var ctx = createContext({ webgl2: true, width: Number, height: Number })
 
 ## Resource creation
 
+### Textures
+
+Represent pixel data uploaded to the GPU.
+
 ```javascript
-var tex = ctx.texture2D({ data: Array, width: Number, height: Number, format: PixelFormat })
+var tex = ctx.texture2D({
+  data: [255, 255, 255, 255, 0, 0, 0, 255],
+  width: 2,
+  height: 1,
+  format: ctx.PixelFormat.RGB8,
+  encoding: ctx.Encoding.Linear,
+  wrap: ctx.Wrap.Repeat
+})
 
-var tex = ctx.textureCube(Array of { data: Array, width: Number, height: Number, format: PixelFormat })
+var tex = ctx.textureCube([
+  { data: new Uint8Array([..]), width: 64, height: 64 },
+  { data: new Uint8Array([..]), width: 64, height: 64 },
+  { data: new Uint8Array([..]), width: 64, height: 64 },
+  { data: new Uint8Array([..]), width: 64, height: 64 },
+  { data: new Uint8Array([..]), width: 64, height: 64 },
+  { data: new Uint8Array([..]), width: 64, height: 64 }
+])
+```
 
+| property | info | type | default |
+| -------- | ---- | ---- | ------- |
+| `data` | pixel data | Array, Uint8Array, Float32Array, HTMLCanvas, HTMLImage, HTMLVideo | null |
+| `width` | texture width   | Number/Int | 0 |
+| `height` | texture height  | Number/Int | 0 |
+| `pixelFormat` | pixel data format | ctx.PixelFormat | ctx.PixelFormat.RGB8 |
+| `encoding` | pixel data encoding | ctx.Encoding | ctx.Encoding.Linear |
+| `wrap` | wrap mode | ctx.Wrap | ctx.Wrap.Repeat |
+| `min` | min filtering mode | ctx.Filter | ctx.Filter.Nearest |
+| `mag` | mag filtering mode | ctx.Filter | ctx.Filter.Nearest |
+| `name` | texture name for debugging | String | '' |
+| `target` | texture target [read only] | gl enum | gl.TEXTURE_2D or gl.TEXTURE_CUBE |
+
+
+### Buffers
+
+```javascript
 var buf = ctx.vertexBuffer({ data: Array }) // aka Attribute Buffer
 
-var buf = ctx.elementsBuffer({ data: Array }) // aka Index Buffer
+var buf = ctx.indexBuffer({ data: Array }) // aka Index Buffer
+```
 
+### Pipelines
+
+```javascript
 var pipeline = ctx.pipeline({
   vert: String,
   frag: String,
@@ -108,7 +148,11 @@ var pipeline = ctx.pipeline({
   cullFaceEnabled: Boolean,
   cullFace: Face
 })
+```
 
+### Passes
+
+```javascript
 var pass = ctx.pass({
   color: [Texture2D, ...]
   color: [{ texture: Texture2D | TextureCube, target: CubemapFace }, ...]
@@ -142,8 +186,8 @@ ctx.submit({
     name:  VertexBuffer,
     name: { buffer: VertexBuffer, offset: Number, stride: Number }
   },
-  elements: ElementsBuffer,
-  elements: { buffer: ElementsBuffer, offset: Number },
+  indices: IndexBuffer,
+  indices: { buffer: IndexBuffer, offset: Number },
   primitive: Primitive,
   count: Number,
   instances: Number,
