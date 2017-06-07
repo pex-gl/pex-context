@@ -631,8 +631,17 @@ function createContext (opts) {
       this.checkError()
     },
     frame: function (cb) {
+      const self = this
       raf(function frame () {
         cb()
+        if (self.defaultState.viewport[2] !== gl.drawingBufferWidth ||
+          self.defaultState.viewport[3] !== gl.drawingBufferHeight) {
+          self.defaultState.viewport[2] = gl.drawingBufferWidth
+          self.defaultState.viewport[3] = gl.drawingBufferHeight
+          self.defaultState.pass.framebuffer.width = gl.drawingBufferWidth
+          self.defaultState.pass.framebuffer.height = gl.drawingBufferHeight
+          gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+        }
         raf(frame)
       })
     },
