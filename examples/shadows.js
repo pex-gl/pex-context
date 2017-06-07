@@ -75,9 +75,15 @@ const lightCamera = createCamera({
 const depthMapSize = 512
 const depthMap = ctx.texture2D({
   width: depthMapSize, height: depthMapSize,
-  format: ctx.PixelFormat.Depth
+  pixelFormat: ctx.PixelFormat.Depth,
+  encoding: ctx.Encoding.Linear
 })
-const colorMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize })
+const colorMap = ctx.texture2D({
+  width: depthMapSize,
+  height: depthMapSize,
+  pixelFormat: ctx.PixelFormat.RGBA8,
+  encoding: ctx.Encoding.SRGB
+})
 
 // TODO: i could probably replace framebuffer with color, depth, stencil attachments props
 // same way we don't declare vertex array, fbo would be created on demand?
