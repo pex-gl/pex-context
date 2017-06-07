@@ -46,7 +46,7 @@ const drawPoints = {
   pipeline: ctx.pipeline({
     vert: VERT,
     frag: FRAG,
-    depthEnabled: true,
+    depthTest: true,
     primitive: ctx.Primitive.Points
   }),
   attributes: {
@@ -65,7 +65,7 @@ const drawLines = {
   pipeline: ctx.pipeline({
     vert: VERT,
     frag: FRAG,
-    depthEnabled: true,
+    depthTest: true,
     primitive: ctx.Primitive.Lines
   }),
   attributes: {
@@ -84,7 +84,7 @@ const drawLineStrip = {
   pipeline: ctx.pipeline({
     vert: VERT,
     frag: FRAG,
-    depthEnabled: true,
+    depthTest: true,
     primitive: ctx.Primitive.LineStrip
   }),
   attributes: {
@@ -103,7 +103,7 @@ const drawTriangles = {
   pipeline: ctx.pipeline({
     vert: VERT,
     frag: FRAG,
-    depthEnabled: true,
+    depthTest: true,
     primitive: ctx.Primitive.Triangles
   }),
   attributes: {
@@ -122,7 +122,7 @@ const drawTriangleStrip = {
   pipeline: ctx.pipeline({
     vert: VERT,
     frag: FRAG,
-    depthEnabled: true,
+    depthTest: true,
     primitive: ctx.Primitive.TriangleStrip
   }),
   attributes: {
