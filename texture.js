@@ -130,7 +130,7 @@ function updateTexture2D (ctx, texture, opts) {
 
     data = opts.data ? (opts.data.data || opts.data) : null
 
-    assert(opts.width && opts.height,
+    assert((opts.width !== undefined) && (opts.height !== undefined),
       'Texture2D.update opts.width and opts.height are required when providing opts.data')
 
     width = opts.width
