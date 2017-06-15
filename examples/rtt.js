@@ -25,12 +25,13 @@ const depthMapSize = 1024
 const depthMap = ctx.texture2D({
   width: depthMapSize,
   height: depthMapSize,
-  format: ctx.PixelFormat.Depth
+  pixelFormat: ctx.PixelFormat.Depth,
+  encoding: ctx.Encoding.Linear
 })
 
-const colorMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize })
-const normalMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize })
-const colorMap2 = ctx.texture2D({ width: depthMapSize / 2, height: depthMapSize / 2 })
+const colorMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize, pixelFormat: ctx.PixelFormat.RGBA8, encoding: ctx.Encoding.SRGB })
+const normalMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize, pixelFormat: ctx.PixelFormat.RGBA8, encoding: ctx.Encoding.Linear })
+const colorMap2 = ctx.texture2D({ width: depthMapSize / 2, height: depthMapSize / 2, pixelFormat: ctx.PixelFormat.RGBA8, encoding: ctx.Encoding.SRGB })
 
 const clearScreenCmd = {
   name: 'clearScreen',

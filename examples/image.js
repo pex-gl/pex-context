@@ -73,7 +73,9 @@ loadImage(ASSETS_DIR + '/images/pex.png', (err, img) => {
     data: img.data || img,
     width: img.width,
     height: img.height,
-    flipY: true
+    flipY: true,
+    pixelFormat: ctx.PixelFormat.RGBA8,
+    encoding: ctx.Encoding.Linear
   })
 
   raf(function frame () {
