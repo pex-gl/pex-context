@@ -9,7 +9,8 @@ const allowedProps = [
   'mipmap',
   'target',
   'min', 'mag',
-  'wrap'
+  'wrap',
+  'premultiplayAlpha'
 ]
 
 
@@ -50,7 +51,7 @@ function updateTexture2D (ctx, texture, opts) {
   let width = 0
   let height = 0
   let lod = 0
-  let flipY = opts.flipY || false
+  let flipY = orValue(opts.flipY, orValue(texture.flipY, false))
   let target = opts.target || texture.target
   let pixelFormat = opts.pixelFormat || texture.pixelFormat
   let encoding = opts.encoding || texture.encoding
