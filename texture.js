@@ -217,6 +217,7 @@ function updateTexture2D (ctx, texture, opts) {
   texture.wrapS = wrapS
   texture.wrapT = wrapT
   texture.format = format
+  texture.flipY = flipY
   texture.internalFormat = internalFormat
   texture.type = type
   texture.info = ''
