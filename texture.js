@@ -34,6 +34,10 @@ function createTexture (ctx, opts) {
   return texture
 }
 
+function orValue (a, b) {
+  return (a !== undefined) ? a : b
+}
+
 // opts = { src, width, height }
 // opts = { data, width, height, pixelFormat, encoding, flipY }
 function updateTexture2D (ctx, texture, opts) {
@@ -55,6 +59,7 @@ function updateTexture2D (ctx, texture, opts) {
   let wrapS = opts.wrapS || texture.wrapS || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
   let wrapT = opts.wrapS || texture.wrapS || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
   let aniso = opts.aniso || texture.aniso || 0
+  let premultiplayAlpha = orValue(opts.premultiplayAlpha, orValue(texture.premultiplayAlpha, false))
   let internalFormat = undefined
   let pixelformat = undefined
   let type = undefined
@@ -84,6 +89,7 @@ function updateTexture2D (ctx, texture, opts) {
   }
 
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY)
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplayAlpha)
   gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, min)
   gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, mag)
   gl.texParameteri(target, gl.TEXTURE_WRAP_S, wrapS)
