@@ -633,7 +633,10 @@ function createContext (opts) {
     frame: function (cb) {
       const self = this
       raf(function frame () {
-        cb()
+        if (cb() === false) {
+          // interrupt render loop
+          return
+        }
         if (self.defaultState.viewport[2] !== gl.drawingBufferWidth ||
           self.defaultState.viewport[3] !== gl.drawingBufferHeight) {
           self.defaultState.viewport[2] = gl.drawingBufferWidth
