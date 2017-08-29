@@ -136,15 +136,15 @@ function createContext (opts) {
     if (!ext) {
       // TODO: this._caps[CAPS_INSTANCED_ARRAYS] = false;
       gl.drawElementsInstanced = function () {
-        throw new Error('ANGLE_instanced_arrays not supported')
+        throw new Error('gl.drawElementsInstanced not available. ANGLE_instanced_arrays not supported')
       }
       gl.drawArraysInstanced = function () {
-        throw new Error('ANGLE_instanced_arrays not supported')
+        throw new Error('gl.drawArraysInstanced not available. ANGLE_instanced_arrays not supported')
       }
       gl.vertexAttribDivisor = function () {
-        throw new Error('ANGLE_instanced_arrays not supported')
+        throw new Error('gl.vertexAttribDivisor not available. ANGLE_instanced_arrays not supported')
       }
-      capabilities.instancing = true
+      capabilities.instancing = false
     } else {
       // TODO: this._caps[CAPS_INSTANCED_ARRAYS] = true;
       gl.drawElementsInstanced = ext.drawElementsInstancedANGLE.bind(ext)
