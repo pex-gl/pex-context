@@ -22,7 +22,9 @@ function createContext (opts) {
   assert(gl, 'pex-context: createContext failed')
 
   const ext = gl.getExtension('OES_texture_half_float')
-  gl.HALF_FLOAT = ext.HALF_FLOAT_OES
+  if (ext) {
+    gl.HALF_FLOAT = ext.HALF_FLOAT_OES
+  }
 
   const BlendFactor = {
     One: gl.ONE,
