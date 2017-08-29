@@ -144,7 +144,7 @@ function createContext (opts) {
       gl.vertexAttribDivisor = function () {
         throw new Error('ANGLE_instanced_arrays not supported')
       }
-      this.capabilities.instancing = true
+      capabilities.instancing = true
     } else {
       // TODO: this._caps[CAPS_INSTANCED_ARRAYS] = true;
       gl.drawElementsInstanced = ext.drawElementsInstancedANGLE.bind(ext)
