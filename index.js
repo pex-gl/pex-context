@@ -127,6 +127,9 @@ function createContext (opts) {
     viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]
   }
 
+  const capabilities = {
+  }
+
   // extensions
   if (!gl.drawElementsInstanced) {
     const ext = gl.getExtension('ANGLE_instanced_arrays')
@@ -141,12 +144,16 @@ function createContext (opts) {
       gl.vertexAttribDivisor = function () {
         throw new Error('ANGLE_instanced_arrays not supported')
       }
+      this.capabilities.instancing = true
     } else {
       // TODO: this._caps[CAPS_INSTANCED_ARRAYS] = true;
       gl.drawElementsInstanced = ext.drawElementsInstancedANGLE.bind(ext)
       gl.drawArraysInstanced = ext.drawArraysInstancedANGLE.bind(ext)
       gl.vertexAttribDivisor = ext.vertexAttribDivisorANGLE.bind(ext)
+      capabilities.instancing = false
     }
+  } else {
+    capabilities.instancing = true
   }
   if (!gl.drawBuffers) {
     const ext = gl.getExtension('WEBGL_draw_buffers')
@@ -172,6 +179,7 @@ function createContext (opts) {
     Primitive: Primitive,
     Wrap: Wrap,
     debugMode: false,
+    capabilities: capabilities,
     // debugGraph: '',
     debugCommands: [],
     resources: [],
@@ -584,7 +592,7 @@ function createContext (opts) {
         if (attrib.divisor) {
           gl.vertexAttribDivisor(location, attrib.divisor)
           instanced = true
-        } else {
+        } else if (capabilities.instancing) {
           gl.vertexAttribDivisor(location, 0)
         }
         // TODO: how to match index with vertexLayout location?
