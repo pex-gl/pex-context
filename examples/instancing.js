@@ -43,11 +43,12 @@ const depthMapSize = 1024
 const depthMap = ctx.texture2D({
   width: depthMapSize,
   height: depthMapSize,
-  format: ctx.PixelFormat.Depth,
+  pixelFormat: ctx.PixelFormat.Depth,
+  encoding: ctx.Encoding.Linear,
   min: ctx.Filter.Linear,
   mag: ctx.Filter.Linear
 })
-const colorMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize })
+const colorMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize, pixelFormat: ctx.PixelFormat.RGBA8, encoding: ctx.Encoding.SRGB })
 
 const depthPassCmd = {
   name: 'depthPass',
