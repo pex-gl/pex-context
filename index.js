@@ -441,21 +441,23 @@ function createContext (opts) {
         }
       }
 
-      if (pipeline.blendEnabled !== state.blendEnabled) {
+      if (pipeline.blendEnabled !== state.blendEnabled ||
+        pipeline.blendSrcRGBFactor !== state.blendSrcRGBFactor ||
+        pipeline.blendSrcAlphaFactor !== state.blendSrcAlphaFactor ||
+        pipeline.blendDstRGBFactor !== state.blendDstRGBFactor ||
+        pipeline.blendDstAlphaFactor !== state.blendDstAlphaFactor) {
         state.blendEnabled = pipeline.blendEnabled
         state.blendSrcRGBFactor = pipeline.blendSrcRGBFactor
         state.blendSrcAlphaFactor = pipeline.blendSrcAlphaFactor
         state.blendDstRGBFactor = pipeline.blendDstRGBFactor
         state.blendDstAlphaFactor = pipeline.blendDstAlphaFactor
         state.blendEnabled ? gl.enable(gl.BLEND) : gl.disable(gl.BLEND)
-        if (state.blendEnabled) {
-          gl.blendFuncSeparate(
-            state.blendSrcRGBFactor,
-            state.blendDstRGBFactor,
-            state.blendSrcAlphaFactor,
-            state.blendDstAlphaFactor
-          )
-        }
+        gl.blendFuncSeparate(
+          state.blendSrcRGBFactor,
+          state.blendDstRGBFactor,
+          state.blendSrcAlphaFactor,
+          state.blendDstAlphaFactor
+        )
       }
 
       if (pipeline.cullFaceEnabled !== state.cullFaceEnabled || pipeline.cullFace !== state.cullFace) {
