@@ -30,7 +30,13 @@ function createContext (opts) {
     One: gl.ONE,
     Zero: gl.ZERO,
     SrcAlpha: gl.SRC_ALPHA,
-    OneMinusSrcAlpha: gl.ONE_MINUS_SRC_ALPHA
+    OneMinusSrcAlpha: gl.ONE_MINUS_SRC_ALPHA,
+    DstAlpha: gl.DST_ALPHA,
+    OneMinusDstAlpha: gl.ONE_MINUS_DST_ALPHA,
+    SrcColor: gl.SRC_COLOR,
+    OneMinusSrcColor: gl.ONE_MINUS_SRC_COLOR,
+    DstColor: gl.DST_COLOR,
+    OneMinusDstColor: gl.ONE_MINUS_DST_COLOR
   }
 
   const CubemapFace = {
