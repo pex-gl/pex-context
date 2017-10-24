@@ -51,10 +51,12 @@ function updateBuffer (ctx, buffer, opts) {
     }
     if (type === ctx.DataType.Float32) data = new Float32Array(data)
     else if (type === ctx.DataType.Uint16) data = new Uint16Array(data)
+    else if (type === ctx.DataType.Uint32) data = new Uint32Array(data)
     else throw new Error(`Unknown buffer type: ${type}`)
   } else {
     if (data instanceof Float32Array) type = ctx.DataType.Float32
     else if (data instanceof Uint16Array) type = ctx.DataType.Uint16
+    else if (data instanceof Uint32Array) type = ctx.DataType.Uint32
     else throw new Error(`Unknown buffer data type: ${data.constructor}`)
   }
 

@@ -26,6 +26,8 @@ function createContext (opts) {
     gl.HALF_FLOAT = ext.HALF_FLOAT_OES
   }
 
+  gl.getExtension('OES_element_index_uint')
+
   const BlendFactor = {
     One: gl.ONE,
     Zero: gl.ZERO,
@@ -62,7 +64,8 @@ function createContext (opts) {
   const DataType = {
     Float32: gl.FLOAT,
     Uint8: gl.UNSIGNED_BYTE,
-    Uint16: gl.UNSIGNED_SHORT
+    Uint16: gl.UNSIGNED_SHORT,
+    Uint32: gl.UNSIGNED_INT
   }
 
   const Face = {
