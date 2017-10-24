@@ -61,6 +61,8 @@ ctx.frame(() => {
 
 Creating gl context wrapper.
 
+### ctx = createContext(opts)
+
 ```javascript
 var createContext = require('pex-context')
 
@@ -82,11 +84,53 @@ TODO: webgl2
 var ctx = createContext({ webgl2: true, width: Number, height: Number })
 ```
 
+## Commands
+
+Commands are plain javascript objects with GPU resources needed to complete a draw call
+
+```javascript
+var cmd = {
+  pass: ctx.pass(..),
+  pipeline: ctx.pipeline(..),
+  attributes: [..]
+}
+```
+
+## Submtting commands to the GPU
+
+#### ctx.submit(cmd)
+
+```javascript
+ctx.submit({
+  pass: Pass
+  pipeline: Pipeline,
+  attributes: {
+    name:  VertexBuffer,
+    name: { buffer: VertexBuffer, offset: Number, stride: Number }
+  },
+  indices: IndexBuffer,
+  indices: { buffer: IndexBuffer, offset: Number },
+  count: Number,
+  instances: Number,
+  uniforms: {
+    name: Number,
+    name: Array,
+    name: Texture2D
+  }
+})
+```
+
+## Subcommands
+
+TODO:
+
 ## Resource creation
 
 ### Textures
 
 Textires represent pixel data uploaded to the GPU.
+
+#### texture = ctx.texture2D(opts)
 
 ```javascript
 var tex = ctx.texture2D({
@@ -132,6 +176,9 @@ var tex = ctx.textureCube([
 
 ### Buffers
 
+#### buffer = ctx.vertexBuffer(opts)
+#### buffer = ctx.indexBuffer(opts)
+
 ```javascript
 var buf = ctx.vertexBuffer({ data: Array }) // aka Attribute Buffer
 
@@ -139,6 +186,8 @@ var buf = ctx.indexBuffer({ data: Array }) // aka Index Buffer
 ```
 
 ### Pipelines
+
+#### pipeline = ctx.pipeline(opts)
 
 ```javascript
 var pipeline = ctx.pipeline({
@@ -154,11 +203,14 @@ var pipeline = ctx.pipeline({
   blendDstRGBFactor: BlendFactor,
   blendDstAlphaFactor: BlendFactor,
   cullFaceEnabled: Boolean,
-  cullFace: Face
+  cullFace: Face,
+  primitive: Primitive
 })
 ```
 
 ### Passes
+
+#### pass = ctx.pass(opts)
 
 ```javascript
 var pass = ctx.pass({
@@ -178,36 +230,17 @@ var pass = ctx.pass({
 
 ```
 
-## Resource update
+## Updating resources
+
+#### ctx.update(res, opts)
 
 ```javascript
 ctx.update(res, { data: Array })
 ```
 
-## Command submission
-
-```javascript
-ctx.submit({
-  pass: Pass
-  pipeline: Pipeline,
-  attributes: {
-    name:  VertexBuffer,
-    name: { buffer: VertexBuffer, offset: Number, stride: Number }
-  },
-  indices: IndexBuffer,
-  indices: { buffer: IndexBuffer, offset: Number },
-  primitive: Primitive,
-  count: Number,
-  instances: Number,
-  uniforms: {
-    name: Number,
-    name: Array,
-    name: Texture2D
-  }
-})
-```
-
 # Enums
+
+#### ctx.BlendFactor
 
 ```
   const BlendFactor = {
@@ -217,6 +250,8 @@ ctx.submit({
     OneMinusSrcAlpha: gl.ONE_MINUS_SRC_ALPHA
   }
 ```
+
+#### ctx.CubemapFace
 
 ```
   const CubemapFace = {
@@ -229,6 +264,8 @@ ctx.submit({
   }
 ```
 
+#### ctx.DataType
+
 ```
   const DataType = {
     Float32: gl.FLOAT,
@@ -236,6 +273,8 @@ ctx.submit({
     Uint16: gl.UNSIGNED_SHORT
   }
 ```
+
+#### ctx.DepthFunc
 
 ```
   const DepthFunc = {
@@ -250,6 +289,8 @@ ctx.submit({
   }
 ```
 
+#### ctx.Face
+
 ```
   const Face = {
     Front: gl.FRONT,
@@ -257,6 +298,8 @@ ctx.submit({
     FrontAndBack: gl.FRONT_AND_BACK
   }
 ```
+
+#### ctx.PixelFormat
 
 ```
   const PixelFormat = {
@@ -269,6 +312,8 @@ ctx.submit({
   }
 ```
 
+#### ctx.Primitive
+
 ```
   const Primitive = {
     Points: gl.POINTS,
@@ -278,6 +323,8 @@ ctx.submit({
     TriangleStrip: gl.TRIANGLE_STRIP
   }
 ```
+
+#### ctx.Wrap
 
 ```
   const Wrap = {
