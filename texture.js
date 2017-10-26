@@ -58,7 +58,7 @@ function updateTexture2D (ctx, texture, opts) {
   let min = opts.min || texture.min || gl.NEAREST
   let mag = opts.min || texture.mag || gl.NEAREST
   let wrapS = opts.wrapS || texture.wrapS || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
-  let wrapT = opts.wrapS || texture.wrapS || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
+  let wrapT = opts.wrapT || texture.wrapT || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
   let aniso = opts.aniso || texture.aniso || 0
   let premultiplayAlpha = orValue(opts.premultiplayAlpha, orValue(texture.premultiplayAlpha, false))
   let internalFormat = undefined
