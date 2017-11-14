@@ -266,6 +266,7 @@ function createContext (opts) {
       if (this.debugMode) {
         var error = gl.getError()
         if (error) {
+          this.debugMode = false // prevents rolling errors
           if (isBrowser) log('State', this.state.state)
           throw new Error(`GL error ${error} : ${this.getGLString(error)}`)
         }
