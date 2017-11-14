@@ -133,7 +133,8 @@ function createContext (opts) {
       cullFace: Face.Back,
       primitive: Primitive.Triangles
     },
-    viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight]
+    viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight],
+    count: 0
   }
 
   const capabilities = {
