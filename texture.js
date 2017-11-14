@@ -56,7 +56,7 @@ function updateTexture2D (ctx, texture, opts) {
   let pixelFormat = opts.pixelFormat || texture.pixelFormat
   let encoding = opts.encoding || texture.encoding
   let min = opts.min || texture.min || gl.NEAREST
-  let mag = opts.min || texture.mag || gl.NEAREST
+  let mag = opts.mag || texture.mag || gl.NEAREST
   let wrapS = opts.wrapS || texture.wrapS || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
   let wrapT = opts.wrapT || texture.wrapT || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
   let aniso = opts.aniso || texture.aniso || 0
@@ -91,8 +91,8 @@ function updateTexture2D (ctx, texture, opts) {
 
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY)
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplayAlpha)
-  gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, min)
-  gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, mag)
+  gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, mag)
+  gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, min)
   gl.texParameteri(target, gl.TEXTURE_WRAP_S, wrapS)
   gl.texParameteri(target, gl.TEXTURE_WRAP_T, wrapT)
   if (anisoExt && aniso > 0) {
