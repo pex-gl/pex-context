@@ -160,7 +160,7 @@ function createContext (opts) {
       gl.drawElementsInstanced = ext.drawElementsInstancedANGLE.bind(ext)
       gl.drawArraysInstanced = ext.drawArraysInstancedANGLE.bind(ext)
       gl.vertexAttribDivisor = ext.vertexAttribDivisorANGLE.bind(ext)
-      capabilities.instancing = false
+      capabilities.instancing = true
     }
   } else {
     capabilities.instancing = true
@@ -562,7 +562,6 @@ function createContext (opts) {
 
       let instanced = false
       // TODO: disable unused vertex array slots
-      // TODO: disable divisor if attribute not instanced?
       for (var i = 0; i < 16; i++) {
         state.activeAttributes[i] = null
         gl.disableVertexAttribArray(i)
