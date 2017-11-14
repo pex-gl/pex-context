@@ -591,11 +591,10 @@ function createContext (opts) {
         gl.bindBuffer(buffer.target, buffer.handle)
         gl.enableVertexAttribArray(location)
         state.activeAttributes[location] = buffer
-        // logSometimes('drawVertexData', name, location, attrib.buffer._length)
         gl.vertexAttribPointer(
           location,
           size,
-          buffer.type || gl.FLOAT,
+          attrib.type || buffer.type || gl.FLOAT,
           attrib.normalized || false,
           attrib.stride || 0,
           attrib.offset || 0
@@ -621,21 +620,22 @@ function createContext (opts) {
         }
         state.indexBuffer = indexBuffer
         gl.bindBuffer(indexBuffer.target, indexBuffer.handle)
-        var count = indexBuffer.length
-        // TODO: support for unint32 type
-        // TODO: support for offset
+        var count = cmd.indices.count || indexBuffer.length
+        var offset = cmd.indices.offset || 0
+        var type = cmd.indices.type || indexBuffer.type
         if (instanced) {
           // TODO: check if instancing available
-          gl.drawElementsInstanced(primitive, count, indexBuffer.type, 0, cmd.instances)
+          gl.drawElementsInstanced(primitive, count, type, offset, cmd.instances)
         } else {
-          gl.drawElements(primitive, count, indexBuffer.type, 0)
+          gl.drawElements(primitive, count, type, offset)
         }
       } else if (cmd.count) {
+        const first = 0
         if (instanced) {
           // TODO: check if instancing available
-          gl.drawElementsInstanced(primitive, 0, cmd.count, cmd.instances)
+          gl.drawElementsInstanced(primitive, first, cmd.count, cmd.instances)
         } else {
-          gl.drawArrays(primitive, 0, cmd.count)
+          gl.drawArrays(primitive, first, cmd.count)
         }
       } else {
         assert.fail('Vertex arrays requres elements or count to draw')
