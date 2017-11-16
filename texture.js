@@ -52,20 +52,17 @@ function updateTexture2D (ctx, texture, opts) {
   let lod = 0
   let flipY = orValue(opts.flipY, orValue(texture.flipY, false))
   let target = opts.target || texture.target
-  let pixelFormat = opts.pixelFormat || texture.pixelFormat
-  let encoding = opts.encoding || texture.encoding
+  let pixelFormat = opts.pixelFormat || texture.pixelFormat || ctx.PixelFormat.RGBA8
+  let encoding = opts.encoding || texture.encoding || ctx.Encoding.Linear
   let min = opts.min || texture.min || gl.NEAREST
   let mag = opts.mag || texture.mag || gl.NEAREST
   let wrapS = opts.wrapS || texture.wrapS || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
   let wrapT = opts.wrapT || texture.wrapT || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
   let aniso = opts.aniso || texture.aniso || 0
   let premultiplayAlpha = orValue(opts.premultiplayAlpha, orValue(texture.premultiplayAlpha, false))
-  let internalFormat = undefined
-  let pixelformat = undefined
-  let type = undefined
-
-  assert(pixelFormat, 'PixelFormat is required')
-  assert(encoding, 'Encoding is required')
+  let internalFormat
+  let type
+  let format
 
   gl.getExtension('WEBGL_depth_texture')
   gl.getExtension('EXT_shader_texture_lod')
