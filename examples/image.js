@@ -5,20 +5,20 @@ const isBrowser = require('is-browser')
 const createCamera = require('pex-cam/perspective')
 const createOrbiter = require('pex-cam/orbiter')
 const createCube = require('primitive-cube')
-const mat4 = require('pex-math/Mat4')
+const mat4 = require('pex-math/mat4')
 
 const ctx = createContext()
 
 const camera = createCamera({
-  fov: 45, // TODO: change fov to radians
+  fov: Math.PI / 4,
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
-  position: [3, 0.5, 3],
+  position: [2, 0.5, 2],
   target: [0, 0, 0]
 })
 
 createOrbiter({ camera: camera, distance: 10 })
 
-const ASSETS_DIR = isBrowser ? 'assets' : __dirname + '/assets'
+const ASSETS_DIR = isBrowser ? 'assets' : `${__dirname}/assets`
 
 const cube = createCube(1)
 

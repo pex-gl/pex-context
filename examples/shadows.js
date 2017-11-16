@@ -26,12 +26,12 @@ const createCube = require('primitive-cube')
 const bunny = require('bunny')
 const normals = require('normals')
 const centerAndNormalize = require('geom-center-and-normalize')
-const Vec3 = require('pex-math/Vec3')
+const vec3 = require('pex-math/vec3')
 const SimplexNoise = require('simplex-noise')
 const flatten = require('flatten')
 
 // math
-// var createMat4 = require('gl-mat4/create')
+// var createmat4 = require('gl-mat4/create')
 // var lookAt = require('gl-mat4/lookAt')
 // var perspective = require('gl-mat4/perspective')
 // var translate = require('gl-mat4/translate')
@@ -43,7 +43,7 @@ const flatten = require('flatten')
 const createContext = require('../../pex-context')
 const createCamera = require('pex-cam/perspective')
 const createOrbiter = require('pex-cam/orbiter')
-const Mat4 = require('pex-math/Mat4')
+const mat4 = require('pex-math/mat4')
 // const load = require('pex-io/load')
 const glsl = require('glslify')
 // const isBrowser = require('is-browser')
@@ -55,7 +55,7 @@ let prevTime = Date.now()
 const noise = new SimplexNoise()
 
 const camera = createCamera({
-  fov: 45, // TODO: change fov to radians
+  fov: Math.PI / 4, // TODO: change fov to radians
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
   position: [3, 0.5, 3],
   target: [0, 0, 0]
@@ -64,7 +64,7 @@ const camera = createCamera({
 createOrbiter({ camera: camera, distance: 10 })
 
 const lightCamera = createCamera({
-  fov: 45, // TODO: change fov to radians,
+  fov: Math.PI / 4, // TODO: change fov to radians,
   aspect: 1,
   near: 1,
   far: 50,
@@ -74,7 +74,8 @@ const lightCamera = createCamera({
 
 const depthMapSize = 512
 const depthMap = ctx.texture2D({
-  width: depthMapSize, height: depthMapSize,
+  width: depthMapSize,
+  height: depthMapSize,
   pixelFormat: ctx.PixelFormat.Depth,
   encoding: ctx.Encoding.Linear
 })
@@ -97,10 +98,10 @@ const depthPassCmd = {
   })
 }
 
-const showNormalsVert = glsl(__dirname + '/glsl/show-normals.vert')
-const showNormalsFrag = glsl(__dirname + '/glsl/show-normals.frag')
-const shadowMappedVert = glsl(__dirname + '/glsl/shadow-mapped.vert')
-const shadowMappedFrag = glsl(__dirname + '/glsl/shadow-mapped.frag')
+const showNormalsVert = glsl(`${__dirname}/glsl/show-normals.vert`)
+const showNormalsFrag = glsl(`${__dirname}/glsl/show-normals.frag`)
+const shadowMappedVert = glsl(`${__dirname}/glsl/shadow-mapped.vert`)
+const shadowMappedFrag = glsl(`${__dirname}/glsl/shadow-mapped.frag`)
 // BlitVert: glslify(__dirname + '/sh/materials/Blit.vert'),
 // BlitFrag: glslify(__dirname + '/sh/materials/Blit.frag')
 
@@ -133,7 +134,7 @@ const drawFloorCmd = {
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: Mat4.create(),
+    uModelMatrix: mat4.create(),
     uWrap: 0,
     uLightNear: lightCamera.near,
     uLightFar: lightCamera.far,
@@ -163,7 +164,7 @@ const drawFloorDepthCmd = {
   uniforms: {
     uProjectionMatrix: lightCamera.projectionMatrix,
     uViewMatrix: lightCamera.viewMatrix,
-    uModelMatrix: Mat4.create()
+    uModelMatrix: mat4.create()
   },
   attributes: {
     aPosition: {
@@ -178,9 +179,9 @@ const drawFloorDepthCmd = {
   }
 }
 
-const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) => Vec3.scale(p, 2))
+const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
 const bunnyBaseNormals = normals.vertexNormals(bunny.cells, bunny.positions)
-const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) => Vec3.scale(p, 2))
+const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
 
 const bunnyPositionBuffer = ctx.vertexBuffer(bunnyBaseVertices)
 const bunnyNormalBuffer = ctx.vertexBuffer(bunnyBaseNormals)
@@ -194,7 +195,7 @@ const drawBunnyCmd = {
     // doing anything, is that but or a feature? Should i cache and force uViewMatrix: () => camera.viewMatrix
     // to mark the uniform as "dynamic" ?
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: Mat4.translate(Mat4.create(), [0, 1, 0]),
+    uModelMatrix: mat4.translate(mat4.create(), [0, 1, 0]),
     uWrap: 0,
     uLightNear: lightCamera.near,
     uLightFar: lightCamera.far,
@@ -224,7 +225,7 @@ const drawBunnyDepthCmd = {
   uniforms: {
     uProjectionMatrix: lightCamera.projectionMatrix,
     uViewMatrix: lightCamera.viewMatrix,
-    uModelMatrix: Mat4.translate(Mat4.create(), [0, 1, 0])
+    uModelMatrix: mat4.translate(mat4.create(), [0, 1, 0])
   },
   attributes: {
     aPosition: {
@@ -261,7 +262,7 @@ function updateBunny (ctx) {
   for (let i = 0; i < bunnyBaseVertices.length; i++) {
     var v = bunnyNoiseVertices[i]
     var n = bunnyBaseNormals[i]
-    Vec3.set(v, bunnyBaseVertices[i])
+    vec3.set(v, bunnyBaseVertices[i])
     var f = noise.noise3D(v[0] * noiseFrequency, v[1] * noiseFrequency, v[2] * noiseFrequency + elapsedSeconds)
     v[0] += n[0] * noiseScale * (f + 1)
     v[1] += n[1] * noiseScale * (f + 1)
@@ -296,14 +297,14 @@ function updateBunny (ctx) {
 const drawFullscreenQuadCmd = {
   name: 'drawFullscreenQuad',
   pipeline: ctx.pipeline({
-    vert: glsl(__dirname + '/glsl/screen-image.vert'),
-    frag: glsl(__dirname + '/glsl/screen-image.frag'),
+    vert: glsl(`${__dirname}/glsl/screen-image.vert`),
+    frag: glsl(`${__dirname}/glsl/screen-image.frag`),
     depthTest: false
   }),
   attributes: {
     // aPosition: { buffer: ctx.vertexBuffer(new Float32Array(flatten([[-1, -1], [1, -1], [1, 1], [-1, 1]]))) },
     aPosition: { buffer: ctx.vertexBuffer([[-1, -1], [-2 / 4, -1], [-2 / 4, -1 / 3], [-1, -1 / 3]]) },
-    aTexCoord0: { buffer: ctx.vertexBuffer([[0, 0], [1, 0], [1, 1], [ 0, 1]]) }
+    aTexCoord0: { buffer: ctx.vertexBuffer([[0, 0], [1, 0], [1, 1], [0, 1]]) }
   },
   indices: {
     buffer: ctx.indexBuffer([[0, 1, 2], [0, 2, 3]])

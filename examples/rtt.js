@@ -1,6 +1,6 @@
 // Render to texture example
 const createCube = require('primitive-cube')
-const Mat4 = require('pex-math/Mat4')
+const mat4 = require('pex-math/mat4')
 
 const createContext = require('../../pex-context')
 const raf = require('raf')
@@ -11,7 +11,7 @@ const glsl = require('glslify')
 const ctx = createContext()
 
 const camera = createCamera({
-  fov: 45, // TODO: change fov to radians
+  fov: Math.PI / 4,
   aspect: 1,
   position: [3, 0.5, 3],
   target: [0, 0, 0],
@@ -60,12 +60,12 @@ const drawPass2Cmd = {
   })
 }
 
-const showNormalsVert = glsl(__dirname + '/glsl/show-normals.vert')
+const showNormalsVert = glsl(`${__dirname}/glsl/show-normals.vert`)
 
 const showNormalsMRTFrag = `
 #ifdef GL_ES
 precision highp float;
-#extension GL_EXT_draw_buffers : require 
+#extension GL_EXT_draw_buffers : require
 #endif
 
 varying vec4 vColor;
@@ -91,7 +91,7 @@ const drawFloorCmd = {
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: Mat4.create()
+    uModelMatrix: mat4.create()
   },
   attributes: {
     aPosition: {

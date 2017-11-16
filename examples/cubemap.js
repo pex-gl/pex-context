@@ -5,13 +5,13 @@ const isBrowser = require('is-browser')
 const createCamera = require('pex-cam/perspective')
 const createOrbiter = require('pex-cam/orbiter')
 const createSphere = require('primitive-sphere')
-const mat4 = require('pex-math/Mat4')
+const mat4 = require('pex-math/mat4')
 const glsl = require('glslify')
 
 const ctx = createContext()
 
 const camera = createCamera({
-  fov: 45, // TODO: change fov to radians
+  fov: Math.PI / 4, 
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
   position: [0, 0.5, 3],
   target: [0, 0, 0]
@@ -19,7 +19,7 @@ const camera = createCamera({
 
 createOrbiter({ camera: camera, distance: 10 })
 
-const ASSETS_DIR = isBrowser ? 'assets' : __dirname + '/assets'
+const ASSETS_DIR = isBrowser ? 'assets' : `${__dirname}/assets`
 
 const clearScreenCmd = {
   pass: ctx.pass({
@@ -143,12 +143,12 @@ const drawSkybox = {
 }
 
 const resources = {
-  negx: { image: ASSETS_DIR + '/images/pisa/pisa_negx.jpg' },
-  negy: { image: ASSETS_DIR + '/images/pisa/pisa_negy.jpg' },
-  negz: { image: ASSETS_DIR + '/images/pisa/pisa_negz.jpg' },
-  posx: { image: ASSETS_DIR + '/images/pisa/pisa_posx.jpg' },
-  posy: { image: ASSETS_DIR + '/images/pisa/pisa_posy.jpg' },
-  posz: { image: ASSETS_DIR + '/images/pisa/pisa_posz.jpg' }
+  negx: { image: `${ASSETS_DIR}/images/pisa/pisa_negx.jpg` },
+  negy: { image: `${ASSETS_DIR}/images/pisa/pisa_negy.jpg` },
+  negz: { image: `${ASSETS_DIR}/images/pisa/pisa_negz.jpg` },
+  posx: { image: `${ASSETS_DIR}/images/pisa/pisa_posx.jpg` },
+  posy: { image: `${ASSETS_DIR}/images/pisa/pisa_posy.jpg` },
+  posz: { image: `${ASSETS_DIR}/images/pisa/pisa_posz.jpg` }
 }
 
 load(resources, (err, res) => {
@@ -164,9 +164,9 @@ load(resources, (err, res) => {
     height: res.negy.height
   })
 
-  drawSkybox.uniforms.uEnvMap = envMapCube;
-  drawCmd.uniforms.uEnvMap = envMapCube;
-  drawCmd.uniforms.uCameraPosition = camera.position;
+  drawSkybox.uniforms.uEnvMap = envMapCube
+  drawCmd.uniforms.uEnvMap = envMapCube
+  drawCmd.uniforms.uCameraPosition = camera.position
 
   raf(function frame () {
     ctx.submit(clearScreenCmd)

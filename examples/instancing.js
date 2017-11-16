@@ -4,9 +4,9 @@ const bunny = require('bunny')
 // const bunny = require('primitive-cube')()
 const normals = require('normals')
 const centerAndNormalize = require('geom-center-and-normalize')
-const Vec3 = require('pex-math/Vec3')
-const Mat4 = require('pex-math/Mat4')
-const Quat = require('pex-math/Quat')
+const vec3 = require('pex-math/vec3')
+const mat4 = require('pex-math/mat4')
+const quat = require('pex-math/quat')
 const SimplexNoise = require('simplex-noise')
 const R = require('ramda')
 const random = require('pex-random')
@@ -14,7 +14,6 @@ const random = require('pex-random')
 const createContext = require('../../pex-context')
 const raf = require('raf')
 const createCamera = require('pex-cam/perspective')
-const createOrbiter = require('pex-cam/orbiter')
 const glsl = require('glslify')
 
 const ctx = createContext()
@@ -24,14 +23,14 @@ let prevTime = Date.now()
 const noise = new SimplexNoise()
 
 const camera = createCamera({
-  fov: 45, // TODO: change fov to radians
+  fov: Math.PI / 4,
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
   position: [3, 0.5, 3],
   target: [0, 2, 0]
 })
 
 const lightCamera = createCamera({
-  fov: 45, // TODO: change fov to radians,
+  fov: Math.PI / 4,
   aspect: 1,
   near: 5,
   far: 20,
@@ -93,12 +92,12 @@ uniform mat4 uViewMatrix;
 uniform mat4 uModelMatrix;
 varying vec4 vColor;
 
-#pragma glslify: quatToMat4=require(./assets/quat2mat4.glsl)
+#pragma glslify: quatTomat4=require(./assets/quat2mat4.glsl)
 
 void main() {
   vec4 position = vec4(aPosition, 1.0);
   position.xyz *= aScale;
-  position = quatToMat4(aRotation) * position;
+  position = quatTomat4(aRotation) * position;
   position.xyz += aOffset;
   gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * position;
   vColor = vec4(aNormal / 2.0 + 0.5, 1.0);
@@ -156,7 +155,7 @@ varying vec3 vNormalWorld;
 varying vec3 vWorldPosition;
 varying vec4 vColor;
 
-#pragma glslify: quatToMat4=require(./assets/quat2mat4.glsl)
+#pragma glslify: quatTomat4=require(./assets/quat2mat4.glsl)
 #ifdef GL_ES
 #pragma glslify: transpose=require(glsl-transpose)
 #endif
@@ -166,7 +165,7 @@ void main() {
   mat4 modelView = uViewMatrix * uModelMatrix;
   vec4 position = vec4(aPosition, 1.0);
   position.xyz *= aScale;
-  mat4 rotationMat = quatToMat4(aRotation);
+  mat4 rotationMat = quatTomat4(aRotation);
   position =  rotationMat * position;
   position.xyz += aOffset;
   gl_Position = uProjectionMatrix * modelView * position;
@@ -226,7 +225,6 @@ void main() {
   vec2 lightUV = lightDeviceCoordsPositionNormalized.xy * 0.5 + 0.5;
   float bias = 0.1;
   float lightDist2 = readDepth(uDepthMap, lightUV);
-  
 
   float illuminated = 1.0;
   if (lightDist1 > lightDist2 + bias) {
@@ -252,7 +250,7 @@ const drawFloorCmd = {
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: Mat4.create(),
+    uModelMatrix: mat4.create(),
     uWrap: 1,
     uLightNear: lightCamera.near,
     uLightFar: lightCamera.far,
@@ -286,7 +284,7 @@ const drawFloorDepthCmd = {
   uniforms: {
     uProjectionMatrix: lightCamera.projectionMatrix,
     uViewMatrix: lightCamera.viewMatrix,
-    uModelMatrix: Mat4.create()
+    uModelMatrix: mat4.create()
   },
   attributes: {
     aPosition: {
@@ -310,7 +308,7 @@ const numBunnies = 200 // for some reason this is much slower than batching
 random.seed(0)
 for (let i = 0; i < numBunnies; i++) {
   const pos = [random.float(-5, 5), random.float(0, 5), random.float(-5, 5)]
-  const rotation = Quat.fromDirection(Quat.create(), random.vec3())
+  const rotation = quat.fromTo(quat.create(), [0, 0, 1], vec3.normalize(random.vec3()))
   const scale = [0.2, 0.2, 0.2]
   const color = [random.float(0.1, 1.0), random.float(0.1, 1.0), random.float(0.1, 1.0), 1.0]
 
@@ -320,9 +318,9 @@ for (let i = 0; i < numBunnies; i++) {
   colors.push(color)
 }
 
-const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) => Vec3.scale(p, 2))
+const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
 const bunnyBaseNormals = normals.vertexNormals(bunny.cells, bunny.positions)
-const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) => Vec3.scale(p, 2))
+const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
 
 const bunnyPositionBuffer = ctx.vertexBuffer(bunnyBaseVertices)
 const bunnyNormalBuffer = ctx.vertexBuffer(bunnyBaseNormals)
@@ -344,7 +342,7 @@ const drawBunnyCmd = {
     // doing anything, is that but or a feature? Should i cache and force uViewMatrix: () => camera.viewMatrix
     // to mark the uniform as "dynamic" ?
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: Mat4.translate(Mat4.create(), [0, 1, 0]),
+    uModelMatrix: mat4.translate(mat4.create(), [0, 1, 0]),
     uWrap: 1,
     uLightNear: lightCamera.near,
     uLightFar: lightCamera.far,
@@ -363,7 +361,6 @@ const drawBunnyCmd = {
     aScale: { buffer: bunnyScalesBuffer, divisor: 1 },
     aColor: { buffer: bunnyColorsBuffer, divisor: 1 }
   },
-  // FIXME: rename this to indexBuffer?
   indices: {
     buffer: ctx.indexBuffer(bunny.cells)
   },
@@ -380,7 +377,7 @@ const drawBunnyDepthCmd = {
   uniforms: {
     uProjectionMatrix: lightCamera.projectionMatrix,
     uViewMatrix: lightCamera.viewMatrix,
-    uModelMatrix: Mat4.translate(Mat4.create(), [0, 1, 0])
+    uModelMatrix: mat4.translate(mat4.create(), [0, 1, 0])
   },
   attributes: {
     aPosition: { buffer: bunnyPositionBuffer },
@@ -389,7 +386,6 @@ const drawBunnyDepthCmd = {
     aRotation: { buffer: bunnyRotationsBuffer, divisor: 1 },
     aScale: { buffer: bunnyScalesBuffer, divisor: 1 }
   },
-  // FIXME: rename this to indexBuffer?
   indices: {
     buffer: ctx.indexBuffer(bunny.cells)
   },
@@ -405,9 +401,9 @@ function updateTime () {
 
 function updateCamera () {
   const t = elapsedSeconds / 10 + 0.5
-  const x = 8 * Math.cos(Math.PI * t)
-  const y = 5
-  const z = 8 * Math.sin(Math.PI * t)
+  const x = 6 * Math.cos(Math.PI * t)
+  const y = 3
+  const z = 6 * Math.sin(Math.PI * t)
   camera({ position: [x, y, z] })
 }
 
@@ -417,7 +413,7 @@ function updateBunny (ctx) {
   for (let i = 0; i < bunnyBaseVertices.length; i++) {
     const v = bunnyNoiseVertices[i]
     const n = bunnyBaseNormals[i]
-    Vec3.set(v, bunnyBaseVertices[i])
+    vec3.set(v, bunnyBaseVertices[i])
     const f = noise.noise3D(v[0] * noiseFrequency, v[1] * noiseFrequency, v[2] * noiseFrequency + elapsedSeconds)
     v[0] += n[0] * noiseScale * (f + 1)
     v[1] += n[1] * noiseScale * (f + 1)
@@ -433,8 +429,8 @@ function updateBunny (ctx) {
 const drawFullscreenQuadCmd = {
   name: 'drawFullscreenQuad',
   pipeline: ctx.pipeline({
-    vert: glsl(__dirname + '/glsl/screen-image.vert'),
-    frag: glsl(__dirname + '/glsl/screen-image.frag'),
+    vert: glsl(`${__dirname}/glsl/screen-image.vert`),
+    frag: glsl(`${__dirname}/glsl/screen-image.frag`),
     depthTest: false
   }),
   attributes: {
