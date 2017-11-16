@@ -3,23 +3,22 @@ const checkProps = require('./check-props')
 
 const allowedProps = [
   'name',
-  'data', 'width', 'height',
+  'data',
+  'width', 'height',
   'pixelFormat', 'encoding',
   'flipY',
   'mipmap',
   'target',
   'min', 'mag',
-  'wrap',
+  'wrap', 'wrapS', 'wrapT',
+  'aniso',
   'premultiplayAlpha'
 ]
 
-
 function createTexture (ctx, opts) {
-  // checkProps(allowedProps, opts)
+  checkProps(allowedProps, opts)
 
   const gl = ctx.gl
-
-  // TODO: implement filtering options
 
   const texture = {
     class: 'texture',
