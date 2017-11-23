@@ -111,6 +111,19 @@ function createContext (opts) {
     ClampToEdge: gl.CLAMP_TO_EDGE,
     Repeat: gl.REPEAT
   }
+  const ctx = {
+    gl: gl,
+    BlendFactor: BlendFactor,
+    CubemapFace: CubemapFace,
+    DataType: DataType,
+    DepthFunc: DepthFunc,
+    Face: Face,
+    Filter: Filter,
+    PixelFormat: PixelFormat,
+    Encoding: Encoding,
+    Primitive: Primitive,
+    Wrap: Wrap
+  }
 
   const defaultState = {
     pass: {
@@ -123,16 +136,7 @@ function createContext (opts) {
       clearColor: [0, 0, 0, 1],
       clearDepth: 1
     },
-    pipeline: {
-      program: null,
-      depthWrite: true,
-      depthTest: false,
-      depthFunc: DepthFunc.LessEqual,
-      blendEnabled: false,
-      cullFaceEnabled: false,
-      cullFace: Face.Back,
-      primitive: Primitive.Triangles
-    },
+    pipeline: createPipeline(ctx, {}),
     viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight],
     count: 0
   }
@@ -176,18 +180,7 @@ function createContext (opts) {
     }
   }
 
-  const ctx = {
-    gl: gl,
-    BlendFactor: BlendFactor,
-    CubemapFace: CubemapFace,
-    DataType: DataType,
-    DepthFunc: DepthFunc,
-    Face: Face,
-    Filter: Filter,
-    PixelFormat: PixelFormat,
-    Encoding: Encoding,
-    Primitive: Primitive,
-    Wrap: Wrap,
+  Object.assign(ctx, {
     debugMode: false,
     capabilities: capabilities,
     // debugGraph: '',
@@ -790,7 +783,7 @@ function createContext (opts) {
       }
       this.checkError()
     }
-  }
+  })
   ctx.apply(defaultState)
   return ctx
 }

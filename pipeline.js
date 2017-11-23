@@ -16,11 +16,20 @@ function createPipeline (ctx, opts) {
 
   const pipeline = Object.assign({
     class: 'pipeline',
-    depthEnabled: false,
-    primitive: ctx.Primitive.Triangles,
+    vert: null,
+    frag: null,
+    program: null,
     depthWrite: true,
     depthTest: false,
-    depthFunc: ctx.DepthFunc.LessEqual
+    depthFunc: ctx.DepthFunc.LessEqual,
+    blend: false,
+    blendSrcRGBFactor: ctx.BlendFactor.One,
+    blendSrcAlphaFactor: ctx.BlendFactor.One,
+    blendDstRGBFactor: ctx.BlendFactor.One,
+    blendDstAlphaFactor: ctx.BlendFactor.One,
+    cullFace: false,
+    cullFaceMode: ctx.Face.Back,
+    primitive: ctx.Primitive.Triangles
   }, opts)
 
   if (opts.vert && opts.frag) {
