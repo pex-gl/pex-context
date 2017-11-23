@@ -169,15 +169,20 @@ function createContext (opts) {
   } else {
     capabilities.instancing = true
   }
+
   if (!gl.drawBuffers) {
     const ext = gl.getExtension('WEBGL_draw_buffers')
     if (!ext) {
       gl.drawBuffers = function () {
         throw new Error('WEBGL_draw_buffers not supported')
       }
+      capabilities.multipleRenderTargets = false
     } else {
       gl.drawBuffers = ext.drawBuffersWEBGL.bind(ext)
+      capabilities.multipleRenderTargets = true
     }
+  } else {
+    capabilities.multipleRenderTargets = true
   }
 
   Object.assign(ctx, {
