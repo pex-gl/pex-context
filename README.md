@@ -1,18 +1,25 @@
 # pex-context
 
-Modern WebGL state wrapper for [PEX](http://pex.gl). With `pex-context` you allocate GPU resources (textures, buffers), setup state pipelines and passes and combine them together in commands.
+Modern WebGL state wrapper for [PEX](http://pex.gl). With `pex-context` you allocate GPU resources (textures, buffers), setup state pipelines and passes and combine them together into commands.
 
 # Example
 
 ```javascript
 const createContext = require('pex-context')
 const createCube = require('primitive-cube')
-const Mat4 = require('pex-math/Mat4')
+const mat4 = require('pex-math/mat4')
 
 const ctx = createContext({ width: 640, height: 480 })
 const cube = createCube()
 
-const cmd = {
+const clearCmd = {
+  pass: ctx.pass({
+    clearColor: [0, 0, 0, 1],
+    clearDepth: 1
+  })
+}
+
+const drawCmd = {
   pass: ctx.pass({
     clearColor: [0.2, 0.2, 0.2, 1],
     clearDepth: 1
@@ -45,13 +52,14 @@ const cmd = {
   },
   indices: ctx.indexBuffer(cube.cells),
   uniforms: {
-    uProjectionMatrix: Mat4.perspective(Mat4.create(), 45, 640 / 480, 0.1, 100),
-    uViewMatrix: Mat4.lookAt(Mat4.create(), [2, 2, 5], [0, 0, 0], [0, 1, 0])
+    uProjectionMatrix: mat4.perspective(mat4.create(), Math.PI / 4, 640 / 480, 0.1, 100),
+    uViewMatrix: mat4.lookAt(mat4.create(), [2, 2, 5], [0, 0, 0], [0, 1, 0])
   }
 }
 
 ctx.frame(() => {
-  ctx.submit(cmd)
+  ctx.submit(clearCmd)
+  ctx.submit(drawCmd)
 })
 ```
 
@@ -79,11 +87,6 @@ var ctx = createContext({ canvas: canvas })
 var ctx = createContext({ width: Number, height: Number })
 ```
 
-TODO: webgl2
-```javascript
-var ctx = createContext({ webgl2: true, width: Number, height: Number })
-```
-
 ## Commands
 
 Commands are plain javascript objects with GPU resources needed to complete a draw call
@@ -98,7 +101,7 @@ var cmd = {
 
 ## Submtting commands to the GPU
 
-#### ctx.submit(cmd)
+### ctx.submit(cmd)
 
 ```javascript
 ctx.submit({
@@ -106,10 +109,13 @@ ctx.submit({
   pipeline: Pipeline,
   attributes: {
     name:  VertexBuffer,
+    // or
     name: { buffer: VertexBuffer, offset: Number, stride: Number }
   },
   indices: IndexBuffer,
+  // or
   indices: { buffer: IndexBuffer, offset: Number },
+  // or
   count: Number,
   instances: Number,
   uniforms: {
@@ -120,15 +126,57 @@ ctx.submit({
 })
 ```
 
+### ctx.submit(cmd, opts)
+
+Submit partially updated command without modifying the original one
+
+```javascript
+// E.g. draw mesh with custom color
+ctx.submit(cmd, {
+  uniforms: {
+    uColor: [1, 0, 0, 0]
+  }
+})
+```
+
+### ctx.submit(cmd, [opts1, opts2, opts3...])
+
+Submit a batch of commands differences in opts.
+
+```javascript
+// E.g. draw same mesh twice with different material and position
+ctx.submit(cmd, [
+  { pipeline: material1, uniforms: { uModelMatrix: position1 },
+  { pipeline: material2, uniforms: { uModelMatrix: position2 }
+])
+```
+
+## Render Loop
+
+#### ctx.frame(cb)
+
+- `cb`: Function - Request Animation Frame callack
+
 ## Subcommands
 
-TODO:
+#### ctx.submit(cmd, cb)
+
+Submit command while preserving state from another command.
+
+This approach allows to simulate state stack with automatic cleanup at the end of callback.
+
+```javascript
+// E.g. render to texture
+ctx.submit(renderToFboCmd, () => {
+  ctx.submit(drawMeshCmd)
+})
+```
 
 ## Resource creation
 
 ### Textures
 
-Textires represent pixel data uploaded to the GPU.
+Textures represent pixel data uploaded to the GPU.
 
 #### texture = ctx.texture2D(opts)
 
@@ -137,20 +185,12 @@ var tex = ctx.texture2D({
   data: [255, 255, 255, 255, 0, 0, 0, 255],
   width: 2,
   height: 1,
-  format: ctx.PixelFormat.RGB8,
+  pixelFormat: ctx.PixelFormat.RGB8,
   encoding: ctx.Encoding.Linear,
   wrap: ctx.Wrap.Repeat
 })
-
-var tex = ctx.textureCube([
-  { data: new Uint8Array([..]), width: 64, height: 64 },
-  { data: new Uint8Array([..]), width: 64, height: 64 },
-  { data: new Uint8Array([..]), width: 64, height: 64 },
-  { data: new Uint8Array([..]), width: 64, height: 64 },
-  { data: new Uint8Array([..]), width: 64, height: 64 },
-  { data: new Uint8Array([..]), width: 64, height: 64 }
-])
 ```
+
 
 | property | info | type | default |
 | -------- | ---- | ---- | ------- |
@@ -174,6 +214,20 @@ var tex = ctx.textureCube([
 <sup>2</sup> requires `min` to be set to `ctx.Filter.LinearMipmapLinear` or similar  
 <sup>3</sup> read only
 
+#### texture = ctx.textureCube(opts)
+
+- `opts`: Object - see `ctx.texture2D(opts)`
+
+```javascript
+var tex = ctx.textureCube([
+  { data: new Uint8Array([..]), width: 64, height: 64 },
+  { data: new Uint8Array([..]), width: 64, height: 64 },
+  { data: new Uint8Array([..]), width: 64, height: 64 },
+  { data: new Uint8Array([..]), width: 64, height: 64 },
+  { data: new Uint8Array([..]), width: 64, height: 64 },
+  { data: new Uint8Array([..]), width: 64, height: 64 }
+])
+```
 ### Buffers
 
 #### buffer = ctx.vertexBuffer(opts)
@@ -185,6 +239,12 @@ var buf = ctx.vertexBuffer({ data: Array }) // aka Attribute Buffer
 var buf = ctx.indexBuffer({ data: Array }) // aka Index Buffer
 ```
 
+| property | info | type | default |
+| -------- | ---- | ---- | ------- |
+| `data` | pixel data | Array, Uint8Array, Float32Array | null |
+| `type` | data type | ctx.DataType | ctx.DataType.Float32 |
+| `usage` | buffer usage | ctx.Usage | ctx.Usage.StaticDraw |
+
 ### Pipelines
 
 #### pipeline = ctx.pipeline(opts)
@@ -193,17 +253,16 @@ var buf = ctx.indexBuffer({ data: Array }) // aka Index Buffer
 var pipeline = ctx.pipeline({
   vert: String,
   frag: String,
-  // vertexLayout: { } // disabled ATM
   depthWrite: Boolean, // true
   depthTest: Boolean,  // false
   depthFunc: DepthFunc, // LessEqual
-  blendEnabled: Boolean, // false
+  blend: Boolean, // false
   blendSrcRGBFactor: BlendFactor,
   blendSrcAlphaFactor: BlendFactor,
   blendDstRGBFactor: BlendFactor,
   blendDstAlphaFactor: BlendFactor,
-  cullFaceEnabled: Boolean,
-  cullFace: Face,
+  cullFace: Boolean,
+  cullFaceMode: Face,
   primitive: Primitive
 })
 ```
@@ -270,7 +329,8 @@ ctx.update(res, { data: Array })
   const DataType = {
     Float32: gl.FLOAT,
     Uint8: gl.UNSIGNED_BYTE,
-    Uint16: gl.UNSIGNED_SHORT
+    Uint16: gl.UNSIGNED_SHORT,
+    Uint32: gl.UNSIGNED_INT
   }
 ```
 
@@ -305,9 +365,9 @@ ctx.update(res, { data: Array })
   const PixelFormat = {
     RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
     RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
-    // RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
-    R32F: 'r32f', //gl.ALPHA + gl.FLOAT
-    // R16F: 'r16f', //gl.ALPHA + gl.HALF_FLOAT
+    RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
+    R32F: 'r32f', // gl.ALPHA + gl.FLOAT
+    R16F: 'r16f', // gl.ALPHA + gl.HALF_FLOAT
     Depth: 'depth' // gl.DEPTH_COMPONENT
   }
 ```
