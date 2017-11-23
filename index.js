@@ -452,17 +452,17 @@ function createContext (opts) {
         }
       }
 
-      if (pipeline.blendEnabled !== state.blendEnabled ||
+      if (pipeline.blend !== state.blend ||
         pipeline.blendSrcRGBFactor !== state.blendSrcRGBFactor ||
         pipeline.blendSrcAlphaFactor !== state.blendSrcAlphaFactor ||
         pipeline.blendDstRGBFactor !== state.blendDstRGBFactor ||
         pipeline.blendDstAlphaFactor !== state.blendDstAlphaFactor) {
-        state.blendEnabled = pipeline.blendEnabled
+        state.blend = pipeline.blend
         state.blendSrcRGBFactor = pipeline.blendSrcRGBFactor
         state.blendSrcAlphaFactor = pipeline.blendSrcAlphaFactor
         state.blendDstRGBFactor = pipeline.blendDstRGBFactor
         state.blendDstAlphaFactor = pipeline.blendDstAlphaFactor
-        state.blendEnabled ? gl.enable(gl.BLEND) : gl.disable(gl.BLEND)
+        state.blend ? gl.enable(gl.BLEND) : gl.disable(gl.BLEND)
         gl.blendFuncSeparate(
           state.blendSrcRGBFactor,
           state.blendDstRGBFactor,
@@ -471,11 +471,11 @@ function createContext (opts) {
         )
       }
 
-      if (pipeline.cullFaceEnabled !== state.cullFaceEnabled || pipeline.cullFace !== state.cullFace) {
-        state.cullFaceEnabled = pipeline.cullFaceEnabled
+      if (pipeline.cullFace !== state.cullFace || pipeline.cullFaceMode !== state.cullFaceMode) {
         state.cullFace = pipeline.cullFace
-        state.cullFaceEnabled ? gl.enable(gl.CULL_FACE) : gl.disable(gl.CULL_FACE)
-        if (state.cullFaceEnabled) {
+        state.cullFace = pipeline.cullFaceMode
+        state.cullFace ? gl.enable(gl.CULL_FACE) : gl.disable(gl.CULL_FACE)
+        if (state.cullFace) {
           gl.cullFace(state.cullFace)
         }
       }

@@ -3,9 +3,9 @@ const checkProps = require('./check-props')
 const allowedProps = [
   'vert', 'frag', 'program',
   'depthWrite', 'depthTest', 'depthFunc',
-  'blendEnabled', 'blendSrcRGBFactor', 'blendSrcAlphaFactor',
+  'blend', 'blendSrcRGBFactor', 'blendSrcAlphaFactor',
   'blendDstRGBFactor', 'blendDstAlphaFactor',
-  'cullFaceEnabled', 'cullFace',
+  'cullFace', 'cullFaceMode',
   'primitive'
 ]
 
