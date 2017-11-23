@@ -12,8 +12,6 @@ const allowedProps = [
 function createPipeline (ctx, opts) {
   checkProps(allowedProps, opts)
 
-  const gl = ctx.gl
-
   const pipeline = Object.assign({
     class: 'pipeline',
     vert: null,
@@ -43,7 +41,6 @@ function createPipeline (ctx, opts) {
     const attributesPerLocation = pipeline.program.attributesPerLocation
     pipeline.vertexLayout = Object.keys(attributesPerLocation).map((location) => {
       const attribute = attributesPerLocation[location]
-      let size = 0
       return [attribute.name, parseInt(location, 10), attribute.size]
     })
   }

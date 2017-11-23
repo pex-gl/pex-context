@@ -329,24 +329,13 @@ function createContext (opts) {
       const y = opts.y || 0
       const width = opts.width
       const height = opts.height
-      // TODO: add support for data out
       const format = gl.RGBA
       const type = gl.UNSIGNED_BYTE
-      // const type = this.state.framebuffer ? gl.FLOAT : gl.UNSIGNED_BYTE
-      // if (!opts.format) {
-        // throw new Error('ctx.readPixels required valid pixel format')
-      // }
-
       let pixels = null
-      // if (type === gl.FLOAT) {
-        // pixels = new Float32Array(width * height * 4)
-      // } else {
       pixels = new Uint8Array(width * height * 4)
-      // }
       gl.readPixels(x, y, width, height, format, type, pixels)
       return pixels
     },
-    // TODO: should data be Array and buffer be TypedArray
     // update(texture, { data: TypeArray, [width: Int, height: Int] })
     // update(texture, { data: TypedArray })
     update: function (resource, opts) {
