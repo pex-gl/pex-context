@@ -11,7 +11,7 @@ const glsl = require('glslify')
 const ctx = createContext()
 
 const camera = createCamera({
-  fov: Math.PI / 4, 
+  fov: Math.PI / 2, 
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
   position: [0, 0.5, 3],
   target: [0, 0, 0]
