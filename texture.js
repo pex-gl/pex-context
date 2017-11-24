@@ -47,8 +47,8 @@ function updateTexture2D (ctx, texture, opts) {
   const PixelFormat = ctx.PixelFormat
 
   let data = null
-  let width = 0
-  let height = 0
+  let width = opts.width
+  let height = opts.height
   let lod = 0
   let flipY = orValue(opts.flipY, orValue(texture.flipY, false))
   let target = opts.target || texture.target
@@ -76,14 +76,6 @@ function updateTexture2D (ctx, texture, opts) {
   gl.activeTexture(gl.TEXTURE0 + textureUnit)
   gl.bindTexture(texture.target, texture.handle)
   ctx.state.activeTextures[textureUnit] = texture
-
-  if (opts.mipmap) {
-    if (opts.data || opts.width || opts.height) {
-      throw new Error('Updating and generating mipmaps at the same time is currently not supported')
-    }
-    gl.generateMipmap(texture.target)
-    return
-  }
 
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY)
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplayAlpha)
@@ -125,6 +117,8 @@ function updateTexture2D (ctx, texture, opts) {
     format = gl.RGBA
     type = gl.UNSIGNED_BYTE
     gl.texImage2D(target, lod, internalFormat, format, type, img)
+    texture.width = width
+    texture.height = height
   } else if (typeof opts === 'object') {
     assert(!data || Array.isArray(opts.data) ||
       opts.data instanceof Uint8Array ||
@@ -133,11 +127,11 @@ function updateTexture2D (ctx, texture, opts) {
 
     data = opts.data ? (opts.data.data || opts.data) : null
 
-    assert((opts.width !== undefined) && (opts.height !== undefined),
-      'Texture2D.update opts.width and opts.height are required when providing opts.data')
+    if (!opts.width && data && data.width) width = data.width
+    if (!opts.height && data && data.height) width = data.height
 
-    width = opts.width
-    height = opts.height
+    assert(!data || ((width !== undefined) && (height !== undefined)),
+      'Texture2D.update opts.width and opts.height are required when providing opts.data')
 
     if (pixelFormat === PixelFormat.Depth) {
       format = gl.DEPTH_COMPONENT
@@ -175,7 +169,11 @@ function updateTexture2D (ctx, texture, opts) {
           assert.fail(`Unknown texture data type: ${type}`)
         }
       }
-      gl.texImage2D(target, lod, internalFormat, width, height, 0, format, type, data)
+      if (width && height) {
+        gl.texImage2D(target, lod, internalFormat, width, height, 0, format, type, data)
+        texture.width = width
+        texture.height = height
+      }
     } else if (target === gl.TEXTURE_CUBE_MAP) {
       assert(!data || (Array.isArray(data) && data.length === 6), 'TextureCube requires data for 6 faces')
       for (let i = 0; i < 6; i++) {
@@ -195,6 +193,8 @@ function updateTexture2D (ctx, texture, opts) {
         } else {
           gl.texImage2D(faceTarget, lod, internalFormat, width, height, 0, format, type, faceData)
         }
+        texture.width = width
+        texture.height = height
       }
     }
   } else {
@@ -202,10 +202,12 @@ function updateTexture2D (ctx, texture, opts) {
     assert.fail('Texture2D.update opts has to be a HTMLElement or Object')
   }
 
+  if (opts.mipmap) {
+    gl.generateMipmap(texture.target)
+  }
+
   texture.target = target
-  // texture.data = data
-  texture.width = width
-  texture.height = height
+  texture.data = data
   texture.pixelFormat = pixelFormat
   texture.encoding = encoding
   texture.min = min
