@@ -151,11 +151,6 @@ ctx.submit(cmd, [
 ])
 ```
 
-## Render Loop
-
-#### ctx.frame(cb)
-
-- `cb`: Function - Request Animation Frame callack
 
 ## Subcommands
 
@@ -171,6 +166,11 @@ ctx.submit(renderToFboCmd, () => {
   ctx.submit(drawMeshCmd)
 })
 ```
+## Render Loop
+
+#### ctx.frame(cb)
+
+- `cb`: Function - Request Animation Frame callack
 
 ## Resource creation
 
