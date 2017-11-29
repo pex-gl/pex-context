@@ -460,10 +460,10 @@ function createContext (opts) {
 
       if (pipeline.cullFace !== state.cullFace || pipeline.cullFaceMode !== state.cullFaceMode) {
         state.cullFace = pipeline.cullFace
-        state.cullFace = pipeline.cullFaceMode
+        state.cullFaceMode = pipeline.cullFaceMode
         state.cullFace ? gl.enable(gl.CULL_FACE) : gl.disable(gl.CULL_FACE)
         if (state.cullFace) {
-          gl.cullFace(state.cullFace)
+          gl.cullFace(state.cullFaceMode)
         }
       }
 
