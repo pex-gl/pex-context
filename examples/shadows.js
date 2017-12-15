@@ -24,7 +24,7 @@
 // var createFSQ = require('./vgen/createFullScreenQuad')
 const createCube = require('primitive-cube')
 const bunny = require('bunny')
-const normals = require('normals')
+const vertexNormals = require('normals').vertexNormals
 const centerAndNormalize = require('geom-center-and-normalize')
 const vec3 = require('pex-math/vec3')
 const SimplexNoise = require('simplex-noise')
@@ -180,7 +180,7 @@ const drawFloorDepthCmd = {
 }
 
 const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
-const bunnyBaseNormals = normals.vertexNormals(bunny.cells, bunny.positions)
+const bunnyBaseNormals = vertexNormals(bunny.cells, bunny.positions)
 const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
 
 const bunnyPositionBuffer = ctx.vertexBuffer(bunnyBaseVertices)
@@ -256,6 +256,8 @@ function updateCamera () {
   camera({ position: [x, y, z] })
 }
 
+let positionData = null
+let normalData = null
 function updateBunny (ctx) {
   const noiseFrequency = 1
   const noiseScale = 0.1
@@ -271,7 +273,16 @@ function updateBunny (ctx) {
 
   // FIXME: pre-allocate buffer
   // FIXME: add update command
-  const positionData = new Float32Array(flatten(bunnyNoiseVertices))
+  if (!positionData) {
+    positionData = new Float32Array(flatten(bunnyNoiseVertices))
+  } else {
+    for (var i = 0; i < bunnyNoiseVertices.length; i++) {
+      var v = bunnyNoiseVertices[i]
+      positionData[i * 3] = v[0]
+      positionData[i * 3 + 1] = v[1]
+      positionData[i * 3 + 2] = v[2]
+    }
+  }
   // bunnyPositionBuffer.bufferData(positionData)
   ctx.update(bunnyPositionBuffer, { data: positionData })
 
@@ -289,7 +300,18 @@ function updateBunny (ctx) {
   // FIXME: pre-allocate buffer
   // FIXME: add update command
   // What are the update patterns in other APIs?
-  const normalData = new Float32Array(flatten(normals.vertexNormals(bunny.cells, bunnyNoiseVertices)))
+  // const normalData = new Float32Array(flatten())
+  var normals = vertexNormals(bunny.cells, bunnyNoiseVertices)
+  if (!normalData) {
+    normalData = new Float32Array(flatten(normals))
+  } else {
+    for (var i = 0; i < normals.length; i++) {
+      var v = normals[i]
+      normalData[i * 3] = v[0]
+      normalData[i * 3 + 1] = v[1]
+      normalData[i * 3 + 2] = v[2]
+    }
+  }
   // bunnyNormalBuffer.bufferData(normalData)
   ctx.update(bunnyNormalBuffer, { data: normalData })
 }
@@ -318,20 +340,76 @@ const drawFullscreenQuadCmd = {
 
 let frameNumber = 0
 
+// var ext = ctx.gl.getExtension('EXT_disjoint_timer_query')
+// var bits = ext.getQueryEXT(ext.TIMESTAMP_EXT, ext.QUERY_COUNTER_BITS_EXT)
+// console.log('bits', bits)
+var query1 = ctx.query()
+var query2 = ctx.query()
+var query3 = ctx.query()
+
+// var startQuery = ext.createQueryEXT()
+// var endQuery = ext.createQueryEXT()
+
+var firstFrame = true
 ctx.frame(() => {
+  // if (firstFrame) {
+    // // ext.beginQueryEXT(ext.TIME_ELAPSED_EXT, query)
+    // ext.queryCounterEXT(startQuery, ext.TIMESTAMP_EXT)
+  // }
   // console.timeEnd('frame')
   // console.time('frame')
+  if (query1.result !== null) {
+    console.log('time 1', query1.result / 1000000)
+  }
+  if (query2.result !== null) {
+    console.log('time 2', query2.result / 1000000)
+  }
+  if (query3.result !== null) {
+    console.log('time 3', query3.result / 1000000)
+  }
+  console.time('update')
   updateTime()
   updateCamera()
   updateBunny(ctx)
+  console.timeEnd('update')
   ctx.debug((++frameNumber) === 1)
+  console.time('draw')
   ctx.submit(depthPassCmd, () => {
     ctx.submit(drawFloorDepthCmd)
     ctx.submit(drawBunnyDepthCmd)
   })
   ctx.submit(clearCmd, () => {
+    ctx.beginQuery(query1)
     ctx.submit(drawFloorCmd)
+    ctx.endQuery(query1)
+
+    ctx.beginQuery(query2)
     ctx.submit(drawBunnyCmd)
+    ctx.endQuery(query2)
+
+    ctx.beginQuery(query3)
     ctx.submit(drawFullscreenQuadCmd)
+    ctx.endQuery(query3)
   })
+  console.timeEnd('draw')
+  // if (firstFrame) {
+    // ext.endQueryEXT(ext.TIME_ELAPSED_EXT);
+    // ext.queryCounterEXT(endQuery, ext.TIMESTAMP_EXT)
+  // }
+
+  firstFrame = false
+  
+  // if (!firstFrame) {
+    // // var available = ext.getQueryObjectEXT(query, ext.QUERY_RESULT_AVAILABLE_EXT);
+    // var available = ext.getQueryObjectEXT(endQuery, ext.QUERY_RESULT_AVAILABLE_EXT);
+    // if (available && !disjoint) {
+      // // See how much time the rendering of the object took in nanoseconds.
+      // // var timeElapsed = ext.getQueryObjectEXT(query, ext.QUERY_RESULT_EXT);
+      // var timeStart = ext.getQueryObjectEXT(startQuery, ext.QUERY_RESULT_EXT)
+      // var timeEnd = ext.getQueryObjectEXT(endQuery, ext.QUERY_RESULT_EXT)
+      // var timeElapsed = timeEnd - timeStart
+      // // console.log('timeElapsed', timeElapsed / 1000000)
+      // firstFrame = true
+    // }
+  // }
 })

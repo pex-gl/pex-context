@@ -289,6 +289,36 @@ var pass = ctx.pass({
 
 ```
 
+### Queries
+
+#### query = ctx.query(opts)
+
+*Note: Requires EXT_disjoint_timer_query*
+
+```javascript
+var query = ctx.query({
+  target: QueryTarget
+})
+```
+
+| property | info | type | default |
+| -------- | ---- | ---- | ------- |
+| `target` | query type | ctx.QueryTarget | ctx.QueryTarget.TimeElapsed |
+| `state` | query state | ctx.QueryState | ctx.QueryState.Ready |
+| `result` | result of the measurement | Number | null |
+
+#### ctx.beginQuery(q)
+
+Begin the query measurement.
+
+*Note: There can be only one query running at the time.*
+
+#### ctx.endQuery(q)
+
+End the query measurement. 
+
+*Note: The result is not available immediately and will be `null` until the state changes from `ctx.QueryState.Pending` to `ctx.QueryState.Ready`*
+
 ## Updating resources
 
 #### ctx.update(res, opts)
@@ -390,6 +420,24 @@ ctx.update(res, { data: Array })
   const Wrap = {
     ClampToEdge: gl.CLAMP_TO_EDGE,
     Repeat: gl.REPEAT
+  }
+```
+
+#### ctx.QueryTarget
+
+```
+  const QueryTarget = {
+    TimeElapsed: gl.TIME_ELAPSED
+  }
+```
+
+#### ctx.QueryState
+
+```
+  const QueryState = {
+    Ready: 'ready',
+    Active: 'active',
+    Pending: 'pending'
   }
 ```
 

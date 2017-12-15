@@ -10,6 +10,7 @@ const createPass = require('./pass')
 const createPipeline = require('./pipeline')
 const createProgram = require('./program')
 const createBuffer = require('./buffer')
+const createQuery = require('./query')
 const raf = require('raf')
 
 let ID = 0
@@ -21,12 +22,39 @@ function createContext (opts) {
   else if (opts && opts.gl) gl = opts.gl
   assert(gl, 'pex-context: createContext failed')
 
-  const ext = gl.getExtension('OES_texture_half_float')
-  if (ext) {
-    gl.HALF_FLOAT = ext.HALF_FLOAT_OES
+  if (!gl.HALF_FLOAT) {
+    const ext = gl.getExtension('OES_texture_half_float')
+    if (ext) {
+      gl.HALF_FLOAT = ext.HALF_FLOAT_OES
+    }
   }
 
-  gl.getExtension('OES_element_index_uint')
+  if (!gl.createQuery) {
+    const ext = gl.getExtension('EXT_disjoint_timer_query')
+    if (!ext) {
+      gl.TIME_ELAPSED = 'TIME_ELAPSED'
+      gl.QUERY_RESULT_AVAILABLE = 'QUERY_RESULT_AVAILABLE'
+      gl.GPU_DISJOINT = 'GPU_DISJOINT'
+      gl.QUERY_RESULT = 'QUERY_RESULT'
+      gl.createQuery = function () { return {} }
+      gl.beginQuery = function () { }
+      gl.endQuery = function () { }
+      gl.getQueryObject = function (q, param) {
+        if (param === gl.QUERY_RESULT_AVAILABLE) return true
+        if (param === gl.QUERY_RESULT) return 0
+        return undefined
+      }
+    } else {
+      gl.TIME_ELAPSED = ext.TIME_ELAPSED_EXT
+      gl.QUERY_RESULT_AVAILABLE = ext.QUERY_RESULT_AVAILABLE_EXT
+      gl.GPU_DISJOINT = ext.GPU_DISJOINT_EXT
+      gl.QUERY_RESULT = ext.QUERY_RESULT_EXT
+      gl.createQuery = ext.createQueryEXT.bind(ext)
+      gl.beginQuery = ext.beginQueryEXT.bind(ext)
+      gl.endQuery = ext.endQueryEXT.bind(ext)
+      gl.getQueryObject = ext.getQueryObjectEXT.bind(ext)
+    }
+  }
 
   const BlendFactor = {
     One: gl.ONE,
@@ -111,6 +139,17 @@ function createContext (opts) {
     ClampToEdge: gl.CLAMP_TO_EDGE,
     Repeat: gl.REPEAT
   }
+
+  const QueryTarget = {
+    TimeElapsed: gl.TIME_ELAPSED
+  }
+
+  const QueryState = {
+    Ready: 'ready',
+    Active: 'active',
+    Pending: 'pending'
+  }
+
   const ctx = {
     gl: gl,
     BlendFactor: BlendFactor,
@@ -122,7 +161,9 @@ function createContext (opts) {
     PixelFormat: PixelFormat,
     Encoding: Encoding,
     Primitive: Primitive,
-    Wrap: Wrap
+    Wrap: Wrap,
+    QueryTarget: QueryTarget,
+    QueryState: QueryState
   }
 
   const defaultState = {
@@ -143,6 +184,8 @@ function createContext (opts) {
 
   const capabilities = {
   }
+
+  gl.getExtension('OES_element_index_uint')
 
   // extensions
   if (!gl.drawElementsInstanced) {
@@ -191,6 +234,7 @@ function createContext (opts) {
     // debugGraph: '',
     debugCommands: [],
     resources: [],
+    queries: [],
     stack: [ defaultState ],
     defaultState: defaultState,
     state: {
@@ -328,6 +372,22 @@ function createContext (opts) {
     pass: function (opts) {
       log('pass', opts, opts.color ? opts.color.map((c) => c.texture ? c.texture.info : c.info) : '')
       return this.resource(createPass(this, opts))
+    },
+    query: function (opts) {
+      log('query', opts)
+      return this.resource(createQuery(this, opts))
+    },
+    beginQuery: function (q) {
+      assert(!this.activeQuery, 'Only one query can be active at the time')
+      if (q._begin(this, q)) {
+        this.activeQuery = q
+      }
+    },
+    endQuery: function (q) {
+      if (q._end(this, q)) {
+        this.queries.push(q)
+        this.activeQuery = null
+      }
     },
     readPixels: function (opts) {
       const x = opts.x || 0
@@ -642,10 +702,6 @@ function createContext (opts) {
     frame: function (cb) {
       const self = this
       raf(function frame () {
-        if (cb() === false) {
-          // interrupt render loop
-          return
-        }
         if (self.defaultState.viewport[2] !== gl.drawingBufferWidth ||
           self.defaultState.viewport[3] !== gl.drawingBufferHeight) {
           self.defaultState.viewport[2] = gl.drawingBufferWidth
@@ -653,6 +709,13 @@ function createContext (opts) {
           self.defaultState.pass.framebuffer.width = gl.drawingBufferWidth
           self.defaultState.pass.framebuffer.height = gl.drawingBufferHeight
           gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+        }
+        if (cb() === false) {
+          // interrupt render loop
+          return
+        }
+        if (self.queries.length) {
+          self.queries = self.queries.filter((q) => !q._available(self, q))
         }
         raf(frame)
       })
