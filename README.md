@@ -99,7 +99,7 @@ var cmd = {
 }
 ```
 
-## Submtting commands to the GPU
+## Submitting commands to the GPU
 
 ### ctx.submit(cmd)
 
@@ -114,7 +114,7 @@ ctx.submit({
   },
   indices: IndexBuffer,
   // or
-  indices: { buffer: IndexBuffer, offset: Number },
+  indices: { buffer: IndexBuffer, offset: Number, count: Number },
   // or
   count: Number,
   instances: Number,
