@@ -143,6 +143,7 @@ function updateAttributes (ctx, program) {
       case gl.FLOAT_VEC2: size = 2; break
       case gl.FLOAT_VEC3: size = 3; break
       case gl.FLOAT_VEC4: size = 4; break
+      case gl.FLOAT_MAT4: size = 16; break
       default: throw new Error(`Unknwon attribute type ${info.type} : ${ctx.getGLString(info.type)}`)
     }
     const attrib = {

@@ -637,21 +637,48 @@ function createContext (opts) {
         }
 
         gl.bindBuffer(buffer.target, buffer.handle)
-        gl.enableVertexAttribArray(location)
-        state.activeAttributes[location] = buffer
-        gl.vertexAttribPointer(
-          location,
-          size,
-          attrib.type || buffer.type || gl.FLOAT,
-          attrib.normalized || false,
-          attrib.stride || 0,
-          attrib.offset || 0
-        )
-        if (attrib.divisor) {
-          gl.vertexAttribDivisor(location, attrib.divisor)
-          instanced = true
-        } else if (capabilities.instancing) {
-          gl.vertexAttribDivisor(location, 0)
+        if (size === 16) {
+          gl.enableVertexAttribArray(location + 0)
+          gl.enableVertexAttribArray(location + 1)
+          gl.enableVertexAttribArray(location + 2)
+          gl.enableVertexAttribArray(location + 3)
+          state.activeAttributes[location + 0] = buffer
+          state.activeAttributes[location + 1] = buffer
+          state.activeAttributes[location + 2] = buffer
+          state.activeAttributes[location + 3] = buffer
+          gl.vertexAttribPointer(location, 4, attrib.type || buffer.type || gl.FLOAT, attrib.normalized || false, attrib.stride || 64, attrib.offset || 0)
+          gl.vertexAttribPointer(location + 1, 4, attrib.type || buffer.type || gl.FLOAT, attrib.normalized || false, attrib.stride || 64, attrib.offset || 16)
+          gl.vertexAttribPointer(location + 2, 4, attrib.type || buffer.type || gl.FLOAT, attrib.normalized || false, attrib.stride || 64, attrib.offset || 32)
+          gl.vertexAttribPointer(location + 3, 4, attrib.type || buffer.type || gl.FLOAT, attrib.normalized || false, attrib.stride || 64, attrib.offset || 48)
+          if (attrib.divisor) {
+            gl.vertexAttribDivisor(location + 0, attrib.divisor)
+            gl.vertexAttribDivisor(location + 1, attrib.divisor)
+            gl.vertexAttribDivisor(location + 2, attrib.divisor)
+            gl.vertexAttribDivisor(location + 3, attrib.divisor)
+            instanced = true
+          } else if (capabilities.instancing) {
+            gl.vertexAttribDivisor(location + 0, 0)
+            gl.vertexAttribDivisor(location + 1, 0)
+            gl.vertexAttribDivisor(location + 2, 0)
+            gl.vertexAttribDivisor(location + 3, 0)
+          }
+        } else {
+          gl.enableVertexAttribArray(location)
+          state.activeAttributes[location] = buffer
+          gl.vertexAttribPointer(
+            location,
+            size,
+            attrib.type || buffer.type || gl.FLOAT,
+            attrib.normalized || false,
+            attrib.stride || 0,
+            attrib.offset || 0
+          )
+          if (attrib.divisor) {
+            gl.vertexAttribDivisor(location, attrib.divisor)
+            instanced = true
+          } else if (capabilities.instancing) {
+            gl.vertexAttribDivisor(location, 0)
+          }
         }
         // TODO: how to match index with vertexLayout location?
       })
