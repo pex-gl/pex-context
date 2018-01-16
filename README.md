@@ -281,14 +281,6 @@ var pass = ctx.pass({
 })
 ```
 
-```
-// WebGL 2
-// var tex2DArray = ctx.texture2DArray()
-// var tex3D = ctx.texture2D()
-// var ubo = ctx.uniformBuffer()
-
-```
-
 ### Queries
 
 #### query = ctx.query(opts)
