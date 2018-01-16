@@ -179,6 +179,7 @@ function createContext (opts) {
     },
     pipeline: createPipeline(ctx, {}),
     viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight],
+    scissor: null,
     count: 0
   }
 
@@ -755,6 +756,20 @@ function createContext (opts) {
       if (this.debugMode) log('apply', cmd.name || cmd.id, { cmd: cmd, state: JSON.parse(JSON.stringify(state)) })
 
       this.checkError()
+
+      if (cmd.scissor) {
+        if (cmd.scissor !== state.scissor) {
+          state.scissor = cmd.scissor
+          gl.enable(gl.SCISSOR_TEST)
+          gl.scissor(state.scissor[0], state.scissor[1], state.scissor[2], state.scissor[3])
+        }
+      } else {
+        if (cmd.scissor !== state.scissor) {
+          state.scissor = cmd.scissor
+          gl.disable(gl.SCISSOR_TEST)
+        }
+      }
+
       if (cmd.pass) this.applyPass(cmd.pass)
       if (cmd.pipeline) this.applyPipeline(cmd.pipeline)
       if (cmd.uniforms) this.applyUniforms(cmd.uniforms)
