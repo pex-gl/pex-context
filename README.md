@@ -93,18 +93,6 @@ Commands are plain javascript objects with GPU resources needed to complete a dr
 
 ```javascript
 var cmd = {
-  pass: ctx.pass(..),
-  pipeline: ctx.pipeline(..),
-  attributes: [..]
-}
-```
-
-## Submitting commands to the GPU
-
-### ctx.submit(cmd)
-
-```javascript
-ctx.submit({
   pass: Pass
   pipeline: Pipeline,
   attributes: {
@@ -122,7 +110,48 @@ ctx.submit({
     name: Number,
     name: Array,
     name: Texture2D
-  }
+  },
+  viewport: [0, 0, 1920, 1080],
+  scissor: [0, 0, 1920, 1080]
+}
+```
+
+| property | info | type |
+| -------- | ---- | ---- |
+| `pass` | render pass info | ctx.Pass
+| `pipeline` | rendering pipeline info | ctx.Pipeline
+| `attributes` | vertex attributes | map of :|
+| | | `attibuteName: ctx.VertexBuffer` |
+| | | `attributeName: { buffer: VertexBuffer, offset: Number, stride: Number, divisor: Number }` |
+| `indices` | indices | either: |
+| | | `ctx.IndexBuffer` |
+| | | `{ buffer: IndexBuffer, offset: Number, stride: Number }` |
+| `count` | number of vertices to draw | Integer |
+| `instances` | number instances to draw | Integer |
+| `uniforms` | shader uniforms | map of `name: value` |
+| `viewport` | drawing viewport bounds | [x, y, w, h] |
+| `scissor` | scissor test bounds | [x, y, w, h] |
+
+*Note: either indices or count need to be specified when drawing geometry*
+*Note: scissor region is by default set to null and scissor test disabled*
+
+## Submitting commands to the GPU
+
+### ctx.submit(cmd)
+
+```javascript
+ctx.submit({
+  pass: ctx.pass({
+    clearColor: [1, 0, 0, 1]
+  }),
+  pipeline: ctx.pipeline({
+    vert: '...',
+    frag: '...'
+  }),
+  attributes: {...},
+  indices: indexBuffer,
+  uniforms: {...},
+  ...
 })
 ```
 
@@ -174,6 +203,47 @@ ctx.submit(renderToFboCmd, () => {
 
 ## Resource creation
 
+### Passes
+
+Passes are responsible for setting render targets (textures) and their clearing values.
+FBOs are created internally and automatically by pex-context.
+
+#### pass = ctx.pass(opts)
+
+```javascript
+var pass = ctx.pass({
+  color: [Texture2D, ...]
+  color: [{ texture: Texture2D | TextureCube, target: CubemapFace }, ...]
+  depth: Texture2D
+  clearColor: Array,
+  clearDepth: Number
+})
+```
+
+### Pipelines
+
+Pipelines represent the state of the GPU rendering pipeline (shaders, blending, depth test etc).
+
+#### pipeline = ctx.pipeline(opts)
+
+```javascript
+var pipeline = ctx.pipeline({
+  vert: String,
+  frag: String,
+  depthWrite: Boolean, // true
+  depthTest: Boolean,  // false
+  depthFunc: DepthFunc, // LessEqual
+  blend: Boolean, // false
+  blendSrcRGBFactor: BlendFactor,
+  blendSrcAlphaFactor: BlendFactor,
+  blendDstRGBFactor: BlendFactor,
+  blendDstAlphaFactor: BlendFactor,
+  cullFace: Boolean,
+  cullFaceMode: Face,
+  primitive: Primitive
+})
+```
+
 ### Textures
 
 Textures represent pixel data uploaded to the GPU.
@@ -190,7 +260,6 @@ var tex = ctx.texture2D({
   wrap: ctx.Wrap.Repeat
 })
 ```
-
 
 | property | info | type | default |
 | -------- | ---- | ---- | ------- |
@@ -230,6 +299,8 @@ var tex = ctx.textureCube([
 ```
 ### Buffers
 
+Buffers store vertex and index data in the GPU memory.
+
 #### buffer = ctx.vertexBuffer(opts)
 #### buffer = ctx.indexBuffer(opts)
 
@@ -245,43 +316,9 @@ var buf = ctx.indexBuffer({ data: Array }) // aka Index Buffer
 | `type` | data type | ctx.DataType | ctx.DataType.Float32 |
 | `usage` | buffer usage | ctx.Usage | ctx.Usage.StaticDraw |
 
-### Pipelines
-
-#### pipeline = ctx.pipeline(opts)
-
-```javascript
-var pipeline = ctx.pipeline({
-  vert: String,
-  frag: String,
-  depthWrite: Boolean, // true
-  depthTest: Boolean,  // false
-  depthFunc: DepthFunc, // LessEqual
-  blend: Boolean, // false
-  blendSrcRGBFactor: BlendFactor,
-  blendSrcAlphaFactor: BlendFactor,
-  blendDstRGBFactor: BlendFactor,
-  blendDstAlphaFactor: BlendFactor,
-  cullFace: Boolean,
-  cullFaceMode: Face,
-  primitive: Primitive
-})
-```
-
-### Passes
-
-#### pass = ctx.pass(opts)
-
-```javascript
-var pass = ctx.pass({
-  color: [Texture2D, ...]
-  color: [{ texture: Texture2D | TextureCube, target: CubemapFace }, ...]
-  depth: Texture2D
-  clearColor: Array,
-  clearDepth: Number
-})
-```
-
 ### Queries
+
+Queries are used for GPU timers.
 
 #### query = ctx.query(opts)
 
@@ -307,7 +344,7 @@ Begin the query measurement.
 
 #### ctx.endQuery(q)
 
-End the query measurement. 
+End the query measurement.
 
 *Note: The result is not available immediately and will be `null` until the state changes from `ctx.QueryState.Pending` to `ctx.QueryState.Ready`*
 
@@ -317,6 +354,14 @@ End the query measurement.
 
 ```javascript
 ctx.update(res, { data: Array })
+
+
+var tex = ctx.texture2D({...})
+ctx.update(tex, {
+  width: 1,
+  height: 1,
+  data: new Uint8Array([255, 0, 0, 255])
+})
 ```
 
 # Enums
