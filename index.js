@@ -12,8 +12,16 @@ const createProgram = require('./program')
 const createBuffer = require('./buffer')
 const createQuery = require('./query')
 const raf = require('raf')
+const checkProps = require('./check-props')
 
 let ID = 0
+
+const allowedCommandProps = [
+  'name',
+  'pass', 'pipeline', 'uniforms',
+  'attributes', 'indices', 'count', 'instances',
+  'viewport', 'scissor'
+]
 
 function createContext (opts) {
   assert(!opts || (typeof opts === 'object'), 'pex-context: createContext requires opts argument to be null or an object')
@@ -793,6 +801,7 @@ function createContext (opts) {
       }
     },
     submit: function (cmd, batches, subCommand) {
+      checkProps(allowedCommandProps, cmd)
       if (this.debugMode) {
         this.debugCommands.push(cmd)
         if (batches && subCommand) log('submit', cmd.name || cmd.id, { depth: this.stack.length, cmd: cmd, batches: batches, subCommand: subCommand, state: this.state, stack: this.stack })
