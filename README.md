@@ -412,6 +412,16 @@ ctx.update(res, { data: Array })
   }
 ```
 
+#### ctx.Usage
+
+```
+  const Usage = {
+    StaticDraw: gl.STATIC_DRAW,
+    DynamicDraw: gl.DYNAMIC_DRAW,
+    StreamDraw: gl.STREAM_DRAW
+  }
+```
+
 #### ctx.Wrap
 
 ```

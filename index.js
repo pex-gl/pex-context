@@ -135,6 +135,12 @@ function createContext (opts) {
     TriangleStrip: gl.TRIANGLE_STRIP
   }
 
+  const Usage = {
+    StaticDraw: gl.STATIC_DRAW,
+    DynamicDraw: gl.DYNAMIC_DRAW,
+    StreamDraw: gl.STREAM_DRAW
+  }
+
   const Wrap = {
     ClampToEdge: gl.CLAMP_TO_EDGE,
     Repeat: gl.REPEAT
@@ -161,6 +167,7 @@ function createContext (opts) {
     PixelFormat: PixelFormat,
     Encoding: Encoding,
     Primitive: Primitive,
+    Usage: Usage,
     Wrap: Wrap,
     QueryTarget: QueryTarget,
     QueryState: QueryState
