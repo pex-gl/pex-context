@@ -309,7 +309,7 @@ raf(function frame () {
   updateTime()
   updateCamera()
   updateBunny(ctx)
-  ctx.debug((++frameNumber) === 1)
+  // ctx.debug((++frameNumber) === 1)
   ctx.submit(depthPassCmd, () => {
     ctx.submit(drawFloorDepthCmd)
     ctx.submit(drawBunnyDepthCmd, shadowBatches)
