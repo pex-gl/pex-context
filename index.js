@@ -26,6 +26,19 @@ const allowedCommandProps = [
 function createContext (opts) {
   assert(!opts || (typeof opts === 'object'), 'pex-context: createContext requires opts argument to be null or an object')
   let gl = null
+
+  const defaultOpts = {
+    pixelRatio: 1
+  }
+
+  opts = Object.assign({}, defaultOpts, opts)
+
+  if (opts.pixelRatio) {
+    opts = Object.assign(opts, {
+      pixelRatio: Math.min(opts.pixelRatio, window.devicePixelRatio)
+    })
+  }
+
   if (!opts || !opts.gl) gl = createGL(opts)
   else if (opts && opts.gl) gl = opts.gl
   assert(gl, 'pex-context: createContext failed')
@@ -253,6 +266,7 @@ function createContext (opts) {
     queries: [],
     stack: [ defaultState ],
     defaultState: defaultState,
+    pixelRatio: opts.pixelRatio || 1,
     state: {
       pass: {
         framebuffer: defaultState.pass.framebuffer
@@ -269,6 +283,19 @@ function createContext (opts) {
         str = 'UNDEFINED'
       }
       return str
+    },
+    set: function (opts) {
+      if (opts.pixelRatio) {
+        this.updatePixelRatio = Math.min(opts.pixelRatio, window.devicePixelRatio)
+      }
+
+      if (opts.width) {
+        this.updateWidth = opts.width
+      }
+
+      if (opts.height) {
+        this.updateHeight = opts.height
+      }
     },
     debug: function (enabled) {
       this.debugMode = enabled
@@ -745,6 +772,27 @@ function createContext (opts) {
     frame: function (cb) {
       const self = this
       raf(function frame () {
+        if (self.updatePixelRatio) {
+          self.pixelRatio = self.updatePixelRatio
+          // we need to reaply width/height and update styles
+          if (!self.updateWidth) {
+            self.updateWidth = parseInt(gl.canvas.style.width) || gl.canvas.width
+          }
+          if (!self.updateHeight) {
+            self.updateHeight = parseInt(gl.canvas.style.height) || gl.canvas.height
+          }
+          self.updatePixelRatio = 0
+        }
+        if (self.updateWidth) {
+          gl.canvas.style.width = self.updateWidth + 'px'
+          gl.canvas.width = self.updateWidth * self.pixelRatio
+          self.updateWidth = 0
+        }
+        if (self.updateHeight) {
+          gl.canvas.style.height = self.updateHeight + 'px'
+          gl.canvas.height = self.updateHeight * self.pixelRatio
+          self.updateHeight = 0
+        }
         if (self.defaultState.viewport[2] !== gl.drawingBufferWidth ||
           self.defaultState.viewport[3] !== gl.drawingBufferHeight) {
           self.defaultState.viewport[2] = gl.drawingBufferWidth
