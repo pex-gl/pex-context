@@ -87,6 +87,34 @@ var ctx = createContext({ canvas: canvas })
 var ctx = createContext({ width: Number, height: Number })
 ```
 
+### ctx.set(opts)
+
+```javascript
+ctx.set({
+  pixelRatio: 2,
+  width: 1280,
+  height: 720
+})
+```
+
+| property | info | default |
+| -------- | ---- | ---- |
+| `pixelRatio` | canvas resolution, can't be bigger than window.devicePixelRatio | 1 |
+| `width` | canvas width | - |
+| `height` | canvas height | - |
+
+Note 1: The new size and resolution will be applied not immediately but before drawing the next frame to avoid flickering.
+
+Note 2: Context's canvas doesn't resize automatically, even if you skip width/height on init and the canvas will be asigned dimensions of the window. To handle resizing use the following code:
+
+```javascript
+window.addEventListener('resize', () => {
+  ctx.set({
+    width: window.innerWidth,
+    height: window.innerWidth
+  })
+})
+
 ## Commands
 
 Commands are plain javascript objects with GPU resources needed to complete a draw call
