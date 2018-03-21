@@ -3,12 +3,17 @@ const createCube = require('primitive-cube')
 const createCamera = require('pex-cam/perspective')
 const createOrbiter = require('pex-cam/orbiter')
 
-const ctx = createContext()
+const ctx = createContext({
+  pixelRatio: window.devicePixelRatio
+})
+
 const cube = createCube()
 const camera = createCamera({
+  position: [2, 2, 2],
   fov: Math.PI / 3,
-  aspect: window.innerWidth / window.innerHeight
+  aspect: ctx.gl.canvas.width / ctx.gl.canvas.height
 })
+
 const orbiter = createOrbiter({
   camera: camera,
   easing: 0.1
@@ -40,7 +45,9 @@ const drawCmd = {
       }
     `,
     frag: `
+      #ifdef GL_ES
       precision mediump float;
+      #endif
       varying vec3 vNormal;
       void main () {
         gl_FragColor.rgb = vNormal * 0.5 + 0.5;
@@ -58,6 +65,16 @@ const drawCmd = {
     uViewMatrix: camera.viewMatrix
   }
 }
+
+window.addEventListener('resize', () => {
+  ctx.set({
+    width: window.innerWidth,
+    height: window.innerHeight
+  })
+  camera.set({
+    aspect: ctx.gl.canvas.width / ctx.gl.canvas.height
+  })
+})
 
 ctx.frame(() => {
   ctx.submit(clearCmd)
