@@ -4,6 +4,7 @@ const createCamera = require('pex-cam/perspective')
 const createOrbiter = require('pex-cam/orbiter')
 const GUI = require('pex-gui')
 const loadImage = require('pex-io/loadImage')
+const isBrowser = require('is-browser')
 
 const resolutions = [
   { name: '800x600 (low-res)', value: '800x600-lowres', width: 800, height: 600, pixelRatio: 0.5 },
@@ -26,7 +27,7 @@ const settings = {
 }
 
 
-if (document.location.hash) {
+if (isBrowser && document.location.hash) {
   const resId = document.location.hash.substr(1)
   const res = resolutions.find((res) => res.value === resId)
   if (res) {
@@ -53,9 +54,11 @@ function onFullscreenChange (e) {
     || document.mozFullScreenElement
 }
 
-document.addEventListener('fullscreenchange', onFullscreenChange)
-document.addEventListener('webkitfullscreenchange', onFullscreenChange)
-document.addEventListener('mozfullscreenchange', onFullscreenChange)
+if (isBrowser) {
+  document.addEventListener('fullscreenchange', onFullscreenChange)
+  document.addEventListener('webkitfullscreenchange', onFullscreenChange)
+  document.addEventListener('mozfullscreenchange', onFullscreenChange)
+}
 
 function requestFullscreen (elem) {
   if (elem.requestFullscreen) {
@@ -95,14 +98,16 @@ const clearCmd = {
   })
 }
 
+const assets = isBrowser ? 'assets' : __dirname + '/assets'
+
 const tex = ctx.texture2D({ width: 1, height: 1})
-loadImage('assets/images/pex.png', (err, img) => {
-  ctx.update(tex, { data: img })
+loadImage(assets + '/images/pex.png', (err, img) => {
+  if (err) console.log(err)
+  ctx.update(tex, { data: img, width: img.width, height: img.height })
 })
 
 const gui = new GUI(ctx)
 gui.addHeader('Settings')
-gui.addTexture2D('PEX', tex)
 const fovItem = gui.addParam('FOV', settings, 'fov', { min: Math.PI / 4, max: Math.PI / 2 })
 gui.addHeader('Resolution')
 gui.addRadioList('Resolution', settings, 'resolution', resolutions, (e) => {
@@ -110,7 +115,9 @@ gui.addRadioList('Resolution', settings, 'resolution', resolutions, (e) => {
   const w = res.width || window.innerWidth
   const h = res.height || window.innerHeight
 
-  document.location.hash = res.value
+  if (document && document.location) {
+    document.location.hash = res.value
+  }
   ctx.set({
     width: w,
     height: h,
@@ -118,6 +125,7 @@ gui.addRadioList('Resolution', settings, 'resolution', resolutions, (e) => {
   })
   camera.set({ aspect: w / h})
 })
+gui.addTexture2D('PEX', tex)
 gui.addHeader('Fullscreen')
 gui.addParam('Fullscreen', settings, 'fullscreen', {}, (e) => {
   if (!settings.fullscreen) {
