@@ -285,6 +285,7 @@ function createContext (opts) {
       return str
     },
     set: function (opts) {
+      assert(isBrowser, 'changing resolution is not supported in Plask')
       if (opts.pixelRatio) {
         this.updatePixelRatio = Math.min(opts.pixelRatio, window.devicePixelRatio)
       }
