@@ -19,7 +19,7 @@
     "glslify": "^6.0.1",
     "normals": "^1.1.0",
     "pex-cam": "^2.6.0",
-    "pex-gui": "^2.1.1",
+    "pex-gui": "^2.2.0",
     "pex-io": "^1.5.0",
     "pex-materials": "^1.1.1",
     "pex-math": "^2.1.0",
