@@ -258,6 +258,23 @@ ctx.submit(renderToFboCmd, () => {
 
 ## Resources
 
+All resources are plain JavaScript object and once constructed their properties can be accessed directly.
+Please note those props are read only. To set new values or upload new data to GPU see [updating resources](#updating-resources).
+
+```javascript
+var tex = ctx.texture2D({
+  width: 256,
+  pixelFormat: ctx.PixelFormat.RGBA8
+})
+
+tex.width //256
+tex.pixelFormat //'rgba8'
+
+//but also those properties has been added
+tex.type //gl.UNSIGNED_BYTE
+tex.internalFormat //gl.RGBA
+```
+
 ### Pass
 
 Passes are responsible for setting render targets (textures) and their clearing values.
