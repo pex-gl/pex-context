@@ -2,6 +2,21 @@
 
 Modern WebGL state wrapper for [PEX](http://pex.gl). With `pex-context` you allocate GPU resources (textures, buffers), setup state pipelines and passes and combine them together into commands.
 
+- [Example](#example)
+- [Code examples](#code-examples)
+- [Context](#context)
+- [Render loop](#render-loop)
+- [Commands](#commands)
+- [Resources](#resources)
+  - [Pass](#pass)
+  - [Pipeline](#pipeline)
+  - [Texture](#texture)
+  - [Buffer](#buffer)
+  - [Query](#query)
+- [Updating resources](#updating-resources)
+- [Enums](#enums)
+
+
 # Example
 
 ```javascript
@@ -63,9 +78,19 @@ ctx.frame(() => {
 })
 ```
 
+
+# Code Examples
+
+To run e.g. shadow mapping example
+
+```sh
+cd examples
+budo shadows.js --open --live -- -t glslify
+```
+
 # API
 
-## Context creation
+## Context
 
 Creating gl context wrapper.
 
@@ -116,9 +141,15 @@ window.addEventListener('resize', () => {
 })
 ```
 
+## Render Loop
+
+#### ctx.frame(cb)
+
+- `cb`: Function - Request Animation Frame callack
+
 ## Commands
 
-Commands are plain javascript objects with GPU resources needed to complete a draw call
+Commands are plain JavaScript objects with GPU resources needed to complete a draw call
 
 ```javascript
 var cmd = {
@@ -224,15 +255,10 @@ ctx.submit(renderToFboCmd, () => {
   ctx.submit(drawMeshCmd)
 })
 ```
-## Render Loop
 
-#### ctx.frame(cb)
+## Resources
 
-- `cb`: Function - Request Animation Frame callack
-
-## Resource creation
-
-### Passes
+### Pass
 
 Passes are responsible for setting render targets (textures) and their clearing values.
 FBOs are created internally and automatically by pex-context.
@@ -249,7 +275,7 @@ var pass = ctx.pass({
 })
 ```
 
-### Pipelines
+### Pipeline
 
 Pipelines represent the state of the GPU rendering pipeline (shaders, blending, depth test etc).
 
@@ -273,7 +299,7 @@ var pipeline = ctx.pipeline({
 })
 ```
 
-### Textures
+### Texture
 
 Textures represent pixel data uploaded to the GPU.
 
@@ -325,7 +351,7 @@ var tex = ctx.textureCube({
 ])
 ```
 
-### Buffers
+### Buffer
 
 Buffers store vertex and index data in the GPU memory.
 
@@ -344,7 +370,7 @@ var buf = ctx.indexBuffer({ data: Array }) // aka Index Buffer
 | `type` | data type | ctx.DataType | ctx.DataType.Float32 |
 | `usage` | buffer usage | ctx.Usage | ctx.Usage.StaticDraw |
 
-### Queries
+### Query
 
 Queries are used for GPU timers.
 
@@ -520,13 +546,4 @@ ctx.update(tex, {
     Active: 'active',
     Pending: 'pending'
   }
-```
-
-# Examples
-
-To run e.g. shadow mapping example
-
-```sh
-cd examples
-budo shadows.js --open --live -- -t glslify
 ```
