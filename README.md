@@ -275,6 +275,13 @@ var pass = ctx.pass({
 })
 ```
 
+| property | info | type | default |
+| -------- | ---- | ---- | ------- |
+| `color` | color render target | Array of Texture2D or { texture, target} pairs | null |
+| `depth` | depth render target | Texture2D | null |
+| `clearColor` | clear color value | Array | null |
+| `clearDepth` | clear depth value | Number | null |
+
 ### Pipeline
 
 Pipelines represent the state of the GPU rendering pipeline (shaders, blending, depth test etc).
