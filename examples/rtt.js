@@ -15,11 +15,11 @@ const camera = createCamera({
   aspect: 1,
   position: [3, 0.5, 3],
   target: [0, 0, 0],
-  near: 2,
-  far: 6
+  near: 0.1,
+  far: 50
 })
 
-createOrbiter({ camera: camera, distance: 10 })
+createOrbiter({ camera: camera, distance: 6 })
 
 const depthMapSize = 1024
 const depthMap = ctx.texture2D({
@@ -80,6 +80,7 @@ void main() {
 }`
 
 const floor = createCube(2, 0.1, 2)
+const cube = createCube()
 
 const drawFloorCmd = {
   name: 'drawFloor',
@@ -146,13 +147,13 @@ const drawTextureCmd = {
 }
 
 let frameNumber = 0
+
 raf(function frame () {
   ctx.debug(++frameNumber === 1)
 
   ctx.submit(clearScreenCmd)
-
   ctx.submit(drawPassCmd, {
-    // viewport: [0, 0, 1024, 1024]
+    viewport: [0, 0, 1024, 1024]
   }, () => {
     ctx.submit(drawFloorCmd)
   })

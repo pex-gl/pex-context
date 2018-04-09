@@ -28,6 +28,7 @@
     "primitive-sphere": "^3.0.0",
     "raf": "^3.3.0",
     "simplex-noise": "^2.3.0",
+    "tinyify": "^2.4.0",
     "unassertify": "^2.0.4"
   }
 }

@@ -253,7 +253,7 @@ function updateCamera () {
   const x = 6 * Math.cos(Math.PI * t)
   const y = 3
   const z = 6 * Math.sin(Math.PI * t)
-  camera({ position: [x, y, z] })
+  camera.set({ position: [x, y, z] })
 }
 
 let positionData = null

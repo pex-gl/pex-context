@@ -8,7 +8,6 @@ const vec3 = require('pex-math/vec3')
 const mat4 = require('pex-math/mat4')
 const quat = require('pex-math/quat')
 const SimplexNoise = require('simplex-noise')
-const R = require('ramda')
 const random = require('pex-random')
 
 const createContext = require('../../pex-context')
@@ -404,7 +403,7 @@ function updateCamera () {
   const x = 6 * Math.cos(Math.PI * t)
   const y = 3
   const z = 6 * Math.sin(Math.PI * t)
-  camera({ position: [x, y, z] })
+  camera.set({ position: [x, y, z] })
 }
 
 function updateBunny (ctx) {
@@ -434,11 +433,11 @@ const drawFullscreenQuadCmd = {
     depthTest: false
   }),
   attributes: {
-    aPosition: { buffer: ctx.vertexBuffer(new Float32Array(R.flatten([[-1, -1], [-2 / 4, -1], [-2 / 4, -1 / 3], [-1, -1 / 3]]))) },
-    aTexCoord0: { buffer: ctx.vertexBuffer(new Float32Array(R.flatten([[0, 0], [1, 0], [1, 1], [0, 1]]))) }
+    aPosition: { buffer: ctx.vertexBuffer([[-1, -1], [-2 / 4, -1], [-2 / 4, -1 / 3], [-1, -1 / 3]]) },
+    aTexCoord0: { buffer: ctx.vertexBuffer([[0, 0], [1, 0], [1, 1], [0, 1]]) }
   },
   indices: {
-    buffer: ctx.indexBuffer(new Uint16Array(R.flatten([[0, 1, 2], [0, 2, 3]])))
+    buffer: ctx.indexBuffer([[0, 1, 2], [0, 2, 3]])
   },
   uniforms: {
     uTexture: depthMap

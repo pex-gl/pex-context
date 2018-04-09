@@ -1,6 +1,5 @@
 const checkProps = require('./check-props')
 const assert = require('assert')
-const flatten = require('ramda/src/flatten')
 
 const allowedProps = [
   'target', 'data', 'usage'
@@ -34,15 +33,26 @@ function updateBuffer (ctx, buffer, opts) {
   let type = opts.type || buffer.type
 
   if (Array.isArray(data)) {
-    data = flatten(data)
+    var sourceData = data
+    var elemSize = Array.isArray(sourceData[0]) ? sourceData[0].length : 1
+    var size = elemSize * sourceData.length
     if (!type) {
       if (opts.target === gl.ARRAY_BUFFER) type = ctx.DataType.Float32
       else if (opts.target === gl.ELEMENT_ARRAY_BUFFER) type = ctx.DataType.Uint16
       else throw new Error('Missing buffer type')
     }
-    if (type === ctx.DataType.Float32) data = new Float32Array(data)
-    else if (type === ctx.DataType.Uint16) data = new Uint16Array(data)
+    if (type === ctx.DataType.Float32) data = new Float32Array((elemSize === 1) ? sourceData : size)
+    else if (type === ctx.DataType.Uint16) data = new Uint16Array((elemSize === 1) ? sourceData : size)
     else throw new Error(`Unknown buffer type: ${type}`)
+
+    if (elemSize > 1) {
+      for (var i = 0; i < sourceData.length; i++) {
+        for (var j = 0; j < elemSize; j++) {
+          var index = i * elemSize + j
+          data[index] = sourceData[i][j]
+        }
+      }
+    }
   } else if (data instanceof ArrayBuffer) {
     if (!type) {
       if (opts.target === gl.ARRAY_BUFFER) type = ctx.DataType.Float32
