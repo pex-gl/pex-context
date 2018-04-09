@@ -292,10 +292,10 @@ Pipelines represent the state of the GPU rendering pipeline (shaders, blending, 
 var pipeline = ctx.pipeline({
   vert: String,
   frag: String,
-  depthWrite: Boolean, // true
-  depthTest: Boolean,  // false
-  depthFunc: DepthFunc, // LessEqual
-  blend: Boolean, // false
+  depthWrite: Boolean,
+  depthTest: Boolean,
+  depthFunc: DepthFunc,
+  blend: Boolean,
   blendSrcRGBFactor: BlendFactor,
   blendSrcAlphaFactor: BlendFactor,
   blendDstRGBFactor: BlendFactor,
@@ -305,6 +305,22 @@ var pipeline = ctx.pipeline({
   primitive: Primitive
 })
 ```
+
+| property | info | type | default |
+| -------- | ---- | ---- | ------- |
+| `vert` | vertex shader code | String | null |
+| `frag` | fragment shader code | String | null |
+| `depthWrite` | depth write mask | Boolean | true |
+| `depthTest` | depth test on/off | Boolean | false |
+| `depthFunc` | depth test function | DepthFunc | LessEqual |
+| `blend` | blending on/off | Boolean | false |
+| `blendSrcRGBFactor` | blending source color factor | BlendFactor | One |
+| `blendSrcAlphaFactor` | blending source alpha factor | BlendFactor | One |
+| `blendDstRGBFactor` | blending destination color factor | BlendFactor | One |
+| `blendDstAlphaFactor` | blending destination alpha factor | BlendFactor | One |
+| `cullFace` | face culling on/off | Boolean | false |
+| `cullFaceMode` | face culling mode | Face | Back |
+| `primitive` | geometry primitive | Primitive | Triangles |
 
 ### Texture
 
