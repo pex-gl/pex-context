@@ -271,6 +271,7 @@ function createContext (opts) {
       pass: {
         framebuffer: defaultState.pass.framebuffer
       },
+      pipeline: createPipeline(ctx, {}),
       activeTextures: [],
       activeAttributes: []
     },
@@ -569,8 +570,16 @@ function createContext (opts) {
           gl.cullFace(state.cullFaceMode)
         }
       }
-
-      // TODO: depthMask: false, depthWrite?
+      if (pipeline.colorMask[0] !== state.pipeline.colorMask[0] ||
+          pipeline.colorMask[1] !== state.pipeline.colorMask[1] ||
+          pipeline.colorMask[2] !== state.pipeline.colorMask[2] ||
+          pipeline.colorMask[3] !== state.pipeline.colorMask[3]) {
+        state.pipeline.colorMask[0] = pipeline.colorMask[0]
+        state.pipeline.colorMask[1] = pipeline.colorMask[1]
+        state.pipeline.colorMask[2] = pipeline.colorMask[2]
+        state.pipeline.colorMask[3] = pipeline.colorMask[3]
+        gl.colorMask(pipeline.colorMask[0], pipeline.colorMask[1], pipeline.colorMask[2], pipeline.colorMask[3])
+      }
 
       if (pipeline.program !== state.program) {
         state.program = pipeline.program

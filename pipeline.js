@@ -6,6 +6,7 @@ const allowedProps = [
   'blend', 'blendSrcRGBFactor', 'blendSrcAlphaFactor',
   'blendDstRGBFactor', 'blendDstAlphaFactor',
   'cullFace', 'cullFaceMode',
+  'colorMask',
   'primitive'
 ]
 
@@ -27,6 +28,7 @@ function createPipeline (ctx, opts) {
     blendDstAlphaFactor: ctx.BlendFactor.One,
     cullFace: false,
     cullFaceMode: ctx.Face.Back,
+    colorMask: [true, true, true, true],
     primitive: ctx.Primitive.Triangles
   }, opts)
 

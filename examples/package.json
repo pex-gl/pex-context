@@ -9,6 +9,7 @@
   "author": "Marcin Ignac <marcin.ignac@gmail.com> (http://marcinignac.com/)",
   "license": "MIT",
   "dependencies": {
+    "baboon-image": "^2.1.0",
     "budo": "^9.4.7",
     "bunny": "^1.0.1",
     "flatten": "^1.0.2",

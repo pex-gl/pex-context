@@ -319,6 +319,7 @@ var pipeline = ctx.pipeline({
   blendDstAlphaFactor: BlendFactor,
   cullFace: Boolean,
   cullFaceMode: Face,
+  colorMask: Array,
   primitive: Primitive
 })
 ```
@@ -337,6 +338,7 @@ var pipeline = ctx.pipeline({
 | `blendDstAlphaFactor` | blending destination alpha factor | BlendFactor | One |
 | `cullFace` | face culling on/off | Boolean | false |
 | `cullFaceMode` | face culling mode | Face | Back |
+| `colorMask` | color write mask for [r, g, b, a] | Array of Boolean | [true, true, true, true] |
 | `primitive` | geometry primitive | Primitive | Triangles |
 
 ### Texture
