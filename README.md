@@ -315,17 +315,16 @@ var tex = ctx.texture2D({
 #### texture = ctx.textureCube(opts)
 
 - `opts`: Object - see `ctx.texture2D(opts)`
+- `opts.data`: Array of Images or TypedArrays - 6 images, one for each face +X, -X, +Y, -Y, +Z, -Z
 
 ```javascript
-var tex = ctx.textureCube([
-  { data: new Uint8Array([..]), width: 64, height: 64 },
-  { data: new Uint8Array([..]), width: 64, height: 64 },
-  { data: new Uint8Array([..]), width: 64, height: 64 },
-  { data: new Uint8Array([..]), width: 64, height: 64 },
-  { data: new Uint8Array([..]), width: 64, height: 64 },
-  { data: new Uint8Array([..]), width: 64, height: 64 }
+var tex = ctx.textureCube({
+  data: [ posx, negx, posy, negy, posz, negz ],
+  width: 64,
+  height: 64
 ])
 ```
+
 ### Buffers
 
 Buffers store vertex and index data in the GPU memory.
