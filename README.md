@@ -114,6 +114,7 @@ window.addEventListener('resize', () => {
     height: window.innerWidth
   })
 })
+```
 
 ## Commands
 
