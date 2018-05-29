@@ -47,8 +47,6 @@ function updateFramebuffer (ctx, framebuffer, opts) {
   // TODO: ctx push framebuffer
   gl.bindFramebuffer(framebuffer.target, framebuffer.handle)
 
-  const maxRenderTargets = 4
-
   framebuffer.drawBuffers.length = 0
 
   for (let i = 0; i < framebuffer.color.length; i++) {
@@ -57,7 +55,7 @@ function updateFramebuffer (ctx, framebuffer, opts) {
     gl.framebufferTexture2D(framebuffer.target, gl.COLOR_ATTACHMENT0 + i,
        colorAttachment.target, colorAttachment.texture.handle, colorAttachment.level)
   }
-  for (let i = framebuffer.color.length; i < maxRenderTargets; i++) {
+  for (let i = framebuffer.color.length; i < ctx.capabilities.maxColorAttachments; i++) {
     gl.framebufferTexture2D(framebuffer.target, gl.COLOR_ATTACHMENT0 + i, gl.TEXTURE_2D, null, 0)
   }
   // console.log('fbo', gl.getError())

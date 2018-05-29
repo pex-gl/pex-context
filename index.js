@@ -212,8 +212,8 @@ function createContext (opts) {
   }
 
   const capabilities = {
+    maxColorAttachments: 1
   }
-
   gl.getExtension('OES_element_index_uint')
 
   // extensions
@@ -248,14 +248,15 @@ function createContext (opts) {
       gl.drawBuffers = function () {
         throw new Error('WEBGL_draw_buffers not supported')
       }
-      capabilities.multipleRenderTargets = false
     } else {
       gl.drawBuffers = ext.drawBuffersWEBGL.bind(ext)
-      capabilities.multipleRenderTargets = true
+      capabilities.maxColorAttachments = gl.get(ext.MAX_COLOR_ATTACHMENTS_WEBGL)
     }
   } else {
-    capabilities.multipleRenderTargets = true
+    capabilities.maxColorAttachments = gl.get('MAX_COLOR_ATTACHMENTS')
   }
+
+  log('capabilities', capabilities)
 
   Object.assign(ctx, {
     debugMode: false,
