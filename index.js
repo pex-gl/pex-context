@@ -250,10 +250,10 @@ function createContext (opts) {
       }
     } else {
       gl.drawBuffers = ext.drawBuffersWEBGL.bind(ext)
-      capabilities.maxColorAttachments = gl.get(ext.MAX_COLOR_ATTACHMENTS_WEBGL)
+      capabilities.maxColorAttachments = gl.getParameter(ext.MAX_COLOR_ATTACHMENTS_WEBGL)
     }
   } else {
-    capabilities.maxColorAttachments = gl.get('MAX_COLOR_ATTACHMENTS')
+    capabilities.maxColorAttachments = gl.getParameter('MAX_COLOR_ATTACHMENTS')
   }
 
   log('capabilities', capabilities)
