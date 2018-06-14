@@ -29,7 +29,15 @@ function createPipeline (ctx, opts) {
     cullFace: false,
     cullFaceMode: ctx.Face.Back,
     colorMask: [true, true, true, true],
-    primitive: ctx.Primitive.Triangles
+    primitive: ctx.Primitive.Triangles,
+    _dispose: function () {
+      this.vert = null
+      this.frag = null
+      if (this.program && --this.program.refCount === 0) {
+        ctx.dispose(this.program)
+      }
+      this.program = null
+    }
   }, opts)
 
   if (opts.vert && opts.frag) {
@@ -40,6 +48,7 @@ function createPipeline (ctx, opts) {
   }
 
   if (pipeline.program && !pipeline.vertexLayout) {
+    pipeline.program.refCount++
     const attributesPerLocation = pipeline.program.attributesPerLocation
     pipeline.vertexLayout = Object.keys(attributesPerLocation).map((location) => {
       const attribute = attributesPerLocation[location]

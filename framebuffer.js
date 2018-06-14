@@ -10,7 +10,13 @@ function createFramebuffer (ctx, opts) {
     depth: null,
     width: 0,
     height: 0,
-    _update: updateFramebuffer
+    refCount: 0,
+    _update: updateFramebuffer,
+    _dispose: function () {
+      gl.deleteFramebuffer(this.handle)
+      this.color = null
+      this.depth = null
+    }
   }
 
   if (opts.color || opts.depth) {

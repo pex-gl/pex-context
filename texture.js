@@ -26,7 +26,11 @@ function createTexture (ctx, opts) {
     target: opts.target,
     width: 0,
     height: 0,
-    _update: updateTexture2D
+    _update: updateTexture2D,
+    _dispose: function () {
+      gl.deleteTexture(this.handle)
+      this.handle = null
+    }
   }
 
   updateTexture2D(ctx, texture, opts)
@@ -207,7 +211,6 @@ function updateTexture2D (ctx, texture, opts) {
   }
 
   texture.target = target
-  texture.data = data
   texture.pixelFormat = pixelFormat
   texture.encoding = encoding
   texture.min = min

@@ -17,7 +17,11 @@ function createBuffer (ctx, opts) {
     handle: gl.createBuffer(),
     target: opts.target,
     usage: opts.usage || gl.STATIC_DRAW,
-    _update: updateBuffer
+    _update: updateBuffer,
+    _dispose: function () {
+      gl.deleteBuffer(this.handle)
+      this.handle = null
+    }
   }
 
   updateBuffer(ctx, buffer, opts)
@@ -71,7 +75,6 @@ function updateBuffer (ctx, buffer, opts) {
   }
 
   buffer.type = type
-  buffer.data = data
   buffer.length = data.length
 
   // TODO: push state, and pop as this can modify existing VBO?

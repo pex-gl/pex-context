@@ -10,7 +10,15 @@ function createProgram (ctx, opts) {
     attributes: [],
     attributesPerLocation: {},
     uniforms: {},
+    refCount: 0,
     _update: updateProgram,
+    _dispose: function () {
+      gl.deleteProgram(this.handle)
+      this.handle = null
+      this.attributes = null
+      this.attributesPerLocation = null
+      this.uniforms = null
+    },
     setUniform: function (name, value) {
       const uniform = this.uniforms[name]
       if (uniform === undefined) {

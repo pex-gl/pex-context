@@ -58,6 +58,7 @@ function createContext (opts) {
       gl.GPU_DISJOINT = 'GPU_DISJOINT'
       gl.QUERY_RESULT = 'QUERY_RESULT'
       gl.createQuery = function () { return {} }
+      gl.deleteQuery = function () { }
       gl.beginQuery = function () { }
       gl.endQuery = function () { }
       gl.getQueryObject = function (q, param) {
@@ -71,6 +72,7 @@ function createContext (opts) {
       gl.GPU_DISJOINT = ext.GPU_DISJOINT_EXT
       gl.QUERY_RESULT = ext.QUERY_RESULT_EXT
       gl.createQuery = ext.createQueryEXT.bind(ext)
+      gl.deleteQuery = ext.deleteQueryEXT.bind(ext)
       gl.beginQuery = ext.beginQueryEXT.bind(ext)
       gl.endQuery = ext.endQueryEXT.bind(ext)
       gl.getQueryObject = ext.getQueryObjectEXT.bind(ext)
@@ -955,6 +957,24 @@ function createContext (opts) {
         }
       }
       this.checkError()
+    },
+    dispose: function (res) {
+      log('dispose', res)
+      assert(res || arguments.length === 0, 'Trying to dispose undefined resource')
+      if (res) {
+        if (!res._dispose) {
+          assert(res._dispose, 'Trying to dispose non resource')
+        }
+        const idx = this.resources.indexOf(res)
+        assert(idx !== -1, 'Trying to dispose resource from another context')
+        this.resources.splice(idx, 1)
+        this.stats[res.class].alive--
+        res._dispose()
+      } else {
+        while (this.resources.length) {
+          this.dispose(this.resources[0])
+        }
+      }
     }
   })
   ctx.apply(defaultState)

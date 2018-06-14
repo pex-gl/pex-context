@@ -6,18 +6,23 @@ const allowedProps = [
 ]
 
 function createQuery (ctx, opts) {
+  const gl = ctx.gl
   opts = opts || {}
   checkProps(allowedProps, opts)
 
   const query = Object.assign({
     class: 'query',
-    handle: ctx.gl.createQuery(),
+    handle: gl.createQuery(),
     target: null,
     state: ctx.QueryState.Ready,
     result: null,
     _begin: begin,
     _end: end,
-    _available: available
+    _available: available,
+    _dispose: function () {
+      gl.deleteQuery(this.handle)
+      this.handle = null
+    }
   }, opts)
 
   if (!query.target) {
