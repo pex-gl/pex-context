@@ -266,6 +266,7 @@ function createContext (opts) {
     // debugGraph: '',
     debugCommands: [],
     resources: [],
+    stats: [],
     queries: [],
     stack: [ defaultState ],
     defaultState: defaultState,
@@ -364,6 +365,11 @@ function createContext (opts) {
     },
     resource: function (res) {
       res.id = res.class + '_' + ID++
+      if (!this.stats[res.class]) {
+        this.stats[res.class] = { alive: 0, total: 0 }
+      }
+      this.stats[res.class].alive++
+      this.stats[res.class].total++
       this.resources.push(res)
       this.checkError()
       return res
