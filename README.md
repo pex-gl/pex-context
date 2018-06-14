@@ -448,9 +448,10 @@ End the query measurement.
 
 #### ctx.update(res, opts)
 
-```javascript
-ctx.update(res, { data: Array })
+Update a resource.
 
+```javascript
+ctx.update(res, { data: [] })
 
 var tex = ctx.texture2D({...})
 ctx.update(tex, {
