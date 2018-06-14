@@ -460,6 +460,36 @@ ctx.update(tex, {
 })
 ```
 
+| property | info |
+| -------- | ---- |
+| `opts` | whatever data the given resource accepts in constructor |
+
+## Disposing resources
+
+#### ctx.dispose()
+
+Delete all allocated resources and stop render loop. Disposed context is no longer valid to use.
+
+```javascript
+ctx.dispose()
+```
+
+#### ctx.dispose(res)
+
+Delete a resource. Disposed resource is no longer valid for use.
+
+```javascript
+var tex = ctx.texture2D({})
+...
+ctx.dispose(tex)
+```
+
+| property | info | type |
+| -------- | ---- | ---- |
+| `target` | resource to be deleted | ctx.Buffer, ctx.Framebuffer, ctx.Pass, ctx.Pipeline, ctx.Program, ctx.Query, ctx.Texture |
+
+*Note: Framebuffers are ref counted and released by Pass, Programs are also ref counted and released by Pipeline*
+
 # Enums
 
 #### ctx.BlendFactor
