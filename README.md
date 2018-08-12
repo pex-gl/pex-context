@@ -94,7 +94,7 @@ budo shadows.js --open --live -- -t glslify
 
 Creating gl context wrapper.
 
-### ctx = createContext(opts)
+#### ctx = createContext(opts)
 
 ```javascript
 var createContext = require('pex-context')
@@ -112,7 +112,7 @@ var ctx = createContext({ canvas: canvas })
 var ctx = createContext({ width: Number, height: Number })
 ```
 
-### ctx.set(opts)
+#### ctx.set(opts)
 
 ```javascript
 ctx.set({
@@ -197,7 +197,7 @@ var cmd = {
 
 ## Submitting commands to the GPU
 
-### ctx.submit(cmd)
+#### ctx.submit(cmd)
 
 ```javascript
 ctx.submit({
@@ -215,7 +215,7 @@ ctx.submit({
 })
 ```
 
-### ctx.submit(cmd, opts)
+#### ctx.submit(cmd, opts)
 
 Submit partially updated command without modifying the original one
 
@@ -228,7 +228,7 @@ ctx.submit(cmd, {
 })
 ```
 
-### ctx.submit(cmd, [opts1, opts2, opts3...])
+#### ctx.submit(cmd, [opts1, opts2, opts3...])
 
 Submit a batch of commands differences in opts.
 
