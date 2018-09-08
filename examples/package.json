@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "baboon-image": "^2.1.0",
-    "budo": "^9.4.7",
+    "budo": "^11.3.2",
     "bunny": "^1.0.1",
     "flatten": "^1.0.2",
     "geom-center-and-normalize": "^1.0.1",
