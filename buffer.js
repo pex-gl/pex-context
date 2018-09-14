@@ -2,7 +2,7 @@ const checkProps = require('./check-props')
 const assert = require('assert')
 
 const allowedProps = [
-  'target', 'data', 'usage'
+  'target', 'data', 'usage', 'type'
 ]
 
 function createBuffer (ctx, opts) {
@@ -47,7 +47,10 @@ function updateBuffer (ctx, buffer, opts) {
     }
     if (type === ctx.DataType.Float32) data = new Float32Array((elemSize === 1) ? sourceData : size)
     else if (type === ctx.DataType.Uint16) data = new Uint16Array((elemSize === 1) ? sourceData : size)
-    else throw new Error(`Unknown buffer type: ${type}`)
+    else if (type === ctx.DataType.Uint32) data = new Uint32Array((elemSize === 1) ? sourceData : size)
+    else {
+      throw new Error(`Unknown buffer type: ${type}`)
+    }
 
     if (elemSize > 1) {
       for (var i = 0; i < sourceData.length; i++) {
