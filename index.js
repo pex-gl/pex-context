@@ -768,8 +768,7 @@ function createContext (opts) {
       } else if (cmd.count) {
         const first = 0
         if (instanced) {
-          // TODO: check if instancing available
-          gl.drawElementsInstanced(primitive, first, cmd.count, cmd.instances)
+          gl.drawArraysInstanced(primitive, first, cmd.count, cmd.instances)
         } else {
           gl.drawArrays(primitive, first, cmd.count)
         }

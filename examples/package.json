@@ -14,6 +14,8 @@
     "bunny": "^1.0.1",
     "flatten": "^1.0.2",
     "geom-center-and-normalize": "^1.0.1",
+    "geom-normals": "^1.0.1",
+    "geom-split-vertices": "^1.0.0",
     "glsl-gamma": "^2.0.0",
     "glsl-inverse": "^1.0.0",
     "glsl-transpose": "^1.0.0",
