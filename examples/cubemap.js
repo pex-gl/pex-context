@@ -7,11 +7,13 @@ const createOrbiter = require('pex-cam/orbiter')
 const createSphere = require('primitive-sphere')
 const mat4 = require('pex-math/mat4')
 const glsl = require('glslify')
+const GUI = require('pex-gui')
 
 const ctx = createContext()
+const gui = new GUI(ctx)
 
 const camera = createCamera({
-  fov: Math.PI / 4, 
+  fov: Math.PI / 4,
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
   position: [0, 0.5, 3],
   target: [0, 0, 0]
@@ -161,8 +163,11 @@ load(resources, (err, res) => {
       res.posz, res.negz
     ],
     width: res.negx.width,
-    height: res.negy.height
+    height: res.negy.height,
+    encoding: ctx.Encoding.SRGB
   })
+
+  gui.addTextureCube('Cubemap', envMapCube, { flipEnvMap: -1 })
 
   drawSkybox.uniforms.uEnvMap = envMapCube
   drawCmd.uniforms.uEnvMap = envMapCube
@@ -172,6 +177,8 @@ load(resources, (err, res) => {
     ctx.submit(clearScreenCmd)
     ctx.submit(drawSkybox)
     ctx.submit(drawCmd)
+
+    gui.draw()
     raf(frame)
   })
 })
