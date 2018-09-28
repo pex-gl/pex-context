@@ -27,7 +27,7 @@ const camera = createCamera({
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
   near: 0.1,
   far: 10,
-  position: [0, 0, 0.7]
+  position: [0, 0, 1.5]
   // position: [0, 0, 0.2]
 })
 createOrbiter({ camera })
@@ -35,7 +35,7 @@ createOrbiter({ camera })
 // Commands
 const clearCmd = {
   pass: ctx.pass({
-    clearColor: [0, 1, 0, 1],
+    clearColor: [1, 0, 0, 1],
     clearDepth: 1
   })
 }
@@ -74,6 +74,7 @@ varying vec3 vNormal;
 varying vec2 vTexCoord0;
 
 uniform vec2 uResolution;
+uniform float uAlphaTest;
 uniform sampler2D uBaseColorMap;
 uniform bool uFXAAEnabled;
 
@@ -82,6 +83,8 @@ void main() {
   vec4 texelColor = texture2D(uBaseColorMap, vTexCoord0);
 
   gl_FragColor = texelColor;
+
+  if (gl_FragColor.a < uAlphaTest) discard;
 
   // FXAA
   if (uFXAAEnabled) gl_FragColor = fxaa(uBaseColorMap, fragCoord, uResolution);
@@ -97,7 +100,7 @@ const drawCmd = {
     vert,
     frag,
     depthTest: true,
-    cullFace: true,
+    cullFace: false,
     // blend: true,
     // blendSrcRGBFactor: ctx.BlendFactor.SrcAlpha,
     // blendSrcAlphaFactor: ctx.BlendFactor.One,
@@ -117,6 +120,7 @@ const drawCmd = {
     uModelMatrix: mat4.create(),
     uResolution: [ctx.gl.canvas.width, ctx.gl.canvas.height],
     uBaseColorMap: null,
+    uAlphaTest: 0.5,
     uFXAAEnabled: false
   }
 }
@@ -150,6 +154,7 @@ gui.addParam('FXAA', STATE, 'fxaa', {}, () => {
 
 // Load textures
 Promise.all([
+  io.loadImage('assets/images/brush-pack-1-3.png'),
   io.loadImage('assets/images/diffuse.png'),
   io.loadImage('assets/images/checker.png'),
   io.loadImage('assets/images/checker.jpg')
@@ -163,7 +168,7 @@ Promise.all([
       encoding: ctx.Encoding.SRGB,
       min: ctx.Filter.Linear,
       mag: ctx.Filter.Linear,
-      wrap: ctx.Wrap.Repeat,
+      wrap: ctx.Wrap.ClampToEdge,
       flipY: true
       // min: ctx.Filter.LinearMipmapLinear,
       // mipmap: true,
