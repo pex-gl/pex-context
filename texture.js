@@ -112,11 +112,11 @@ function updateTexture2D (ctx, texture, opts) {
   const img = opts.data ? opts.data : opts
   if (img && img.nodeName) {
     assert(img instanceof window.HTMLImageElement ||
+      img instanceof window.HTMLVideoElement ||
       img instanceof window.HTMLCanvasElement,
       'Texture2D.update opts has to be Image, Canvas or Video element')
-    // TODO: add support for HTMLVideoElement with videoWidth and videoHeight
-    width = img.width
-    height = img.height
+    width = img.width || img.videoHeight
+    height = img.height || img.videoHeight
     internalFormat = gl.RGBA
     format = gl.RGBA
     type = gl.UNSIGNED_BYTE
