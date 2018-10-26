@@ -678,13 +678,14 @@ function createContext (opts) {
 
       let instanced = false
       // TODO: disable unused vertex array slots
-      for (var i = 0; i < 16; i++) {
+      for (let i = 0; i < 16; i++) {
         state.activeAttributes[i] = null
         gl.disableVertexAttribArray(i)
       }
 
       // TODO: the same as i support [tex] and { texture: tex } i should support buffers in attributes?
-      vertexLayout.forEach((layout, i) => {
+      for (let i = 0; i < vertexLayout.length; i++) {
+        const layout = vertexLayout[i]
         const name = layout[0]
         const location = layout[1]
         const size = layout[2]
@@ -752,7 +753,7 @@ function createContext (opts) {
           }
         }
         // TODO: how to match index with vertexLayout location?
-      })
+      }
 
       let primitive = cmd.pipeline.primitive
       if (cmd.indices) {
