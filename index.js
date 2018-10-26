@@ -669,9 +669,11 @@ function createContext (opts) {
         assert.fail('Trying to draw without an active program')
       }
 
-      if (vertexLayout.length !== Object.keys(state.program.attributes).length) {
-        log('Invalid vertex layout not matching the shader', vertexLayout, state.program.attributes, cmd)
-        assert.fail('Invalid vertex layout not matching the shader')
+      if (this.debugMode) {
+        if (vertexLayout.length !== Object.keys(state.program.attributes).length) {
+          log('Invalid vertex layout not matching the shader', vertexLayout, state.program.attributes, cmd)
+          assert.fail('Invalid vertex layout not matching the shader')
+        }
       }
 
       let instanced = false
