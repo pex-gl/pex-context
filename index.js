@@ -613,11 +613,11 @@ function createContext (opts) {
 
       const requiredUniforms = this.debugMode ? Object.keys(state.program.uniforms) : null
 
-      Object.keys(uniforms).forEach((name) => {
+      for (var name in uniforms) {
         let value = uniforms[name]
         // TODO: find a better way to not trying to set unused uniforms that might have been inherited
         if (!state.program.uniforms[name] && !state.program.uniforms[name + '[0]']) {
-          return
+          continue
         }
         if (value === null || value === undefined) {
           log('invalid command', cmd)
@@ -626,11 +626,13 @@ function createContext (opts) {
         // FIXME: uniform array hack
         if (Array.isArray(value) && !state.program.uniforms[name]) {
           if (this.debugMode) log('unknown uniform', name, Object.keys(state.program.uniforms))
-          value.forEach((val, i) => {
-            var nameIndex = `${name}[${i}]`
-            state.program.setUniform(nameIndex, val)
-            requiredUniforms.splice(requiredUniforms.indexOf(nameIndex), 1)
-          })
+          for (var i = 0; i < value.length; i++) {
+            var nameIndex = name + '[' + i + ']'
+            state.program.setUniform(nameIndex, value[i])
+            if (this.debugMode) {
+              requiredUniforms.splice(requiredUniforms.indexOf(nameIndex), 1)
+            }
+          }
         } else if (value.target) { // assuming texture
           // FIXME: texture binding hack
           const slot = numTextures++
