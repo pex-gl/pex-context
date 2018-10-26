@@ -611,7 +611,7 @@ function createContext (opts) {
         assert.fail('Trying to draw without an active program')
       }
 
-      const requiredUniforms = Object.keys(state.program.uniforms)
+      const requiredUniforms = this.debugMode ? Object.keys(state.program.uniforms) : null
 
       Object.keys(uniforms).forEach((name) => {
         let value = uniforms[name]
@@ -640,16 +640,20 @@ function createContext (opts) {
             state.activeTextures[slot] = value
           }
           state.program.setUniform(name, slot)
-          requiredUniforms.splice(requiredUniforms.indexOf(name), 1)
+          if (this.debugMode) {
+            requiredUniforms.splice(requiredUniforms.indexOf(name), 1)
+          }
         } else if (!value.length && typeof value === 'object') {
           log('invalid command', cmd)
           assert.fail(`Can set uniform "${name}" with an Object value`)
         } else {
           state.program.setUniform(name, value)
-          requiredUniforms.splice(requiredUniforms.indexOf(name), 1)
+          if (this.debugMode) {
+            requiredUniforms.splice(requiredUniforms.indexOf(name), 1)
+          }
         }
-      })
-      if (requiredUniforms.length > 0) {
+      }
+      if (this.debugMode && requiredUniforms.length > 0) {
         log('invalid command', cmd)
         assert.fail(`Trying to draw with missing uniforms: ${requiredUniforms.join(', ')}`)
       }
