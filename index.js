@@ -877,9 +877,9 @@ function createContext (opts) {
       }
     },
     submit: function (cmd, batches, subCommand) {
-      checkProps(allowedCommandProps, cmd)
       if (this.debugMode) {
         this.debugCommands.push(cmd)
+        checkProps(allowedCommandProps, cmd)
         if (batches && subCommand) log('submit', cmd.name || cmd.id, { depth: this.stack.length, cmd: cmd, batches: batches, subCommand: subCommand, state: this.state, stack: this.stack })
         else if (batches) log('submit', cmd.name || cmd.id, { depth: this.stack.length, cmd: cmd, batches: batches, state: this.state, stack: this.stack })
         else log('submit', cmd.name || cmd.id, { depth: this.stack.length, cmd: cmd, state: this.state, stack: this.stack })
