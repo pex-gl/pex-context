@@ -37,20 +37,23 @@ function updateBuffer (ctx, buffer, opts) {
   let type = opts.type || buffer.type
 
   if (Array.isArray(data)) {
+    if (!type) {
+      if (opts.target === gl.ARRAY_BUFFER) {
+        type = ctx.DataType.Float32
+      }
+      if (opts.target === gl.ELEMENT_ARRAY_BUFFER) {
+        type = ctx.DataType.Uint16
+      }
+    }
+
     var sourceData = data
     var elemSize = Array.isArray(sourceData[0]) ? sourceData[0].length : 1
     var size = elemSize * sourceData.length
-    if (!type) {
-      if (opts.target === gl.ARRAY_BUFFER) type = ctx.DataType.Float32
-      else if (opts.target === gl.ELEMENT_ARRAY_BUFFER) type = ctx.DataType.Uint16
-      else throw new Error('Missing buffer type')
-    }
+
     if (type === ctx.DataType.Float32) data = new Float32Array((elemSize === 1) ? sourceData : size)
+    else if (type === ctx.DataType.Uint8) data = new Uint8Array((elemSize === 1) ? sourceData : size)
     else if (type === ctx.DataType.Uint16) data = new Uint16Array((elemSize === 1) ? sourceData : size)
     else if (type === ctx.DataType.Uint32) data = new Uint32Array((elemSize === 1) ? sourceData : size)
-    else {
-      throw new Error(`Unknown buffer type: ${type}`)
-    }
 
     if (elemSize > 1) {
       for (var i = 0; i < sourceData.length; i++) {
@@ -60,24 +63,23 @@ function updateBuffer (ctx, buffer, opts) {
         }
       }
     }
+  } else if (data instanceof Float32Array) {
+    type = ctx.DataType.Float32
+  } else if (data instanceof Uint8Array) {
+    type = ctx.DataType.Uint8
+  } else if (data instanceof Uint16Array) {
+    type = ctx.DataType.Uint16
+  } else if (data instanceof Uint32Array) {
+    type = ctx.DataType.Uint32
   } else if (data instanceof ArrayBuffer) {
-    if (!type) {
-      if (opts.target === gl.ARRAY_BUFFER) type = ctx.DataType.Float32
-      else if (opts.target === gl.ELEMENT_ARRAY_BUFFER) type = ctx.DataType.Uint16
-      else throw new Error('Missing buffer type')
-    }
-    if (type === ctx.DataType.Float32) data = new Float32Array(data)
-    else if (type === ctx.DataType.Uint16) data = new Uint16Array(data)
-    else if (type === ctx.DataType.Uint32) data = new Uint32Array(data)
-    else throw new Error(`Unknown buffer type: ${type}`)
+    // assuming type was provided
   } else {
-    if (data instanceof Float32Array) type = ctx.DataType.Float32
-    else if (data instanceof Uint16Array) type = ctx.DataType.Uint16
-    else if (data instanceof Uint32Array) type = ctx.DataType.Uint32
-    else throw new Error(`Unknown buffer data type: ${data.constructor}`)
+    throw new Error(`Unknown buffer data type: ${data.constructor}`)
   }
 
   buffer.type = type
+
+  // TODO: is this a valid guess?
   buffer.length = data.length
 
   // TODO: push state, and pop as this can modify existing VBO?

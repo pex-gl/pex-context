@@ -692,7 +692,7 @@ function createContext (opts) {
           buffer = attrib
         }
 
-        if (!buffer || !buffer.target || !buffer.length) {
+        if (!buffer || !buffer.target) {
           log('Invalid command', cmd)
           assert.fail(`Trying to draw arrays with invalid buffer for attribute : ${name}`)
         }
@@ -707,10 +707,12 @@ function createContext (opts) {
           state.activeAttributes[location + 1] = buffer
           state.activeAttributes[location + 2] = buffer
           state.activeAttributes[location + 3] = buffer
-          gl.vertexAttribPointer(location, 4, attrib.type || buffer.type || gl.FLOAT, attrib.normalized || false, attrib.stride || 64, attrib.offset || 0)
-          gl.vertexAttribPointer(location + 1, 4, attrib.type || buffer.type || gl.FLOAT, attrib.normalized || false, attrib.stride || 64, attrib.offset || 16)
-          gl.vertexAttribPointer(location + 2, 4, attrib.type || buffer.type || gl.FLOAT, attrib.normalized || false, attrib.stride || 64, attrib.offset || 32)
-          gl.vertexAttribPointer(location + 3, 4, attrib.type || buffer.type || gl.FLOAT, attrib.normalized || false, attrib.stride || 64, attrib.offset || 48)
+          // we still check for buffer type because while e.g. pex-renderer would copy buffer type to attrib
+          // a raw pex-context example probably would not
+          gl.vertexAttribPointer(location, 4, attrib.type || buffer.type, attrib.normalized || false, attrib.stride || 64, attrib.offset || 0)
+          gl.vertexAttribPointer(location + 1, 4, attrib.type || buffer.type, attrib.normalized || false, attrib.stride || 64, attrib.offset || 16)
+          gl.vertexAttribPointer(location + 2, 4, attrib.type || buffer.type, attrib.normalized || false, attrib.stride || 64, attrib.offset || 32)
+          gl.vertexAttribPointer(location + 3, 4, attrib.type || buffer.type, attrib.normalized || false, attrib.stride || 64, attrib.offset || 48)
           if (attrib.divisor) {
             gl.vertexAttribDivisor(location + 0, attrib.divisor)
             gl.vertexAttribDivisor(location + 1, attrib.divisor)
@@ -729,7 +731,7 @@ function createContext (opts) {
           gl.vertexAttribPointer(
             location,
             size,
-            attrib.type || buffer.type || gl.FLOAT,
+            attrib.type || buffer.type,
             attrib.normalized || false,
             attrib.stride || 0,
             attrib.offset || 0
