@@ -68,12 +68,6 @@ function updateTexture2D (ctx, texture, opts) {
   let type
   let format
 
-  gl.getExtension('WEBGL_depth_texture')
-  gl.getExtension('EXT_shader_texture_lod')
-  gl.getExtension('OES_texture_float')
-  gl.getExtension('OES_texture_float_linear')
-  gl.getExtension('OES_texture_half_float')
-  gl.getExtension('OES_texture_half_float_linear')
   var anisoExt = gl.getExtension('EXT_texture_filter_anisotropic')
 
   const textureUnit = 0

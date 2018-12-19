@@ -43,6 +43,21 @@ function createContext (opts) {
   else if (opts && opts.gl) gl = opts.gl
   assert(gl, 'pex-context: createContext failed')
 
+  const capabilities = {
+    maxColorAttachments: 1,
+    instancedArrays: false,
+    instancing: false, // TODO: deprecate
+    elementIndexUint32: !!gl.getExtension('OES_element_index_uint'),
+    standardDerivatives: !!gl.getExtension('OES_standard_derivatives'),
+    depthTexture: !!gl.getExtension('WEBGL_depth_texture'),
+    shaderTextureLod: !!gl.getExtension('EXT_shader_texture_lod'),
+    textureFloat: !!gl.getExtension('OES_texture_float'),
+    textureFloatLinear: !!gl.getExtension('OES_texture_float_linear'),
+    textureHalfFloat: !!gl.getExtension('OES_texture_half_float'),
+    textureHalfFloatLinear: !!gl.getExtension('OES_texture_half_float_linear'),
+    textureFilterAnisotropic: !!gl.getExtension('EXT_texture_filter_anisotropic')
+  }
+
   if (!gl.HALF_FLOAT) {
     const ext = gl.getExtension('OES_texture_half_float')
     if (ext) {
@@ -213,11 +228,6 @@ function createContext (opts) {
     count: 0
   }
 
-  const capabilities = {
-    maxColorAttachments: 1
-  }
-  gl.getExtension('OES_element_index_uint')
-
   // extensions
   if (!gl.drawElementsInstanced) {
     const ext = gl.getExtension('ANGLE_instanced_arrays')
@@ -232,16 +242,17 @@ function createContext (opts) {
       gl.vertexAttribDivisor = function () {
         throw new Error('gl.vertexAttribDivisor not available. ANGLE_instanced_arrays not supported')
       }
-      capabilities.instancing = false
     } else {
       // TODO: this._caps[CAPS_INSTANCED_ARRAYS] = true;
       gl.drawElementsInstanced = ext.drawElementsInstancedANGLE.bind(ext)
       gl.drawArraysInstanced = ext.drawArraysInstancedANGLE.bind(ext)
       gl.vertexAttribDivisor = ext.vertexAttribDivisorANGLE.bind(ext)
-      capabilities.instancing = true
+      capabilities.instancedArrays = true
+      capabilities.instancing = true // TODO: deprecate
     }
   } else {
-    capabilities.instancing = true
+    capabilities.instancedArrays = true
+    capabilities.instancing = true // TODO: deprecate
   }
 
   if (!gl.drawBuffers) {
