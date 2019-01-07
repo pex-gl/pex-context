@@ -145,7 +145,7 @@ window.addEventListener('resize', () => {
 
 #### ctx.frame(cb)
 
-- `cb`: Function - Request Animation Frame callack
+- `cb`: Function - Request Animation Frame callback
 
 ## Commands
 
