@@ -28,7 +28,8 @@ function createContext (opts) {
   let gl = null
 
   const defaultOpts = {
-    pixelRatio: 1
+    pixelRatio: 1,
+    precision: 'highp'
   }
 
   opts = Object.assign({}, defaultOpts, opts)
@@ -269,6 +270,28 @@ function createContext (opts) {
     capabilities.maxColorAttachments = gl.getParameter('MAX_COLOR_ATTACHMENTS')
   }
 
+  function getMaxPrecision(precision = 'highp') {
+    if (precision === "highp") {
+      if (
+        gl.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.HIGH_FLOAT).precision > 0 &&
+        gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT).precision > 0
+      ) {
+        return "highp";
+      }
+      precision = "mediump";
+    }
+    if (precision === "mediump") {
+      if (
+        gl.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.MEDIUM_FLOAT).precision > 0 &&
+        gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.MEDIUM_FLOAT).precision > 0
+      ) {
+        return "mediump";
+      }
+    }
+    return "lowp";
+  }
+  capabilities.maxPrecision = getMaxPrecision(opts.precision)
+
   log('capabilities', capabilities)
 
   Object.assign(ctx, {
@@ -300,6 +323,7 @@ function createContext (opts) {
       }
       return str
     },
+    getMaxPrecision,
     set: function (opts) {
       assert(isBrowser, 'changing resolution is not supported in Plask')
       if (opts.pixelRatio) {
