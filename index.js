@@ -45,6 +45,10 @@ function createContext (opts) {
 
   const capabilities = {
     maxColorAttachments: 1,
+    maxTextureImageUnits: !!gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
+    maxVertexTextureImageUnits: !!gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS),
+    maxTextureSize: !!gl.getParameter(gl.MAX_TEXTURE_SIZE),
+    maxCubeMapTextureSize: !!gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
     instancedArrays: false,
     instancing: false, // TODO: deprecate
     elementIndexUint32: !!gl.getExtension('OES_element_index_uint'),
