@@ -1,6 +1,6 @@
 {
   "name": "pex-context",
-  "version": "2.8.0",
+  "version": "2.9.0-0",
   "description": "Thin WebGL wrapper for state stack and resource management for the pex library",
   "main": "index.js",
   "scripts": {
