@@ -11,6 +11,7 @@ Modern WebGL state wrapper for [PEX](http://pex.gl). With `pex-context` you allo
   - [Pass](#pass)
   - [Pipeline](#pipeline)
   - [Texture](#texture)
+  - [Renderbuffer](#renderbuffer)
   - [Buffer](#buffer)
   - [Query](#query)
 - [Updating resources](#updating-resources)
@@ -393,6 +394,28 @@ var tex = ctx.textureCube({
 ])
 ```
 
+### Renderbuffer
+
+Renderbuffers represent pixel data store for rendering operations
+
+#### renderbuffer = ctx.renderbuffer(opts)
+
+```javascript
+var tex = ctx.renderbuffer({
+  width: 1280,
+  height: 720,
+  pixelFormat: ctx.PixelFormat.Depth16
+})
+```
+
+| property | info | type | default |
+| -------- | ---- | ---- | ------- |
+| `width` | renderbuffer width   | Number/Int | 0 |
+| `height` | renderbuffer height  | Number/Int | 0 |
+| `pixelFormat`  | pixel data format<sup>1</sup> | ctx.PixelFormat | null |
+
+<sup>1</sup> only `PixelFormat.Depth16` is currently supported and only  for use as render pass depth storage (e.g. `ctx.pass({ depth: renderbuffer})`) for platforms with no `WEBGL_depth_texture` support.
+
 ### Buffer
 
 Buffers store vertex and index data in the GPU memory.
@@ -568,7 +591,8 @@ ctx.dispose(tex)
     RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
     R32F: 'r32f', // gl.ALPHA + gl.FLOAT
     R16F: 'r16f', // gl.ALPHA + gl.HALF_FLOAT
-    Depth: 'depth' // gl.DEPTH_COMPONENT
+    Depth: 'depth', // gl.DEPTH_COMPONENT
+    Depth16: 'depth16' // gl.DEPTH_COMPONENT16, renderbuffer only
   }
 ```
 

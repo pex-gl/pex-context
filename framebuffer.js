@@ -1,3 +1,5 @@
+const assert = require('assert')
+
 function createFramebuffer (ctx, opts) {
   const gl = ctx.gl
 
@@ -64,19 +66,30 @@ function updateFramebuffer (ctx, framebuffer, opts) {
   for (let i = framebuffer.color.length; i < ctx.capabilities.maxColorAttachments; i++) {
     gl.framebufferTexture2D(framebuffer.target, gl.COLOR_ATTACHMENT0 + i, gl.TEXTURE_2D, null, 0)
   }
-  // console.log('fbo', gl.getError())
-  // console.log('fbo', ctx.getGLString(gl, gl.checkFramebufferStatus(gl.FRAMEBUFFER)))
 
   if (framebuffer.depth) {
-    // console.log('fbo attaching depth', framebuffer.depth)
+    if (ctx.debugMode) console.log('fbo attaching depth', framebuffer.depth)
     const depthAttachment = framebuffer.depth
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
-      depthAttachment.texture.target, depthAttachment.texture.handle, depthAttachment.level)
+
+    if (depthAttachment.texture.target === gl.RENDERBUFFER) {
+      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthAttachment.texture.handle)
+    } else {
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
+        depthAttachment.texture.target, depthAttachment.texture.handle, depthAttachment.level)
+    }
   } else {
+    if (ctx.debugMode) console.log('fbo deattaching depth')
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, null)
     gl.framebufferTexture2D(framebuffer.target, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, null, 0)
   }
-  // console.log('fbo', gl.getError())
-  // console.log('fbo', ctx.getGLString(gl, gl.checkFramebufferStatus(gl.FRAMEBUFFER)))
+  var statusStr = []
+  statusStr[gl.FRAMEBUFFER_COMPLETE] = 'FRAMEBUFFER_COMPLETE'
+  statusStr[gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT] = 'FRAMEBUFFER_INCOMPLETE_ATTACHMENT'
+  statusStr[gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT] = 'FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT'
+  statusStr[gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS] = 'FRAMEBUFFER_INCOMPLETE_DIMENSIONS'
+  statusStr[gl.FRAMEBUFFER_UNSUPPORTED] = 'FRAMEBUFFER_UNSUPPORTED'
+  var fboStatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
+  assert(fboStatus === gl.FRAMEBUFFER_COMPLETE, `FBO incomplete ${statusStr[fboStatus]}`)
 
   // TODO: ctx. pop framebuffer
   gl.bindFramebuffer(framebuffer.target, null)
