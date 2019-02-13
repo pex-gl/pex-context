@@ -71,12 +71,11 @@ function updateFramebuffer (ctx, framebuffer, opts) {
     if (ctx.debugMode) console.log('fbo attaching depth', framebuffer.depth)
     const depthAttachment = framebuffer.depth
 
-    if (depthAttachment.texture.target) {
+    if (depthAttachment.texture.target === gl.RENDERBUFFER) {
+      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthAttachment.texture.handle)
+    } else {
       gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
         depthAttachment.texture.target, depthAttachment.texture.handle, depthAttachment.level)
-    } else {
-      // gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, depthAttachment.texture)
-      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthAttachment.texture.handle)
     }
   } else {
     if (ctx.debugMode) console.log('fbo deattaching depth')

@@ -6,6 +6,7 @@ const createGL = require('pex-gl')
 const assert = require('assert')
 const createTexture = require('./texture')
 const createFramebuffer = require('./framebuffer')
+const createRenderbuffer = require('./renderbuffer')
 const createPass = require('./pass')
 const createPipeline = require('./pipeline')
 const createProgram = require('./program')
@@ -171,7 +172,8 @@ function createContext (opts) {
     RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
     R32F: 'r32f', // gl.ALPHA + gl.FLOAT
     R16F: 'r16f', // gl.ALPHA + gl.HALF_FLOAT
-    Depth: 'depth' // gl.DEPTH_COMPONENT
+    Depth: 'depth', // gl.DEPTH_COMPONENT
+    Depth16: 'depth16' // gl.DEPTH_COMPONENT16, renderbuffer only
   }
 
   const Encoding = {
@@ -418,6 +420,11 @@ function createContext (opts) {
     framebuffer: function (opts) {
       log('framebuffer', opts)
       return this.resource(createFramebuffer(this, opts))
+    },
+    // renderbuffer({ width: int, height: int })
+    renderbuffer: function (opts) {
+      log('renderbuffer', opts)
+      return this.resource(createRenderbuffer(this, opts))
     },
     // TODO: Should we have named versions or generic 'ctx.buffer' command?
     // In regl buffer() is ARRAY_BUFFER (aka VertexBuffer) and elements() is ELEMENT_ARRAY_BUFFER
