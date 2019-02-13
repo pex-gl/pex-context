@@ -13,6 +13,15 @@ const createBuffer = require('./buffer')
 const createQuery = require('./query')
 const raf = require('raf')
 const checkProps = require('./check-props')
+var WebGLDebugUtils = require('webgl-debug')
+ 
+function throwOnGLError(err, funcName, args) {
+ throw WebGLDebugUtils.glEnumToString(err) 
+ + "was caused by call to " 
+ + funcName
+}
+ 
+ 
 
 let ID = 0
 
@@ -42,6 +51,9 @@ function createContext (opts) {
   if (!opts || !opts.gl) gl = createGL(opts)
   else if (opts && opts.gl) gl = opts.gl
   assert(gl, 'pex-context: createContext failed')
+
+  // gl = WebGLDebugUtils.makeDebugContext(gl, throwOnGLError);
+  // console.log('debug gl', gl)
 
   const capabilities = {
     maxColorAttachments: 1,

@@ -68,15 +68,30 @@ function updateFramebuffer (ctx, framebuffer, opts) {
   // console.log('fbo', ctx.getGLString(gl, gl.checkFramebufferStatus(gl.FRAMEBUFFER)))
 
   if (framebuffer.depth) {
-    // console.log('fbo attaching depth', framebuffer.depth)
+    if (ctx.debugMode) console.log('fbo attaching depth', framebuffer.depth)
     const depthAttachment = framebuffer.depth
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
-      depthAttachment.texture.target, depthAttachment.texture.handle, depthAttachment.level)
+
+    if (depthAttachment.texture.target) {
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
+        depthAttachment.texture.target, depthAttachment.texture.handle, depthAttachment.level)
+    } else {
+      // gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, depthAttachment.texture)
+      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthAttachment.texture.handle)
+    }
   } else {
+    if (ctx.debugMode) console.log('fbo deattaching depth')
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, null)
     gl.framebufferTexture2D(framebuffer.target, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, null, 0)
   }
   // console.log('fbo', gl.getError())
   // console.log('fbo', ctx.getGLString(gl, gl.checkFramebufferStatus(gl.FRAMEBUFFER)))
+  var status = []
+  status[gl.FRAMEBUFFER_COMPLETE] = 'FRAMEBUFFER_COMPLETE'
+  status[gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT] = 'FRAMEBUFFER_INCOMPLETE_ATTACHMENT'
+  status[gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT] = 'FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT'
+  status[gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS] = 'FRAMEBUFFER_INCOMPLETE_DIMENSIONS'
+  status[gl.FRAMEBUFFER_UNSUPPORTED] = 'FRAMEBUFFER_UNSUPPORTED'
+  // console.log('fbo status', status[gl.checkFramebufferStatus(gl.FRAMEBUFFER)])
 
   // TODO: ctx. pop framebuffer
   gl.bindFramebuffer(framebuffer.target, null)
