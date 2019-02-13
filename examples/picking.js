@@ -26,7 +26,6 @@ createOrbiter({ camera: camera, distance: 10 })
 const N = 64
 const colors = []
 const offsets = []
-const prevIndex = -1
 
 const s = 2
 for (var i = 0; i < N; i++) {
@@ -34,29 +33,17 @@ for (var i = 0; i < N; i++) {
   offsets.push([Math.random() * 2 * s - s, Math.random() * 2 * s - s, Math.random() * 2 * s - s])
 }
 
-const W = window.innerWidth
-const H = window.innerHeight
+let W = window.innerWidth
+let H = window.innerHeight
 const colorTex = ctx.texture2D({ width: W, height: H })
 let depthTex = null
 let depthRenderbuffer = null
-if (false && ctx.capabilities.depthTexture) {
+let useDepthTexture = false
+if (ctx.capabilities.depthTexture && useDepthTexture) {
   depthTex = ctx.texture2D({ width: W, height: H, pixelFormat: ctx.PixelFormat.Depth })
 } else {
-  const gl = ctx.gl
-  depthRenderbuffer = {
-    handle: gl.createRenderbuffer(),
-    width: W,
-    height: H
-  }
-  gl.bindRenderbuffer(gl.RENDERBUFFER, depthRenderbuffer.handle)
- 
-  // make a depth buffer and the same size as the targetTexture
-  gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, W, H)
-  // gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL, window.innerWidth, window.innerHeight);
-  //gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
-  gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+  depthRenderbuffer = ctx.renderbuffer({ width: W, height: H, pixelFormat: ctx.PixelFormat.Depth16 })
 }
-
 
 const clearCmd = {
   pass: ctx.pass({
@@ -64,7 +51,6 @@ const clearCmd = {
     clearDepth: 1
   })
 }
-
 
 const drawCmd = {
   pipeline: ctx.pipeline({
@@ -119,7 +105,8 @@ const drawCmd = {
   indices: ctx.indexBuffer(cube.cells),
   uniforms: {
     uProjectionMatrix: mat4.perspective(mat4.create(), Math.PI / 4, window.innerWidth / window.innerHeight, 0.1, 100),
-    uViewMatrix: null
+    uViewMatrix: null,
+    uHitColor: [0, 0, 0, 1]
   }
 }
 
@@ -150,11 +137,6 @@ function onCanvasMove (e) {
   my = e.offsetY
 }
 ctx.gl.canvas.addEventListener('mousemove', onCanvasMove)
-/*
-
-
-const th = ctx.gl.canvas.height
-*/
 
 const drawPreviewCmd = {
   pipeline: ctx.pipeline({
@@ -199,6 +181,15 @@ window.addEventListener('keypress', () => {
   debugNextFrame = true
 })
 
+window.addEventListener('resize', () => {
+  W = window.innerWidth
+  H = window.innerHeight
+  ctx.set({ width: W, height: H })
+  ctx.update(colorTex, { width: W, height: H })
+  ctx.update(depthRenderbuffer, { width: W, height: H })
+  drawCmd.uniforms.uProjectionMatrix = mat4.perspective(mat4.create(), Math.PI / 4, W / H, 0.1, 100)
+})
+
 ctx.frame(() => {
   if (debugNextFrame) ctx.debug(true)
   ctx.submit(clearCmd)
@@ -207,25 +198,21 @@ ctx.frame(() => {
       uniforms: {
         uViewMatrix: camera.viewMatrix,
         uRenderColors: true
-      },
-      // viewport: [0, 0, window.innerWidth, window.innerHeight]
+      }
     })
   })
 
-  if (px != mx || py != my) {
+  if (px !== mx || py !== my) {
     px = mx
     py = my
     ctx.submit(readPixelWrap, () => {
       ctx.gl.readPixels(mx, H - my, 1, 1, ctx.gl.RGBA, ctx.gl.UNSIGNED_BYTE, pixels)
     })
     var selectedColor = [pixels[0] / 255, pixels[1] / 255, pixels[2] / 255]
-    var color = colors.find((c) => vec3.distance(c, selectedColor) < 1/255)
+    var color = colors.find((c) => vec3.distance(c, selectedColor) < 1 / 255)
     var index = colors.indexOf(color)
     if (index !== -1) {
       hitColor = color
-      console.log('picked', index)
-      // var material = geometries[index].entity.getComponent('Material')
-      // material.set({ emissiveColor: [10, 0, 0, 1] })
     } else {
       hitColor = [0, 0, 0, 0]
     }
