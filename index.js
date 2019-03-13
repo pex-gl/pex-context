@@ -19,13 +19,22 @@ let ID = 0
 
 const allowedCommandProps = [
   'name',
-  'pass', 'pipeline', 'uniforms',
-  'attributes', 'indices', 'count', 'instances',
-  'viewport', 'scissor'
+  'pass',
+  'pipeline',
+  'uniforms',
+  'attributes',
+  'indices',
+  'count',
+  'instances',
+  'viewport',
+  'scissor'
 ]
 
-function createContext (opts) {
-  assert(!opts || (typeof opts === 'object'), 'pex-context: createContext requires opts argument to be null or an object')
+function createContext(opts) {
+  assert(
+    !opts || typeof opts === 'object',
+    'pex-context: createContext requires opts argument to be null or an object'
+  )
   let gl = null
 
   const defaultOpts = {
@@ -47,7 +56,9 @@ function createContext (opts) {
   const capabilities = {
     maxColorAttachments: 1,
     maxTextureImageUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
-    maxVertexTextureImageUnits: gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS),
+    maxVertexTextureImageUnits: gl.getParameter(
+      gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS
+    ),
     maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
     maxCubeMapTextureSize: gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
     instancedArrays: false,
@@ -60,7 +71,9 @@ function createContext (opts) {
     textureFloatLinear: !!gl.getExtension('OES_texture_float_linear'),
     textureHalfFloat: !!gl.getExtension('OES_texture_half_float'),
     textureHalfFloatLinear: !!gl.getExtension('OES_texture_half_float_linear'),
-    textureFilterAnisotropic: !!gl.getExtension('EXT_texture_filter_anisotropic')
+    textureFilterAnisotropic: !!gl.getExtension(
+      'EXT_texture_filter_anisotropic'
+    )
   }
 
   if (!gl.HALF_FLOAT) {
@@ -77,11 +90,13 @@ function createContext (opts) {
       gl.QUERY_RESULT_AVAILABLE = 'QUERY_RESULT_AVAILABLE'
       gl.GPU_DISJOINT = 'GPU_DISJOINT'
       gl.QUERY_RESULT = 'QUERY_RESULT'
-      gl.createQuery = function () { return {} }
-      gl.deleteQuery = function () { }
-      gl.beginQuery = function () { }
-      gl.endQuery = function () { }
-      gl.getQueryObject = function (q, param) {
+      gl.createQuery = function() {
+        return {}
+      }
+      gl.deleteQuery = function() {}
+      gl.beginQuery = function() {}
+      gl.endQuery = function() {}
+      gl.getQueryObject = function(q, param) {
         if (param === gl.QUERY_RESULT_AVAILABLE) return true
         if (param === gl.QUERY_RESULT) return 0
         return undefined
@@ -239,14 +254,20 @@ function createContext (opts) {
     const ext = gl.getExtension('ANGLE_instanced_arrays')
     if (!ext) {
       // TODO: this._caps[CAPS_INSTANCED_ARRAYS] = false;
-      gl.drawElementsInstanced = function () {
-        throw new Error('gl.drawElementsInstanced not available. ANGLE_instanced_arrays not supported')
+      gl.drawElementsInstanced = function() {
+        throw new Error(
+          'gl.drawElementsInstanced not available. ANGLE_instanced_arrays not supported'
+        )
       }
-      gl.drawArraysInstanced = function () {
-        throw new Error('gl.drawArraysInstanced not available. ANGLE_instanced_arrays not supported')
+      gl.drawArraysInstanced = function() {
+        throw new Error(
+          'gl.drawArraysInstanced not available. ANGLE_instanced_arrays not supported'
+        )
       }
-      gl.vertexAttribDivisor = function () {
-        throw new Error('gl.vertexAttribDivisor not available. ANGLE_instanced_arrays not supported')
+      gl.vertexAttribDivisor = function() {
+        throw new Error(
+          'gl.vertexAttribDivisor not available. ANGLE_instanced_arrays not supported'
+        )
       }
     } else {
       // TODO: this._caps[CAPS_INSTANCED_ARRAYS] = true;
@@ -264,12 +285,14 @@ function createContext (opts) {
   if (!gl.drawBuffers) {
     const ext = gl.getExtension('WEBGL_draw_buffers')
     if (!ext) {
-      gl.drawBuffers = function () {
+      gl.drawBuffers = function() {
         throw new Error('WEBGL_draw_buffers not supported')
       }
     } else {
       gl.drawBuffers = ext.drawBuffersWEBGL.bind(ext)
-      capabilities.maxColorAttachments = gl.getParameter(ext.MAX_COLOR_ATTACHMENTS_WEBGL)
+      capabilities.maxColorAttachments = gl.getParameter(
+        ext.MAX_COLOR_ATTACHMENTS_WEBGL
+      )
     }
   } else {
     capabilities.maxColorAttachments = gl.getParameter('MAX_COLOR_ATTACHMENTS')
@@ -285,7 +308,7 @@ function createContext (opts) {
     resources: [],
     stats: [],
     queries: [],
-    stack: [ defaultState ],
+    stack: [defaultState],
     defaultState: defaultState,
     pixelRatio: opts.pixelRatio || 1,
     state: {
@@ -296,20 +319,23 @@ function createContext (opts) {
       activeTextures: [],
       activeAttributes: []
     },
-    getGLString: function (glEnum) {
+    getGLString: function(glEnum) {
       let str = ''
       for (let key in gl) {
-        if ((gl[key] === glEnum)) str = key
+        if (gl[key] === glEnum) str = key
       }
       if (!str) {
         str = 'UNDEFINED'
       }
       return str
     },
-    set: function (opts) {
+    set: function(opts) {
       assert(isBrowser, 'changing resolution is not supported in Plask')
       if (opts.pixelRatio) {
-        this.updatePixelRatio = Math.min(opts.pixelRatio, window.devicePixelRatio)
+        this.updatePixelRatio = Math.min(
+          opts.pixelRatio,
+          window.devicePixelRatio
+        )
       }
 
       if (opts.width) {
@@ -320,57 +346,57 @@ function createContext (opts) {
         this.updateHeight = opts.height
       }
     },
-    debug: function (enabled) {
+    debug: function(enabled) {
       this.debugMode = enabled
       // if (enabled) {
-        // this.debuggraph = ''
-        // this.debugCommands = []
-        // if (isBrowser) {
-          // window.R = R
-          // window.commands = this.debugCommands
-        // }
-        // this.debugGraph = ''
-        // this.debugGraph += 'digraph frame {\n'
-        // this.debugGraph += 'size="6,12";\n'
-        // this.debugGraph += 'rankdir="LR"\n'
-        // this.debugGraph += 'node [shape=record];\n'
-        // if (this.debugMode) {
-          // const res = this.resources.map((res) => {
+      // this.debuggraph = ''
+      // this.debugCommands = []
+      // if (isBrowser) {
+      // window.R = R
+      // window.commands = this.debugCommands
+      // }
+      // this.debugGraph = ''
+      // this.debugGraph += 'digraph frame {\n'
+      // this.debugGraph += 'size="6,12";\n'
+      // this.debugGraph += 'rankdir="LR"\n'
+      // this.debugGraph += 'node [shape=record];\n'
+      // if (this.debugMode) {
+      // const res = this.resources.map((res) => {
       // return { id: res.id, type: res.id.split('_')[0] }
-          // })
-          // const groups = R.groupBy(R.prop('type'), res)
-          // Object.keys(groups).forEach((g) => {
-            // this.debugGraph += `subgraph cluster_${g} { \n`
-            // this.debugGraph += `label = "${g}s" \n`
-            // groups[g].forEach((res) => {
-              // this.debugGraph += `${res.id} [style=filled fillcolor = "#DDDDFF"] \n`
-            // })
-            // this.debugGraph += `} \n`
-          // })
-        // }
+      // })
+      // const groups = R.groupBy(R.prop('type'), res)
+      // Object.keys(groups).forEach((g) => {
+      // this.debugGraph += `subgraph cluster_${g} { \n`
+      // this.debugGraph += `label = "${g}s" \n`
+      // groups[g].forEach((res) => {
+      // this.debugGraph += `${res.id} [style=filled fillcolor = "#DDDDFF"] \n`
+      // })
+      // this.debugGraph += `} \n`
+      // })
+      // }
       // } else {
-        // if (this.debugGraph) {
-          // this.debugGraph += 'edge  [style=bold, fontname="Arial", weight=100]\n'
-          // this.debugCommands.forEach((cmd, i, commands) => {
-            // if (i > 0) {
-              // const prevCmd = commands[i - 1]
-              // this.debugGraph += `${prevCmd.name || prevCmd.id} -> ${cmd.name || cmd.id}\n`
-            // }
-          // })
-          // this.debugGraph += '}'
-          // // log(this.debugGraph)
-          // // const div = document.createElement('div')
-          // // div.innerHTML = viz(this.debugGraph)
-          // // div.style.position = 'absolute'
-          // // div.style.top = '0'
-          // // div.style.left = '0'
-          // // div.style.transformOrigin = '0 0'
-          // // div.style.transform = 'scale(0.75, 0.75)'
-          // // document.body.appendChild(div)
-        // }
+      // if (this.debugGraph) {
+      // this.debugGraph += 'edge  [style=bold, fontname="Arial", weight=100]\n'
+      // this.debugCommands.forEach((cmd, i, commands) => {
+      // if (i > 0) {
+      // const prevCmd = commands[i - 1]
+      // this.debugGraph += `${prevCmd.name || prevCmd.id} -> ${cmd.name || cmd.id}\n`
+      // }
+      // })
+      // this.debugGraph += '}'
+      // // log(this.debugGraph)
+      // // const div = document.createElement('div')
+      // // div.innerHTML = viz(this.debugGraph)
+      // // div.style.position = 'absolute'
+      // // div.style.top = '0'
+      // // div.style.left = '0'
+      // // div.style.transformOrigin = '0 0'
+      // // div.style.transform = 'scale(0.75, 0.75)'
+      // // document.body.appendChild(div)
+      // }
       // }
     },
-    checkError: function () {
+    checkError: function() {
       if (this.debugMode) {
         var error = gl.getError()
         if (error) {
@@ -380,7 +406,7 @@ function createContext (opts) {
         }
       }
     },
-    resource: function (res) {
+    resource: function(res) {
       res.id = res.class + '_' + ID++
       if (!this.stats[res.class]) {
         this.stats[res.class] = { alive: 0, total: 0 }
@@ -392,25 +418,25 @@ function createContext (opts) {
       return res
     },
     // texture2D({ data: TypedArray, width: Int, height: Int, format: PixelFormat, flipY: Boolean })
-    texture2D: function (opts) {
+    texture2D: function(opts) {
       log('texture2D', opts)
       opts.target = gl.TEXTURE_2D
       return this.resource(createTexture(this, opts))
     },
     // textureCube({ data: [negxData, negyData,...], width: Int, height: Int, format: PixelFormat, flipY: Boolean })
-    textureCube: function (opts) {
+    textureCube: function(opts) {
       log('textureCube', opts)
       opts.target = gl.TEXTURE_CUBE_MAP
       return this.resource(createTexture(this, opts))
     },
     // framebuffer({ color: [ Texture2D, .. ], depth: Texture2D }
     // framebuffer({ color: [ { texture: Texture2D, target: Enum, level: int }, .. ], depth: { texture: Texture2D }})
-    framebuffer: function (opts) {
+    framebuffer: function(opts) {
       log('framebuffer', opts)
       return this.resource(createFramebuffer(this, opts))
     },
     // renderbuffer({ width: int, height: int })
-    renderbuffer: function (opts) {
+    renderbuffer: function(opts) {
       log('renderbuffer', opts)
       return this.resource(createRenderbuffer(this, opts))
     },
@@ -421,7 +447,7 @@ function createContext (opts) {
     //    data: Array or ArrayBuffer
     //    type: 'float', 'uint16' etc
     // }
-    vertexBuffer: function (opts) {
+    vertexBuffer: function(opts) {
       log('vertexBuffer', opts)
       if (opts.length) {
         opts = { data: opts }
@@ -429,7 +455,7 @@ function createContext (opts) {
       opts.target = gl.ARRAY_BUFFER
       return this.resource(createBuffer(this, opts))
     },
-    indexBuffer: function (opts) {
+    indexBuffer: function(opts) {
       log('indexBuffer', opts)
       if (opts.length) {
         opts = { data: opts }
@@ -437,35 +463,41 @@ function createContext (opts) {
       opts.target = gl.ELEMENT_ARRAY_BUFFER
       return this.resource(createBuffer(this, opts))
     },
-    program: function (opts) {
+    program: function(opts) {
       log('program', opts)
       return this.resource(createProgram(this, opts))
     },
-    pipeline: function (opts) {
+    pipeline: function(opts) {
       log('pipeline', opts)
       return this.resource(createPipeline(this, opts))
     },
-    pass: function (opts) {
-      log('pass', opts, opts.color ? opts.color.map((c) => c.texture ? c.texture.info : c.info) : '')
+    pass: function(opts) {
+      log(
+        'pass',
+        opts,
+        opts.color
+          ? opts.color.map(c => (c.texture ? c.texture.info : c.info))
+          : ''
+      )
       return this.resource(createPass(this, opts))
     },
-    query: function (opts) {
+    query: function(opts) {
       log('query', opts)
       return this.resource(createQuery(this, opts))
     },
-    beginQuery: function (q) {
+    beginQuery: function(q) {
       assert(!this.activeQuery, 'Only one query can be active at the time')
       if (q._begin(this, q)) {
         this.activeQuery = q
       }
     },
-    endQuery: function (q) {
+    endQuery: function(q) {
       if (q._end(this, q)) {
         this.queries.push(q)
         this.activeQuery = null
       }
     },
-    readPixels: function (opts) {
+    readPixels: function(opts) {
       const x = opts.x || 0
       const y = opts.y || 0
       const width = opts.width
@@ -479,12 +511,12 @@ function createContext (opts) {
     },
     // update(texture, { data: TypeArray, [width: Int, height: Int] })
     // update(texture, { data: TypedArray })
-    update: function (resource, opts) {
+    update: function(resource, opts) {
       if (this.debugMode) log('update', { resource: resource, opts: opts })
       resource._update(this, resource, opts)
     },
     // TODO: i don't like this inherit flag
-    mergeCommands: function (parent, cmd, inherit) {
+    mergeCommands: function(parent, cmd, inherit) {
       // copy old state so we don't modify it's internals
       const newCmd = Object.assign({}, parent)
 
@@ -501,31 +533,47 @@ function createContext (opts) {
       // set viewport to FBO sizes when rendering to a texture
       if (!cmd.viewport && cmd.pass && cmd.pass.opts.color) {
         let tex = null
-        if (cmd.pass.opts.color[0]) tex = cmd.pass.opts.color[0].texture || cmd.pass.opts.color[0]
-        if (cmd.pass.opts.depth) tex = cmd.pass.opts.depth.texture || cmd.pass.opts.depth
+        if (cmd.pass.opts.color[0]) {
+          tex = cmd.pass.opts.color[0].texture || cmd.pass.opts.color[0]
+        }
+        if (cmd.pass.opts.depth) {
+          tex = cmd.pass.opts.depth.texture || cmd.pass.opts.depth
+        }
         if (tex) {
           newCmd.viewport = [0, 0, tex.width, tex.height]
         }
       }
 
       // merge uniforms
-      newCmd.uniforms = (parent.uniforms || cmd.uniforms) ? Object.assign({}, parent.uniforms, cmd.uniforms) : null
+      newCmd.uniforms =
+        parent.uniforms || cmd.uniforms
+          ? Object.assign({}, parent.uniforms, cmd.uniforms)
+          : null
       return newCmd
     },
-    applyPass: function (pass) {
+    applyPass: function(pass) {
       const gl = this.gl
       const state = this.state
 
       // if (pass.framebuffer !== state.framebuffer) {
       if (state.pass.id !== pass.id) {
-        if (this.debugMode) log('change framebuffer', state.pass.framebuffer, '->', pass.framebuffer)
+        if (this.debugMode)
+          log(
+            'change framebuffer',
+            state.pass.framebuffer,
+            '->',
+            pass.framebuffer
+          )
         state.pass = pass
         if (pass.framebuffer._update) {
           // rebind pass' color and depth to shared FBO
           this.update(pass.framebuffer, pass.opts)
         }
         gl.bindFramebuffer(pass.framebuffer.target, pass.framebuffer.handle)
-        if (pass.framebuffer.drawBuffers && pass.framebuffer.drawBuffers.length > 1) {
+        if (
+          pass.framebuffer.drawBuffers &&
+          pass.framebuffer.drawBuffers.length > 1
+        ) {
           gl.drawBuffers(pass.framebuffer.drawBuffers)
         }
       }
@@ -535,7 +583,12 @@ function createContext (opts) {
         if (this.debugMode) log('clearing color', pass.clearColor)
         clearBits |= gl.COLOR_BUFFER_BIT
         // TODO this might be unnecesary but we don't know because we don't store the clearColor in state
-        gl.clearColor(pass.clearColor[0], pass.clearColor[1], pass.clearColor[2], pass.clearColor[3])
+        gl.clearColor(
+          pass.clearColor[0],
+          pass.clearColor[1],
+          pass.clearColor[2],
+          pass.clearColor[3]
+        )
       }
 
       if (pass.clearDepth !== undefined) {
@@ -555,7 +608,7 @@ function createContext (opts) {
       }
       this.checkError()
     },
-    applyPipeline: function (pipeline) {
+    applyPipeline: function(pipeline) {
       const gl = this.gl
       const state = this.state
 
@@ -574,11 +627,13 @@ function createContext (opts) {
         gl.depthFunc(state.depthFunc)
       }
 
-      if (pipeline.blend !== state.blend ||
+      if (
+        pipeline.blend !== state.blend ||
         pipeline.blendSrcRGBFactor !== state.blendSrcRGBFactor ||
         pipeline.blendSrcAlphaFactor !== state.blendSrcAlphaFactor ||
         pipeline.blendDstRGBFactor !== state.blendDstRGBFactor ||
-        pipeline.blendDstAlphaFactor !== state.blendDstAlphaFactor) {
+        pipeline.blendDstAlphaFactor !== state.blendDstAlphaFactor
+      ) {
         state.blend = pipeline.blend
         state.blendSrcRGBFactor = pipeline.blendSrcRGBFactor
         state.blendSrcAlphaFactor = pipeline.blendSrcAlphaFactor
@@ -593,7 +648,10 @@ function createContext (opts) {
         )
       }
 
-      if (pipeline.cullFace !== state.cullFace || pipeline.cullFaceMode !== state.cullFaceMode) {
+      if (
+        pipeline.cullFace !== state.cullFace ||
+        pipeline.cullFaceMode !== state.cullFaceMode
+      ) {
         state.cullFace = pipeline.cullFace
         state.cullFaceMode = pipeline.cullFaceMode
         state.cullFace ? gl.enable(gl.CULL_FACE) : gl.disable(gl.CULL_FACE)
@@ -601,15 +659,22 @@ function createContext (opts) {
           gl.cullFace(state.cullFaceMode)
         }
       }
-      if (pipeline.colorMask[0] !== state.pipeline.colorMask[0] ||
-          pipeline.colorMask[1] !== state.pipeline.colorMask[1] ||
-          pipeline.colorMask[2] !== state.pipeline.colorMask[2] ||
-          pipeline.colorMask[3] !== state.pipeline.colorMask[3]) {
+      if (
+        pipeline.colorMask[0] !== state.pipeline.colorMask[0] ||
+        pipeline.colorMask[1] !== state.pipeline.colorMask[1] ||
+        pipeline.colorMask[2] !== state.pipeline.colorMask[2] ||
+        pipeline.colorMask[3] !== state.pipeline.colorMask[3]
+      ) {
         state.pipeline.colorMask[0] = pipeline.colorMask[0]
         state.pipeline.colorMask[1] = pipeline.colorMask[1]
         state.pipeline.colorMask[2] = pipeline.colorMask[2]
         state.pipeline.colorMask[3] = pipeline.colorMask[3]
-        gl.colorMask(pipeline.colorMask[0], pipeline.colorMask[1], pipeline.colorMask[2], pipeline.colorMask[3])
+        gl.colorMask(
+          pipeline.colorMask[0],
+          pipeline.colorMask[1],
+          pipeline.colorMask[2],
+          pipeline.colorMask[3]
+        )
       }
 
       if (pipeline.program !== state.program) {
@@ -624,7 +689,7 @@ function createContext (opts) {
       }
       this.checkError()
     },
-    applyUniforms: function (uniforms, cmd) {
+    applyUniforms: function(uniforms, cmd) {
       const gl = this.gl
       const state = this.state
       let numTextures = 0
@@ -633,12 +698,17 @@ function createContext (opts) {
         assert.fail('Trying to draw without an active program')
       }
 
-      const requiredUniforms = this.debugMode ? Object.keys(state.program.uniforms) : null
+      const requiredUniforms = this.debugMode
+        ? Object.keys(state.program.uniforms)
+        : null
 
       for (var name in uniforms) {
         let value = uniforms[name]
         // TODO: find a better way to not trying to set unused uniforms that might have been inherited
-        if (!state.program.uniforms[name] && !state.program.uniforms[name + '[0]']) {
+        if (
+          !state.program.uniforms[name] &&
+          !state.program.uniforms[name + '[0]']
+        ) {
           continue
         }
         if (value === null || value === undefined) {
@@ -647,7 +717,9 @@ function createContext (opts) {
         }
         // FIXME: uniform array hack
         if (Array.isArray(value) && !state.program.uniforms[name]) {
-          if (this.debugMode) log('unknown uniform', name, Object.keys(state.program.uniforms))
+          if (this.debugMode) {
+            log('unknown uniform', name, Object.keys(state.program.uniforms))
+          }
           for (var i = 0; i < value.length; i++) {
             var nameIndex = name + '[' + i + ']'
             state.program.setUniform(nameIndex, value[i])
@@ -655,7 +727,8 @@ function createContext (opts) {
               requiredUniforms.splice(requiredUniforms.indexOf(nameIndex), 1)
             }
           }
-        } else if (value.target) { // assuming texture
+        } else if (value.target) {
+          // assuming texture
           // FIXME: texture binding hack
           const slot = numTextures++
           gl.activeTexture(gl.TEXTURE0 + slot)
@@ -679,11 +752,13 @@ function createContext (opts) {
       }
       if (this.debugMode && requiredUniforms.length > 0) {
         log('invalid command', cmd)
-        assert.fail(`Trying to draw with missing uniforms: ${requiredUniforms.join(', ')}`)
+        assert.fail(
+          `Trying to draw with missing uniforms: ${requiredUniforms.join(', ')}`
+        )
       }
       this.checkError()
     },
-    drawVertexData: function (cmd) {
+    drawVertexData: function(cmd) {
       const state = this.state
       const vertexLayout = state.vertexLayout
 
@@ -693,8 +768,15 @@ function createContext (opts) {
 
       if (this.debugMode) {
         // TODO: can vertex layout be ever different if it's derived from pipeline's shader?
-        if (vertexLayout.length !== Object.keys(state.program.attributes).length) {
-          log('Invalid vertex layout not matching the shader', vertexLayout, state.program.attributes, cmd)
+        if (
+          vertexLayout.length !== Object.keys(state.program.attributes).length
+        ) {
+          log(
+            'Invalid vertex layout not matching the shader',
+            vertexLayout,
+            state.program.attributes,
+            cmd
+          )
           assert.fail('Invalid vertex layout not matching the shader')
         }
       }
@@ -715,8 +797,15 @@ function createContext (opts) {
         const attrib = cmd.attributes[i] || cmd.attributes[name]
 
         if (!attrib) {
-          log('Invalid command', cmd, 'doesn\'t satisfy vertex layout', vertexLayout)
-          assert.fail(`Command is missing attribute "${name}" at location ${location} with ${attrib}`)
+          log(
+            'Invalid command',
+            cmd,
+            "doesn't satisfy vertex layout",
+            vertexLayout
+          )
+          assert.fail(
+            `Command is missing attribute "${name}" at location ${location} with ${attrib}`
+          )
         }
 
         let buffer = attrib.buffer
@@ -726,7 +815,9 @@ function createContext (opts) {
 
         if (!buffer || !buffer.target) {
           log('Invalid command', cmd)
-          assert.fail(`Trying to draw arrays with invalid buffer for attribute : ${name}`)
+          assert.fail(
+            `Trying to draw arrays with invalid buffer for attribute : ${name}`
+          )
         }
 
         gl.bindBuffer(buffer.target, buffer.handle)
@@ -741,10 +832,38 @@ function createContext (opts) {
           state.activeAttributes[location + 3] = buffer
           // we still check for buffer type because while e.g. pex-renderer would copy buffer type to attrib
           // a raw pex-context example probably would not
-          gl.vertexAttribPointer(location, 4, attrib.type || buffer.type, attrib.normalized || false, attrib.stride || 64, attrib.offset || 0)
-          gl.vertexAttribPointer(location + 1, 4, attrib.type || buffer.type, attrib.normalized || false, attrib.stride || 64, attrib.offset || 16)
-          gl.vertexAttribPointer(location + 2, 4, attrib.type || buffer.type, attrib.normalized || false, attrib.stride || 64, attrib.offset || 32)
-          gl.vertexAttribPointer(location + 3, 4, attrib.type || buffer.type, attrib.normalized || false, attrib.stride || 64, attrib.offset || 48)
+          gl.vertexAttribPointer(
+            location,
+            4,
+            attrib.type || buffer.type,
+            attrib.normalized || false,
+            attrib.stride || 64,
+            attrib.offset || 0
+          )
+          gl.vertexAttribPointer(
+            location + 1,
+            4,
+            attrib.type || buffer.type,
+            attrib.normalized || false,
+            attrib.stride || 64,
+            attrib.offset || 16
+          )
+          gl.vertexAttribPointer(
+            location + 2,
+            4,
+            attrib.type || buffer.type,
+            attrib.normalized || false,
+            attrib.stride || 64,
+            attrib.offset || 32
+          )
+          gl.vertexAttribPointer(
+            location + 3,
+            4,
+            attrib.type || buffer.type,
+            attrib.normalized || false,
+            attrib.stride || 64,
+            attrib.offset || 48
+          )
           if (attrib.divisor) {
             gl.vertexAttribDivisor(location + 0, attrib.divisor)
             gl.vertexAttribDivisor(location + 1, attrib.divisor)
@@ -795,7 +914,13 @@ function createContext (opts) {
         var type = cmd.indices.type || indexBuffer.type
         if (instanced) {
           // TODO: check if instancing available
-          gl.drawElementsInstanced(primitive, count, type, offset, cmd.instances)
+          gl.drawElementsInstanced(
+            primitive,
+            count,
+            type,
+            offset,
+            cmd.instances
+          )
         } else {
           gl.drawElements(primitive, count, type, offset)
         }
@@ -820,17 +945,19 @@ function createContext (opts) {
       // }
       this.checkError()
     },
-    frame: function (cb) {
+    frame: function(cb) {
       const self = this
-      raf(function frame () {
+      raf(function frame() {
         if (self.updatePixelRatio) {
           self.pixelRatio = self.updatePixelRatio
           // we need to reaply width/height and update styles
           if (!self.updateWidth) {
-            self.updateWidth = parseInt(gl.canvas.style.width) || gl.canvas.width
+            self.updateWidth =
+              parseInt(gl.canvas.style.width) || gl.canvas.width
           }
           if (!self.updateHeight) {
-            self.updateHeight = parseInt(gl.canvas.style.height) || gl.canvas.height
+            self.updateHeight =
+              parseInt(gl.canvas.style.height) || gl.canvas.height
           }
           self.updatePixelRatio = 0
         }
@@ -844,8 +971,10 @@ function createContext (opts) {
           gl.canvas.height = self.updateHeight * self.pixelRatio
           self.updateHeight = 0
         }
-        if (self.defaultState.viewport[2] !== gl.drawingBufferWidth ||
-          self.defaultState.viewport[3] !== gl.drawingBufferHeight) {
+        if (
+          self.defaultState.viewport[2] !== gl.drawingBufferWidth ||
+          self.defaultState.viewport[3] !== gl.drawingBufferHeight
+        ) {
           self.defaultState.viewport[2] = gl.drawingBufferWidth
           self.defaultState.viewport[3] = gl.drawingBufferHeight
           self.defaultState.pass.framebuffer.width = gl.drawingBufferWidth
@@ -857,17 +986,21 @@ function createContext (opts) {
           return
         }
         if (self.queries.length) {
-          self.queries = self.queries.filter((q) => !q._available(self, q))
+          self.queries = self.queries.filter(q => !q._available(self, q))
         }
         raf(frame)
       })
     },
     // TODO: switching to lightweight resources would allow to just clone state
     // and use commands as state modifiers?
-    apply: function (cmd) {
+    apply: function(cmd) {
       const state = this.state
 
-      if (this.debugMode) log('apply', cmd.name || cmd.id, { cmd: cmd, state: JSON.parse(JSON.stringify(state)) })
+      if (this.debugMode)
+        log('apply', cmd.name || cmd.id, {
+          cmd: cmd,
+          state: JSON.parse(JSON.stringify(state))
+        })
 
       this.checkError()
 
@@ -875,7 +1008,12 @@ function createContext (opts) {
         if (cmd.scissor !== state.scissor) {
           state.scissor = cmd.scissor
           gl.enable(gl.SCISSOR_TEST)
-          gl.scissor(state.scissor[0], state.scissor[1], state.scissor[2], state.scissor[3])
+          gl.scissor(
+            state.scissor[0],
+            state.scissor[1],
+            state.scissor[2],
+            state.scissor[3]
+          )
         }
       } else {
         if (cmd.scissor !== state.scissor) {
@@ -891,7 +1029,12 @@ function createContext (opts) {
       if (cmd.viewport) {
         if (cmd.viewport !== state.viewport) {
           state.viewport = cmd.viewport
-          gl.viewport(state.viewport[0], state.viewport[1], state.viewport[2], state.viewport[3])
+          gl.viewport(
+            state.viewport[0],
+            state.viewport[1],
+            state.viewport[2],
+            state.viewport[3]
+          )
         }
       }
 
@@ -899,19 +1042,43 @@ function createContext (opts) {
         this.drawVertexData(cmd)
       }
     },
-    submit: function (cmd, batches, subCommand) {
+    submit: function(cmd, batches, subCommand) {
       if (this.debugMode) {
         this.debugCommands.push(cmd)
         checkProps(allowedCommandProps, cmd)
-        if (batches && subCommand) log('submit', cmd.name || cmd.id, { depth: this.stack.length, cmd: cmd, batches: batches, subCommand: subCommand, state: this.state, stack: this.stack })
-        else if (batches) log('submit', cmd.name || cmd.id, { depth: this.stack.length, cmd: cmd, batches: batches, state: this.state, stack: this.stack })
-        else log('submit', cmd.name || cmd.id, { depth: this.stack.length, cmd: cmd, state: this.state, stack: this.stack })
+        if (batches && subCommand) {
+          log('submit', cmd.name || cmd.id, {
+            depth: this.stack.length,
+            cmd: cmd,
+            batches: batches,
+            subCommand: subCommand,
+            state: this.state,
+            stack: this.stack
+          })
+        } else if (batches) {
+          log('submit', cmd.name || cmd.id, {
+            depth: this.stack.length,
+            cmd: cmd,
+            batches: batches,
+            state: this.state,
+            stack: this.stack
+          })
+        } else {
+          log('submit', cmd.name || cmd.id, {
+            depth: this.stack.length,
+            cmd: cmd,
+            state: this.state,
+            stack: this.stack
+          })
+        }
       }
 
       if (batches) {
         if (Array.isArray(batches)) {
           // TODO: quick hack
-          batches.forEach((batch) => this.submit(this.mergeCommands(cmd, batch, true), subCommand))
+          batches.forEach(batch =>
+            this.submit(this.mergeCommands(cmd, batch, true), subCommand)
+          )
           return
         } else if (typeof batches === 'object') {
           this.submit(this.mergeCommands(cmd, batches, true), subCommand)
@@ -929,15 +1096,21 @@ function createContext (opts) {
           this.debugGraph += `subgraph cluster_${cmd.name || cmd.id} {\n`
           this.debugGraph += `label = "${cmd.name}"\n`
           if (cmd.program) {
-            this.debugGraph += `${cmd.program.id} -> cluster_${cmd.name || cmd.id}\n`
+            this.debugGraph += `${cmd.program.id} -> cluster_${cmd.name ||
+              cmd.id}\n`
           }
           if (cmd.framebuffer) {
-            this.debugGraph += `${cmd.framebuffer.id} -> cluster_${cmd.name || cmd.id}\n`
-            cmd.framebuffer.color.forEach((attachment) => {
-              this.debugGraph += `${attachment.texture.id} -> ${cmd.framebuffer.id}\n`
+            this.debugGraph += `${cmd.framebuffer.id} -> cluster_${cmd.name ||
+              cmd.id}\n`
+            cmd.framebuffer.color.forEach(attachment => {
+              this.debugGraph += `${attachment.texture.id} -> ${
+                cmd.framebuffer.id
+              }\n`
             })
             if (cmd.framebuffer.depth) {
-              this.debugGraph += `${cmd.framebuffer.depth.texture.id} -> ${cmd.framebuffer.id}\n`
+              this.debugGraph += `${cmd.framebuffer.depth.texture.id} -> ${
+                cmd.framebuffer.id
+              }\n`
             }
           }
         }
@@ -949,31 +1122,32 @@ function createContext (opts) {
         }
       } else {
         if (this.debugMode) {
-          let s = `${cmd.name || cmd.id} [style=filled fillcolor = "#DDFFDD" label="`
+          let s = `${cmd.name ||
+            cmd.id} [style=filled fillcolor = "#DDFFDD" label="`
           let cells = [cmd.name || cmd.id]
           // this.debugGraph += `cluster_${cmd.name || cmd.id} [style=filled fillcolor = "#DDFFDD"] {\n`
           // if (cmd.attributes) {
-            // cells.push(' ')
-            // cells.push('vertex arrays')
-            // Object.keys(cmd.attributes).forEach((attribName, index) => {
-              // const attrib = cmd.attributes[attribName]
-              // cells.push(`<a${index}>${attribName}`)
-              // this.debugGraph += `${attrib.buffer.id} -> ${cmd.name || cmd.id}:a${index}\n`
-            // })
+          // cells.push(' ')
+          // cells.push('vertex arrays')
+          // Object.keys(cmd.attributes).forEach((attribName, index) => {
+          // const attrib = cmd.attributes[attribName]
+          // cells.push(`<a${index}>${attribName}`)
+          // this.debugGraph += `${attrib.buffer.id} -> ${cmd.name || cmd.id}:a${index}\n`
+          // })
           // }
           // if (cmd.indices) {
-            // cells.push(' ')
-            // cells.push(`<e>elements`)
-            // this.debugGraph += `${cmd.elements.buffer.id} -> ${cmd.name || cmd.id}:e\n`
+          // cells.push(' ')
+          // cells.push(`<e>elements`)
+          // this.debugGraph += `${cmd.elements.buffer.id} -> ${cmd.name || cmd.id}:e\n`
           // }
           // if (cmd.program) {
-            // this.debugGraph += `${cmd.program.id} -> ${cmd.name || cmd.id}\n`
+          // this.debugGraph += `${cmd.program.id} -> ${cmd.name || cmd.id}\n`
           // }
           // if (cmd.framebuffer) {
-            // this.debugGraph += `${cmd.framebuffer.id} -> ${cmd.name || cmd.id}\n`
-            // cmd.framebuffer.color.forEach((tex) => {
-              // console.log('tex', tex)
-            // })
+          // this.debugGraph += `${cmd.framebuffer.id} -> ${cmd.name || cmd.id}\n`
+          // cmd.framebuffer.color.forEach((tex) => {
+          // console.log('tex', tex)
+          // })
           // }
           if (cmd.uniforms) {
             cells.push(' ')
@@ -983,10 +1157,13 @@ function createContext (opts) {
               const value = cmd.uniforms[uniformName]
               if (value === null || value === undefined) {
                 log('Invalid command', cmd)
-                assert.fail(`Trying to draw with uniform "${uniformName}" = null`)
+                assert.fail(
+                  `Trying to draw with uniform "${uniformName}" = null`
+                )
               }
               if (value.id) {
-                this.debugGraph += `${value.id} -> ${cmd.name || cmd.id}:u${index}\n`
+                this.debugGraph += `${value.id} -> ${cmd.name ||
+                  cmd.id}:u${index}\n`
               }
             })
           }
@@ -997,9 +1174,12 @@ function createContext (opts) {
       }
       this.checkError()
     },
-    dispose: function (res) {
+    dispose: function(res) {
       log('dispose', res)
-      assert(res || arguments.length === 0, 'Trying to dispose undefined resource')
+      assert(
+        res || arguments.length === 0,
+        'Trying to dispose undefined resource'
+      )
       if (res) {
         if (!res._dispose) {
           assert(res._dispose, 'Trying to dispose non resource')
