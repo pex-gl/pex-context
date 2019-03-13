@@ -140,7 +140,7 @@ const clearCmd = {
   })
 }
 
-ctx.frame(function () {
+ctx.frame(function() {
   ctx.submit(clearCmd)
   ctx.submit(drawPoints)
   ctx.submit(drawLines)

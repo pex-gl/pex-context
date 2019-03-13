@@ -157,11 +157,7 @@ load(resources, (err, res) => {
   if (err) console.log(err)
 
   const envMapCube = ctx.textureCube({
-    data: [
-      res.posx, res.negx,
-      res.posy, res.negy,
-      res.posz, res.negz
-    ],
+    data: [res.posx, res.negx, res.posy, res.negy, res.posz, res.negz],
     width: res.negx.width,
     height: res.negy.height,
     encoding: ctx.Encoding.SRGB
@@ -173,7 +169,7 @@ load(resources, (err, res) => {
   drawCmd.uniforms.uEnvMap = envMapCube
   drawCmd.uniforms.uCameraPosition = camera.position
 
-  raf(function frame () {
+  raf(function frame() {
     ctx.submit(clearScreenCmd)
     ctx.submit(drawSkybox)
     ctx.submit(drawCmd)

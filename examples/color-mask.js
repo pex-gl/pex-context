@@ -14,7 +14,6 @@ const quadPositions = [[-1, -1], [1, -1], [1, 1], [-1, 1]]
 const quadTexCoords = [[0, 0], [1, 0], [1, 1], [0, 1]]
 const quadFaces = [[0, 1, 2], [0, 2, 3]]
 
-
 const vert = `
   attribute vec2 aPosition;
   attribute vec2 aTexCoord;
@@ -71,7 +70,6 @@ const drawTextureCmd = {
     uTexture: null
   }
 }
-
 
 const clearScreenCmd = {
   name: 'clearScreen',

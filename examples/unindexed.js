@@ -7,7 +7,7 @@ const normals = require('geom-normals')
 const random = require('pex-random')
 const GUI = require('pex-gui')
 
-const ctx = createContext({ })
+const ctx = createContext({})
 
 const W = window.innerWidth
 const H = window.innerHeight
@@ -104,8 +104,6 @@ const drawInstancedCmd = {
     uViewMatrix: camera.viewMatrix
   }
 }
-
-
 
 const cube = createCube()
 const indexedPositions = ctx.vertexBuffer(cube.positions)

@@ -46,12 +46,17 @@ const depthMap = ctx.texture2D({
   min: ctx.Filter.Linear,
   mag: ctx.Filter.Linear
 })
-const colorMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize, pixelFormat: ctx.PixelFormat.RGBA8, encoding: ctx.Encoding.SRGB })
+const colorMap = ctx.texture2D({
+  width: depthMapSize,
+  height: depthMapSize,
+  pixelFormat: ctx.PixelFormat.RGBA8,
+  encoding: ctx.Encoding.SRGB
+})
 
 const depthPassCmd = {
   name: 'depthPass',
   pass: ctx.pass({
-    color: [ colorMap ],
+    color: [colorMap],
     depth: depthMap,
     clearColor: [1, 0, 0, 1],
     clearDepth: 1
@@ -307,9 +312,18 @@ const numBunnies = 200 // for some reason this is much slower than batching
 random.seed(0)
 for (let i = 0; i < numBunnies; i++) {
   const pos = [random.float(-5, 5), random.float(0, 5), random.float(-5, 5)]
-  const rotation = quat.fromTo(quat.create(), [0, 0, 1], vec3.normalize(random.vec3()))
+  const rotation = quat.fromTo(
+    quat.create(),
+    [0, 0, 1],
+    vec3.normalize(random.vec3())
+  )
   const scale = [0.2, 0.2, 0.2]
-  const color = [random.float(0.1, 1.0), random.float(0.1, 1.0), random.float(0.1, 1.0), 1.0]
+  const color = [
+    random.float(0.1, 1.0),
+    random.float(0.1, 1.0),
+    random.float(0.1, 1.0),
+    1.0
+  ]
 
   offsets.push(pos)
   rotations.push(rotation)
@@ -317,9 +331,13 @@ for (let i = 0; i < numBunnies; i++) {
   colors.push(color)
 }
 
-const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
+const bunnyBaseVertices = centerAndNormalize(bunny.positions).map(p =>
+  vec3.scale(p, 2)
+)
 const bunnyBaseNormals = normals.vertexNormals(bunny.cells, bunny.positions)
-const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
+const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map(p =>
+  vec3.scale(p, 2)
+)
 
 const bunnyPositionBuffer = ctx.vertexBuffer(bunnyBaseVertices)
 const bunnyNormalBuffer = ctx.vertexBuffer(bunnyBaseNormals)
@@ -391,14 +409,14 @@ const drawBunnyDepthCmd = {
   instances: offsets.length
 }
 
-function updateTime () {
+function updateTime() {
   const now = Date.now()
   const deltaTime = (now - prevTime) / 1000
   elapsedSeconds += deltaTime
   prevTime = now
 }
 
-function updateCamera () {
+function updateCamera() {
   const t = elapsedSeconds / 10 + 0.5
   const x = 6 * Math.cos(Math.PI * t)
   const y = 3
@@ -406,14 +424,18 @@ function updateCamera () {
   camera.set({ position: [x, y, z] })
 }
 
-function updateBunny (ctx) {
+function updateBunny(ctx) {
   const noiseFrequency = 1
   const noiseScale = 0.1
   for (let i = 0; i < bunnyBaseVertices.length; i++) {
     const v = bunnyNoiseVertices[i]
     const n = bunnyBaseNormals[i]
     vec3.set(v, bunnyBaseVertices[i])
-    const f = noise.noise3D(v[0] * noiseFrequency, v[1] * noiseFrequency, v[2] * noiseFrequency + elapsedSeconds)
+    const f = noise.noise3D(
+      v[0] * noiseFrequency,
+      v[1] * noiseFrequency,
+      v[2] * noiseFrequency + elapsedSeconds
+    )
     v[0] += n[0] * noiseScale * (f + 1)
     v[1] += n[1] * noiseScale * (f + 1)
     v[2] += n[2] * noiseScale * (f + 1)
@@ -433,7 +455,14 @@ const drawFullscreenQuadCmd = {
     depthTest: false
   }),
   attributes: {
-    aPosition: { buffer: ctx.vertexBuffer([[-1, -1], [-2 / 4, -1], [-2 / 4, -1 / 3], [-1, -1 / 3]]) },
+    aPosition: {
+      buffer: ctx.vertexBuffer([
+        [-1, -1],
+        [-2 / 4, -1],
+        [-2 / 4, -1 / 3],
+        [-1, -1 / 3]
+      ])
+    },
     aTexCoord0: { buffer: ctx.vertexBuffer([[0, 0], [1, 0], [1, 1], [0, 1]]) }
   },
   indices: {
@@ -445,12 +474,12 @@ const drawFullscreenQuadCmd = {
 }
 
 let frameNumber = 0
-raf(function frame () {
+raf(function frame() {
   updateTime()
   updateCamera()
   updateBunny(ctx)
   if (frameNumber < 3) console.log('frameNumber', frameNumber)
-  ctx.debug((++frameNumber) < 3)
+  ctx.debug(++frameNumber < 3)
 
   ctx.submit(depthPassCmd, () => {
     ctx.submit(drawFloorDepthCmd)

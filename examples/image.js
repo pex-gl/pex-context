@@ -78,7 +78,7 @@ loadImage(ASSETS_DIR + '/images/pex.png', (err, img) => {
     encoding: ctx.Encoding.Linear
   })
 
-  raf(function frame () {
+  raf(function frame() {
     ctx.submit(drawCmd)
     raf(frame)
   })

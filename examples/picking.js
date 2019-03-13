@@ -30,7 +30,11 @@ const offsets = []
 const s = 2
 for (var i = 0; i < N; i++) {
   colors.push([Math.random(), Math.random(), Math.random(), 1.0])
-  offsets.push([Math.random() * 2 * s - s, Math.random() * 2 * s - s, Math.random() * 2 * s - s])
+  offsets.push([
+    Math.random() * 2 * s - s,
+    Math.random() * 2 * s - s,
+    Math.random() * 2 * s - s
+  ])
 }
 
 let W = window.innerWidth
@@ -40,9 +44,17 @@ let depthTex = null
 let depthRenderbuffer = null
 let useDepthTexture = false
 if (ctx.capabilities.depthTexture && useDepthTexture) {
-  depthTex = ctx.texture2D({ width: W, height: H, pixelFormat: ctx.PixelFormat.Depth })
+  depthTex = ctx.texture2D({
+    width: W,
+    height: H,
+    pixelFormat: ctx.PixelFormat.Depth
+  })
 } else {
-  depthRenderbuffer = ctx.renderbuffer({ width: W, height: H, pixelFormat: ctx.PixelFormat.Depth16 })
+  depthRenderbuffer = ctx.renderbuffer({
+    width: W,
+    height: H,
+    pixelFormat: ctx.PixelFormat.Depth16
+  })
 }
 
 const clearCmd = {
@@ -104,7 +116,13 @@ const drawCmd = {
   instances: N,
   indices: ctx.indexBuffer(cube.cells),
   uniforms: {
-    uProjectionMatrix: mat4.perspective(mat4.create(), Math.PI / 4, window.innerWidth / window.innerHeight, 0.1, 100),
+    uProjectionMatrix: mat4.perspective(
+      mat4.create(),
+      Math.PI / 4,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      100
+    ),
     uViewMatrix: null,
     uHitColor: [0, 0, 0, 1]
   }
@@ -132,7 +150,7 @@ const readPixelWrap = {
   })
 }
 
-function onCanvasMove (e) {
+function onCanvasMove(e) {
   mx = e.offsetX
   my = e.offsetY
 }
@@ -187,7 +205,13 @@ window.addEventListener('resize', () => {
   ctx.set({ width: W, height: H })
   ctx.update(colorTex, { width: W, height: H })
   ctx.update(depthRenderbuffer, { width: W, height: H })
-  drawCmd.uniforms.uProjectionMatrix = mat4.perspective(mat4.create(), Math.PI / 4, W / H, 0.1, 100)
+  drawCmd.uniforms.uProjectionMatrix = mat4.perspective(
+    mat4.create(),
+    Math.PI / 4,
+    W / H,
+    0.1,
+    100
+  )
 })
 
 ctx.frame(() => {
@@ -206,10 +230,18 @@ ctx.frame(() => {
     px = mx
     py = my
     ctx.submit(readPixelWrap, () => {
-      ctx.gl.readPixels(mx, H - my, 1, 1, ctx.gl.RGBA, ctx.gl.UNSIGNED_BYTE, pixels)
+      ctx.gl.readPixels(
+        mx,
+        H - my,
+        1,
+        1,
+        ctx.gl.RGBA,
+        ctx.gl.UNSIGNED_BYTE,
+        pixels
+      )
     })
     var selectedColor = [pixels[0] / 255, pixels[1] / 255, pixels[2] / 255]
-    var color = colors.find((c) => vec3.distance(c, selectedColor) < 1 / 255)
+    var color = colors.find(c => vec3.distance(c, selectedColor) < 1 / 255)
     var index = colors.indexOf(color)
     if (index !== -1) {
       hitColor = color

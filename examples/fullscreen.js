@@ -7,12 +7,42 @@ const loadImage = require('pex-io/loadImage')
 const isBrowser = require('is-browser')
 
 const resolutions = [
-  { name: '800x600 (low-res)', value: '800x600-lowres', width: 800, height: 600, pixelRatio: 0.5 },
+  {
+    name: '800x600 (low-res)',
+    value: '800x600-lowres',
+    width: 800,
+    height: 600,
+    pixelRatio: 0.5
+  },
   { name: '800x600', value: '800x600', width: 800, height: 600, pixelRatio: 1 },
-  { name: '800x600 (hi-res)', value: '800x600-hi-res', width: 800, height: 600, pixelRatio: 2 },
-  { name: 'Full window (low res)', value: 'full-window-lowres', width: 0, height: 0, pixelRatio: 0.5 },
-  { name: 'Full window', value: 'full-window', width: 0, height: 0, pixelRatio: 1 },
-  { name: 'Full window (hi-res)', value: 'full-window-hi-res', width: 0, height: 0, pixelRatio: 2 }
+  {
+    name: '800x600 (hi-res)',
+    value: '800x600-hi-res',
+    width: 800,
+    height: 600,
+    pixelRatio: 2
+  },
+  {
+    name: 'Full window (low res)',
+    value: 'full-window-lowres',
+    width: 0,
+    height: 0,
+    pixelRatio: 0.5
+  },
+  {
+    name: 'Full window',
+    value: 'full-window',
+    width: 0,
+    height: 0,
+    pixelRatio: 1
+  },
+  {
+    name: 'Full window (hi-res)',
+    value: 'full-window-hi-res',
+    width: 0,
+    height: 0,
+    pixelRatio: 2
+  }
 ]
 
 const config = {
@@ -26,10 +56,9 @@ const settings = {
   fullscreen: false
 }
 
-
 if (isBrowser && document.location.hash) {
   const resId = document.location.hash.substr(1)
-  const res = resolutions.find((res) => res.value === resId)
+  const res = resolutions.find(res => res.value === resId)
   if (res) {
     config.width = res.width
     config.height = res.height
@@ -47,11 +76,12 @@ window.addEventListener('resize', () => {
 
 const ctx = createContext(config)
 
-function onFullscreenChange (e) {
+function onFullscreenChange(e) {
   console.log(e)
-  settings.fullscreen = document.fullscreenElement
-    || document.webkitFullscreenElement
-    || document.mozFullScreenElement
+  settings.fullscreen =
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.mozFullScreenElement
 }
 
 if (isBrowser) {
@@ -60,7 +90,7 @@ if (isBrowser) {
   document.addEventListener('mozfullscreenchange', onFullscreenChange)
 }
 
-function requestFullscreen (elem) {
+function requestFullscreen(elem) {
   if (elem.requestFullscreen) {
     elem.requestFullscreen()
   } else if (elem.webkitRequestFullscreen) {
@@ -70,7 +100,7 @@ function requestFullscreen (elem) {
   }
 }
 
-function exitFullscreen () {
+function exitFullscreen() {
   if (document.exitFullscreen) {
     document.exitFullscreen()
   } else if (document.webkitExitFullscreen) {
@@ -100,7 +130,7 @@ const clearCmd = {
 
 const assets = isBrowser ? 'assets' : __dirname + '/assets'
 
-const tex = ctx.texture2D({ width: 1, height: 1})
+const tex = ctx.texture2D({ width: 1, height: 1 })
 loadImage(assets + '/images/pex.png', (err, img) => {
   if (err) console.log(err)
   ctx.update(tex, { data: img, width: img.width, height: img.height })
@@ -108,10 +138,13 @@ loadImage(assets + '/images/pex.png', (err, img) => {
 
 const gui = new GUI(ctx)
 gui.addHeader('Settings')
-const fovItem = gui.addParam('FOV', settings, 'fov', { min: Math.PI / 4, max: Math.PI / 2 })
+const fovItem = gui.addParam('FOV', settings, 'fov', {
+  min: Math.PI / 4,
+  max: Math.PI / 2
+})
 gui.addHeader('Resolution')
-gui.addRadioList('Resolution', settings, 'resolution', resolutions, (e) => {
-  const res = resolutions.find((r) => r.value === settings.resolution)
+gui.addRadioList('Resolution', settings, 'resolution', resolutions, e => {
+  const res = resolutions.find(r => r.value === settings.resolution)
   const w = res.width || window.innerWidth
   const h = res.height || window.innerHeight
 
@@ -123,11 +156,11 @@ gui.addRadioList('Resolution', settings, 'resolution', resolutions, (e) => {
     height: h,
     pixelRatio: res.pixelRatio
   })
-  camera.set({ aspect: w / h})
+  camera.set({ aspect: w / h })
 })
 gui.addTexture2D('PEX', tex)
 gui.addHeader('Fullscreen')
-gui.addParam('Fullscreen', settings, 'fullscreen', {}, (e) => {
+gui.addParam('Fullscreen', settings, 'fullscreen', {}, e => {
   if (!settings.fullscreen) {
     exitFullscreen()
   } else {

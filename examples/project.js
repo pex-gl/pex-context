@@ -89,8 +89,7 @@ ctx.frame(() => {
   ctx.submit(clearCmd)
 
   ctx.submit(drawInViewport, () => {
-    cubes.forEach((c) => {
-
+    cubes.forEach(c => {
       // normal matrix = inverse transpose of model view matrix
       // you can just pass mat3(viewMatrix) if you scaling is uniform
       mat4.identity(tempMat)
@@ -143,7 +142,6 @@ ctx.frame(() => {
 
       c.label.style.left = pos[0] + 'px'
       c.label.style.top = pos[1] + 'px'
-
 
       ctx.submit(drawCubeCmd, {
         uniforms: {

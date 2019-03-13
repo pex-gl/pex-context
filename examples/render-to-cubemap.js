@@ -182,7 +182,7 @@ gui.addTextureCube('Reflection Cubemap RT', reflectionMap)
 gui.addParam('Sphere pos', state, 'spherePosition', { min: -3, max: 3 })
 gui.addParam('Reflections', state, 'reflections')
 
-const sides = this._sides = [
+const sides = (this._sides = [
   { eye: [0, 0, 0], target: [1, 0, 0], up: [0, -1, 0] },
   { eye: [0, 0, 0], target: [-1, 0, 0], up: [0, -1, 0] },
   { eye: [0, 0, 0], target: [0, 1, 0], up: [0, 0, 1] },
@@ -190,23 +190,34 @@ const sides = this._sides = [
   { eye: [0, 0, 0], target: [0, 0, 1], up: [0, -1, 0] },
   { eye: [0, 0, 0], target: [0, 0, -1], up: [0, -1, 0] }
 ].map((side, i) => {
-  side.projectionMatrix = mat4.perspective(mat4.create(), Math.PI / 2, 1, 0.1, 100) // TODO: change this to radians
+  side.projectionMatrix = mat4.perspective(
+    mat4.create(),
+    Math.PI / 2,
+    1,
+    0.1,
+    100
+  ) // TODO: change this to radians
   side.viewMatrix = mat4.lookAt(mat4.create(), side.eye, side.target, side.up)
   side.drawPassCmd = {
     name: 'ReflectionProbe.sidePass',
     pass: ctx.pass({
       name: 'ReflectionProbe.sidePass',
-      color: [{ texture: reflectionMap, target: ctx.gl.TEXTURE_CUBE_MAP_POSITIVE_X + i }],
+      color: [
+        {
+          texture: reflectionMap,
+          target: ctx.gl.TEXTURE_CUBE_MAP_POSITIVE_X + i
+        }
+      ],
       depth: depthMap,
       clearColor: [0, 0, 0, 1],
       clearDepth: 1
     })
   }
   return side
-})
+}))
 
-function drawBoxes (camera) {
-  cubeInstances.forEach((cube) => {
+function drawBoxes(camera) {
+  cubeInstances.forEach(cube => {
     if (camera) {
       ctx.submit(drawBoxCmd, {
         uniforms: {
@@ -258,11 +269,7 @@ load(resources, (err, res) => {
   gui.addTexture2D('Equirect', equirect)
 
   envMap = ctx.textureCube({
-    data: [
-      res.posx, res.negx,
-      res.posy, res.negy,
-      res.posz, res.negz
-    ],
+    data: [res.posx, res.negx, res.posy, res.negy, res.posz, res.negz],
     width: res.negx.width,
     height: res.negy.height,
     encoding: ctx.Encoding.SRGB
@@ -277,16 +284,18 @@ load(resources, (err, res) => {
 
   var testEnvMap = ctx.textureCube({
     data: [
-      res.testposx, res.testnegx,
-      res.testposy, res.testnegy,
-      res.testposz, res.testnegz
+      res.testposx,
+      res.testnegx,
+      res.testposy,
+      res.testnegy,
+      res.testposz,
+      res.testnegz
     ],
     width: res.testnegx.width,
     height: res.testnegy.height,
     encoding: ctx.Encoding.SRGB
   })
   gui.addTextureCube('Test EnvMap Cubemap File', testEnvMap, { flipEnvMap: -1 })
-
 })
 
 const skyboxPositions = [[-1, -1], [1, -1], [1, 1], [-1, 1]]
@@ -393,7 +402,7 @@ const drawSkyboxCmd = {
   indices: ctx.indexBuffer(skyboxFaces)
 }
 
-function drawSkybox (camera) {
+function drawSkybox(camera) {
   if (envMap) {
     if (camera) {
       ctx.submit(drawSkyboxCmd, {
@@ -415,7 +424,7 @@ function drawSkybox (camera) {
 
 ctx.frame(() => {
   ctx.submit(clearScreenCmd)
-  sides.forEach((side) => {
+  sides.forEach(side => {
     var target = [0, 0, 0]
     ctx.submit(side.drawPassCmd, () => {
       const position = state.spherePosition
