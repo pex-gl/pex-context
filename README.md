@@ -488,9 +488,9 @@ ctx.update(tex, {
 })
 ```
 
-| property | info                                                    |
-| -------- | ------------------------------------------------------- |
-| `opts`   | whatever data the given resource accepts in constructor |
+| property | info                                                    | type   |
+| -------- | ------------------------------------------------------- | ------ |
+| `opts`   | whatever data the given resource accepts in constructor | Object |
 
 ## Disposing resources
 
@@ -659,3 +659,7 @@ const QueryState = {
   Pending: 'pending'
 }
 ```
+
+## License
+
+MIT, see [LICENSE.md](https://github.com/pex-gl/pex-context/blob/master/LICENSE.md) for details.
