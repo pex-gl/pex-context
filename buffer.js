@@ -1,5 +1,5 @@
-const checkProps = require('./check-props')
 const assert = require('assert')
+const checkProps = require('./check-props')
 
 const allowedProps = ['target', 'data', 'usage', 'type']
 

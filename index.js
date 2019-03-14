@@ -1,9 +1,9 @@
-// TODO: get rid of Ramda
-const log = require('debug')('context')
+const createGL = require('pex-gl')
 // const viz = require('viz.js')
 const isBrowser = require('is-browser')
-const createGL = require('pex-gl')
 const assert = require('assert')
+const raf = require('raf')
+const log = require('debug')('context')
 const createTexture = require('./texture')
 const createFramebuffer = require('./framebuffer')
 const createRenderbuffer = require('./renderbuffer')
@@ -12,7 +12,6 @@ const createPipeline = require('./pipeline')
 const createProgram = require('./program')
 const createBuffer = require('./buffer')
 const createQuery = require('./query')
-const raf = require('raf')
 const checkProps = require('./check-props')
 
 let ID = 0
