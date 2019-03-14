@@ -1,5 +1,5 @@
 const assert = require('assert')
-const log = require('debug')('context')
+const log = require('debug')('context/framebuffer')
 
 function createFramebuffer(ctx, opts) {
   const gl = ctx.gl
