@@ -1,4 +1,5 @@
 const assert = require('assert')
+const log = require('debug')('context')
 
 function createFramebuffer(ctx, opts) {
   const gl = ctx.gl
@@ -85,7 +86,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
   }
 
   if (framebuffer.depth) {
-    if (ctx.debugMode) console.log('fbo attaching depth', framebuffer.depth)
+    if (ctx.debugMode) log('fbo attaching depth', framebuffer.depth)
     const depthAttachment = framebuffer.depth
 
     if (depthAttachment.texture.target === gl.RENDERBUFFER) {
@@ -105,7 +106,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
       )
     }
   } else {
-    if (ctx.debugMode) console.log('fbo deattaching depth')
+    if (ctx.debugMode) log('fbo deattaching depth')
     gl.framebufferRenderbuffer(
       gl.FRAMEBUFFER,
       gl.DEPTH_ATTACHMENT,
