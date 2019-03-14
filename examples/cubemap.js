@@ -154,7 +154,7 @@ const resources = {
 }
 
 load(resources, (err, res) => {
-  if (err) console.log(err)
+  if (err) throw err
 
   const envMapCube = ctx.textureCube({
     data: [res.posx, res.negx, res.posy, res.negy, res.posz, res.negz],

@@ -260,7 +260,7 @@ const resources = {
 let envMap = null
 
 load(resources, (err, res) => {
-  if (err) console.log(err)
+  if (err) throw err
 
   var equirect = ctx.texture2D({
     data: res.equirect,

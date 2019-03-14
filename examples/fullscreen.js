@@ -1,7 +1,6 @@
 const createContext = require('../')
 const createCube = require('primitive-cube')
 const createCamera = require('pex-cam/perspective')
-const createOrbiter = require('pex-cam/orbiter')
 const GUI = require('pex-gui')
 const loadImage = require('pex-io/loadImage')
 const isBrowser = require('is-browser')
@@ -76,8 +75,7 @@ window.addEventListener('resize', () => {
 
 const ctx = createContext(config)
 
-function onFullscreenChange(e) {
-  console.log(e)
+function onFullscreenChange() {
   settings.fullscreen =
     document.fullscreenElement ||
     document.webkitFullscreenElement ||
@@ -116,10 +114,6 @@ const camera = createCamera({
   fov: Math.PI / 3,
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height
 })
-const orbiter = createOrbiter({
-  camera: camera,
-  easing: 0.1
-})
 
 const clearCmd = {
   pass: ctx.pass({
@@ -132,18 +126,18 @@ const assets = isBrowser ? 'assets' : __dirname + '/assets'
 
 const tex = ctx.texture2D({ width: 1, height: 1 })
 loadImage(assets + '/images/pex.png', (err, img) => {
-  if (err) console.log(err)
+  if (err) throw err
   ctx.update(tex, { data: img, width: img.width, height: img.height })
 })
 
 const gui = new GUI(ctx)
 gui.addHeader('Settings')
-const fovItem = gui.addParam('FOV', settings, 'fov', {
+gui.addParam('FOV', settings, 'fov', {
   min: Math.PI / 4,
   max: Math.PI / 2
 })
 gui.addHeader('Resolution')
-gui.addRadioList('Resolution', settings, 'resolution', resolutions, (e) => {
+gui.addRadioList('Resolution', settings, 'resolution', resolutions, () => {
   const res = resolutions.find((r) => r.value === settings.resolution)
   const w = res.width || window.innerWidth
   const h = res.height || window.innerHeight
@@ -160,7 +154,7 @@ gui.addRadioList('Resolution', settings, 'resolution', resolutions, (e) => {
 })
 gui.addTexture2D('PEX', tex)
 gui.addHeader('Fullscreen')
-gui.addParam('Fullscreen', settings, 'fullscreen', {}, (e) => {
+gui.addParam('Fullscreen', settings, 'fullscreen', {}, () => {
   if (!settings.fullscreen) {
     exitFullscreen()
   } else {
@@ -169,7 +163,6 @@ gui.addParam('Fullscreen', settings, 'fullscreen', {}, (e) => {
 })
 
 setTimeout(() => {
-  return
   settings.resolution = '800x600-hi-res'
   ctx.set({
     width: 800,

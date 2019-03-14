@@ -95,7 +95,6 @@ void main() {
 }`
 
 const floor = createCube(2, 0.1, 2)
-const cube = createCube()
 
 const drawFloorCmd = {
   name: 'drawFloor',

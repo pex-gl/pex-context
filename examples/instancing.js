@@ -478,7 +478,6 @@ raf(function frame() {
   updateTime()
   updateCamera()
   updateBunny(ctx)
-  if (frameNumber < 3) console.log('frameNumber', frameNumber)
   ctx.debug(++frameNumber < 3)
 
   ctx.submit(depthPassCmd, () => {

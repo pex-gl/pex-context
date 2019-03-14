@@ -8,8 +8,6 @@ const ctx = createContext({
   stencil: true
 })
 
-console.log(ctx.capabilities)
-
 const cube = createCube()
 
 const camera = createCamera({
@@ -93,7 +91,7 @@ const drawCmd = {
 
       void main () {
         vec3 N = normalize(vNormal);
-        vec3 L = normalize(vec3(1.0, 2.0, 3.0)); 
+        vec3 L = normalize(vec3(1.0, 2.0, 3.0));
         float dotNL = abs(dot(N, L));
         float diffuse = (dotNL + 1.0) / 2.0;
         if (uRenderColors) {

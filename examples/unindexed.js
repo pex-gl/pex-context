@@ -25,7 +25,6 @@ const camera = require('pex-cam/perspective')({
   fov: Math.PI / 3,
   position: [2, 1, 2]
 })
-const orbiter = require('pex-cam/orbiter')({ camera: camera })
 
 const clearCmd = {
   pass: ctx.pass({

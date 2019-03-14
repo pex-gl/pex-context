@@ -266,10 +266,10 @@ function updateBunny(ctx) {
   const noiseFrequency = 1
   const noiseScale = 0.1
   for (let i = 0; i < bunnyBaseVertices.length; i++) {
-    var v = bunnyNoiseVertices[i]
-    var n = bunnyBaseNormals[i]
+    let v = bunnyNoiseVertices[i]
+    let n = bunnyBaseNormals[i]
     vec3.set(v, bunnyBaseVertices[i])
-    var f = noise.noise3D(
+    let f = noise.noise3D(
       v[0] * noiseFrequency,
       v[1] * noiseFrequency,
       v[2] * noiseFrequency + elapsedSeconds
@@ -284,8 +284,8 @@ function updateBunny(ctx) {
   if (!positionData) {
     positionData = new Float32Array(flatten(bunnyNoiseVertices))
   } else {
-    for (var i = 0; i < bunnyNoiseVertices.length; i++) {
-      var v = bunnyNoiseVertices[i]
+    for (let i = 0; i < bunnyNoiseVertices.length; i++) {
+      let v = bunnyNoiseVertices[i]
       positionData[i * 3] = v[0]
       positionData[i * 3 + 1] = v[1]
       positionData[i * 3 + 2] = v[2]
@@ -313,8 +313,8 @@ function updateBunny(ctx) {
   if (!normalData) {
     normalData = new Float32Array(flatten(normals))
   } else {
-    for (var i = 0; i < normals.length; i++) {
-      var v = normals[i]
+    for (let i = 0; i < normals.length; i++) {
+      let v = normals[i]
       normalData[i * 3] = v[0]
       normalData[i * 3 + 1] = v[1]
       normalData[i * 3 + 2] = v[2]
@@ -365,7 +365,7 @@ var query3 = ctx.query()
 // var startQuery = ext.createQueryEXT()
 // var endQuery = ext.createQueryEXT()
 
-var firstFrame = true
+// var firstFrame = true
 ctx.frame(() => {
   // if (firstFrame) {
   // // ext.beginQueryEXT(ext.TIME_ELAPSED_EXT, query)
@@ -373,22 +373,22 @@ ctx.frame(() => {
   // }
   // console.timeEnd('frame')
   // console.time('frame')
-  if (query1.result !== null) {
-    console.log('time 1', query1.result / 1000000)
-  }
-  if (query2.result !== null) {
-    console.log('time 2', query2.result / 1000000)
-  }
-  if (query3.result !== null) {
-    console.log('time 3', query3.result / 1000000)
-  }
-  console.time('update')
+  // if (query1.result !== null) {
+  //   console.log('time 1', query1.result / 1000000)
+  // }
+  // if (query2.result !== null) {
+  //   console.log('time 2', query2.result / 1000000)
+  // }
+  // if (query3.result !== null) {
+  //   console.log('time 3', query3.result / 1000000)
+  // }
+  // console.time('update')
   updateTime()
   updateCamera()
   updateBunny(ctx)
-  console.timeEnd('update')
+  // console.timeEnd('update')
   ctx.debug(++frameNumber === 1)
-  console.time('draw')
+  // console.time('draw')
   ctx.submit(depthPassCmd, () => {
     ctx.submit(drawFloorDepthCmd)
     ctx.submit(drawBunnyDepthCmd)
@@ -406,13 +406,13 @@ ctx.frame(() => {
     ctx.submit(drawFullscreenQuadCmd)
     ctx.endQuery(query3)
   })
-  console.timeEnd('draw')
+  // console.timeEnd('draw')
   // if (firstFrame) {
   // ext.endQueryEXT(ext.TIME_ELAPSED_EXT);
   // ext.queryCounterEXT(endQuery, ext.TIMESTAMP_EXT)
   // }
 
-  firstFrame = false
+  // firstFrame = false
 
   // if (!firstFrame) {
   // // var available = ext.getQueryObjectEXT(query, ext.QUERY_RESULT_AVAILABLE_EXT);
