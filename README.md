@@ -522,129 +522,140 @@ _Note: Framebuffers are ref counted and released by Pass, Programs are also ref 
 
 #### ctx.BlendFactor
 
-```
-  const BlendFactor = {
-    One: gl.ONE,
-    Zero: gl.ZERO,
-    SrcAlpha: gl.SRC_ALPHA,
-    OneMinusSrcAlpha: gl.ONE_MINUS_SRC_ALPHA,
-    DstAlpha: gl.DST_ALPHA,
-    OneMinusDstAlpha: gl.ONE_MINUS_DST_ALPHA,
-    SrcColor: gl.SRC_COLOR,
-    OneMinusSrcColor: gl.ONE_MINUS_SRC_COLOR,
-    DstColor: gl.DST_COLOR,
-    OneMinusDstColor: gl.ONE_MINUS_DST_COLOR
-  }
+```js
+const BlendFactor = {
+  One: gl.ONE,
+  Zero: gl.ZERO,
+  SrcAlpha: gl.SRC_ALPHA,
+  OneMinusSrcAlpha: gl.ONE_MINUS_SRC_ALPHA,
+  DstAlpha: gl.DST_ALPHA,
+  OneMinusDstAlpha: gl.ONE_MINUS_DST_ALPHA,
+  SrcColor: gl.SRC_COLOR,
+  OneMinusSrcColor: gl.ONE_MINUS_SRC_COLOR,
+  DstColor: gl.DST_COLOR,
+  OneMinusDstColor: gl.ONE_MINUS_DST_COLOR
+}
 ```
 
 #### ctx.CubemapFace
 
-```
-  const CubemapFace = {
-    PositiveX: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-    NegativeX: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-    PositiveY: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-    NegativeY: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-    PositiveZ: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-    NegativeZ: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
-  }
+```js
+const CubemapFace = {
+  PositiveX: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+  NegativeX: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+  PositiveY: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+  NegativeY: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+  PositiveZ: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+  NegativeZ: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
+}
 ```
 
 #### ctx.DataType
 
-```
-  const DataType = {
-    Float32: gl.FLOAT,
-    Uint8: gl.UNSIGNED_BYTE,
-    Uint16: gl.UNSIGNED_SHORT,
-    Uint32: gl.UNSIGNED_INT
-  }
+```js
+const DataType = {
+  Float32: gl.FLOAT,
+  Uint8: gl.UNSIGNED_BYTE,
+  Uint16: gl.UNSIGNED_SHORT,
+  Uint32: gl.UNSIGNED_INT
+}
 ```
 
 #### ctx.DepthFunc
 
-```
-  const DepthFunc = {
-    Never: gl.NEVER,
-    Less: gl.LESS,
-    Equal: gl.EQUAL,
-    LessEqual: gl.LEQUAL,
-    Greater: gl.GREATER,
-    NotEqual: gl.NOTEQUAL,
-    GreaterEqual: gl.GEQUAL,
-    Always: gl.ALWAYS
-  }
+```js
+const DepthFunc = {
+  Never: gl.NEVER,
+  Less: gl.LESS,
+  Equal: gl.EQUAL,
+  LessEqual: gl.LEQUAL,
+  Greater: gl.GREATER,
+  NotEqual: gl.NOTEQUAL,
+  GreaterEqual: gl.GEQUAL,
+  Always: gl.ALWAYS
+}
 ```
 
 #### ctx.Face
 
-```
-  const Face = {
-    Front: gl.FRONT,
-    Back: gl.BACK,
-    FrontAndBack: gl.FRONT_AND_BACK
-  }
+```js
+const Face = {
+  Front: gl.FRONT,
+  Back: gl.BACK,
+  FrontAndBack: gl.FRONT_AND_BACK
+}
 ```
 
 #### ctx.PixelFormat
 
-```
-  const PixelFormat = {
-    RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
-    RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
-    RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
-    R32F: 'r32f', // gl.ALPHA + gl.FLOAT
-    R16F: 'r16f', // gl.ALPHA + gl.HALF_FLOAT
-    Depth: 'depth', // gl.DEPTH_COMPONENT
-    Depth16: 'depth16' // gl.DEPTH_COMPONENT16, renderbuffer only
-  }
+```js
+const PixelFormat = {
+  RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
+  RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
+  RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
+  R32F: 'r32f', // gl.ALPHA + gl.FLOAT
+  R16F: 'r16f', // gl.ALPHA + gl.HALF_FLOAT
+  Depth: 'depth', // gl.DEPTH_COMPONENT
+  Depth16: 'depth16' // gl.DEPTH_COMPONENT16, renderbuffer only
+}
 ```
 
 #### ctx.Primitive
 
+```js
+const Primitive = {
+  Points: gl.POINTS,
+  Lines: gl.LINES,
+  LineStrip: gl.LINE_STRIP,
+  Triangles: gl.TRIANGLES,
+  TriangleStrip: gl.TRIANGLE_STRIP
+}
 ```
-  const Primitive = {
-    Points: gl.POINTS,
-    Lines: gl.LINES,
-    LineStrip: gl.LINE_STRIP,
-    Triangles: gl.TRIANGLES,
-    TriangleStrip: gl.TRIANGLE_STRIP
-  }
+
+#### ctx.Encoding
+
+```js
+const Encoding = {
+  Linear: 1,
+  Gamma: 2,
+  SRGB: 3,
+  RGBM: 4
+}
 ```
 
 #### ctx.Usage
 
-```
-  const Usage = {
-    StaticDraw: gl.STATIC_DRAW,
-    DynamicDraw: gl.DYNAMIC_DRAW,
-    StreamDraw: gl.STREAM_DRAW
-  }
+```js
+const Usage = {
+  StaticDraw: gl.STATIC_DRAW,
+  DynamicDraw: gl.DYNAMIC_DRAW,
+  StreamDraw: gl.STREAM_DRAW
+}
 ```
 
 #### ctx.Wrap
 
-```
-  const Wrap = {
-    ClampToEdge: gl.CLAMP_TO_EDGE,
-    Repeat: gl.REPEAT
-  }
+```js
+const Wrap = {
+  ClampToEdge: gl.CLAMP_TO_EDGE,
+  Repeat: gl.REPEAT
+}
 ```
 
 #### ctx.QueryTarget
 
-```
-  const QueryTarget = {
-    TimeElapsed: gl.TIME_ELAPSED
-  }
+```js
+const QueryTarget = {
+  TimeElapsed: gl.TIME_ELAPSED
+}
 ```
 
 #### ctx.QueryState
 
-```
-  const QueryState = {
-    Ready: 'ready',
-    Active: 'active',
-    Pending: 'pending'
-  }
+```js
+const QueryState = {
+  Ready: 'ready',
+  Active: 'active',
+  Pending: 'pending'
+}
 ```
