@@ -19,7 +19,7 @@ Modern WebGL state wrapper for [PEX](http://pex.gl). With `pex-context` you allo
 
 # Example
 
-```javascript
+```js
 const createContext = require('pex-context')
 const createCube = require('primitive-cube')
 const mat4 = require('pex-math/mat4')
@@ -101,25 +101,25 @@ Creating gl context wrapper.
 
 #### ctx = createContext(opts)
 
-```javascript
-var createContext = require('pex-context')
+```js
+const createContext = require('pex-context')
 
 // full window canvas
-var ctx = createContext()
+const ctx = createContext()
 
 // creates gl context from existing canvas and keeps it's size
-var ctx = createContext({ gl: gl })
+const ctx = createContext({ gl: gl })
 
 // creates gl context from existing canvas and keeps it's size
-var ctx = createContext({ canvas: canvas })
+const ctx = createContext({ canvas: canvas })
 
 // creates new canvas with given width and height
-var ctx = createContext({ width: Number, height: Number })
+const ctx = createContext({ width: Number, height: Number })
 ```
 
 #### ctx.set(opts)
 
-```javascript
+```js
 ctx.set({
   pixelRatio: 2,
   width: 1280,
@@ -137,7 +137,7 @@ Note 1: The new size and resolution will be applied not immediately but before d
 
 Note 2: Context's canvas doesn't resize automatically, even if you skip width/height on init and the canvas will be asigned dimensions of the window. To handle resizing use the following code:
 
-```javascript
+```js
 window.addEventListener('resize', () => {
   ctx.set({
     width: window.innerWidth,
@@ -154,10 +154,10 @@ window.addEventListener('resize', () => {
 
 ## Commands
 
-Commands are plain JavaScript objects with GPU resources needed to complete a draw call
+Commands are plain js objects with GPU resources needed to complete a draw call
 
-```javascript
-var cmd = {
+```js
+const cmd = {
   pass: Pass
   pipeline: Pipeline,
   attributes: {
@@ -204,7 +204,7 @@ _Note: scissor region is by default set to null and scissor test disabled_
 
 #### ctx.submit(cmd)
 
-```javascript
+```js
 ctx.submit({
   pass: ctx.pass({
     clearColor: [1, 0, 0, 1]
@@ -224,7 +224,7 @@ ctx.submit({
 
 Submit partially updated command without modifying the original one
 
-```javascript
+```js
 // E.g. draw mesh with custom color
 ctx.submit(cmd, {
   uniforms: {
@@ -237,7 +237,7 @@ ctx.submit(cmd, {
 
 Submit a batch of commands differences in opts.
 
-```javascript
+```js
 // E.g. draw same mesh twice with different material and position
 ctx.submit(cmd, [
   { pipeline: material1, uniforms: { uModelMatrix: position1 },
@@ -253,7 +253,7 @@ Submit command while preserving state from another command.
 
 This approach allows to simulate state stack with automatic cleanup at the end of callback.
 
-```javascript
+```js
 // E.g. render to texture
 ctx.submit(renderToFboCmd, () => {
   ctx.submit(drawMeshCmd)
@@ -262,11 +262,11 @@ ctx.submit(renderToFboCmd, () => {
 
 ## Resources
 
-All resources are plain JavaScript object and once constructed their properties can be accessed directly.
+All resources are plain js object and once constructed their properties can be accessed directly.
 Please note those props are read only. To set new values or upload new data to GPU see [updating resources](#updating-resources).
 
-```javascript
-var tex = ctx.texture2D({
+```js
+const tex = ctx.texture2D({
   width: 256,
   pixelFormat: ctx.PixelFormat.RGBA8
 })
@@ -286,8 +286,8 @@ FBOs are created internally and automatically by pex-context.
 
 #### pass = ctx.pass(opts)
 
-```javascript
-var pass = ctx.pass({
+```js
+const pass = ctx.pass({
   color: [Texture2D, ...]
   color: [{ texture: Texture2D | TextureCube, target: CubemapFace }, ...]
   depth: Texture2D
@@ -309,8 +309,8 @@ Pipelines represent the state of the GPU rendering pipeline (shaders, blending, 
 
 #### pipeline = ctx.pipeline(opts)
 
-```javascript
-var pipeline = ctx.pipeline({
+```js
+const pipeline = ctx.pipeline({
   vert: String,
   frag: String,
   depthWrite: Boolean,
@@ -351,8 +351,8 @@ Textures represent pixel data uploaded to the GPU.
 
 #### texture = ctx.texture2D(opts)
 
-```javascript
-var tex = ctx.texture2D({
+```js
+const tex = ctx.texture2D({
   data: [255, 255, 255, 255, 0, 0, 0, 255],
   width: 2,
   height: 1,
@@ -389,8 +389,8 @@ var tex = ctx.texture2D({
 - `opts`: Object - see `ctx.texture2D(opts)`
 - `opts.data`: Array of Images or TypedArrays - 6 images, one for each face +X, -X, +Y, -Y, +Z, -Z
 
-```javascript
-var tex = ctx.textureCube({
+```js
+const tex = ctx.textureCube({
   data: [ posx, negx, posy, negy, posz, negz ],
   width: 64,
   height: 64
@@ -403,8 +403,8 @@ Renderbuffers represent pixel data store for rendering operations
 
 #### renderbuffer = ctx.renderbuffer(opts)
 
-```javascript
-var tex = ctx.renderbuffer({
+```js
+const tex = ctx.renderbuffer({
   width: 1280,
   height: 720,
   pixelFormat: ctx.PixelFormat.Depth16
@@ -427,10 +427,10 @@ Buffers store vertex and index data in the GPU memory.
 
 #### buffer = ctx.indexBuffer(opts)
 
-```javascript
-var buf = ctx.vertexBuffer({ data: Array }) // aka Attribute Buffer
+```js
+const buf = ctx.vertexBuffer({ data: Array }) // aka Attribute Buffer
 
-var buf = ctx.indexBuffer({ data: Array }) // aka Index Buffer
+const buf = ctx.indexBuffer({ data: Array }) // aka Index Buffer
 ```
 
 | property | info         | type                            | default              |
@@ -447,8 +447,8 @@ Queries are used for GPU timers.
 
 _Note: Requires EXT_disjoint_timer_query_
 
-```javascript
-var query = ctx.query({
+```js
+const query = ctx.query({
   target: QueryTarget
 })
 ```
@@ -477,10 +477,10 @@ _Note: The result is not available immediately and will be `null` until the stat
 
 Update a resource.
 
-```javascript
+```js
 ctx.update(res, { data: [] })
 
-var tex = ctx.texture2D({...})
+const tex = ctx.texture2D({...})
 ctx.update(tex, {
   width: 1,
   height: 1,
@@ -488,9 +488,10 @@ ctx.update(tex, {
 })
 ```
 
-| property | info                                                    | type   |
-| -------- | ------------------------------------------------------- | ------ |
-| `opts`   | whatever data the given resource accepts in constructor | Object |
+| property | info                                                    | type                                                                                     |
+| -------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `res`    | resource to be updated                                  | ctx.Buffer, ctx.Framebuffer, ctx.Pass, ctx.Pipeline, ctx.Program, ctx.Query, ctx.Texture |
+| `opts`   | whatever data the given resource accepts in constructor | Object                                                                                   |
 
 ## Disposing resources
 
@@ -498,7 +499,7 @@ ctx.update(tex, {
 
 Delete all allocated resources and stop render loop. Disposed context is no longer valid to use.
 
-```javascript
+```js
 ctx.dispose()
 ```
 
@@ -506,17 +507,44 @@ ctx.dispose()
 
 Delete a resource. Disposed resource is no longer valid for use.
 
-```javascript
-var tex = ctx.texture2D({})
+```js
+const tex = ctx.texture2D({})
 ...
 ctx.dispose(tex)
 ```
 
 | property | info                   | type                                                                                     |
 | -------- | ---------------------- | ---------------------------------------------------------------------------------------- |
-| `target` | resource to be deleted | ctx.Buffer, ctx.Framebuffer, ctx.Pass, ctx.Pipeline, ctx.Program, ctx.Query, ctx.Texture |
+| `res`    | resource to be deleted | ctx.Buffer, ctx.Framebuffer, ctx.Pass, ctx.Pipeline, ctx.Program, ctx.Query, ctx.Texture |
 
 _Note: Framebuffers are ref counted and released by Pass, Programs are also ref counted and released by Pipeline_
+
+## Capabilities
+
+Get capabilities and extensions availability.
+
+```js
+const maxTextureSize = ctx.maxTextureSize
+```
+
+| property                     | info                                                                                         | type    |
+| ---------------------------- | -------------------------------------------------------------------------------------------- | ------- |
+| `maxColorAttachments`        | gl.getParameter('MAX_COLOR_ATTACHMENTS') or gl.getParameter(ext.MAX_COLOR_ATTACHMENTS_WEBGL) | Number  |
+| `maxTextureImageUnits`       | gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS)                                                  | Number  |
+| `maxVertexTextureImageUnits` | gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS)                                           | Number  |
+| `maxTextureSize`             | gl.getParameter(gl.MAX_TEXTURE_SIZE)                                                         | Number  |
+| `maxCubeMapTextureSize`      | gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE)                                                | Number  |
+| `instancedArrays`            | false                                                                                        | Boolean |
+| `instancing`                 | false (deprecated)                                                                           | Boolean |
+| `elementIndexUint32`         | !!gl.getExtension('OES_element_index_uint')                                                  | Boolean |
+| `standardDerivatives`        | !!gl.getExtension('OES_standard_derivatives')                                                | Boolean |
+| `depthTexture`               | !!gl.getExtension('WEBGL_depth_texture')                                                     | Boolean |
+| `shaderTextureLod`           | !!gl.getExtension('EXT_shader_texture_lod')                                                  | Boolean |
+| `textureFloat`               | !!gl.getExtension('OES_texture_float')                                                       | Boolean |
+| `textureFloatLinear`         | !!gl.getExtension('OES_texture_float_linear')                                                | Boolean |
+| `textureHalfFloat`           | !!gl.getExtension('OES_texture_half_float')                                                  | Boolean |
+| `textureHalfFloatLinear`     | !!gl.getExtension('OES_texture_half_float_linear')                                           | Boolean |
+| `textureFilterAnisotropic`   | !!gl.getExtension('EXT_texture_filter_anisotropic')                                          | Boolean |
 
 # Enums
 
