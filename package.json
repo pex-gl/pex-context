@@ -4,7 +4,9 @@
   "description": "Thin WebGL wrapper for state stack and resource management for the pex library",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "npx eslint {examples/*,*}.js",
+    "format": "npx prettier {examples/*,*}.js --write",
+    "format:check": "npx prettier {examples/*,*}.js --check"
   },
   "repository": {
     "type": "git",
@@ -24,7 +26,8 @@
       "name": "Marcin Ignac",
       "email": "marcin.ignac@gmail.com",
       "url": "http://marcinignac.com"
-    }
+    },
+    "Damien Seguin (https://github.com/dmnsgn)"
   ],
   "license": "MIT",
   "bugs": {
@@ -36,5 +39,38 @@
     "is-browser": "^2.0.1",
     "pex-gl": "^2.7.0",
     "raf": "^3.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.15.1",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-markdown": "^1.0.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "prettier": "1.16.4"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "arrowParens": "always"
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "plugin:prettier/recommended"
+    ],
+    "plugins": [
+      "prettier",
+      "markdown"
+    ],
+    "rules": {
+      "prettier/prettier": "error"
+    },
+    "parserOptions": {
+      "ecmaVersion": 2019
+    },
+    "env": {
+      "es6": true,
+      "browser": true,
+      "node": true
+    }
   }
 }

@@ -67,7 +67,7 @@ const drawCmd = {
 }
 
 loadImage(ASSETS_DIR + '/images/pex.png', (err, img) => {
-  if (err) console.log(err)
+  if (err) throw err
 
   drawCmd.uniforms.uTexture = ctx.texture2D({
     data: img.data || img,
@@ -78,7 +78,7 @@ loadImage(ASSETS_DIR + '/images/pex.png', (err, img) => {
     encoding: ctx.Encoding.Linear
   })
 
-  raf(function frame () {
+  raf(function frame() {
     ctx.submit(drawCmd)
     raf(frame)
   })

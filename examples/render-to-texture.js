@@ -29,9 +29,24 @@ const depthMap = ctx.texture2D({
   encoding: ctx.Encoding.Linear
 })
 
-const colorMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize, pixelFormat: ctx.PixelFormat.RGBA8, encoding: ctx.Encoding.SRGB })
-const normalMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize, pixelFormat: ctx.PixelFormat.RGBA8, encoding: ctx.Encoding.Linear })
-const colorMap2 = ctx.texture2D({ width: depthMapSize / 2, height: depthMapSize / 2, pixelFormat: ctx.PixelFormat.RGBA8, encoding: ctx.Encoding.SRGB })
+const colorMap = ctx.texture2D({
+  width: depthMapSize,
+  height: depthMapSize,
+  pixelFormat: ctx.PixelFormat.RGBA8,
+  encoding: ctx.Encoding.SRGB
+})
+const normalMap = ctx.texture2D({
+  width: depthMapSize,
+  height: depthMapSize,
+  pixelFormat: ctx.PixelFormat.RGBA8,
+  encoding: ctx.Encoding.Linear
+})
+const colorMap2 = ctx.texture2D({
+  width: depthMapSize / 2,
+  height: depthMapSize / 2,
+  pixelFormat: ctx.PixelFormat.RGBA8,
+  encoding: ctx.Encoding.SRGB
+})
 
 const clearScreenCmd = {
   name: 'clearScreen',
@@ -43,7 +58,7 @@ const clearScreenCmd = {
 const drawPassCmd = {
   name: 'drawPass',
   pass: ctx.pass({
-    color: [ colorMap, normalMap ],
+    color: [colorMap, normalMap],
     depth: depthMap,
     clearColor: [1, 0, 0, 1],
     clearDepth: 1
@@ -53,7 +68,7 @@ const drawPassCmd = {
 const drawPass2Cmd = {
   name: 'drawPass2',
   pass: ctx.pass({
-    color: [ colorMap2 ],
+    color: [colorMap2],
     // depth: depthMap2,
     clearColor: [0, 0, 1, 1],
     clearDepth: 1
@@ -80,7 +95,6 @@ void main() {
 }`
 
 const floor = createCube(2, 0.1, 2)
-const cube = createCube()
 
 const drawFloorCmd = {
   name: 'drawFloor',
@@ -148,21 +162,29 @@ const drawTextureCmd = {
 
 let frameNumber = 0
 
-raf(function frame () {
+raf(function frame() {
   ctx.debug(++frameNumber === 1)
 
   ctx.submit(clearScreenCmd)
-  ctx.submit(drawPassCmd, {
-    viewport: [0, 0, 1024, 1024]
-  }, () => {
-    ctx.submit(drawFloorCmd)
-  })
+  ctx.submit(
+    drawPassCmd,
+    {
+      viewport: [0, 0, 1024, 1024]
+    },
+    () => {
+      ctx.submit(drawFloorCmd)
+    }
+  )
 
-  ctx.submit(drawPass2Cmd, {
-    // viewport: [0, 0, 512, 512]
-  }, () => {
-    ctx.submit(drawFloorCmd)
-  })
+  ctx.submit(
+    drawPass2Cmd,
+    {
+      // viewport: [0, 0, 512, 512]
+    },
+    () => {
+      ctx.submit(drawFloorCmd)
+    }
+  )
 
   ctx.submit(drawTextureCmd, {
     uniforms: {

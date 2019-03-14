@@ -91,7 +91,7 @@ const colorMap = ctx.texture2D({
 const depthPassCmd = {
   name: 'depthPass',
   pass: ctx.pass({
-    color: [ colorMap ],
+    color: [colorMap],
     depth: depthMap,
     clearColor: [0, 0, 0, 1],
     clearDepth: 1
@@ -179,9 +179,13 @@ const drawFloorDepthCmd = {
   }
 }
 
-const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
+const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) =>
+  vec3.scale(p, 2)
+)
 const bunnyBaseNormals = vertexNormals(bunny.cells, bunny.positions)
-const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
+const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) =>
+  vec3.scale(p, 2)
+)
 
 const bunnyPositionBuffer = ctx.vertexBuffer(bunnyBaseVertices)
 const bunnyNormalBuffer = ctx.vertexBuffer(bunnyBaseNormals)
@@ -241,14 +245,14 @@ const drawBunnyDepthCmd = {
   }
 }
 
-function updateTime () {
+function updateTime() {
   const now = Date.now()
   const deltaTime = (now - prevTime) / 1000
   elapsedSeconds += deltaTime
   prevTime = now
 }
 
-function updateCamera () {
+function updateCamera() {
   const t = elapsedSeconds / 10
   const x = 6 * Math.cos(Math.PI * t)
   const y = 3
@@ -258,14 +262,18 @@ function updateCamera () {
 
 let positionData = null
 let normalData = null
-function updateBunny (ctx) {
+function updateBunny(ctx) {
   const noiseFrequency = 1
   const noiseScale = 0.1
   for (let i = 0; i < bunnyBaseVertices.length; i++) {
-    var v = bunnyNoiseVertices[i]
-    var n = bunnyBaseNormals[i]
+    let v = bunnyNoiseVertices[i]
+    let n = bunnyBaseNormals[i]
     vec3.set(v, bunnyBaseVertices[i])
-    var f = noise.noise3D(v[0] * noiseFrequency, v[1] * noiseFrequency, v[2] * noiseFrequency + elapsedSeconds)
+    let f = noise.noise3D(
+      v[0] * noiseFrequency,
+      v[1] * noiseFrequency,
+      v[2] * noiseFrequency + elapsedSeconds
+    )
     v[0] += n[0] * noiseScale * (f + 1)
     v[1] += n[1] * noiseScale * (f + 1)
     v[2] += n[2] * noiseScale * (f + 1)
@@ -276,8 +284,8 @@ function updateBunny (ctx) {
   if (!positionData) {
     positionData = new Float32Array(flatten(bunnyNoiseVertices))
   } else {
-    for (var i = 0; i < bunnyNoiseVertices.length; i++) {
-      var v = bunnyNoiseVertices[i]
+    for (let i = 0; i < bunnyNoiseVertices.length; i++) {
+      let v = bunnyNoiseVertices[i]
       positionData[i * 3] = v[0]
       positionData[i * 3 + 1] = v[1]
       positionData[i * 3 + 2] = v[2]
@@ -305,8 +313,8 @@ function updateBunny (ctx) {
   if (!normalData) {
     normalData = new Float32Array(flatten(normals))
   } else {
-    for (var i = 0; i < normals.length; i++) {
-      var v = normals[i]
+    for (let i = 0; i < normals.length; i++) {
+      let v = normals[i]
       normalData[i * 3] = v[0]
       normalData[i * 3 + 1] = v[1]
       normalData[i * 3 + 2] = v[2]
@@ -325,7 +333,14 @@ const drawFullscreenQuadCmd = {
   }),
   attributes: {
     // aPosition: { buffer: ctx.vertexBuffer(new Float32Array(flatten([[-1, -1], [1, -1], [1, 1], [-1, 1]]))) },
-    aPosition: { buffer: ctx.vertexBuffer([[-1, -1], [-2 / 4, -1], [-2 / 4, -1 / 3], [-1, -1 / 3]]) },
+    aPosition: {
+      buffer: ctx.vertexBuffer([
+        [-1, -1],
+        [-2 / 4, -1],
+        [-2 / 4, -1 / 3],
+        [-1, -1 / 3]
+      ])
+    },
     aTexCoord0: { buffer: ctx.vertexBuffer([[0, 0], [1, 0], [1, 1], [0, 1]]) }
   },
   indices: {
@@ -350,30 +365,30 @@ var query3 = ctx.query()
 // var startQuery = ext.createQueryEXT()
 // var endQuery = ext.createQueryEXT()
 
-var firstFrame = true
+// var firstFrame = true
 ctx.frame(() => {
   // if (firstFrame) {
-    // // ext.beginQueryEXT(ext.TIME_ELAPSED_EXT, query)
-    // ext.queryCounterEXT(startQuery, ext.TIMESTAMP_EXT)
+  // // ext.beginQueryEXT(ext.TIME_ELAPSED_EXT, query)
+  // ext.queryCounterEXT(startQuery, ext.TIMESTAMP_EXT)
   // }
   // console.timeEnd('frame')
   // console.time('frame')
-  if (query1.result !== null) {
-    console.log('time 1', query1.result / 1000000)
-  }
-  if (query2.result !== null) {
-    console.log('time 2', query2.result / 1000000)
-  }
-  if (query3.result !== null) {
-    console.log('time 3', query3.result / 1000000)
-  }
-  console.time('update')
+  // if (query1.result !== null) {
+  //   console.log('time 1', query1.result / 1000000)
+  // }
+  // if (query2.result !== null) {
+  //   console.log('time 2', query2.result / 1000000)
+  // }
+  // if (query3.result !== null) {
+  //   console.log('time 3', query3.result / 1000000)
+  // }
+  // console.time('update')
   updateTime()
   updateCamera()
   updateBunny(ctx)
-  console.timeEnd('update')
-  ctx.debug((++frameNumber) === 1)
-  console.time('draw')
+  // console.timeEnd('update')
+  ctx.debug(++frameNumber === 1)
+  // console.time('draw')
   ctx.submit(depthPassCmd, () => {
     ctx.submit(drawFloorDepthCmd)
     ctx.submit(drawBunnyDepthCmd)
@@ -391,25 +406,25 @@ ctx.frame(() => {
     ctx.submit(drawFullscreenQuadCmd)
     ctx.endQuery(query3)
   })
-  console.timeEnd('draw')
+  // console.timeEnd('draw')
   // if (firstFrame) {
-    // ext.endQueryEXT(ext.TIME_ELAPSED_EXT);
-    // ext.queryCounterEXT(endQuery, ext.TIMESTAMP_EXT)
+  // ext.endQueryEXT(ext.TIME_ELAPSED_EXT);
+  // ext.queryCounterEXT(endQuery, ext.TIMESTAMP_EXT)
   // }
 
-  firstFrame = false
-  
+  // firstFrame = false
+
   // if (!firstFrame) {
-    // // var available = ext.getQueryObjectEXT(query, ext.QUERY_RESULT_AVAILABLE_EXT);
-    // var available = ext.getQueryObjectEXT(endQuery, ext.QUERY_RESULT_AVAILABLE_EXT);
-    // if (available && !disjoint) {
-      // // See how much time the rendering of the object took in nanoseconds.
-      // // var timeElapsed = ext.getQueryObjectEXT(query, ext.QUERY_RESULT_EXT);
-      // var timeStart = ext.getQueryObjectEXT(startQuery, ext.QUERY_RESULT_EXT)
-      // var timeEnd = ext.getQueryObjectEXT(endQuery, ext.QUERY_RESULT_EXT)
-      // var timeElapsed = timeEnd - timeStart
-      // // console.log('timeElapsed', timeElapsed / 1000000)
-      // firstFrame = true
-    // }
+  // // var available = ext.getQueryObjectEXT(query, ext.QUERY_RESULT_AVAILABLE_EXT);
+  // var available = ext.getQueryObjectEXT(endQuery, ext.QUERY_RESULT_AVAILABLE_EXT);
+  // if (available && !disjoint) {
+  // // See how much time the rendering of the object took in nanoseconds.
+  // // var timeElapsed = ext.getQueryObjectEXT(query, ext.QUERY_RESULT_EXT);
+  // var timeStart = ext.getQueryObjectEXT(startQuery, ext.QUERY_RESULT_EXT)
+  // var timeEnd = ext.getQueryObjectEXT(endQuery, ext.QUERY_RESULT_EXT)
+  // var timeElapsed = timeEnd - timeStart
+  // // console.log('timeElapsed', timeElapsed / 1000000)
+  // firstFrame = true
+  // }
   // }
 })

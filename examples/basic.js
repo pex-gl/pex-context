@@ -49,7 +49,13 @@ const drawCmd = {
   },
   indices: ctx.indexBuffer(cube.cells),
   uniforms: {
-    uProjectionMatrix: mat4.perspective(mat4.create(), Math.PI / 4, W / H, 0.1, 100),
+    uProjectionMatrix: mat4.perspective(
+      mat4.create(),
+      Math.PI / 4,
+      W / H,
+      0.1,
+      100
+    ),
     uViewMatrix: mat4.lookAt(mat4.create(), [2, 2, 5], [0, 0, 0], [0, 1, 0])
   }
 }

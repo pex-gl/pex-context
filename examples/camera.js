@@ -1,7 +1,6 @@
 const createContext = require('../')
 const createCube = require('primitive-cube')
 const createCamera = require('pex-cam/perspective')
-const createOrbiter = require('pex-cam/orbiter')
 
 const ctx = createContext({
   pixelRatio: window.devicePixelRatio
@@ -12,11 +11,6 @@ const camera = createCamera({
   position: [2, 2, 2],
   fov: Math.PI / 3,
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height
-})
-
-const orbiter = createOrbiter({
-  camera: camera,
-  easing: 0.1
 })
 
 const clearCmd = {
