@@ -54,7 +54,8 @@
   },
   "prettier": {
     "semi": false,
-    "singleQuote": true
+    "singleQuote": true,
+    "arrowParens": "always"
   },
   "eslintConfig": {
     "extends": [

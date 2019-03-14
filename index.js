@@ -476,7 +476,7 @@ function createContext(opts) {
         'pass',
         opts,
         opts.color
-          ? opts.color.map(c => (c.texture ? c.texture.info : c.info))
+          ? opts.color.map((c) => (c.texture ? c.texture.info : c.info))
           : ''
       )
       return this.resource(createPass(this, opts))
@@ -986,7 +986,7 @@ function createContext(opts) {
           return
         }
         if (self.queries.length) {
-          self.queries = self.queries.filter(q => !q._available(self, q))
+          self.queries = self.queries.filter((q) => !q._available(self, q))
         }
         raf(frame)
       })
@@ -1076,7 +1076,7 @@ function createContext(opts) {
       if (batches) {
         if (Array.isArray(batches)) {
           // TODO: quick hack
-          batches.forEach(batch =>
+          batches.forEach((batch) =>
             this.submit(this.mergeCommands(cmd, batch, true), subCommand)
           )
           return
@@ -1102,7 +1102,7 @@ function createContext(opts) {
           if (cmd.framebuffer) {
             this.debugGraph += `${cmd.framebuffer.id} -> cluster_${cmd.name ||
               cmd.id}\n`
-            cmd.framebuffer.color.forEach(attachment => {
+            cmd.framebuffer.color.forEach((attachment) => {
               this.debugGraph += `${attachment.texture.id} -> ${
                 cmd.framebuffer.id
               }\n`

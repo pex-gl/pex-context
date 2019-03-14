@@ -35,7 +35,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
   const gl = ctx.gl
 
   // TODO: if color.length > 1 check for WebGL2 or gl.getExtension('WEBGL_draw_buffers')
-  framebuffer.color = opts.color.map(attachment => {
+  framebuffer.color = opts.color.map((attachment) => {
     const colorAttachment = attachment.texture
       ? attachment
       : { texture: attachment }

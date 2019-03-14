@@ -268,11 +268,11 @@ function updateTexture2D(ctx, texture, opts) {
   texture.type = type
   texture.info = ''
   texture.info += Object.keys(ctx.PixelFormat).find(
-    key => ctx.PixelFormat[key] === pixelFormat
+    (key) => ctx.PixelFormat[key] === pixelFormat
   )
   texture.info += '_'
   texture.info += Object.keys(ctx.Encoding).find(
-    key => ctx.Encoding[key] === encoding
+    (key) => ctx.Encoding[key] === encoding
   )
 
   return texture

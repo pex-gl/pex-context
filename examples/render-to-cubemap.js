@@ -217,7 +217,7 @@ const sides = (this._sides = [
 }))
 
 function drawBoxes(camera) {
-  cubeInstances.forEach(cube => {
+  cubeInstances.forEach((cube) => {
     if (camera) {
       ctx.submit(drawBoxCmd, {
         uniforms: {
@@ -424,7 +424,7 @@ function drawSkybox(camera) {
 
 ctx.frame(() => {
   ctx.submit(clearScreenCmd)
-  sides.forEach(side => {
+  sides.forEach((side) => {
     var target = [0, 0, 0]
     ctx.submit(side.drawPassCmd, () => {
       const position = state.spherePosition

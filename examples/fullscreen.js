@@ -58,7 +58,7 @@ const settings = {
 
 if (isBrowser && document.location.hash) {
   const resId = document.location.hash.substr(1)
-  const res = resolutions.find(res => res.value === resId)
+  const res = resolutions.find((res) => res.value === resId)
   if (res) {
     config.width = res.width
     config.height = res.height
@@ -143,8 +143,8 @@ const fovItem = gui.addParam('FOV', settings, 'fov', {
   max: Math.PI / 2
 })
 gui.addHeader('Resolution')
-gui.addRadioList('Resolution', settings, 'resolution', resolutions, e => {
-  const res = resolutions.find(r => r.value === settings.resolution)
+gui.addRadioList('Resolution', settings, 'resolution', resolutions, (e) => {
+  const res = resolutions.find((r) => r.value === settings.resolution)
   const w = res.width || window.innerWidth
   const h = res.height || window.innerHeight
 
@@ -160,7 +160,7 @@ gui.addRadioList('Resolution', settings, 'resolution', resolutions, e => {
 })
 gui.addTexture2D('PEX', tex)
 gui.addHeader('Fullscreen')
-gui.addParam('Fullscreen', settings, 'fullscreen', {}, e => {
+gui.addParam('Fullscreen', settings, 'fullscreen', {}, (e) => {
   if (!settings.fullscreen) {
     exitFullscreen()
   } else {

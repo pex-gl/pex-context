@@ -61,10 +61,12 @@ function createPipeline(ctx, opts) {
   if (pipeline.program && !pipeline.vertexLayout) {
     pipeline.program.refCount++
     const attributesPerLocation = pipeline.program.attributesPerLocation
-    pipeline.vertexLayout = Object.keys(attributesPerLocation).map(location => {
-      const attribute = attributesPerLocation[location]
-      return [attribute.name, parseInt(location, 10), attribute.size]
-    })
+    pipeline.vertexLayout = Object.keys(attributesPerLocation).map(
+      (location) => {
+        const attribute = attributesPerLocation[location]
+        return [attribute.name, parseInt(location, 10), attribute.size]
+      }
+    )
   }
 
   return pipeline

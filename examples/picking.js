@@ -241,7 +241,7 @@ ctx.frame(() => {
       )
     })
     var selectedColor = [pixels[0] / 255, pixels[1] / 255, pixels[2] / 255]
-    var color = colors.find(c => vec3.distance(c, selectedColor) < 1 / 255)
+    var color = colors.find((c) => vec3.distance(c, selectedColor) < 1 / 255)
     var index = colors.indexOf(color)
     if (index !== -1) {
       hitColor = color

@@ -331,11 +331,11 @@ for (let i = 0; i < numBunnies; i++) {
   colors.push(color)
 }
 
-const bunnyBaseVertices = centerAndNormalize(bunny.positions).map(p =>
+const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) =>
   vec3.scale(p, 2)
 )
 const bunnyBaseNormals = normals.vertexNormals(bunny.cells, bunny.positions)
-const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map(p =>
+const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) =>
   vec3.scale(p, 2)
 )
 
