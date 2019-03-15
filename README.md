@@ -84,7 +84,7 @@ ctx.frame(() => {
 })
 ```
 
-# Examples
+You can find runnable examples in the /examples folder in this repository. To run an example install Node.js, clone or download this repository and then run:
 
 ```sh
 cd examples
