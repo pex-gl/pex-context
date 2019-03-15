@@ -14,27 +14,26 @@ const quadPositions = [[-1, -1], [1, -1], [1, 1], [-1, 1]]
 const quadTexCoords = [[0, 0], [1, 0], [1, 1], [0, 1]]
 const quadFaces = [[0, 1, 2], [0, 2, 3]]
 
-const vert = `
-  attribute vec2 aPosition;
-  attribute vec2 aTexCoord;
+const vert = /* glsl */ `
+attribute vec2 aPosition;
+attribute vec2 aTexCoord;
 
-  varying vec2 vTexCoord;
+varying vec2 vTexCoord;
 
-  void main() {
-    vTexCoord = aTexCoord;
-    gl_Position = vec4(aPosition, 0.0, 1.0);
-  }
+void main() {
+  vTexCoord = aTexCoord;
+  gl_Position = vec4(aPosition, 0.0, 1.0);
+}
 `
 
-const frag = `
-  #ifdef GL_ES
-  precision mediump float;
-  #endif
-  uniform sampler2D uTexture;
-  varying vec2 vTexCoord;
-  void main () {
-    gl_FragColor = texture2D(uTexture, vTexCoord);
-  }
+const frag = /* glsl */ `
+precision mediump float;
+
+uniform sampler2D uTexture;
+varying vec2 vTexCoord;
+void main () {
+  gl_FragColor = texture2D(uTexture, vTexCoord);
+}
 `
 
 const redPipeline = ctx.pipeline({

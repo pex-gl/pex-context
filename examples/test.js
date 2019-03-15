@@ -44,16 +44,16 @@ vertexBuffers.forEach((vertexBuffer, i) => {
 })
 
 const pipeline = ctx.pipeline({
-  vert: `
+  vert: /* glsl */ `
     attribute vec3 aPosition0;
     void main () {
       gl_Position = vec4(aPosition0, 1.0);
     }`,
-  frag: `
-    #ifdef GL_ES
+  frag: /* glsl */ `
     precision mediump float;
-    #endif
+
     uniform sampler2D texture;
+
     void main () {
       gl_FragColor = vec4(1.0) + texture2D(texture, vec2(0.0));
     }`

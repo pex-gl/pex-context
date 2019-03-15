@@ -2,6 +2,9 @@ const createContext = require('../')
 const createCube = require('primitive-cube')
 const createCamera = require('pex-cam/perspective')
 
+const basicVert = require('./shaders/basic.vert')
+const basicFrag = require('./shaders/basic.frag')
+
 const ctx = createContext({
   pixelRatio: window.devicePixelRatio
 })
@@ -27,27 +30,8 @@ const drawCmd = {
   }),
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: `
-      attribute vec3 aPosition;
-      attribute vec3 aNormal;
-      uniform mat4 uProjectionMatrix;
-      uniform mat4 uViewMatrix;
-      varying vec3 vNormal;
-      void main () {
-        gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
-        vNormal = aNormal;
-      }
-    `,
-    frag: `
-      #ifdef GL_ES
-      precision mediump float;
-      #endif
-      varying vec3 vNormal;
-      void main () {
-        gl_FragColor.rgb = vNormal * 0.5 + 0.5;
-        gl_FragColor.a = 1.0;
-      }
-    `
+    vert: basicVert,
+    frag: basicFrag
   }),
   attributes: {
     aPosition: ctx.vertexBuffer(cube.positions),

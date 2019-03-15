@@ -1,5 +1,3 @@
-// Indexed vs unindexed geometry tests
-
 const createContext = require('../')
 const createCube = require('primitive-cube')
 const splitVertices = require('geom-split-vertices')
@@ -40,7 +38,7 @@ const drawCmd = {
   }),
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: `
+    vert: /* glsl */ `
       attribute vec3 aPosition;
       attribute vec3 aNormal;
       uniform mat4 uProjectionMatrix;
@@ -51,10 +49,9 @@ const drawCmd = {
         vNormal = aNormal;
       }
     `,
-    frag: `
-      #ifdef GL_ES
+    frag: /* glsl */ `
       precision mediump float;
-      #endif
+
       varying vec3 vNormal;
       void main () {
         gl_FragColor.rgb = vNormal * 0.5 + 0.5;
@@ -75,7 +72,7 @@ const drawInstancedCmd = {
   }),
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: `
+    vert: /* glsl */ `
       attribute vec3 aPosition;
       attribute vec3 aNormal;
       attribute vec3 aOffset;
@@ -87,7 +84,7 @@ const drawInstancedCmd = {
         vNormal = aNormal;
       }
     `,
-    frag: `
+    frag: /* glsl */ `
       #ifdef GL_ES
       precision mediump float;
       #endif

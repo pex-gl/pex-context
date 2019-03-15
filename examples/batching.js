@@ -1,18 +1,25 @@
-const createCube = require('primitive-cube')
-const bunny = require('bunny')
-const normals = require('normals')
-const centerAndNormalize = require('geom-center-and-normalize')
+const createContext = require('../')
+const createCamera = require('pex-cam/perspective')
+const createOrbiter = require('pex-cam/orbiter')
 const vec3 = require('pex-math/vec3')
 const mat4 = require('pex-math/mat4')
 const quat = require('pex-math/quat')
-const SimplexNoise = require('simplex-noise')
 const random = require('pex-random')
 
-const createContext = require('../../pex-context')
+const createCube = require('primitive-cube')
+const SimplexNoise = require('simplex-noise')
+const normals = require('normals')
+const centerAndNormalize = require('geom-center-and-normalize')
+const bunny = require('bunny')
 const raf = require('raf')
-const createCamera = require('pex-cam/perspective')
-const createOrbiter = require('pex-cam/orbiter')
-const glsl = require('glslify')
+
+const showNormalsVert = require('./shaders/show-normals.vert.js')
+const showNormalsFrag = require('./shaders/show-normals.frag.js')
+const shadowMappedVert = require('./shaders/shadow-mapped.vert.js')
+const shadowMappedFrag = require('./shaders/shadow-mapped.frag.js')
+
+const screenImageVert = require('./shaders/screen-image.vert')
+const screenImageFrag = require('./shaders/screen-image.frag')
 
 const ctx = createContext()
 
@@ -27,10 +34,10 @@ const camera = createCamera({
   target: [0, 0, 0]
 })
 
-createOrbiter({ camera: camera, distance: 10 })
+createOrbiter({ camera, distance: 10 })
 
 const lightCamera = createCamera({
-  fov: Math.PI / 4, // TODO: change fov to radians,
+  fov: Math.PI / 4,
   aspect: 1,
   near: 1,
   far: 50,
@@ -69,11 +76,6 @@ const drawPassCmd = {
     clearDepth: 1
   })
 }
-
-const showNormalsVert = glsl(`${__dirname}/glsl/show-normals.vert`)
-const showNormalsFrag = glsl(`${__dirname}/glsl/show-normals.frag`)
-const shadowMappedVert = glsl(`${__dirname}/glsl/shadow-mapped.vert`)
-const shadowMappedFrag = glsl(`${__dirname}/glsl/shadow-mapped.frag`)
 
 const floor = createCube(5, 0.1, 5)
 const drawFloorCmd = {
@@ -267,8 +269,8 @@ function updateBunny(ctx) {
 const drawFullscreenQuadCmd = {
   name: 'drawFullscreenQuad',
   pipeline: ctx.pipeline({
-    vert: glsl(`${__dirname}/glsl/screen-image.vert`),
-    frag: glsl(`${__dirname}/glsl/screen-image.frag`),
+    vert: screenImageVert,
+    frag: screenImageFrag,
     depthTest: false
   }),
   attributes: {

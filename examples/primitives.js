@@ -14,7 +14,7 @@ const camera = createCamera({
 
 createOrbiter({ camera: camera, distance: 10 })
 
-const VERT = `
+const VERT = /* glsl */ `
   attribute vec3 aPosition;
   attribute vec2 aTexCoord;
   uniform mat4 uProjectionMatrix;
@@ -26,10 +26,9 @@ const VERT = `
     gl_PointSize = 5.0;
   }
 `
-const FRAG = `
-  #ifdef GL_ES
+const FRAG = /* glsl */ `
   precision highp float;
-  #endif
+
   uniform vec4 uColor;
   void main () {
     gl_FragColor = uColor;

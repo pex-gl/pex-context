@@ -65,7 +65,7 @@ const clearCmd = {
 const drawCmd = {
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: `
+    vert: /* glsl */ `
       attribute vec3 aPosition;
       attribute vec3 aOffset;
       attribute vec3 aNormal;
@@ -80,10 +80,9 @@ const drawCmd = {
         vColor = aColor;
       }
     `,
-    frag: `
-      #ifdef GL_ES
+    frag: /* glsl */ `
       precision mediump float;
-      #endif
+
       varying vec3 vNormal;
       varying vec4 vColor;
       uniform vec4 uHitColor;
@@ -156,7 +155,7 @@ ctx.gl.canvas.addEventListener('mousemove', onCanvasMove)
 
 const drawPreviewCmd = {
   pipeline: ctx.pipeline({
-    vert: `
+    vert: /* glsl */ `
       attribute vec2 aPosition;
       attribute vec2 aTexCoord;
       varying vec2 vTexCoord;
@@ -170,10 +169,9 @@ const drawPreviewCmd = {
         vTexCoord = aTexCoord;
       }
     `,
-    frag: `
-      #ifdef GL_ES
+    frag: /* glsl */ `
       precision mediump float;
-      #endif
+
       varying vec2 vTexCoord;
       uniform sampler2D uColorTex;
 

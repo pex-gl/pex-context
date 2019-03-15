@@ -115,7 +115,7 @@ const sphere = createSphere()
 const drawSphereCmd = {
   name: 'drawSphere',
   pipeline: ctx.pipeline({
-    vert: `
+    vert: /* glsl */ `
       attribute vec3 aPosition;
       attribute vec3 aNormal;
       uniform mat4 uProjectionMatrix;
@@ -131,10 +131,8 @@ const drawSphereCmd = {
         vNormalView = vec3(modelView * vec4(aNormal, 0.0));
       }
     `,
-    frag: `
-      #ifdef GL_ES
+    frag: /* glsl */ `
       precision highp float;
-      #endif
 
       varying vec3 vNormalView;
       uniform samplerCube uReflectionMap;

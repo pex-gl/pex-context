@@ -84,13 +84,11 @@ ctx.frame(() => {
 })
 ```
 
-# Code Examples
-
-To run e.g. shadow mapping example
+# Examples
 
 ```sh
 cd examples
-budo shadows.js --open --live -- -t glslify
+npx budo example-name.js --open --live
 ```
 
 # API

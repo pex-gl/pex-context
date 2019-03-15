@@ -1,6 +1,8 @@
-#ifdef GL_ES
+const gamma = require('./gamma.glsl.js')
+
+module.exports = /* glsl */ `
 precision highp float;
-#endif
+
 uniform vec4 uAmbientColor;
 uniform vec4 uDiffuseColor;
 uniform vec3 uLightPos;
@@ -14,8 +16,7 @@ uniform mat4 uLightViewMatrix;
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
 
-#pragma glslify: toLinear=require(glsl-gamma/in)
-#pragma glslify: toGamma=require(glsl-gamma/out)
+${gamma}
 
 //fron depth buf normalized z to linear (eye space) z
 //http://stackoverflow.com/questions/6652253/getting-the-true-z-value-from-the-depth-buffer
@@ -31,7 +32,6 @@ float readDepth(sampler2D depthMap, vec2 coord) {
   return ndcDepthToEyeSpace(z_n);
 }
 
-
 void main() {
   vec3 L = normalize(uLightPos);
   vec3 N = normalize(vNormal);
@@ -46,7 +46,7 @@ void main() {
   vec2 lightUV = lightDeviceCoordsPositionNormalized.xy * 0.5 + 0.5;
   float bias = 0.1;
   float lightDist2 = readDepth(uDepthMap, lightUV);
-  
+
   gl_FragColor.rgb = ambient + NdotL * diffuse;
 
   if (lightDist1 < lightDist2 + bias)
@@ -64,3 +64,4 @@ void main() {
   //gl_FragColor = vec4((lightDist1 - lightNear)/(lightFar - lightNear));
   //gl_FragColor = vec4((lightDist2 - lightNear)/(lightFar - lightNear));
 }
+`

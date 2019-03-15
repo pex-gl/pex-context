@@ -37,16 +37,21 @@ const flatten = require('flatten')
 // var translate = require('gl-mat4/translate')
 // var copy3 = require('gl-vec3/copy')
 
-// shaders
-// var glslify = require('glslify-promise')
-
 const createContext = require('../../pex-context')
 const createCamera = require('pex-cam/perspective')
 const createOrbiter = require('pex-cam/orbiter')
 const mat4 = require('pex-math/mat4')
 // const load = require('pex-io/load')
-const glsl = require('glslify')
 // const isBrowser = require('is-browser')
+
+// shaders
+const showNormalsVert = require('./shaders/show-normals.vert')
+const showNormalsFrag = require('./shaders/show-normals.frag')
+const shadowMappedVert = require('./shaders/shadow-mapped.vert')
+const shadowMappedFrag = require('./shaders/shadow-mapped.frag')
+
+const screenImageVert = require('./shaders/screen-image.vert')
+const screenImageFrag = require('./shaders/screen-image.frag')
 
 const ctx = createContext()
 
@@ -97,13 +102,6 @@ const depthPassCmd = {
     clearDepth: 1
   })
 }
-
-const showNormalsVert = glsl(`${__dirname}/glsl/show-normals.vert`)
-const showNormalsFrag = glsl(`${__dirname}/glsl/show-normals.frag`)
-const shadowMappedVert = glsl(`${__dirname}/glsl/shadow-mapped.vert`)
-const shadowMappedFrag = glsl(`${__dirname}/glsl/shadow-mapped.frag`)
-// BlitVert: glslify(__dirname + '/sh/materials/Blit.vert'),
-// BlitFrag: glslify(__dirname + '/sh/materials/Blit.frag')
 
 const clearCmd = {
   pass: ctx.pass({
@@ -327,8 +325,8 @@ function updateBunny(ctx) {
 const drawFullscreenQuadCmd = {
   name: 'drawFullscreenQuad',
   pipeline: ctx.pipeline({
-    vert: glsl(`${__dirname}/glsl/screen-image.vert`),
-    frag: glsl(`${__dirname}/glsl/screen-image.frag`),
+    vert: screenImageVert,
+    frag: screenImageFrag,
     depthTest: false
   }),
   attributes: {
