@@ -3,11 +3,13 @@ const checkProps = require('./check-props')
 const allowedProps = [
   'name',
   'framebuffer',
-  'color', 'depth',
-  'clearColor', 'clearDepth'
+  'color',
+  'depth',
+  'clearColor',
+  'clearDepth'
 ]
 
-function createPass (ctx, opts) {
+function createPass(ctx, opts) {
   checkProps(allowedProps, opts)
 
   const pass = {
@@ -16,7 +18,7 @@ function createPass (ctx, opts) {
     // framebuffer: opts.framebuffer,
     clearColor: opts.clearColor,
     clearDepth: opts.clearDepth,
-    _dispose: function () {
+    _dispose: function() {
       this.opts = null
       this.clearColor = null
       this.clearDepth = null

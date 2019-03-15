@@ -13,7 +13,16 @@ const random = require('pex-random')
 const createContext = require('../../pex-context')
 const raf = require('raf')
 const createCamera = require('pex-cam/perspective')
-const glsl = require('glslify')
+
+const screenImageVert = require('./shaders/screen-image.vert')
+const screenImageFrag = require('./shaders/screen-image.frag')
+const showNormalsVert = require('./shaders/show-normals.vert.js')
+const showNormalsInstancedVert = require('./shaders/show-normals-instanced.vert')
+const shadowMappedInstancedVert = require('./shaders/shadow-mapped-instanced.vert')
+const showNormalsFrag = require('./shaders/show-normals.frag.js')
+const gammaGlsl = require('./shaders/gamma.glsl.js')
+
+const { transposeMat4, inverseMat4 } = require('./shaders/math.glsl')
 
 const ctx = createContext()
 
@@ -46,12 +55,17 @@ const depthMap = ctx.texture2D({
   min: ctx.Filter.Linear,
   mag: ctx.Filter.Linear
 })
-const colorMap = ctx.texture2D({ width: depthMapSize, height: depthMapSize, pixelFormat: ctx.PixelFormat.RGBA8, encoding: ctx.Encoding.SRGB })
+const colorMap = ctx.texture2D({
+  width: depthMapSize,
+  height: depthMapSize,
+  pixelFormat: ctx.PixelFormat.RGBA8,
+  encoding: ctx.Encoding.SRGB
+})
 
 const depthPassCmd = {
   name: 'depthPass',
   pass: ctx.pass({
-    color: [ colorMap ],
+    color: [colorMap],
     depth: depthMap,
     clearColor: [1, 0, 0, 1],
     clearDepth: 1
@@ -66,68 +80,21 @@ const drawPassCmd = {
   })
 }
 
-const showNormalsVert = `
-attribute vec3 aPosition;
-attribute vec3 aNormal;
-uniform mat4 uProjectionMatrix;
-uniform mat4 uViewMatrix;
-uniform mat4 uModelMatrix;
-varying vec4 vColor;
-
-void main() {
-  gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aPosition, 1.0);
-  vColor = vec4(aNormal / 2.0 + 0.5, 1.0);
-}
-`
-
-const showNormalsInstancedVert = glsl`
-attribute vec3 aPosition;
-attribute vec3 aNormal;
-attribute vec3 aOffset;
-attribute vec3 aScale;
-attribute vec4 aRotation;
-uniform mat4 uProjectionMatrix;
-uniform mat4 uViewMatrix;
-uniform mat4 uModelMatrix;
-varying vec4 vColor;
-
-#pragma glslify: quatTomat4=require(./assets/quat2mat4.glsl)
-
-void main() {
-  vec4 position = vec4(aPosition, 1.0);
-  position.xyz *= aScale;
-  position = quatTomat4(aRotation) * position;
-  position.xyz += aOffset;
-  gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * position;
-  vColor = vec4(aNormal / 2.0 + 0.5, 1.0);
-}
-`
-
-const showNormalsFrag = `
-#ifdef GL_ES
-precision highp float;
-#endif
-
-varying vec4 vColor;
-
-void main() {
-  gl_FragColor = vColor;
-}
-`
-const shadowMappedVert = glsl`
-#pragma glslify: inverse=require(glsl-inverse)
-#ifdef GL_ES
-#pragma glslify: transpose=require(glsl-transpose)
-#endif
+const shadowMappedVert = /* glsl */ `
 uniform mat4 uProjectionMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uModelMatrix;
 uniform vec4 uAlbedoColor;
+
 attribute vec3 aPosition;
 attribute vec3 aNormal;
+
 varying vec3 vNormalWorld;
 varying vec3 vWorldPosition;
 varying vec4 vColor;
+
+${inverseMat4}
+${transposeMat4}
 
 void main() {
   mat4 modelView = uViewMatrix * uModelMatrix;
@@ -140,46 +107,9 @@ void main() {
 }
 `
 
-const shadowMappedInstancedVert = glsl`
-uniform mat4 uProjectionMatrix;
-uniform mat4 uViewMatrix;
-uniform mat4 uModelMatrix;
-attribute vec3 aPosition;
-attribute vec3 aNormal;
-attribute vec3 aOffset;
-attribute vec3 aScale;
-attribute vec4 aRotation;
-attribute vec4 aColor;
-varying vec3 vNormalWorld;
-varying vec3 vWorldPosition;
-varying vec4 vColor;
-
-#pragma glslify: quatTomat4=require(./assets/quat2mat4.glsl)
-#ifdef GL_ES
-#pragma glslify: transpose=require(glsl-transpose)
-#endif
-#pragma glslify: inverse=require(glsl-inverse)
-
-void main() {
-  mat4 modelView = uViewMatrix * uModelMatrix;
-  vec4 position = vec4(aPosition, 1.0);
-  position.xyz *= aScale;
-  mat4 rotationMat = quatTomat4(aRotation);
-  position =  rotationMat * position;
-  position.xyz += aOffset;
-  gl_Position = uProjectionMatrix * modelView * position;
-  vWorldPosition = (uModelMatrix * position).xyz;
-  mat4 invViewMatrix = inverse(uViewMatrix);
-  vec3 normalView = mat3(transpose(inverse(modelView)) * rotationMat) * aNormal;
-  vNormalWorld = vec3(uModelMatrix * vec4(normalView, 0.0));
-  vColor = aColor;
-}
-`
-
-const shadowMappedFrag = glsl`
-#ifdef GL_ES
+const shadowMappedFrag = /* glsl */ `
 precision highp float;
-#endif
+
 uniform vec4 uAmbientColor;
 uniform vec3 uLightPos;
 uniform float uWrap;
@@ -193,8 +123,7 @@ varying vec3 vNormalWorld;
 varying vec3 vWorldPosition;
 varying vec4 vColor;
 
-#pragma glslify: toLinear=require(glsl-gamma/in)
-#pragma glslify: toGamma=require(glsl-gamma/out)
+${gammaGlsl}
 
 //fron depth buf normalized z to linear (eye space) z
 //http://stackoverflow.com/questions/6652253/getting-the-true-z-value-from-the-depth-buffer
@@ -307,9 +236,18 @@ const numBunnies = 200 // for some reason this is much slower than batching
 random.seed(0)
 for (let i = 0; i < numBunnies; i++) {
   const pos = [random.float(-5, 5), random.float(0, 5), random.float(-5, 5)]
-  const rotation = quat.fromTo(quat.create(), [0, 0, 1], vec3.normalize(random.vec3()))
+  const rotation = quat.fromTo(
+    quat.create(),
+    [0, 0, 1],
+    vec3.normalize(random.vec3())
+  )
   const scale = [0.2, 0.2, 0.2]
-  const color = [random.float(0.1, 1.0), random.float(0.1, 1.0), random.float(0.1, 1.0), 1.0]
+  const color = [
+    random.float(0.1, 1.0),
+    random.float(0.1, 1.0),
+    random.float(0.1, 1.0),
+    1.0
+  ]
 
   offsets.push(pos)
   rotations.push(rotation)
@@ -317,9 +255,13 @@ for (let i = 0; i < numBunnies; i++) {
   colors.push(color)
 }
 
-const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
+const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) =>
+  vec3.scale(p, 2)
+)
 const bunnyBaseNormals = normals.vertexNormals(bunny.cells, bunny.positions)
-const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
+const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) =>
+  vec3.scale(p, 2)
+)
 
 const bunnyPositionBuffer = ctx.vertexBuffer(bunnyBaseVertices)
 const bunnyNormalBuffer = ctx.vertexBuffer(bunnyBaseNormals)
@@ -391,14 +333,14 @@ const drawBunnyDepthCmd = {
   instances: offsets.length
 }
 
-function updateTime () {
+function updateTime() {
   const now = Date.now()
   const deltaTime = (now - prevTime) / 1000
   elapsedSeconds += deltaTime
   prevTime = now
 }
 
-function updateCamera () {
+function updateCamera() {
   const t = elapsedSeconds / 10 + 0.5
   const x = 6 * Math.cos(Math.PI * t)
   const y = 3
@@ -406,14 +348,18 @@ function updateCamera () {
   camera.set({ position: [x, y, z] })
 }
 
-function updateBunny (ctx) {
+function updateBunny(ctx) {
   const noiseFrequency = 1
   const noiseScale = 0.1
   for (let i = 0; i < bunnyBaseVertices.length; i++) {
     const v = bunnyNoiseVertices[i]
     const n = bunnyBaseNormals[i]
     vec3.set(v, bunnyBaseVertices[i])
-    const f = noise.noise3D(v[0] * noiseFrequency, v[1] * noiseFrequency, v[2] * noiseFrequency + elapsedSeconds)
+    const f = noise.noise3D(
+      v[0] * noiseFrequency,
+      v[1] * noiseFrequency,
+      v[2] * noiseFrequency + elapsedSeconds
+    )
     v[0] += n[0] * noiseScale * (f + 1)
     v[1] += n[1] * noiseScale * (f + 1)
     v[2] += n[2] * noiseScale * (f + 1)
@@ -428,12 +374,19 @@ function updateBunny (ctx) {
 const drawFullscreenQuadCmd = {
   name: 'drawFullscreenQuad',
   pipeline: ctx.pipeline({
-    vert: glsl(`${__dirname}/glsl/screen-image.vert`),
-    frag: glsl(`${__dirname}/glsl/screen-image.frag`),
+    vert: screenImageVert,
+    frag: screenImageFrag,
     depthTest: false
   }),
   attributes: {
-    aPosition: { buffer: ctx.vertexBuffer([[-1, -1], [-2 / 4, -1], [-2 / 4, -1 / 3], [-1, -1 / 3]]) },
+    aPosition: {
+      buffer: ctx.vertexBuffer([
+        [-1, -1],
+        [-2 / 4, -1],
+        [-2 / 4, -1 / 3],
+        [-1, -1 / 3]
+      ])
+    },
     aTexCoord0: { buffer: ctx.vertexBuffer([[0, 0], [1, 0], [1, 1], [0, 1]]) }
   },
   indices: {
@@ -445,12 +398,11 @@ const drawFullscreenQuadCmd = {
 }
 
 let frameNumber = 0
-raf(function frame () {
+raf(function frame() {
   updateTime()
   updateCamera()
   updateBunny(ctx)
-  if (frameNumber < 3) console.log('frameNumber', frameNumber)
-  ctx.debug((++frameNumber) < 3)
+  ctx.debug(++frameNumber < 3)
 
   ctx.submit(depthPassCmd, () => {
     ctx.submit(drawFloorDepthCmd)

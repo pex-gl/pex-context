@@ -1,18 +1,25 @@
-const createCube = require('primitive-cube')
-const bunny = require('bunny')
-const normals = require('normals')
-const centerAndNormalize = require('geom-center-and-normalize')
+const createContext = require('../')
+const createCamera = require('pex-cam/perspective')
+const createOrbiter = require('pex-cam/orbiter')
 const vec3 = require('pex-math/vec3')
 const mat4 = require('pex-math/mat4')
 const quat = require('pex-math/quat')
-const SimplexNoise = require('simplex-noise')
 const random = require('pex-random')
 
-const createContext = require('../../pex-context')
+const createCube = require('primitive-cube')
+const SimplexNoise = require('simplex-noise')
+const normals = require('normals')
+const centerAndNormalize = require('geom-center-and-normalize')
+const bunny = require('bunny')
 const raf = require('raf')
-const createCamera = require('pex-cam/perspective')
-const createOrbiter = require('pex-cam/orbiter')
-const glsl = require('glslify')
+
+const showNormalsVert = require('./shaders/show-normals.vert.js')
+const showNormalsFrag = require('./shaders/show-normals.frag.js')
+const shadowMappedVert = require('./shaders/shadow-mapped.vert.js')
+const shadowMappedFrag = require('./shaders/shadow-mapped.frag.js')
+
+const screenImageVert = require('./shaders/screen-image.vert')
+const screenImageFrag = require('./shaders/screen-image.frag')
 
 const ctx = createContext()
 
@@ -27,10 +34,10 @@ const camera = createCamera({
   target: [0, 0, 0]
 })
 
-createOrbiter({ camera: camera, distance: 10 })
+createOrbiter({ camera, distance: 10 })
 
 const lightCamera = createCamera({
-  fov: Math.PI / 4, // TODO: change fov to radians,
+  fov: Math.PI / 4,
   aspect: 1,
   near: 1,
   far: 50,
@@ -55,7 +62,7 @@ const colorMap = ctx.texture2D({
 const depthPassCmd = {
   name: 'depthPass',
   pass: ctx.pass({
-    color: [ colorMap ],
+    color: [colorMap],
     depth: depthMap,
     clearColor: [1, 0, 0, 1],
     clearDepth: 1
@@ -69,11 +76,6 @@ const drawPassCmd = {
     clearDepth: 1
   })
 }
-
-const showNormalsVert = glsl(`${__dirname}/glsl/show-normals.vert`)
-const showNormalsFrag = glsl(`${__dirname}/glsl/show-normals.frag`)
-const shadowMappedVert = glsl(`${__dirname}/glsl/shadow-mapped.vert`)
-const shadowMappedFrag = glsl(`${__dirname}/glsl/shadow-mapped.frag`)
 
 const floor = createCube(5, 0.1, 5)
 const drawFloorCmd = {
@@ -136,9 +138,13 @@ const drawFloorDepthCmd = {
   }
 }
 
-const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
+const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) =>
+  vec3.scale(p, 2)
+)
 const bunnyBaseNormals = normals.vertexNormals(bunny.cells, bunny.positions)
-const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) => vec3.scale(p, 2))
+const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) =>
+  vec3.scale(p, 2)
+)
 
 const bunnyPositionBuffer = ctx.vertexBuffer(bunnyBaseVertices)
 const bunnyNormalBuffer = ctx.vertexBuffer(bunnyBaseNormals)
@@ -207,14 +213,14 @@ const drawBunnyDepthCmd = {
   }
 }
 
-function updateTime () {
+function updateTime() {
   const now = Date.now()
   const deltaTime = (now - prevTime) / 1000
   elapsedSeconds += deltaTime
   prevTime = now
 }
 
-function updateCamera () {
+function updateCamera() {
   const t = elapsedSeconds / 10
   const x = 6 * Math.cos(Math.PI * t)
   const y = 3
@@ -222,14 +228,18 @@ function updateCamera () {
   camera.set({ position: [x, y, z] })
 }
 
-function updateBunny (ctx) {
+function updateBunny(ctx) {
   const noiseFrequency = 1
   const noiseScale = 0.1
   for (let i = 0; i < bunnyBaseVertices.length; i++) {
     const v = bunnyNoiseVertices[i]
     const n = bunnyBaseNormals[i]
     vec3.set(v, bunnyBaseVertices[i])
-    const f = noise.noise3D(v[0] * noiseFrequency, v[1] * noiseFrequency, v[2] * noiseFrequency + elapsedSeconds)
+    const f = noise.noise3D(
+      v[0] * noiseFrequency,
+      v[1] * noiseFrequency,
+      v[2] * noiseFrequency + elapsedSeconds
+    )
     v[0] += n[0] * noiseScale * (f + 1)
     v[1] += n[1] * noiseScale * (f + 1)
     v[2] += n[2] * noiseScale * (f + 1)
@@ -259,13 +269,20 @@ function updateBunny (ctx) {
 const drawFullscreenQuadCmd = {
   name: 'drawFullscreenQuad',
   pipeline: ctx.pipeline({
-    vert: glsl(`${__dirname}/glsl/screen-image.vert`),
-    frag: glsl(`${__dirname}/glsl/screen-image.frag`),
+    vert: screenImageVert,
+    frag: screenImageFrag,
     depthTest: false
   }),
   attributes: {
     // aPosition: { buffer: ctx.vertexBuffer(new Float32Array(R.flatten([[-1, -1], [1, -1], [1, 1], [-1, 1]]))) },
-    aPosition: { buffer: ctx.vertexBuffer([[-1, -1], [-2 / 4, -1], [-2 / 4, -1 / 3], [-1, -1 / 3]]) },
+    aPosition: {
+      buffer: ctx.vertexBuffer([
+        [-1, -1],
+        [-2 / 4, -1],
+        [-2 / 4, -1 / 3],
+        [-1, -1 / 3]
+      ])
+    },
     aTexCoord0: { buffer: ctx.vertexBuffer([[0, 0], [1, 0], [1, 1], [0, 1]]) }
   },
   indices: {
@@ -284,7 +301,13 @@ for (let i = 0; i < numBunnies; i++) {
   const color = [random.float(), random.float(), random.float(), 1.0]
   const m = mat4.create()
   mat4.translate(m, pos)
-  mat4.mult(m, mat4.fromQuat(mat4.create(), quat.fromTo(quat.create(), [0, 0, 1], vec3.normalize(random.vec3()))))
+  mat4.mult(
+    m,
+    mat4.fromQuat(
+      mat4.create(),
+      quat.fromTo(quat.create(), [0, 0, 1], vec3.normalize(random.vec3()))
+    )
+  )
   mat4.scale(m, [0.2, 0.2, 0.2])
 
   shadowBatches.push({
@@ -301,7 +324,7 @@ for (let i = 0; i < numBunnies; i++) {
 }
 
 // console.time('frame')
-raf(function frame () {
+raf(function frame() {
   // console.timeEnd('frame')
   // console.time('frame')
   updateTime()

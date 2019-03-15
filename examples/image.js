@@ -28,9 +28,10 @@ const drawCmd = {
     clearDepth: 1
   }),
   pipeline: ctx.pipeline({
-    vert: `
+    vert: /* glsl */ `
       attribute vec3 aPosition;
       attribute vec2 aTexCoord;
+
       uniform mat4 uProjectionMatrix;
       uniform mat4 uViewMatrix;
       uniform mat4 uModelMatrix;
@@ -42,10 +43,9 @@ const drawCmd = {
         vTexCoord = aTexCoord;
       }
     `,
-    frag: `
-      #ifdef GL_ES
+    frag: /* glsl */ `
       precision highp float;
-      #endif
+
       varying vec2 vTexCoord;
       uniform sampler2D uTexture;
       void main () {
@@ -67,7 +67,7 @@ const drawCmd = {
 }
 
 loadImage(ASSETS_DIR + '/images/pex.png', (err, img) => {
-  if (err) console.log(err)
+  if (err) throw err
 
   drawCmd.uniforms.uTexture = ctx.texture2D({
     data: img.data || img,
@@ -78,7 +78,7 @@ loadImage(ASSETS_DIR + '/images/pex.png', (err, img) => {
     encoding: ctx.Encoding.Linear
   })
 
-  raf(function frame () {
+  raf(function frame() {
     ctx.submit(drawCmd)
     raf(frame)
   })

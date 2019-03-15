@@ -22,8 +22,6 @@ const camera = require('pex-cam/perspective')({
   position: [5, 1, 5]
 })
 
-const oribter = require('pex-cam/orbiter')({ camera: camera })
-
 const cube = require('primitive-cube')(0.5)
 
 const cubes = []
@@ -90,7 +88,6 @@ ctx.frame(() => {
 
   ctx.submit(drawInViewport, () => {
     cubes.forEach((c) => {
-
       // normal matrix = inverse transpose of model view matrix
       // you can just pass mat3(viewMatrix) if you scaling is uniform
       mat4.identity(tempMat)
@@ -110,8 +107,6 @@ ctx.frame(() => {
       // vec4.multMat4([0, 0, 0, 1], c.modelMatrix)
       vec4.fromVec3(pos, c.position)
       pos[3] = 1 // vec4 bug fix
-
-      if (Math.random() > 0.99) console.log(c.position)
 
       // world space to view space
       vec4.multMat4(pos, camera.viewMatrix)
@@ -143,7 +138,6 @@ ctx.frame(() => {
 
       c.label.style.left = pos[0] + 'px'
       c.label.style.top = pos[1] + 'px'
-
 
       ctx.submit(drawCubeCmd, {
         uniforms: {

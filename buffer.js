@@ -1,16 +1,18 @@
-const checkProps = require('./check-props')
 const assert = require('assert')
+const checkProps = require('./check-props')
 
-const allowedProps = [
-  'target', 'data', 'usage', 'type'
-]
+const allowedProps = ['target', 'data', 'usage', 'type']
 
-function createBuffer (ctx, opts) {
+function createBuffer(ctx, opts) {
   const gl = ctx.gl
   checkProps(allowedProps, opts)
-  assert(opts.target === gl.ARRAY_BUFFER || opts.target === gl.ELEMENT_ARRAY_BUFFER, 'Invalid buffer target')
+  assert(
+    opts.target === gl.ARRAY_BUFFER || opts.target === gl.ELEMENT_ARRAY_BUFFER,
+    'Invalid buffer target'
+  )
 
-  let className = (opts.target === gl.ARRAY_BUFFER) ? 'vertexBuffer' : 'indexBuffer'
+  let className =
+    opts.target === gl.ARRAY_BUFFER ? 'vertexBuffer' : 'indexBuffer'
 
   const buffer = {
     class: className,
@@ -18,7 +20,7 @@ function createBuffer (ctx, opts) {
     target: opts.target,
     usage: opts.usage || gl.STATIC_DRAW,
     _update: updateBuffer,
-    _dispose: function () {
+    _dispose: function() {
       gl.deleteBuffer(this.handle)
       this.handle = null
     }
@@ -29,7 +31,7 @@ function createBuffer (ctx, opts) {
   return buffer
 }
 
-function updateBuffer (ctx, buffer, opts) {
+function updateBuffer(ctx, buffer, opts) {
   checkProps(allowedProps, opts)
 
   const gl = ctx.gl
@@ -50,10 +52,15 @@ function updateBuffer (ctx, buffer, opts) {
     var elemSize = Array.isArray(sourceData[0]) ? sourceData[0].length : 1
     var size = elemSize * sourceData.length
 
-    if (type === ctx.DataType.Float32) data = new Float32Array((elemSize === 1) ? sourceData : size)
-    else if (type === ctx.DataType.Uint8) data = new Uint8Array((elemSize === 1) ? sourceData : size)
-    else if (type === ctx.DataType.Uint16) data = new Uint16Array((elemSize === 1) ? sourceData : size)
-    else if (type === ctx.DataType.Uint32) data = new Uint32Array((elemSize === 1) ? sourceData : size)
+    if (type === ctx.DataType.Float32) {
+      data = new Float32Array(elemSize === 1 ? sourceData : size)
+    } else if (type === ctx.DataType.Uint8) {
+      data = new Uint8Array(elemSize === 1 ? sourceData : size)
+    } else if (type === ctx.DataType.Uint16) {
+      data = new Uint16Array(elemSize === 1 ? sourceData : size)
+    } else if (type === ctx.DataType.Uint32) {
+      data = new Uint32Array(elemSize === 1 ? sourceData : size)
+    }
 
     if (elemSize > 1) {
       for (var i = 0; i < sourceData.length; i++) {

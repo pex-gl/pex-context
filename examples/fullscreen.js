@@ -1,18 +1,50 @@
 const createContext = require('../')
 const createCube = require('primitive-cube')
 const createCamera = require('pex-cam/perspective')
-const createOrbiter = require('pex-cam/orbiter')
 const GUI = require('pex-gui')
 const loadImage = require('pex-io/loadImage')
 const isBrowser = require('is-browser')
 
+const basicVert = require('./shaders/basic.vert')
+const basicFrag = require('./shaders/basic.frag')
+
 const resolutions = [
-  { name: '800x600 (low-res)', value: '800x600-lowres', width: 800, height: 600, pixelRatio: 0.5 },
+  {
+    name: '800x600 (low-res)',
+    value: '800x600-lowres',
+    width: 800,
+    height: 600,
+    pixelRatio: 0.5
+  },
   { name: '800x600', value: '800x600', width: 800, height: 600, pixelRatio: 1 },
-  { name: '800x600 (hi-res)', value: '800x600-hi-res', width: 800, height: 600, pixelRatio: 2 },
-  { name: 'Full window (low res)', value: 'full-window-lowres', width: 0, height: 0, pixelRatio: 0.5 },
-  { name: 'Full window', value: 'full-window', width: 0, height: 0, pixelRatio: 1 },
-  { name: 'Full window (hi-res)', value: 'full-window-hi-res', width: 0, height: 0, pixelRatio: 2 }
+  {
+    name: '800x600 (hi-res)',
+    value: '800x600-hi-res',
+    width: 800,
+    height: 600,
+    pixelRatio: 2
+  },
+  {
+    name: 'Full window (low res)',
+    value: 'full-window-lowres',
+    width: 0,
+    height: 0,
+    pixelRatio: 0.5
+  },
+  {
+    name: 'Full window',
+    value: 'full-window',
+    width: 0,
+    height: 0,
+    pixelRatio: 1
+  },
+  {
+    name: 'Full window (hi-res)',
+    value: 'full-window-hi-res',
+    width: 0,
+    height: 0,
+    pixelRatio: 2
+  }
 ]
 
 const config = {
@@ -25,7 +57,6 @@ const settings = {
   fov: Math.PI / 3,
   fullscreen: false
 }
-
 
 if (isBrowser && document.location.hash) {
   const resId = document.location.hash.substr(1)
@@ -47,11 +78,11 @@ window.addEventListener('resize', () => {
 
 const ctx = createContext(config)
 
-function onFullscreenChange (e) {
-  console.log(e)
-  settings.fullscreen = document.fullscreenElement
-    || document.webkitFullscreenElement
-    || document.mozFullScreenElement
+function onFullscreenChange() {
+  settings.fullscreen =
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.mozFullScreenElement
 }
 
 if (isBrowser) {
@@ -60,7 +91,7 @@ if (isBrowser) {
   document.addEventListener('mozfullscreenchange', onFullscreenChange)
 }
 
-function requestFullscreen (elem) {
+function requestFullscreen(elem) {
   if (elem.requestFullscreen) {
     elem.requestFullscreen()
   } else if (elem.webkitRequestFullscreen) {
@@ -70,7 +101,7 @@ function requestFullscreen (elem) {
   }
 }
 
-function exitFullscreen () {
+function exitFullscreen() {
   if (document.exitFullscreen) {
     document.exitFullscreen()
   } else if (document.webkitExitFullscreen) {
@@ -86,10 +117,6 @@ const camera = createCamera({
   fov: Math.PI / 3,
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height
 })
-const orbiter = createOrbiter({
-  camera: camera,
-  easing: 0.1
-})
 
 const clearCmd = {
   pass: ctx.pass({
@@ -100,17 +127,20 @@ const clearCmd = {
 
 const assets = isBrowser ? 'assets' : __dirname + '/assets'
 
-const tex = ctx.texture2D({ width: 1, height: 1})
+const tex = ctx.texture2D({ width: 1, height: 1 })
 loadImage(assets + '/images/pex.png', (err, img) => {
-  if (err) console.log(err)
+  if (err) throw err
   ctx.update(tex, { data: img, width: img.width, height: img.height })
 })
 
 const gui = new GUI(ctx)
 gui.addHeader('Settings')
-const fovItem = gui.addParam('FOV', settings, 'fov', { min: Math.PI / 4, max: Math.PI / 2 })
+gui.addParam('FOV', settings, 'fov', {
+  min: Math.PI / 4,
+  max: Math.PI / 2
+})
 gui.addHeader('Resolution')
-gui.addRadioList('Resolution', settings, 'resolution', resolutions, (e) => {
+gui.addRadioList('Resolution', settings, 'resolution', resolutions, () => {
   const res = resolutions.find((r) => r.value === settings.resolution)
   const w = res.width || window.innerWidth
   const h = res.height || window.innerHeight
@@ -123,11 +153,11 @@ gui.addRadioList('Resolution', settings, 'resolution', resolutions, (e) => {
     height: h,
     pixelRatio: res.pixelRatio
   })
-  camera.set({ aspect: w / h})
+  camera.set({ aspect: w / h })
 })
 gui.addTexture2D('PEX', tex)
 gui.addHeader('Fullscreen')
-gui.addParam('Fullscreen', settings, 'fullscreen', {}, (e) => {
+gui.addParam('Fullscreen', settings, 'fullscreen', {}, () => {
   if (!settings.fullscreen) {
     exitFullscreen()
   } else {
@@ -136,7 +166,6 @@ gui.addParam('Fullscreen', settings, 'fullscreen', {}, (e) => {
 })
 
 setTimeout(() => {
-  return
   settings.resolution = '800x600-hi-res'
   ctx.set({
     width: 800,
@@ -153,27 +182,8 @@ const drawCmd = {
   }),
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: `
-      attribute vec3 aPosition;
-      attribute vec3 aNormal;
-      uniform mat4 uProjectionMatrix;
-      uniform mat4 uViewMatrix;
-      varying vec3 vNormal;
-      void main () {
-        gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
-        vNormal = aNormal;
-      }
-    `,
-    frag: `
-      #ifdef GL_ES
-      precision mediump float;
-      #endif
-      varying vec3 vNormal;
-      void main () {
-        gl_FragColor.rgb = vNormal * 0.5 + 0.5;
-        gl_FragColor.a = 1.0;
-      }
-    `
+    vert: basicVert,
+    frag: basicFrag
   }),
   attributes: {
     aPosition: ctx.vertexBuffer(cube.positions),

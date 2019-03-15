@@ -11,15 +11,15 @@ Modern WebGL state wrapper for [PEX](http://pex.gl). With `pex-context` you allo
   - [Pass](#pass)
   - [Pipeline](#pipeline)
   - [Texture](#texture)
+  - [Renderbuffer](#renderbuffer)
   - [Buffer](#buffer)
   - [Query](#query)
 - [Updating resources](#updating-resources)
 - [Enums](#enums)
 
-
 # Example
 
-```javascript
+```js
 const createContext = require('pex-context')
 const createCube = require('primitive-cube')
 const mat4 = require('pex-math/mat4')
@@ -67,7 +67,13 @@ const drawCmd = {
   },
   indices: ctx.indexBuffer(cube.cells),
   uniforms: {
-    uProjectionMatrix: mat4.perspective(mat4.create(), Math.PI / 4, 640 / 480, 0.1, 100),
+    uProjectionMatrix: mat4.perspective(
+      mat4.create(),
+      Math.PI / 4,
+      640 / 480,
+      0.1,
+      100
+    ),
     uViewMatrix: mat4.lookAt(mat4.create(), [2, 2, 5], [0, 0, 0], [0, 1, 0])
   }
 }
@@ -78,14 +84,17 @@ ctx.frame(() => {
 })
 ```
 
-
-# Code Examples
-
-To run e.g. shadow mapping example
+You can find runnable examples in the /examples folder in this repository. To run an example install Node.js, clone or download this repository and then run:
 
 ```sh
+# go to the example folder
 cd examples
-budo shadows.js --open --live -- -t glslify
+
+# install examples dependencies
+npm i
+
+# run the example in your default browser window
+npx budo example-name.js --open --start
 ```
 
 # API
@@ -96,25 +105,25 @@ Creating gl context wrapper.
 
 #### ctx = createContext(opts)
 
-```javascript
-var createContext = require('pex-context')
+```js
+const createContext = require('pex-context')
 
 // full window canvas
-var ctx = createContext()
+const ctx = createContext()
 
 // creates gl context from existing canvas and keeps it's size
-var ctx = createContext({ gl: gl })
+const ctx = createContext({ gl: gl })
 
 // creates gl context from existing canvas and keeps it's size
-var ctx = createContext({ canvas: canvas })
+const ctx = createContext({ canvas: canvas })
 
 // creates new canvas with given width and height
-var ctx = createContext({ width: Number, height: Number })
+const ctx = createContext({ width: Number, height: Number })
 ```
 
 #### ctx.set(opts)
 
-```javascript
+```js
 ctx.set({
   pixelRatio: 2,
   width: 1280,
@@ -122,17 +131,17 @@ ctx.set({
 })
 ```
 
-| property | info | default |
-| -------- | ---- | ---- |
-| `pixelRatio` | canvas resolution, can't be bigger than window.devicePixelRatio | 1 |
-| `width` | canvas width | - |
-| `height` | canvas height | - |
+| property     | info                                                            | default |
+| ------------ | --------------------------------------------------------------- | ------- |
+| `pixelRatio` | canvas resolution, can't be bigger than window.devicePixelRatio | 1       |
+| `width`      | canvas width                                                    | -       |
+| `height`     | canvas height                                                   | -       |
 
 Note 1: The new size and resolution will be applied not immediately but before drawing the next frame to avoid flickering.
 
 Note 2: Context's canvas doesn't resize automatically, even if you skip width/height on init and the canvas will be asigned dimensions of the window. To handle resizing use the following code:
 
-```javascript
+```js
 window.addEventListener('resize', () => {
   ctx.set({
     width: window.innerWidth,
@@ -149,10 +158,10 @@ window.addEventListener('resize', () => {
 
 ## Commands
 
-Commands are plain JavaScript objects with GPU resources needed to complete a draw call
+Commands are plain js objects with GPU resources needed to complete a draw call
 
-```javascript
-var cmd = {
+```js
+const cmd = {
   pass: Pass
   pipeline: Pipeline,
   attributes: {
@@ -176,30 +185,30 @@ var cmd = {
 }
 ```
 
-| property | info | type |
-| -------- | ---- | ---- |
-| `pass` | render pass info | ctx.Pass
-| `pipeline` | rendering pipeline info | ctx.Pipeline
-| `attributes` | vertex attributes | map of :|
-| | | `attibuteName: ctx.VertexBuffer` |
-| | | `attributeName: { buffer: VertexBuffer, offset: Number, stride: Number, divisor: Number }` |
-| `indices` | indices | either: |
-| | | `ctx.IndexBuffer` |
-| | | `{ buffer: IndexBuffer, offset: Number, stride: Number }` |
-| `count` | number of vertices to draw | Integer |
-| `instances` | number instances to draw | Integer |
-| `uniforms` | shader uniforms | map of `name: value` |
-| `viewport` | drawing viewport bounds | [x, y, w, h] |
-| `scissor` | scissor test bounds | [x, y, w, h] |
+| property     | info                       | type                                                                                       |
+| ------------ | -------------------------- | ------------------------------------------------------------------------------------------ |
+| `pass`       | render pass info           | ctx.Pass                                                                                   |
+| `pipeline`   | rendering pipeline info    | ctx.Pipeline                                                                               |
+| `attributes` | vertex attributes          | map of :                                                                                   |
+|              |                            | `attibuteName: ctx.VertexBuffer`                                                           |
+|              |                            | `attributeName: { buffer: VertexBuffer, offset: Number, stride: Number, divisor: Number }` |
+| `indices`    | indices                    | either:                                                                                    |
+|              |                            | `ctx.IndexBuffer`                                                                          |
+|              |                            | `{ buffer: IndexBuffer, offset: Number, stride: Number }`                                  |
+| `count`      | number of vertices to draw | Integer                                                                                    |
+| `instances`  | number instances to draw   | Integer                                                                                    |
+| `uniforms`   | shader uniforms            | map of `name: value`                                                                       |
+| `viewport`   | drawing viewport bounds    | [x, y, w, h]                                                                               |
+| `scissor`    | scissor test bounds        | [x, y, w, h]                                                                               |
 
-*Note: either indices or count need to be specified when drawing geometry*
-*Note: scissor region is by default set to null and scissor test disabled*
+_Note: either indices or count need to be specified when drawing geometry_
+_Note: scissor region is by default set to null and scissor test disabled_
 
 ## Submitting commands to the GPU
 
 #### ctx.submit(cmd)
 
-```javascript
+```js
 ctx.submit({
   pass: ctx.pass({
     clearColor: [1, 0, 0, 1]
@@ -219,7 +228,7 @@ ctx.submit({
 
 Submit partially updated command without modifying the original one
 
-```javascript
+```js
 // E.g. draw mesh with custom color
 ctx.submit(cmd, {
   uniforms: {
@@ -232,14 +241,13 @@ ctx.submit(cmd, {
 
 Submit a batch of commands differences in opts.
 
-```javascript
+```js
 // E.g. draw same mesh twice with different material and position
 ctx.submit(cmd, [
   { pipeline: material1, uniforms: { uModelMatrix: position1 },
   { pipeline: material2, uniforms: { uModelMatrix: position2 }
 ])
 ```
-
 
 ## Subcommands
 
@@ -249,7 +257,7 @@ Submit command while preserving state from another command.
 
 This approach allows to simulate state stack with automatic cleanup at the end of callback.
 
-```javascript
+```js
 // E.g. render to texture
 ctx.submit(renderToFboCmd, () => {
   ctx.submit(drawMeshCmd)
@@ -258,11 +266,11 @@ ctx.submit(renderToFboCmd, () => {
 
 ## Resources
 
-All resources are plain JavaScript object and once constructed their properties can be accessed directly.
+All resources are plain js object and once constructed their properties can be accessed directly.
 Please note those props are read only. To set new values or upload new data to GPU see [updating resources](#updating-resources).
 
-```javascript
-var tex = ctx.texture2D({
+```js
+const tex = ctx.texture2D({
   width: 256,
   pixelFormat: ctx.PixelFormat.RGBA8
 })
@@ -282,8 +290,8 @@ FBOs are created internally and automatically by pex-context.
 
 #### pass = ctx.pass(opts)
 
-```javascript
-var pass = ctx.pass({
+```js
+const pass = ctx.pass({
   color: [Texture2D, ...]
   color: [{ texture: Texture2D | TextureCube, target: CubemapFace }, ...]
   depth: Texture2D
@@ -292,12 +300,12 @@ var pass = ctx.pass({
 })
 ```
 
-| property | info | type | default |
-| -------- | ---- | ---- | ------- |
-| `color` | color render target | Array of Texture2D or { texture, target} pairs | null |
-| `depth` | depth render target | Texture2D | null |
-| `clearColor` | clear color value | Array | null |
-| `clearDepth` | clear depth value | Number | null |
+| property     | info                | type                                           | default |
+| ------------ | ------------------- | ---------------------------------------------- | ------- |
+| `color`      | color render target | Array of Texture2D or { texture, target} pairs | null    |
+| `depth`      | depth render target | Texture2D                                      | null    |
+| `clearColor` | clear color value   | Array                                          | null    |
+| `clearDepth` | clear depth value   | Number                                         | null    |
 
 ### Pipeline
 
@@ -305,8 +313,8 @@ Pipelines represent the state of the GPU rendering pipeline (shaders, blending, 
 
 #### pipeline = ctx.pipeline(opts)
 
-```javascript
-var pipeline = ctx.pipeline({
+```js
+const pipeline = ctx.pipeline({
   vert: String,
   frag: String,
   depthWrite: Boolean,
@@ -324,22 +332,22 @@ var pipeline = ctx.pipeline({
 })
 ```
 
-| property | info | type | default |
-| -------- | ---- | ---- | ------- |
-| `vert` | vertex shader code | String | null |
-| `frag` | fragment shader code | String | null |
-| `depthWrite` | depth write mask | Boolean | true |
-| `depthTest` | depth test on/off | Boolean | false |
-| `depthFunc` | depth test function | DepthFunc | LessEqual |
-| `blend` | blending on/off | Boolean | false |
-| `blendSrcRGBFactor` | blending source color factor | BlendFactor | One |
-| `blendSrcAlphaFactor` | blending source alpha factor | BlendFactor | One |
-| `blendDstRGBFactor` | blending destination color factor | BlendFactor | One |
-| `blendDstAlphaFactor` | blending destination alpha factor | BlendFactor | One |
-| `cullFace` | face culling on/off | Boolean | false |
-| `cullFaceMode` | face culling mode | Face | Back |
-| `colorMask` | color write mask for [r, g, b, a] | Array of Boolean | [true, true, true, true] |
-| `primitive` | geometry primitive | Primitive | Triangles |
+| property              | info                              | type             | default                  |
+| --------------------- | --------------------------------- | ---------------- | ------------------------ |
+| `vert`                | vertex shader code                | String           | null                     |
+| `frag`                | fragment shader code              | String           | null                     |
+| `depthWrite`          | depth write mask                  | Boolean          | true                     |
+| `depthTest`           | depth test on/off                 | Boolean          | false                    |
+| `depthFunc`           | depth test function               | DepthFunc        | LessEqual                |
+| `blend`               | blending on/off                   | Boolean          | false                    |
+| `blendSrcRGBFactor`   | blending source color factor      | BlendFactor      | One                      |
+| `blendSrcAlphaFactor` | blending source alpha factor      | BlendFactor      | One                      |
+| `blendDstRGBFactor`   | blending destination color factor | BlendFactor      | One                      |
+| `blendDstAlphaFactor` | blending destination alpha factor | BlendFactor      | One                      |
+| `cullFace`            | face culling on/off               | Boolean          | false                    |
+| `cullFaceMode`        | face culling mode                 | Face             | Back                     |
+| `colorMask`           | color write mask for [r, g, b, a] | Array of Boolean | [true, true, true, true] |
+| `primitive`           | geometry primitive                | Primitive        | Triangles                |
 
 ### Texture
 
@@ -347,8 +355,8 @@ Textures represent pixel data uploaded to the GPU.
 
 #### texture = ctx.texture2D(opts)
 
-```javascript
-var tex = ctx.texture2D({
+```js
+const tex = ctx.texture2D({
   data: [255, 255, 255, 255, 0, 0, 0, 255],
   width: 2,
   height: 1,
@@ -358,26 +366,26 @@ var tex = ctx.texture2D({
 })
 ```
 
-| property | info | type | default |
-| -------- | ---- | ---- | ------- |
-| `data` | pixel data | Array, Uint8Array, Float32Array, HTMLCanvas, HTMLImage, HTMLVideo | null |
-| `width` | texture width   | Number/Int | 0 |
-| `height` | texture height  | Number/Int | 0 |
-| `pixelFormat` | pixel data format | ctx.PixelFormat | ctx.PixelFormat.RGB8 |
-| `encoding` | pixel data encoding | ctx.Encoding | ctx.Encoding.Linear |
-| `wrapS` | wrapS mode | ctx.Wrap | ctx.Wrap.ClampToEdge |
-| `wrapT` | wrapT mode | ctx.Wrap | ctx.Wrap.ClampToEdge |
-| `wrap` | combines wrapS and wrapT | ctx.Wrap | ctx.Wrap.ClampToEdge |
-| `min` | min filtering mode | ctx.Filter | ctx.Filter.Nearest |
-| `mag` | mag filtering mode | ctx.Filter | ctx.Filter.Nearest |
-| `aniso` | aniso level <sup>1</sup> | Number/Int | 0 |
-| `mipmap` | generate mipmaps on update <sup>2</sup> | Boolean | false |
-| `flipY` | flip pixel data on upload | Boolean | false |
-| `name` | texture name for debugging | String | '' |
-| `target` | texture target <sup>3</sup> | gl enum | gl.TEXTURE_2D or gl.TEXTURE_CUBE |
+| property      | info                                    | type                                                              | default                          |
+| ------------- | --------------------------------------- | ----------------------------------------------------------------- | -------------------------------- |
+| `data`        | pixel data                              | Array, Uint8Array, Float32Array, HTMLCanvas, HTMLImage, HTMLVideo | null                             |
+| `width`       | texture width                           | Number/Int                                                        | 0                                |
+| `height`      | texture height                          | Number/Int                                                        | 0                                |
+| `pixelFormat` | pixel data format                       | ctx.PixelFormat                                                   | ctx.PixelFormat.RGB8             |
+| `encoding`    | pixel data encoding                     | ctx.Encoding                                                      | ctx.Encoding.Linear              |
+| `wrapS`       | wrapS mode                              | ctx.Wrap                                                          | ctx.Wrap.ClampToEdge             |
+| `wrapT`       | wrapT mode                              | ctx.Wrap                                                          | ctx.Wrap.ClampToEdge             |
+| `wrap`        | combines wrapS and wrapT                | ctx.Wrap                                                          | ctx.Wrap.ClampToEdge             |
+| `min`         | min filtering mode                      | ctx.Filter                                                        | ctx.Filter.Nearest               |
+| `mag`         | mag filtering mode                      | ctx.Filter                                                        | ctx.Filter.Nearest               |
+| `aniso`       | aniso level <sup>1</sup>                | Number/Int                                                        | 0                                |
+| `mipmap`      | generate mipmaps on update <sup>2</sup> | Boolean                                                           | false                            |
+| `flipY`       | flip pixel data on upload               | Boolean                                                           | false                            |
+| `name`        | texture name for debugging              | String                                                            | ''                               |
+| `target`      | texture target <sup>3</sup>             | gl enum                                                           | gl.TEXTURE_2D or gl.TEXTURE_CUBE |
 
-<sup>1</sup> requries [EXT_texture_filter_anisotropic](https://www.khronos.org/registry/webgl/extensions/EXT_texture_filter_anisotropic/)  
-<sup>2</sup> requires `min` to be set to `ctx.Filter.LinearMipmapLinear` or similar  
+<sup>1</sup> requries [EXT_texture_filter_anisotropic](https://www.khronos.org/registry/webgl/extensions/EXT_texture_filter_anisotropic/)
+<sup>2</sup> requires `min` to be set to `ctx.Filter.LinearMipmapLinear` or similar
 <sup>3</sup> read only
 
 #### texture = ctx.textureCube(opts)
@@ -385,32 +393,55 @@ var tex = ctx.texture2D({
 - `opts`: Object - see `ctx.texture2D(opts)`
 - `opts.data`: Array of Images or TypedArrays - 6 images, one for each face +X, -X, +Y, -Y, +Z, -Z
 
-```javascript
-var tex = ctx.textureCube({
+```js
+const tex = ctx.textureCube({
   data: [ posx, negx, posy, negy, posz, negz ],
   width: 64,
   height: 64
 ])
 ```
 
+### Renderbuffer
+
+Renderbuffers represent pixel data store for rendering operations
+
+#### renderbuffer = ctx.renderbuffer(opts)
+
+```js
+const tex = ctx.renderbuffer({
+  width: 1280,
+  height: 720,
+  pixelFormat: ctx.PixelFormat.Depth16
+})
+```
+
+| property      | info                          | type            | default |
+| ------------- | ----------------------------- | --------------- | ------- |
+| `width`       | renderbuffer width            | Number/Int      | 0       |
+| `height`      | renderbuffer height           | Number/Int      | 0       |
+| `pixelFormat` | pixel data format<sup>1</sup> | ctx.PixelFormat | null    |
+
+<sup>1</sup> only `PixelFormat.Depth16` is currently supported and only for use as render pass depth storage (e.g. `ctx.pass({ depth: renderbuffer})`) for platforms with no `WEBGL_depth_texture` support.
+
 ### Buffer
 
 Buffers store vertex and index data in the GPU memory.
 
 #### buffer = ctx.vertexBuffer(opts)
+
 #### buffer = ctx.indexBuffer(opts)
 
-```javascript
-var buf = ctx.vertexBuffer({ data: Array }) // aka Attribute Buffer
+```js
+const buf = ctx.vertexBuffer({ data: Array }) // aka Attribute Buffer
 
-var buf = ctx.indexBuffer({ data: Array }) // aka Index Buffer
+const buf = ctx.indexBuffer({ data: Array }) // aka Index Buffer
 ```
 
-| property | info | type | default |
-| -------- | ---- | ---- | ------- |
-| `data` | pixel data | Array, Uint8Array, Float32Array | null |
-| `type` | data type | ctx.DataType | ctx.DataType.Float32 |
-| `usage` | buffer usage | ctx.Usage | ctx.Usage.StaticDraw |
+| property | info         | type                            | default              |
+| -------- | ------------ | ------------------------------- | -------------------- |
+| `data`   | pixel data   | Array, Uint8Array, Float32Array | null                 |
+| `type`   | data type    | ctx.DataType                    | ctx.DataType.Float32 |
+| `usage`  | buffer usage | ctx.Usage                       | ctx.Usage.StaticDraw |
 
 ### Query
 
@@ -418,31 +449,31 @@ Queries are used for GPU timers.
 
 #### query = ctx.query(opts)
 
-*Note: Requires EXT_disjoint_timer_query*
+_Note: Requires EXT_disjoint_timer_query_
 
-```javascript
-var query = ctx.query({
+```js
+const query = ctx.query({
   target: QueryTarget
 })
 ```
 
-| property | info | type | default |
-| -------- | ---- | ---- | ------- |
-| `target` | query type | ctx.QueryTarget | ctx.QueryTarget.TimeElapsed |
-| `state` | query state | ctx.QueryState | ctx.QueryState.Ready |
-| `result` | result of the measurement | Number | null |
+| property | info                      | type            | default                     |
+| -------- | ------------------------- | --------------- | --------------------------- |
+| `target` | query type                | ctx.QueryTarget | ctx.QueryTarget.TimeElapsed |
+| `state`  | query state               | ctx.QueryState  | ctx.QueryState.Ready        |
+| `result` | result of the measurement | Number          | null                        |
 
 #### ctx.beginQuery(q)
 
 Begin the query measurement.
 
-*Note: There can be only one query running at the time.*
+_Note: There can be only one query running at the time._
 
 #### ctx.endQuery(q)
 
 End the query measurement.
 
-*Note: The result is not available immediately and will be `null` until the state changes from `ctx.QueryState.Pending` to `ctx.QueryState.Ready`*
+_Note: The result is not available immediately and will be `null` until the state changes from `ctx.QueryState.Pending` to `ctx.QueryState.Ready`_
 
 ## Updating resources
 
@@ -450,10 +481,10 @@ End the query measurement.
 
 Update a resource.
 
-```javascript
+```js
 ctx.update(res, { data: [] })
 
-var tex = ctx.texture2D({...})
+const tex = ctx.texture2D({...})
 ctx.update(tex, {
   width: 1,
   height: 1,
@@ -461,9 +492,10 @@ ctx.update(tex, {
 })
 ```
 
-| property | info |
-| -------- | ---- |
-| `opts` | whatever data the given resource accepts in constructor |
+| property | info                                                    | type                                                                                     |
+| -------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `res`    | resource to be updated                                  | ctx.Buffer, ctx.Framebuffer, ctx.Pass, ctx.Pipeline, ctx.Program, ctx.Query, ctx.Texture |
+| `opts`   | whatever data the given resource accepts in constructor | Object                                                                                   |
 
 ## Disposing resources
 
@@ -471,7 +503,7 @@ ctx.update(tex, {
 
 Delete all allocated resources and stop render loop. Disposed context is no longer valid to use.
 
-```javascript
+```js
 ctx.dispose()
 ```
 
@@ -479,144 +511,187 @@ ctx.dispose()
 
 Delete a resource. Disposed resource is no longer valid for use.
 
-```javascript
-var tex = ctx.texture2D({})
+```js
+const tex = ctx.texture2D({})
 ...
 ctx.dispose(tex)
 ```
 
-| property | info | type |
-| -------- | ---- | ---- |
-| `target` | resource to be deleted | ctx.Buffer, ctx.Framebuffer, ctx.Pass, ctx.Pipeline, ctx.Program, ctx.Query, ctx.Texture |
+| property | info                   | type                                                                                     |
+| -------- | ---------------------- | ---------------------------------------------------------------------------------------- |
+| `res`    | resource to be deleted | ctx.Buffer, ctx.Framebuffer, ctx.Pass, ctx.Pipeline, ctx.Program, ctx.Query, ctx.Texture |
 
-*Note: Framebuffers are ref counted and released by Pass, Programs are also ref counted and released by Pipeline*
+_Note: Framebuffers are ref counted and released by Pass, Programs are also ref counted and released by Pipeline_
+
+## Capabilities
+
+Get capabilities and extensions availability.
+
+```js
+const maxTextureSize = ctx.maxTextureSize
+```
+
+| property                     | info                                                                                         | type    |
+| ---------------------------- | -------------------------------------------------------------------------------------------- | ------- |
+| `maxColorAttachments`        | gl.getParameter('MAX_COLOR_ATTACHMENTS') or gl.getParameter(ext.MAX_COLOR_ATTACHMENTS_WEBGL) | Number  |
+| `maxTextureImageUnits`       | gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS)                                                  | Number  |
+| `maxVertexTextureImageUnits` | gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS)                                           | Number  |
+| `maxTextureSize`             | gl.getParameter(gl.MAX_TEXTURE_SIZE)                                                         | Number  |
+| `maxCubeMapTextureSize`      | gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE)                                                | Number  |
+| `instancedArrays`            | false                                                                                        | Boolean |
+| `instancing`                 | false (deprecated)                                                                           | Boolean |
+| `elementIndexUint32`         | !!gl.getExtension('OES_element_index_uint')                                                  | Boolean |
+| `standardDerivatives`        | !!gl.getExtension('OES_standard_derivatives')                                                | Boolean |
+| `depthTexture`               | !!gl.getExtension('WEBGL_depth_texture')                                                     | Boolean |
+| `shaderTextureLod`           | !!gl.getExtension('EXT_shader_texture_lod')                                                  | Boolean |
+| `textureFloat`               | !!gl.getExtension('OES_texture_float')                                                       | Boolean |
+| `textureFloatLinear`         | !!gl.getExtension('OES_texture_float_linear')                                                | Boolean |
+| `textureHalfFloat`           | !!gl.getExtension('OES_texture_half_float')                                                  | Boolean |
+| `textureHalfFloatLinear`     | !!gl.getExtension('OES_texture_half_float_linear')                                           | Boolean |
+| `textureFilterAnisotropic`   | !!gl.getExtension('EXT_texture_filter_anisotropic')                                          | Boolean |
 
 # Enums
 
 #### ctx.BlendFactor
 
-```
-  const BlendFactor = {
-    One: gl.ONE,
-    Zero: gl.ZERO,
-    SrcAlpha: gl.SRC_ALPHA,
-    OneMinusSrcAlpha: gl.ONE_MINUS_SRC_ALPHA,
-    DstAlpha: gl.DST_ALPHA,
-    OneMinusDstAlpha: gl.ONE_MINUS_DST_ALPHA,
-    SrcColor: gl.SRC_COLOR,
-    OneMinusSrcColor: gl.ONE_MINUS_SRC_COLOR,
-    DstColor: gl.DST_COLOR,
-    OneMinusDstColor: gl.ONE_MINUS_DST_COLOR
-  }
+```js
+const BlendFactor = {
+  One: gl.ONE,
+  Zero: gl.ZERO,
+  SrcAlpha: gl.SRC_ALPHA,
+  OneMinusSrcAlpha: gl.ONE_MINUS_SRC_ALPHA,
+  DstAlpha: gl.DST_ALPHA,
+  OneMinusDstAlpha: gl.ONE_MINUS_DST_ALPHA,
+  SrcColor: gl.SRC_COLOR,
+  OneMinusSrcColor: gl.ONE_MINUS_SRC_COLOR,
+  DstColor: gl.DST_COLOR,
+  OneMinusDstColor: gl.ONE_MINUS_DST_COLOR
+}
 ```
 
 #### ctx.CubemapFace
 
-```
-  const CubemapFace = {
-    PositiveX: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-    NegativeX: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-    PositiveY: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-    NegativeY: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-    PositiveZ: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-    NegativeZ: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
-  }
+```js
+const CubemapFace = {
+  PositiveX: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+  NegativeX: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+  PositiveY: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+  NegativeY: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+  PositiveZ: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+  NegativeZ: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
+}
 ```
 
 #### ctx.DataType
 
-```
-  const DataType = {
-    Float32: gl.FLOAT,
-    Uint8: gl.UNSIGNED_BYTE,
-    Uint16: gl.UNSIGNED_SHORT,
-    Uint32: gl.UNSIGNED_INT
-  }
+```js
+const DataType = {
+  Float32: gl.FLOAT,
+  Uint8: gl.UNSIGNED_BYTE,
+  Uint16: gl.UNSIGNED_SHORT,
+  Uint32: gl.UNSIGNED_INT
+}
 ```
 
 #### ctx.DepthFunc
 
-```
-  const DepthFunc = {
-    Never: gl.NEVER,
-    Less: gl.LESS,
-    Equal: gl.EQUAL,
-    LessEqual: gl.LEQUAL,
-    Greater: gl.GREATER,
-    NotEqual: gl.NOTEQUAL,
-    GreaterEqual: gl.GEQUAL,
-    Always: gl.ALWAYS
-  }
+```js
+const DepthFunc = {
+  Never: gl.NEVER,
+  Less: gl.LESS,
+  Equal: gl.EQUAL,
+  LessEqual: gl.LEQUAL,
+  Greater: gl.GREATER,
+  NotEqual: gl.NOTEQUAL,
+  GreaterEqual: gl.GEQUAL,
+  Always: gl.ALWAYS
+}
 ```
 
 #### ctx.Face
 
-```
-  const Face = {
-    Front: gl.FRONT,
-    Back: gl.BACK,
-    FrontAndBack: gl.FRONT_AND_BACK
-  }
+```js
+const Face = {
+  Front: gl.FRONT,
+  Back: gl.BACK,
+  FrontAndBack: gl.FRONT_AND_BACK
+}
 ```
 
 #### ctx.PixelFormat
 
-```
-  const PixelFormat = {
-    RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
-    RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
-    RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
-    R32F: 'r32f', // gl.ALPHA + gl.FLOAT
-    R16F: 'r16f', // gl.ALPHA + gl.HALF_FLOAT
-    Depth: 'depth' // gl.DEPTH_COMPONENT
-  }
+```js
+const PixelFormat = {
+  RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
+  RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
+  RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
+  R32F: 'r32f', // gl.ALPHA + gl.FLOAT
+  R16F: 'r16f', // gl.ALPHA + gl.HALF_FLOAT
+  Depth: 'depth', // gl.DEPTH_COMPONENT
+  Depth16: 'depth16' // gl.DEPTH_COMPONENT16, renderbuffer only
+}
 ```
 
 #### ctx.Primitive
 
+```js
+const Primitive = {
+  Points: gl.POINTS,
+  Lines: gl.LINES,
+  LineStrip: gl.LINE_STRIP,
+  Triangles: gl.TRIANGLES,
+  TriangleStrip: gl.TRIANGLE_STRIP
+}
 ```
-  const Primitive = {
-    Points: gl.POINTS,
-    Lines: gl.LINES,
-    LineStrip: gl.LINE_STRIP,
-    Triangles: gl.TRIANGLES,
-    TriangleStrip: gl.TRIANGLE_STRIP
-  }
+
+#### ctx.Encoding
+
+```js
+const Encoding = {
+  Linear: 1,
+  Gamma: 2,
+  SRGB: 3,
+  RGBM: 4
+}
 ```
 
 #### ctx.Usage
 
-```
-  const Usage = {
-    StaticDraw: gl.STATIC_DRAW,
-    DynamicDraw: gl.DYNAMIC_DRAW,
-    StreamDraw: gl.STREAM_DRAW
-  }
+```js
+const Usage = {
+  StaticDraw: gl.STATIC_DRAW,
+  DynamicDraw: gl.DYNAMIC_DRAW,
+  StreamDraw: gl.STREAM_DRAW
+}
 ```
 
 #### ctx.Wrap
 
-```
-  const Wrap = {
-    ClampToEdge: gl.CLAMP_TO_EDGE,
-    Repeat: gl.REPEAT
-  }
+```js
+const Wrap = {
+  ClampToEdge: gl.CLAMP_TO_EDGE,
+  Repeat: gl.REPEAT
+}
 ```
 
 #### ctx.QueryTarget
 
-```
-  const QueryTarget = {
-    TimeElapsed: gl.TIME_ELAPSED
-  }
+```js
+const QueryTarget = {
+  TimeElapsed: gl.TIME_ELAPSED
+}
 ```
 
 #### ctx.QueryState
 
+```js
+const QueryState = {
+  Ready: 'ready',
+  Active: 'active',
+  Pending: 'pending'
+}
 ```
-  const QueryState = {
-    Ready: 'ready',
-    Active: 'active',
-    Pending: 'pending'
-  }
-```
+
+## License
+
+MIT, see [LICENSE.md](https://github.com/pex-gl/pex-context/blob/master/LICENSE.md) for details.

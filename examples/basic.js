@@ -2,6 +2,9 @@ const createContext = require('../')
 const createCube = require('primitive-cube')
 const mat4 = require('pex-math/mat4')
 
+const basicVert = require('./shaders/basic.vert')
+const basicFrag = require('./shaders/basic.frag')
+
 const W = 640
 const H = 480
 const ctx = createContext({ width: W, height: H })
@@ -21,27 +24,8 @@ const drawCmd = {
   }),
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: `
-      attribute vec3 aPosition;
-      attribute vec3 aNormal;
-      uniform mat4 uProjectionMatrix;
-      uniform mat4 uViewMatrix;
-      varying vec3 vNormal;
-      void main () {
-        gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
-        vNormal = aNormal;
-      }
-    `,
-    frag: `
-      #ifdef GL_ES
-      precision mediump float;
-      #endif
-      varying vec3 vNormal;
-      void main () {
-        gl_FragColor.rgb = vNormal;
-        gl_FragColor.a = 1.0;
-      }
-    `
+    vert: basicVert,
+    frag: basicFrag
   }),
   attributes: {
     aPosition: ctx.vertexBuffer(cube.positions),
@@ -49,7 +33,13 @@ const drawCmd = {
   },
   indices: ctx.indexBuffer(cube.cells),
   uniforms: {
-    uProjectionMatrix: mat4.perspective(mat4.create(), Math.PI / 4, W / H, 0.1, 100),
+    uProjectionMatrix: mat4.perspective(
+      mat4.create(),
+      Math.PI / 4,
+      W / H,
+      0.1,
+      100
+    ),
     uViewMatrix: mat4.lookAt(mat4.create(), [2, 2, 5], [0, 0, 0], [0, 1, 0])
   }
 }

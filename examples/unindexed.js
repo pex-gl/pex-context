@@ -1,5 +1,3 @@
-// Indexed vs unindexed geometry tests
-
 const createContext = require('../')
 const createCube = require('primitive-cube')
 const splitVertices = require('geom-split-vertices')
@@ -7,7 +5,7 @@ const normals = require('geom-normals')
 const random = require('pex-random')
 const GUI = require('pex-gui')
 
-const ctx = createContext({ })
+const ctx = createContext({})
 
 const W = window.innerWidth
 const H = window.innerHeight
@@ -25,7 +23,6 @@ const camera = require('pex-cam/perspective')({
   fov: Math.PI / 3,
   position: [2, 1, 2]
 })
-const orbiter = require('pex-cam/orbiter')({ camera: camera })
 
 const clearCmd = {
   pass: ctx.pass({
@@ -41,7 +38,7 @@ const drawCmd = {
   }),
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: `
+    vert: /* glsl */ `
       attribute vec3 aPosition;
       attribute vec3 aNormal;
       uniform mat4 uProjectionMatrix;
@@ -52,10 +49,9 @@ const drawCmd = {
         vNormal = aNormal;
       }
     `,
-    frag: `
-      #ifdef GL_ES
+    frag: /* glsl */ `
       precision mediump float;
-      #endif
+
       varying vec3 vNormal;
       void main () {
         gl_FragColor.rgb = vNormal * 0.5 + 0.5;
@@ -76,7 +72,7 @@ const drawInstancedCmd = {
   }),
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: `
+    vert: /* glsl */ `
       attribute vec3 aPosition;
       attribute vec3 aNormal;
       attribute vec3 aOffset;
@@ -88,7 +84,7 @@ const drawInstancedCmd = {
         vNormal = aNormal;
       }
     `,
-    frag: `
+    frag: /* glsl */ `
       #ifdef GL_ES
       precision mediump float;
       #endif
@@ -104,8 +100,6 @@ const drawInstancedCmd = {
     uViewMatrix: camera.viewMatrix
   }
 }
-
-
 
 const cube = createCube()
 const indexedPositions = ctx.vertexBuffer(cube.positions)
