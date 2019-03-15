@@ -87,8 +87,14 @@ ctx.frame(() => {
 You can find runnable examples in the /examples folder in this repository. To run an example install Node.js, clone or download this repository and then run:
 
 ```sh
+# go to the example folder
 cd examples
-npx budo example-name.js --open --live
+
+# install examples dependencies
+npm i
+
+# run the example in your default browser window
+npx budo example-name.js --open --start
 ```
 
 # API
