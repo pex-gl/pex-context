@@ -1193,6 +1193,11 @@ function createContext(opts) {
           this.dispose(this.resources[0])
         }
       }
+
+      if (this.gl.canvas) {
+        this.gl.canvas.width = 1
+        this.gl.canvas.height = 1
+      }
     }
   })
   ctx.apply(defaultState)
