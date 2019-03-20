@@ -36,11 +36,6 @@ vertexBuffers.forEach((vertexBuffer, i) => {
       ctx.gl.ARRAY_BUFFER
     }`
   )
-  assert.equal(
-    vertexBuffer.data[3],
-    3,
-    `VertexBuffer ${i} data is wrong ${vertexBuffer.data[3]} != 3`
-  )
 })
 
 const pipeline = ctx.pipeline({
