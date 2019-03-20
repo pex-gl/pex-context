@@ -150,6 +150,15 @@ window.addEventListener('resize', () => {
 })
 ```
 
+## Dimensions
+
+Retrieve the current width and height of the context via getters:
+
+```js
+const width = ctx.width
+const height = ctx.height
+```
+
 ## Render Loop
 
 #### ctx.frame(cb)

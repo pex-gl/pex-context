@@ -318,10 +318,10 @@ function createContext(opts) {
       activeTextures: [],
       activeAttributes: []
     },
-    width: function() {
+    get width() {
       return gl.drawingBufferWidth
     },
-    height: function() {
+    get height() {
       return gl.drawingBufferHeight
     },
     getGLString: function(glEnum) {
