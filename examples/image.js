@@ -18,7 +18,7 @@ const camera = createCamera({
 
 createOrbiter({ camera: camera, distance: 10 })
 
-const ASSETS_DIR = isBrowser ? 'assets' : `${__dirname}/assets`
+const ASSETS_DIR = isBrowser ? '/assets' : `${__dirname}/assets`
 
 const cube = createCube(1)
 
