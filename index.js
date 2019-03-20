@@ -1075,9 +1075,10 @@ function createContext(opts) {
       if (batches) {
         if (Array.isArray(batches)) {
           // TODO: quick hack
-          batches.forEach((batch) =>
+          for (let i = 0; i < batches.length; i++) {
+            const batch = batches[i]
             this.submit(this.mergeCommands(cmd, batch, true), subCommand)
-          )
+          }
           return
         } else if (typeof batches === 'object') {
           this.submit(this.mergeCommands(cmd, batches, true), subCommand)
@@ -1101,11 +1102,12 @@ function createContext(opts) {
           if (cmd.framebuffer) {
             this.debugGraph += `${cmd.framebuffer.id} -> cluster_${cmd.name ||
               cmd.id}\n`
-            cmd.framebuffer.color.forEach((attachment) => {
+            for (let i = 0; i < cmd.framebuffer.color; i++) {
+              const attachment = cmd.framebuffer.color[i]
               this.debugGraph += `${attachment.texture.id} -> ${
                 cmd.framebuffer.id
               }\n`
-            })
+            }
             if (cmd.framebuffer.depth) {
               this.debugGraph += `${cmd.framebuffer.depth.texture.id} -> ${
                 cmd.framebuffer.id
@@ -1151,8 +1153,10 @@ function createContext(opts) {
           if (cmd.uniforms) {
             cells.push(' ')
             cells.push('uniforms')
-            Object.keys(cmd.uniforms).forEach((uniformName, index) => {
-              cells.push(`<u${index}>${uniformName}`)
+            const uniforms = Object.keys(cmd.uniforms)
+            for (let i = 0; i < uniforms.length; i++) {
+              const uniformName = uniforms[i]
+              cells.push(`<u${i}>${uniformName}`)
               const value = cmd.uniforms[uniformName]
               if (value === null || value === undefined) {
                 log('Invalid command', cmd)
@@ -1162,9 +1166,9 @@ function createContext(opts) {
               }
               if (value.id) {
                 this.debugGraph += `${value.id} -> ${cmd.name ||
-                  cmd.id}:u${index}\n`
+                  cmd.id}:u${i}\n`
               }
-            })
+            }
           }
           s += cells.join('|')
           s += '"]'
