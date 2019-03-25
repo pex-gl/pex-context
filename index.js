@@ -47,6 +47,8 @@ function createContext(opts) {
     })
   }
 
+  if (opts.debug) log.enabled = true
+
   if (!opts || !opts.gl) gl = createGL(opts)
   else if (opts && opts.gl) gl = opts.gl
   assert(gl, 'pex-context: createContext failed')
@@ -344,7 +346,7 @@ function createContext(opts) {
         this.updateHeight = height
       }
 
-      log.enabled = setOpts.debug
+      if (Object.keys(setOpts).includes('debug')) log.enabled = setOpts.debug
       Object.assign(this, setOpts)
     },
     checkError: function() {
