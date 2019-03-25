@@ -947,6 +947,7 @@ function createContext(opts) {
     frame: function(cb) {
       const self = this
       raf(function frame() {
+        self.debugCommands = []
         if (self.updatePixelRatio) {
           self.pixelRatio = self.updatePixelRatio
           // we need to reaply width/height and update styles
