@@ -1,5 +1,4 @@
 const createGL = require('pex-gl')
-// const viz = require('viz.js')
 const isBrowser = require('is-browser')
 const assert = require('assert')
 const raf = require('raf')
@@ -300,7 +299,7 @@ function createContext(opts) {
   log('capabilities', capabilities)
 
   Object.assign(ctx, {
-    debugMode: false,
+    debug: opts.debug || false,
     capabilities: capabilities,
     // debugGraph: '',
     debugCommands: [],
@@ -330,76 +329,29 @@ function createContext(opts) {
     },
     set: function(opts) {
       assert(isBrowser, 'changing resolution is not supported in Plask')
-      if (opts.pixelRatio) {
-        this.updatePixelRatio = Math.min(
-          opts.pixelRatio,
-          window.devicePixelRatio
-        )
+
+      const { pixelRatio, width, height, ...setOpts } = opts
+
+      if (pixelRatio) {
+        this.updatePixelRatio = Math.min(pixelRatio, window.devicePixelRatio)
       }
 
-      if (opts.width) {
-        this.updateWidth = opts.width
+      if (width) {
+        this.updateWidth = width
       }
 
-      if (opts.height) {
-        this.updateHeight = opts.height
+      if (height) {
+        this.updateHeight = height
       }
-    },
-    debug: function(enabled) {
-      this.debugMode = enabled
-      // if (enabled) {
-      // this.debuggraph = ''
-      // this.debugCommands = []
-      // if (isBrowser) {
-      // window.R = R
-      // window.commands = this.debugCommands
-      // }
-      // this.debugGraph = ''
-      // this.debugGraph += 'digraph frame {\n'
-      // this.debugGraph += 'size="6,12";\n'
-      // this.debugGraph += 'rankdir="LR"\n'
-      // this.debugGraph += 'node [shape=record];\n'
-      // if (this.debugMode) {
-      // const res = this.resources.map((res) => {
-      // return { id: res.id, type: res.id.split('_')[0] }
-      // })
-      // const groups = R.groupBy(R.prop('type'), res)
-      // Object.keys(groups).forEach((g) => {
-      // this.debugGraph += `subgraph cluster_${g} { \n`
-      // this.debugGraph += `label = "${g}s" \n`
-      // groups[g].forEach((res) => {
-      // this.debugGraph += `${res.id} [style=filled fillcolor = "#DDDDFF"] \n`
-      // })
-      // this.debugGraph += `} \n`
-      // })
-      // }
-      // } else {
-      // if (this.debugGraph) {
-      // this.debugGraph += 'edge  [style=bold, fontname="Arial", weight=100]\n'
-      // this.debugCommands.forEach((cmd, i, commands) => {
-      // if (i > 0) {
-      // const prevCmd = commands[i - 1]
-      // this.debugGraph += `${prevCmd.name || prevCmd.id} -> ${cmd.name || cmd.id}\n`
-      // }
-      // })
-      // this.debugGraph += '}'
-      // // log(this.debugGraph)
-      // // const div = document.createElement('div')
-      // // div.innerHTML = viz(this.debugGraph)
-      // // div.style.position = 'absolute'
-      // // div.style.top = '0'
-      // // div.style.left = '0'
-      // // div.style.transformOrigin = '0 0'
-      // // div.style.transform = 'scale(0.75, 0.75)'
-      // // document.body.appendChild(div)
-      // }
-      // }
+
+      log.enabled = setOpts.debug
+      Object.assign(this, setOpts)
     },
     checkError: function() {
-      if (this.debugMode) {
+      if (this.debug) {
         var error = gl.getError()
         if (error) {
-          this.debugMode = false // prevents rolling errors
+          this.debug = false // prevents rolling errors
           if (isBrowser) log('State', this.state.state)
           throw new Error(`GL error ${error} : ${this.getGLString(error)}`)
         }
@@ -511,7 +463,7 @@ function createContext(opts) {
     // update(texture, { data: TypeArray, [width: Int, height: Int] })
     // update(texture, { data: TypedArray })
     update: function(resource, opts) {
-      if (this.debugMode) log('update', { resource: resource, opts: opts })
+      if (this.debug) log('update', { resource: resource, opts: opts })
       resource._update(this, resource, opts)
     },
     // TODO: i don't like this inherit flag
@@ -556,7 +508,7 @@ function createContext(opts) {
 
       // if (pass.framebuffer !== state.framebuffer) {
       if (state.pass.id !== pass.id) {
-        if (this.debugMode)
+        if (this.debug)
           log(
             'change framebuffer',
             state.pass.framebuffer,
@@ -579,7 +531,7 @@ function createContext(opts) {
 
       let clearBits = 0
       if (pass.clearColor !== undefined) {
-        if (this.debugMode) log('clearing color', pass.clearColor)
+        if (this.debug) log('clearing color', pass.clearColor)
         clearBits |= gl.COLOR_BUFFER_BIT
         // TODO this might be unnecesary but we don't know because we don't store the clearColor in state
         gl.clearColor(
@@ -591,7 +543,7 @@ function createContext(opts) {
       }
 
       if (pass.clearDepth !== undefined) {
-        if (this.debugMode) log('clearing depth', pass.clearDepth)
+        if (this.debug) log('clearing depth', pass.clearDepth)
         clearBits |= gl.DEPTH_BUFFER_BIT
 
         if (!state.depthWrite) {
@@ -697,7 +649,7 @@ function createContext(opts) {
         assert.fail('Trying to draw without an active program')
       }
 
-      const requiredUniforms = this.debugMode
+      const requiredUniforms = this.debug
         ? Object.keys(state.program.uniforms)
         : null
 
@@ -716,13 +668,13 @@ function createContext(opts) {
         }
         // FIXME: uniform array hack
         if (Array.isArray(value) && !state.program.uniforms[name]) {
-          if (this.debugMode) {
+          if (this.debug) {
             log('unknown uniform', name, Object.keys(state.program.uniforms))
           }
           for (var i = 0; i < value.length; i++) {
             var nameIndex = name + '[' + i + ']'
             state.program.setUniform(nameIndex, value[i])
-            if (this.debugMode) {
+            if (this.debug) {
               requiredUniforms.splice(requiredUniforms.indexOf(nameIndex), 1)
             }
           }
@@ -736,7 +688,7 @@ function createContext(opts) {
             state.activeTextures[slot] = value
           }
           state.program.setUniform(name, slot)
-          if (this.debugMode) {
+          if (this.debug) {
             requiredUniforms.splice(requiredUniforms.indexOf(name), 1)
           }
         } else if (!value.length && typeof value === 'object') {
@@ -744,12 +696,12 @@ function createContext(opts) {
           assert.fail(`Can set uniform "${name}" with an Object value`)
         } else {
           state.program.setUniform(name, value)
-          if (this.debugMode) {
+          if (this.debug) {
             requiredUniforms.splice(requiredUniforms.indexOf(name), 1)
           }
         }
       }
-      if (this.debugMode && requiredUniforms.length > 0) {
+      if (this.debug && requiredUniforms.length > 0) {
         log('invalid command', cmd)
         assert.fail(
           `Trying to draw with missing uniforms: ${requiredUniforms.join(', ')}`
@@ -765,7 +717,7 @@ function createContext(opts) {
         assert.fail('Trying to draw without an active program')
       }
 
-      if (this.debugMode) {
+      if (this.debug) {
         // TODO: can vertex layout be ever different if it's derived from pipeline's shader?
         if (
           vertexLayout.length !== Object.keys(state.program.attributes).length
@@ -933,7 +885,7 @@ function createContext(opts) {
       } else {
         assert.fail('Vertex arrays requres elements or count to draw')
       }
-      // if (self.debugMode) {
+      // if (self.debug) {
       // var error = gl.getError()
       // cmd.error = { code: error, msg: self.getGLString(error) }
       // if (error) {
@@ -995,7 +947,7 @@ function createContext(opts) {
     apply: function(cmd) {
       const state = this.state
 
-      if (this.debugMode)
+      if (this.debug)
         log('apply', cmd.name || cmd.id, {
           cmd: cmd,
           state: JSON.parse(JSON.stringify(state))
@@ -1042,7 +994,7 @@ function createContext(opts) {
       }
     },
     submit: function(cmd, batches, subCommand) {
-      if (this.debugMode) {
+      if (this.debug) {
         this.debugCommands.push(cmd)
         checkProps(allowedCommandProps, cmd)
         if (batches && subCommand) {
@@ -1092,7 +1044,7 @@ function createContext(opts) {
       const cmdState = this.mergeCommands(parentState, cmd, false)
       this.apply(cmdState)
       if (subCommand) {
-        if (this.debugMode) {
+        if (this.debug) {
           this.debugGraph += `subgraph cluster_${cmd.name || cmd.id} {\n`
           this.debugGraph += `label = "${cmd.name}"\n`
           if (cmd.program) {
@@ -1118,11 +1070,11 @@ function createContext(opts) {
         this.stack.push(cmdState)
         subCommand()
         this.stack.pop()
-        if (this.debugMode) {
+        if (this.debug) {
           this.debugGraph += '}\n'
         }
       } else {
-        if (this.debugMode) {
+        if (this.debug) {
           let s = `${cmd.name ||
             cmd.id} [style=filled fillcolor = "#DDFFDD" label="`
           let cells = [cmd.name || cmd.id]

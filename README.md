@@ -127,7 +127,8 @@ const ctx = createContext({ width: Number, height: Number })
 ctx.set({
   pixelRatio: 2,
   width: 1280,
-  height: 720
+  height: 720,
+  debug: true
 })
 ```
 
@@ -136,6 +137,7 @@ ctx.set({
 | `pixelRatio` | canvas resolution, can't be bigger than window.devicePixelRatio | 1       |
 | `width`      | canvas width                                                    | -       |
 | `height`     | canvas height                                                   | -       |
+| `debug`      | turn on/off debug mode with log package                         | -       |
 
 Note 1: The new size and resolution will be applied not immediately but before drawing the next frame to avoid flickering.
 
