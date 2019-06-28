@@ -81,7 +81,7 @@ const depthMapSize = 512
 const depthMap = ctx.texture2D({
   width: depthMapSize,
   height: depthMapSize,
-  pixelFormat: ctx.PixelFormat.Depth,
+  pixelFormat: ctx.PixelFormat.Depth24,
   encoding: ctx.Encoding.Linear
 })
 const colorMap = ctx.texture2D({

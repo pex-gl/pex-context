@@ -149,10 +149,17 @@ function updateTexture2D(ctx, texture, opts) {
       'Texture2D.update opts.width and opts.height are required when providing opts.data'
     )
 
-    if (pixelFormat === PixelFormat.Depth) {
+    if (
+      pixelFormat === PixelFormat.Depth ||
+      pixelFormat === PixelFormat.Depth16
+    ) {
       format = gl.DEPTH_COMPONENT
       internalFormat = gl.DEPTH_COMPONENT
       type = gl.UNSIGNED_SHORT
+    } else if (pixelFormat === PixelFormat.Depth24) {
+      format = gl.DEPTH_COMPONENT
+      internalFormat = gl.DEPTH_COMPONENT
+      type = gl.UNSIGNED_INT
     } else if (pixelFormat === PixelFormat.RGBA8) {
       format = gl.RGBA
       internalFormat = gl.RGBA

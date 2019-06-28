@@ -174,8 +174,9 @@ function createContext(opts) {
     RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
     R32F: 'r32f', // gl.ALPHA + gl.FLOAT
     R16F: 'r16f', // gl.ALPHA + gl.HALF_FLOAT
-    Depth: 'depth', // gl.DEPTH_COMPONENT
-    Depth16: 'depth16' // gl.DEPTH_COMPONENT16, renderbuffer only
+    Depth: 'depth', // gl.DEPTH_COMPONENT + gl.UNSIGNED_SHORT
+    Depth16: 'depth16', // gl.DEPTH_COMPONENT16 in renderbuffers, gl.DEPTH_COMPONENT + gl.UNSIGNED_SHORT
+    Depth24: 'depth24' // gl.DEPTH_COMPONENT + gl.UNSIGNED_INT
   }
 
   const Encoding = {

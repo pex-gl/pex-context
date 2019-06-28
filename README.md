@@ -421,7 +421,7 @@ const tex = ctx.renderbuffer({
 | `height`      | renderbuffer height           | Number/Int      | 0       |
 | `pixelFormat` | pixel data format<sup>1</sup> | ctx.PixelFormat | null    |
 
-<sup>1</sup> only `PixelFormat.Depth16` is currently supported and only for use as render pass depth storage (e.g. `ctx.pass({ depth: renderbuffer})`) for platforms with no `WEBGL_depth_texture` support.
+<sup>1</sup> only `PixelFormat.Depth16` equal to `gl.DEPTH_COMPONENT16` is currently supported for use as render pass depth storage (e.g. `ctx.pass({ depth: renderbuffer})`) for platforms with no `WEBGL_depth_texture` support.
 
 ### Buffer
 
@@ -627,8 +627,9 @@ const PixelFormat = {
   RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
   R32F: 'r32f', // gl.ALPHA + gl.FLOAT
   R16F: 'r16f', // gl.ALPHA + gl.HALF_FLOAT
-  Depth: 'depth', // gl.DEPTH_COMPONENT
-  Depth16: 'depth16' // gl.DEPTH_COMPONENT16, renderbuffer only
+  Depth: 'depth', // gl.DEPTH_COMPONENT + gl.UNSIGNED_SHORT
+  Depth16: 'depth16', // gl.DEPTH_COMPONENT + gl.UNSIGNED_SHORT
+  Depth24: 'depth24' // gl.DEPTH_COMPONENT + gl.UNSIGNED_INT
 }
 ```
 
