@@ -1197,9 +1197,9 @@ function createContext(opts) {
         while (this.resources.length) {
           this.dispose(this.resources[0])
         }
+        this.gl.canvas.width = 1
+        this.gl.canvas.height = 1
       }
-      this.gl.canvas.width = 1
-      this.gl.canvas.height = 1
     }
   })
   ctx.apply(defaultState)
