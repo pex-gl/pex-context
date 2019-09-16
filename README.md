@@ -442,6 +442,7 @@ const buf = ctx.indexBuffer({ data: Array }) // aka Index Buffer
 | `data`   | pixel data   | Array, Uint8Array, Float32Array | null                 |
 | `type`   | data type    | ctx.DataType                    | ctx.DataType.Float32 |
 | `usage`  | buffer usage | ctx.Usage                       | ctx.Usage.StaticDraw |
+| `offset` | data offset in the buffer (update only) | Number/Int      | undefined |
 
 ### Query
 

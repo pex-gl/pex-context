@@ -1,7 +1,7 @@
 const assert = require('assert')
 const checkProps = require('./check-props')
 
-const allowedProps = ['target', 'data', 'usage', 'type']
+const allowedProps = ['target', 'data', 'usage', 'type', 'offset']
 
 function createBuffer(ctx, opts) {
   const gl = ctx.gl
@@ -37,6 +37,7 @@ function updateBuffer(ctx, buffer, opts) {
   const gl = ctx.gl
   let data = opts.data || opts
   let type = opts.type || buffer.type
+  let offset = opts.offset || 0
 
   if (Array.isArray(data)) {
     if (!type) {
@@ -91,7 +92,11 @@ function updateBuffer(ctx, buffer, opts) {
 
   // TODO: push state, and pop as this can modify existing VBO?
   gl.bindBuffer(buffer.target, buffer.handle)
-  gl.bufferData(buffer.target, data, buffer.usage)
+  if (offset) {
+    gl.bufferSubData(buffer.target, offset, data)
+  } else {
+    gl.bufferData(buffer.target, data, buffer.usage)
+  }
 }
 
 module.exports = createBuffer
