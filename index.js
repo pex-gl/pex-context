@@ -909,7 +909,7 @@ function createContext(opts) {
         }
         state.indexBuffer = indexBuffer
         gl.bindBuffer(indexBuffer.target, indexBuffer.handle)
-        var count = cmd.indices.count || indexBuffer.length
+        var count = cmd.count || indexBuffer.length
         var offset = cmd.indices.offset || 0
         var type = cmd.indices.type || indexBuffer.type
         if (instanced) {
