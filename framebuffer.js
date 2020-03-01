@@ -130,11 +130,14 @@ function updateFramebuffer(ctx, framebuffer, opts) {
   statusStr[gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS] =
     'FRAMEBUFFER_INCOMPLETE_DIMENSIONS'
   statusStr[gl.FRAMEBUFFER_UNSUPPORTED] = 'FRAMEBUFFER_UNSUPPORTED'
-  var fboStatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
-  assert(
-    fboStatus === gl.FRAMEBUFFER_COMPLETE,
-    `FBO incomplete ${statusStr[fboStatus]}`
-  )
+
+  if (ctx.debugMode) {
+    var fboStatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
+    assert(
+      fboStatus === gl.FRAMEBUFFER_COMPLETE,
+      `FBO incomplete ${statusStr[fboStatus]}`
+    )
+  }
 
   // TODO: ctx. pop framebuffer
   gl.bindFramebuffer(framebuffer.target, null)
