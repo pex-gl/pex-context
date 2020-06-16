@@ -3,16 +3,25 @@ const checkProps = require('./check-props')
 
 const allowedProps = ['target', 'data', 'usage', 'type', 'offset']
 
+let classNameByTarget = null
+
 function createBuffer(ctx, opts) {
   const gl = ctx.gl
+
+  if (!classNameByTarget) {
+    classNameByTarget = {
+      [gl.ARRAY_BUFFER]: 'vertexBuffer',
+      [gl.ELEMENT_ARRAY_BUFFER]: 'indexBuffer',
+      [gl.UNIFORM_BUFFER]: 'uniformBuffer'
+    }
+  }  
   checkProps(allowedProps, opts)
   assert(
-    opts.target === gl.ARRAY_BUFFER || opts.target === gl.ELEMENT_ARRAY_BUFFER,
+    opts.target === gl.ARRAY_BUFFER || opts.target === gl.ELEMENT_ARRAY_BUFFER  || opts.target === gl.UNIFORM_BUFFER,
     'Invalid buffer target'
   )
 
-  let className =
-    opts.target === gl.ARRAY_BUFFER ? 'vertexBuffer' : 'indexBuffer'
+  let className = classNameByTarget[opts.target]
 
   const buffer = {
     class: className,
@@ -43,9 +52,12 @@ function updateBuffer(ctx, buffer, opts) {
     if (!type) {
       if (opts.target === gl.ARRAY_BUFFER) {
         type = ctx.DataType.Float32
-      }
+      }      
       if (opts.target === gl.ELEMENT_ARRAY_BUFFER) {
         type = ctx.DataType.Uint16
+      }
+      if (opts.target === gl.UNIFORM_BUFFER) {
+        type = ctx.DataType.Float32
       }
     }
 

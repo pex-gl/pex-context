@@ -295,7 +295,7 @@ function createContext(opts) {
       )
     }
   } else {
-    capabilities.maxColorAttachments = gl.getParameter('MAX_COLOR_ATTACHMENTS')
+    capabilities.maxColorAttachments = gl.getParameter(gl.MAX_COLOR_ATTACHMENTS)
   }
 
   log('capabilities', capabilities)
@@ -317,7 +317,8 @@ function createContext(opts) {
       },
       pipeline: createPipeline(ctx, {}),
       activeTextures: [],
-      activeAttributes: []
+      activeAttributes: [],
+      activeUniformBuffers: []
     },
     getGLString: function(glEnum) {
       let str = ''
@@ -461,6 +462,14 @@ function createContext(opts) {
         opts = { data: opts }
       }
       opts.target = gl.ELEMENT_ARRAY_BUFFER
+      return this.resource(createBuffer(this, opts))
+    },
+    uniformBuffer: function(opts) {
+      log('uniformBuffer', opts)
+      if (opts.length) {
+        opts = { data: opts }
+      }
+      opts.target = gl.UNIFORM_BUFFER
       return this.resource(createBuffer(this, opts))
     },
     program: function(opts) {
@@ -749,11 +758,68 @@ function createContext(opts) {
             requiredUniforms.splice(requiredUniforms.indexOf(name), 1)
           }
         }
-      }
+      }      
       if (this.debugMode && requiredUniforms.length > 0) {
         log('invalid command', cmd)
         assert.fail(
           `Trying to draw with missing uniforms: ${requiredUniforms.join(', ')}`
+        )
+      }
+      this.checkError()
+    },    
+    bindUniformBlocks: function(uniformBlocks, cmd) {
+      const gl = this.gl
+      const state = this.state
+      let numTextures = 0
+
+      if (!state.program) {
+        assert.fail('Trying to draw without an active program')
+      }
+
+      const requiredUniformBlocks = this.debugMode
+        ? Object.keys(state.program.uniformBlocks)
+        : null
+        
+      for (var name in uniformBlocks) {
+        let value = uniformBlocks[name]
+        // console.log(name, value)
+        // TODO: find a better way to not trying to set unused uniforms that might have been inherited
+        if (
+          !state.program.uniformBlocks[name]
+        ) {
+          continue
+        }
+        if (value === null || value === undefined) {
+          log('invalid command', cmd)
+          assert.fail(`Can't set uniformBlocks "${name}" with a null value`)
+        }
+        if (value.target) {
+          // if (state.activeUniformBuffers
+          const location = state.program.uniformBlocks[name].location
+          const binding = location
+          gl.bindBufferBase(gl.UNIFORM_BUFFER, binding, value.handle);
+          gl.uniformBlockBinding(state.program.handle, location, binding);
+          // assuming ubo
+          // FIXME: texture binding hack
+          // const slot = numTextures++
+          // gl.activeTexture(gl.TEXTURE0 + slot)
+          // if (state.activeTextures[slot] !== value) {
+          //   gl.bindTexture(value.target, value.handle)
+          //   state.activeTextures[slot] = value
+          // }
+          // state.program.setUniform(name, slot)
+          // if (this.debugMode) {
+          //   requiredUniformBlocks.splice(requiredUniformBlocks.indexOf(name), 1)
+          // }
+        }
+        if (value.buffer) {
+          // assuming ubo but e.g. with offset
+        }
+      }      
+      if (this.debugMode && requiredUniformBlocks.length > 0) {
+        log('invalid command', cmd)
+        assert.fail(
+          `Trying to draw with missing uniform blockss: ${requiredUniformBlocks.join(', ')}`
         )
       }
       this.checkError()
@@ -1025,6 +1091,7 @@ function createContext(opts) {
       if (cmd.pass) this.applyPass(cmd.pass)
       if (cmd.pipeline) this.applyPipeline(cmd.pipeline)
       if (cmd.uniforms) this.applyUniforms(cmd.uniforms)
+      if (cmd.uniformBlocks) this.bindUniformBlocks(cmd.uniformBlocks)
 
       if (cmd.viewport) {
         if (cmd.viewport !== state.viewport) {

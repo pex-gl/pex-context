@@ -126,6 +126,7 @@ function updateUniforms(ctx, program) {
   const gl = ctx.gl
 
   program.uniforms = {}
+  program.uniformBlocks = {}
 
   const numUniforms = gl.getProgramParameter(program.handle, gl.ACTIVE_UNIFORMS)
   for (let i = 0; i < numUniforms; ++i) {
@@ -170,7 +171,7 @@ function updateUniforms(ctx, program) {
         throw new Error(
           `Unknwon attribute type ${info.type} : ${ctx.getGLString(info.type)}`
         )
-    }
+    }   
     program.uniforms[name] = {
       name: name,
       type: info.type,
@@ -188,6 +189,22 @@ function updateUniforms(ctx, program) {
       }
     }
   }
+
+  const numUniformsBlocks = gl.getProgramParameter(
+    program.handle,
+    gl.ACTIVE_UNIFORM_BLOCKS
+  )
+  console.log('numUniformsBlocks', numUniformsBlocks)
+  for (let i = 0; i < numUniformsBlocks; ++i) {
+    const blockName = gl.getActiveUniformBlockName(program.handle, i)
+    
+    console.log('ACTIVE_UNIFORMS_BLOCKS', blockName)
+    program.uniformBlocks[blockName] = {
+      name: blockName,
+      location: gl.getUniformBlockIndex(program.handle, blockName)
+    }
+  }
+  console.log(program.uniformBlocks)  
 }
 
 function updateAttributes(ctx, program) {
