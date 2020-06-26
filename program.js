@@ -190,18 +190,23 @@ function updateUniforms(ctx, program) {
     }
   }
 
-  const numUniformsBlocks = gl.getProgramParameter(
+  
+  const numUniformsBlocks = ctx.capabilities.isWebGL2 ? gl.getProgramParameter(
     program.handle,
     gl.ACTIVE_UNIFORM_BLOCKS
-  )
+  ) : 0
+
   console.log('numUniformsBlocks', numUniformsBlocks)
   for (let i = 0; i < numUniformsBlocks; ++i) {
     const blockName = gl.getActiveUniformBlockName(program.handle, i)
     
     console.log('ACTIVE_UNIFORMS_BLOCKS', blockName)
+    //TODO: location is called uniformBlockIndex
+    var location = gl.getUniformBlockIndex(program.handle, blockName)
     program.uniformBlocks[blockName] = {
       name: blockName,
-      location: gl.getUniformBlockIndex(program.handle, blockName)
+      location: location,
+      size: gl.getActiveUniformBlockParameter(program.handle, location, gl.UNIFORM_BLOCK_DATA_SIZE)
     }
   }
   console.log(program.uniformBlocks)  
