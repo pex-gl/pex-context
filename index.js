@@ -794,26 +794,18 @@ function createContext(opts) {
           assert.fail(`Can't set uniformBlocks "${name}" with a null value`)
         }
         if (value.target) {
-          // if (state.activeUniformBuffers
+          // assuming ubo
+          // TODO: if (state.activeUniformBuffers
           const location = state.program.uniformBlocks[name].location
           const binding = location
           gl.bindBufferBase(gl.UNIFORM_BUFFER, binding, value.handle);
-          gl.uniformBlockBinding(state.program.handle, location, binding);
-          // assuming ubo
-          // FIXME: texture binding hack
-          // const slot = numTextures++
-          // gl.activeTexture(gl.TEXTURE0 + slot)
-          // if (state.activeTextures[slot] !== value) {
-          //   gl.bindTexture(value.target, value.handle)
-          //   state.activeTextures[slot] = value
-          // }
-          // state.program.setUniform(name, slot)
-          // if (this.debugMode) {
-          //   requiredUniformBlocks.splice(requiredUniformBlocks.indexOf(name), 1)
-          // }
+          gl.uniformBlockBinding(state.program.handle, location, binding);          
         }
-        if (value.buffer) {
-          // assuming ubo but e.g. with offset
+        if (value.buffer) {          
+          const location = state.program.uniformBlocks[name].location
+          const binding = location
+          gl.bindBufferRange(gl.UNIFORM_BUFFER, binding, value.buffer.handle, value.offset, value.size);
+          gl.uniformBlockBinding(state.program.handle, location, binding); 
         }
       }      
       if (this.debugMode && requiredUniformBlocks.length > 0) {
