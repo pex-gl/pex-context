@@ -13,6 +13,7 @@ const createProgram = require('./program')
 const createBuffer = require('./buffer')
 const createQuery = require('./query')
 const checkProps = require('./check-props')
+const isWebGL2 = require('is-webgl2-context')
 
 let ID = 0
 
@@ -53,6 +54,7 @@ function createContext(opts) {
   assert(gl, 'pex-context: createContext failed')
 
   const capabilities = {
+    isWebGL2: isWebGL2(gl),
     maxColorAttachments: 1,
     maxTextureImageUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
     maxVertexTextureImageUnits: gl.getParameter(

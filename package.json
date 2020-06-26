@@ -37,6 +37,7 @@
   "dependencies": {
     "debug": "^2.6.9",
     "is-browser": "^2.0.1",
+    "is-webgl2-context": "^1.0.0",
     "pex-gl": "^2.7.0",
     "raf": "^3.3.0"
   },
