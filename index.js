@@ -348,53 +348,9 @@ function createContext(opts) {
     },
     debug: function(enabled) {
       this.debugMode = enabled
-      // if (enabled) {
-      // this.debuggraph = ''
-      // this.debugCommands = []
-      // if (isBrowser) {
-      // window.R = R
-      // window.commands = this.debugCommands
-      // }
-      // this.debugGraph = ''
-      // this.debugGraph += 'digraph frame {\n'
-      // this.debugGraph += 'size="6,12";\n'
-      // this.debugGraph += 'rankdir="LR"\n'
-      // this.debugGraph += 'node [shape=record];\n'
-      // if (this.debugMode) {
-      // const res = this.resources.map((res) => {
-      // return { id: res.id, type: res.id.split('_')[0] }
-      // })
-      // const groups = R.groupBy(R.prop('type'), res)
-      // Object.keys(groups).forEach((g) => {
-      // this.debugGraph += `subgraph cluster_${g} { \n`
-      // this.debugGraph += `label = "${g}s" \n`
-      // groups[g].forEach((res) => {
-      // this.debugGraph += `${res.id} [style=filled fillcolor = "#DDDDFF"] \n`
-      // })
-      // this.debugGraph += `} \n`
-      // })
-      // }
-      // } else {
-      // if (this.debugGraph) {
-      // this.debugGraph += 'edge  [style=bold, fontname="Arial", weight=100]\n'
-      // this.debugCommands.forEach((cmd, i, commands) => {
-      // if (i > 0) {
-      // const prevCmd = commands[i - 1]
-      // this.debugGraph += `${prevCmd.name || prevCmd.id} -> ${cmd.name || cmd.id}\n`
-      // }
-      // })
-      // this.debugGraph += '}'
-      // // log(this.debugGraph)
-      // // const div = document.createElement('div')
-      // // div.innerHTML = viz(this.debugGraph)
-      // // div.style.position = 'absolute'
-      // // div.style.top = '0'
-      // // div.style.left = '0'
-      // // div.style.transformOrigin = '0 0'
-      // // div.style.transform = 'scale(0.75, 0.75)'
-      // // document.body.appendChild(div)
-      // }
-      // }
+      if (enabled) {        
+        this.debugCommands = []     
+      }
     },
     checkError: function() {
       if (this.debugMode) {
@@ -934,15 +890,6 @@ function createContext(opts) {
       } else {
         assert.fail('Vertex arrays requres elements or count to draw')
       }
-      // if (self.debugMode) {
-      // var error = gl.getError()
-      // cmd.error = { code: error, msg: self.getGLString(error) }
-      // if (error) {
-      // self.debugCommands.push(cmd)
-      // throw new Error(`WebGL error ${error} : ${self.getGLString(error)}`)
-      // }
-      // log('draw elements', count, error)
-      // }
       this.checkError()
     },
     frame: function(cb) {
@@ -1043,8 +990,7 @@ function createContext(opts) {
       }
     },
     submit: function(cmd, batches, subCommand) {
-      if (this.debugMode) {
-        this.debugCommands.push(cmd)
+      if (this.debugMode) {                
         checkProps(allowedCommandProps, cmd)
         if (batches && subCommand) {
           log('submit', cmd.name || cmd.id, {
@@ -1092,6 +1038,14 @@ function createContext(opts) {
       const parentState = this.stack[this.stack.length - 1]
       const cmdState = this.mergeCommands(parentState, cmd, false)
       this.apply(cmdState)
+      if (this.debugMode) {
+        cmdState.debugId = this.debugCommands.length
+        this.debugCommands.push({
+          cmd,
+          cmdState,
+          parentState
+        })
+      }
       if (subCommand) {
         if (this.debugMode) {
           this.debugGraph += `subgraph cluster_${cmd.name || cmd.id} {\n`
@@ -1121,59 +1075,6 @@ function createContext(opts) {
         this.stack.pop()
         if (this.debugMode) {
           this.debugGraph += '}\n'
-        }
-      } else {
-        if (this.debugMode) {
-          let s = `${cmd.name ||
-            cmd.id} [style=filled fillcolor = "#DDFFDD" label="`
-          let cells = [cmd.name || cmd.id]
-          // this.debugGraph += `cluster_${cmd.name || cmd.id} [style=filled fillcolor = "#DDFFDD"] {\n`
-          // if (cmd.attributes) {
-          // cells.push(' ')
-          // cells.push('vertex arrays')
-          // Object.keys(cmd.attributes).forEach((attribName, index) => {
-          // const attrib = cmd.attributes[attribName]
-          // cells.push(`<a${index}>${attribName}`)
-          // this.debugGraph += `${attrib.buffer.id} -> ${cmd.name || cmd.id}:a${index}\n`
-          // })
-          // }
-          // if (cmd.indices) {
-          // cells.push(' ')
-          // cells.push(`<e>elements`)
-          // this.debugGraph += `${cmd.elements.buffer.id} -> ${cmd.name || cmd.id}:e\n`
-          // }
-          // if (cmd.program) {
-          // this.debugGraph += `${cmd.program.id} -> ${cmd.name || cmd.id}\n`
-          // }
-          // if (cmd.framebuffer) {
-          // this.debugGraph += `${cmd.framebuffer.id} -> ${cmd.name || cmd.id}\n`
-          // cmd.framebuffer.color.forEach((tex) => {
-          // console.log('tex', tex)
-          // })
-          // }
-          if (cmd.uniforms) {
-            cells.push(' ')
-            cells.push('uniforms')
-            const uniforms = Object.keys(cmd.uniforms)
-            for (let i = 0; i < uniforms.length; i++) {
-              const uniformName = uniforms[i]
-              cells.push(`<u${i}>${uniformName}`)
-              const value = cmd.uniforms[uniformName]
-              if (value === null || value === undefined) {
-                log('Invalid command', cmd)
-                assert.fail(
-                  `Trying to draw with uniform "${uniformName}" = null`
-                )
-              }
-              if (value.id) {
-                this.debugGraph += `${value.id} -> ${cmd.name ||
-                  cmd.id}:u${i}\n`
-              }
-            }
-          }
-          s += cells.join('|')
-          s += '"]'
-          this.debugGraph += `${s}\n`
         }
       }
       this.checkError()
