@@ -1,4 +1,4 @@
-const createContext = require('../../pex-context')
+const createContext = require('../')
 const loadImage = require('pex-io/loadImage')
 const raf = require('raf')
 const isBrowser = require('is-browser')
@@ -80,6 +80,7 @@ loadImage(ASSETS_DIR + '/images/pex.png', (err, img) => {
 
   raf(function frame() {
     ctx.submit(drawCmd)
+    window.dispatchEvent(new CustomEvent('pex-screenshot'))
     raf(frame)
   })
 })

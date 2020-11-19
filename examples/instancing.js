@@ -1,7 +1,9 @@
 require('debug').enable('*')
+const createContext = require('../')
+const raf = require('raf')
+const createCamera = require('pex-cam/perspective')
 const createCube = require('primitive-cube')
 const bunny = require('bunny')
-// const bunny = require('primitive-cube')()
 const normals = require('normals')
 const centerAndNormalize = require('geom-center-and-normalize')
 const vec3 = require('pex-math/vec3')
@@ -10,19 +12,15 @@ const quat = require('pex-math/quat')
 const SimplexNoise = require('simplex-noise')
 const random = require('pex-random')
 
-const createContext = require('../../pex-context')
-const raf = require('raf')
-const createCamera = require('pex-cam/perspective')
-
-const screenImageVert = require('./shaders/screen-image.vert')
-const screenImageFrag = require('./shaders/screen-image.frag')
+const screenImageVert = require('./shaders/screen-image.vert.js')
+const screenImageFrag = require('./shaders/screen-image.frag.js')
 const showNormalsVert = require('./shaders/show-normals.vert.js')
-const showNormalsInstancedVert = require('./shaders/show-normals-instanced.vert')
-const shadowMappedInstancedVert = require('./shaders/shadow-mapped-instanced.vert')
+const showNormalsInstancedVert = require('./shaders/show-normals-instanced.vert.js')
+const shadowMappedInstancedVert = require('./shaders/shadow-mapped-instanced.vert.js')
 const showNormalsFrag = require('./shaders/show-normals.frag.js')
 const gammaGlsl = require('./shaders/gamma.glsl.js')
 
-const { transposeMat4, inverseMat4 } = require('./shaders/math.glsl')
+const { transposeMat4, inverseMat4 } = require('./shaders/math.glsl.js')
 
 const ctx = createContext()
 
@@ -413,6 +411,8 @@ raf(function frame() {
     ctx.submit(drawBunnyCmd)
     ctx.submit(drawFullscreenQuadCmd)
   })
+
+  window.dispatchEvent(new CustomEvent('pex-screenshot'))
 
   raf(frame)
 })

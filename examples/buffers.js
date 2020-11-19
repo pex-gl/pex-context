@@ -1,4 +1,4 @@
-const createContext = require('..')
+const createContext = require('../')
 const assert = require('assert')
 const ctx = createContext({ width: 10, height: 10 })
 
@@ -70,3 +70,5 @@ const i9 = ctx.indexBuffer({
 })
 assert(i9.length === 6, 'Invalid buffer length')
 assert(i9.type === ctx.DataType.Uint32, 'Invalid data type')
+
+window.dispatchEvent(new CustomEvent('pex-screenshot'))

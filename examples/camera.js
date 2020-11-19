@@ -2,8 +2,8 @@ const createContext = require('../')
 const createCube = require('primitive-cube')
 const createCamera = require('pex-cam/perspective')
 
-const basicVert = require('./shaders/basic.vert')
-const basicFrag = require('./shaders/basic.frag')
+const basicVert = require('./shaders/basic.vert.js')
+const basicFrag = require('./shaders/basic.frag.js')
 
 const ctx = createContext({
   pixelRatio: window.devicePixelRatio
@@ -62,4 +62,5 @@ ctx.frame(() => {
       uViewMatrix: camera.viewMatrix
     }
   })
+  window.dispatchEvent(new CustomEvent('pex-screenshot'))
 })

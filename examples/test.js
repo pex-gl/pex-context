@@ -1,5 +1,5 @@
 const assert = require('assert')
-const createContext = require('../../pex-context')
+const createContext = require('../')
 const ctx = createContext()
 
 const tex = ctx.texture2D({
@@ -73,3 +73,5 @@ assert.equal(
   tex,
   'Using texture should be remembered in active state'
 )
+
+window.dispatchEvent(new CustomEvent('pex-screenshot'))

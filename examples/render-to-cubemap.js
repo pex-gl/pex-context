@@ -1,9 +1,9 @@
 // Render to texture example
+const createContext = require('../')
 const createCube = require('primitive-cube')
 const createSphere = require('primitive-sphere')
 const mat4 = require('pex-math/mat4')
 
-const createContext = require('../../pex-context')
 const createCamera = require('pex-cam/perspective')
 const createOrbiter = require('pex-cam/orbiter')
 const vec3 = require('pex-math').vec3
@@ -301,7 +301,7 @@ const skyboxFaces = [[0, 1, 2], [0, 2, 3]]
 
 const drawSkyboxCmd = {
   pipeline: ctx.pipeline({
-    vert: `
+    vert: /* glsl */ `
       //Based on http://gamedev.stackexchange.com/questions/60313/implementing-a-skybox-with-glsl-version-330
       attribute vec2 aPosition;
 
@@ -369,7 +369,7 @@ const drawSkyboxCmd = {
           gl_Position = position;
       }
     `,
-    frag: `
+    frag: /* glsl */ `
       #ifdef GL_ES
       precision highp float;
       #endif
@@ -444,6 +444,8 @@ ctx.frame(() => {
       uInvViewMatrix: mat4.invert(mat4.copy(camera.viewMatrix))
     }
   })
+
+  window.dispatchEvent(new CustomEvent('pex-screenshot'))
 
   gui.draw()
 })
