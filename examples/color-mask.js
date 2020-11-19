@@ -110,4 +110,5 @@ ctx.frame(() => {
       uTexture: baboonTex
     }
   })
+  window.dispatchEvent(new CustomEvent('pex-screenshot'))
 })

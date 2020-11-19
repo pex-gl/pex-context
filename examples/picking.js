@@ -257,4 +257,6 @@ ctx.frame(() => {
     ctx.debug(false)
     debugNextFrame = false
   }
+
+  window.dispatchEvent(new CustomEvent('pex-screenshot'))
 })

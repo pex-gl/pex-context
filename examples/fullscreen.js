@@ -5,8 +5,8 @@ const GUI = require('pex-gui')
 const loadImage = require('pex-io/loadImage')
 const isBrowser = require('is-browser')
 
-const basicVert = require('./shaders/basic.vert')
-const basicFrag = require('./shaders/basic.frag')
+const basicVert = require('./shaders/basic.vert.js')
+const basicFrag = require('./shaders/basic.frag.js')
 
 const resolutions = [
   {
@@ -204,6 +204,8 @@ ctx.frame(() => {
       uViewMatrix: camera.viewMatrix
     }
   })
+
+  window.dispatchEvent(new CustomEvent('pex-screenshot'))
 
   gui.draw()
 })

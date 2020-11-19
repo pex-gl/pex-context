@@ -1,4 +1,4 @@
-const createContext = require('../../pex-context')
+const createContext = require('../')
 const load = require('pex-io/load')
 const raf = require('raf')
 const isBrowser = require('is-browser')
@@ -8,10 +8,10 @@ const createSphere = require('primitive-sphere')
 const mat4 = require('pex-math/mat4')
 const GUI = require('pex-gui')
 
-const skyboxVert = require('./shaders/skybox.vert')
-const skyboxFrag = require('./shaders/skybox.frag')
-const reflectionVert = require('./shaders/reflection.vert')
-const reflectionFrag = require('./shaders/reflection.frag')
+const skyboxVert = require('./shaders/skybox.vert.js')
+const skyboxFrag = require('./shaders/skybox.frag.js')
+const reflectionVert = require('./shaders/reflection.vert.js')
+const reflectionFrag = require('./shaders/reflection.frag.js')
 
 const ctx = createContext()
 const gui = new GUI(ctx)
@@ -104,6 +104,8 @@ load(resources, (err, res) => {
     ctx.submit(drawCmd)
 
     gui.draw()
+
+    window.dispatchEvent(new CustomEvent('pex-screenshot'))
     raf(frame)
   })
 })

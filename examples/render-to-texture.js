@@ -1,7 +1,7 @@
+const createContext = require('../')
 const createCube = require('primitive-cube')
 const mat4 = require('pex-math/mat4')
 
-const createContext = require('../../pex-context')
 const raf = require('raf')
 const createCamera = require('pex-cam/perspective')
 const createOrbiter = require('pex-cam/orbiter')
@@ -177,6 +177,8 @@ raf(function frame() {
     },
     viewport: [512, 0, 256, 256]
   })
+
+  window.dispatchEvent(new CustomEvent('pex-screenshot'))
 
   raf(frame)
 })

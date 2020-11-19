@@ -341,5 +341,7 @@ raf(function frame() {
     ctx.submit(drawFullscreenQuadCmd)
   })
 
+  window.dispatchEvent(new CustomEvent('pex-screenshot'))
+
   raf(frame)
 })

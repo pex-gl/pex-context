@@ -2,8 +2,8 @@ const createContext = require('../')
 const createCube = require('primitive-cube')
 const mat4 = require('pex-math/mat4')
 
-const basicVert = require('./shaders/basic.vert')
-const basicFrag = require('./shaders/basic.frag')
+const basicVert = require('./shaders/basic.vert.js')
+const basicFrag = require('./shaders/basic.frag.js')
 
 const W = 640
 const H = 480
@@ -47,4 +47,5 @@ const drawCmd = {
 ctx.frame(() => {
   ctx.submit(clearCmd)
   ctx.submit(drawCmd)
+  window.dispatchEvent(new CustomEvent('pex-screenshot'))
 })

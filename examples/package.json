@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "webpack-dev-server --open",
+    "build": "npm run clean && webpack",
+    "screenshots": "node ./scripts/screenshot-examples.js",
+    "diff": "node ./scripts/screenshot-diff.js",
+    "clean": "rm -rf build"
   },
   "author": "Marcin Ignac <marcin.ignac@gmail.com> (http://marcinignac.com/)",
   "license": "MIT",
@@ -16,16 +20,27 @@
     "geom-center-and-normalize": "^1.0.2",
     "geom-normals": "^1.0.1",
     "geom-split-vertices": "^1.0.0",
+    "is-browser": "^2.1.0",
     "normals": "^1.1.0",
     "pex-cam": "^2.7.1",
     "pex-gui": "^2.3.0",
     "pex-io": "^2.1.0",
-    "pex-materials": "^1.1.1",
     "pex-math": "^2.1.1",
     "pex-random": "^1.0.1",
     "primitive-cube": "^2.0.1",
     "primitive-sphere": "^3.0.0",
     "raf": "^3.4.1",
     "simplex-noise": "^2.4.0"
+  },
+  "devDependencies": {
+    "glob": "^7.1.4",
+    "mkdirp": "^0.5.1",
+    "pixelmatch": "^5.0.2",
+    "pngjs": "^3.4.0",
+    "puppeteer": "^1.19.0",
+    "request": "^2.88.0",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.8",
+    "webpack-dev-server": "^3.8.0"
   }
 }

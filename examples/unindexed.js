@@ -165,5 +165,7 @@ ctx.frame(() => {
     instances: offsetPositions.length
   })
 
+  window.dispatchEvent(new CustomEvent('pex-screenshot'))
+
   gui.draw()
 })

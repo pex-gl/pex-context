@@ -1,9 +1,13 @@
-const ctx = require('..')()
+const createContext = require('../')
 const random = require('pex-random')
 const mat4 = require('pex-math/mat4')
 const mat3 = require('pex-math/mat3')
 const vec4 = require('pex-math/vec4')
-const ShowNormals = require('pex-materials/show-normals')
+
+const showNormalsVert = require('./shaders/show-normals.vert.js')
+const showNormalsFrag = require('./shaders/show-normals.frag.js')
+
+const ctx = createContext()
 
 const W = ctx.gl.drawingBufferWidth
 const H = ctx.gl.drawingBufferHeight
@@ -65,8 +69,8 @@ const drawInViewport = {
 
 const drawCubeCmd = {
   pipeline: ctx.pipeline({
-    vert: ShowNormals.Vert,
-    frag: ShowNormals.Frag,
+    vert: showNormalsVert,
+    frag: showNormalsFrag,
     depthTest: true
   }),
   attributes: {
@@ -147,4 +151,5 @@ ctx.frame(() => {
       })
     })
   })
+  window.dispatchEvent(new CustomEvent('pex-screenshot'))
 })

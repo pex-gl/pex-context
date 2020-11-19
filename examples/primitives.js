@@ -1,4 +1,4 @@
-const createContext = require('../../pex-context')
+const createContext = require('../')
 const createCamera = require('pex-cam/perspective')
 const createOrbiter = require('pex-cam/orbiter')
 const mat4 = require('pex-math/mat4')
@@ -146,4 +146,6 @@ ctx.frame(function() {
   ctx.submit(drawLineStrip)
   ctx.submit(drawTriangles)
   ctx.submit(drawTriangleStrip)
+
+  window.dispatchEvent(new CustomEvent('pex-screenshot'))
 })
