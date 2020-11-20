@@ -86,7 +86,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
   }
 
   if (framebuffer.depth) {
-    if (ctx.debugMode) log('fbo attaching depth', framebuffer.depth)
+    if (ctx.debug) log('fbo attaching depth', framebuffer.depth)
     const depthAttachment = framebuffer.depth
 
     if (depthAttachment.texture.target === gl.RENDERBUFFER) {
@@ -106,7 +106,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
       )
     }
   } else {
-    if (ctx.debugMode) log('fbo deattaching depth')
+    if (ctx.debug) log('fbo deattaching depth')
     gl.framebufferRenderbuffer(
       gl.FRAMEBUFFER,
       gl.DEPTH_ATTACHMENT,
