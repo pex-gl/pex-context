@@ -26,6 +26,10 @@ const camera = require('pex-cam/perspective')({
   position: [5, 1, 5]
 })
 
+const orbiter = require('pex-cam/orbiter')({
+  camera: camera
+})
+
 const cube = require('primitive-cube')(0.5)
 
 const cubes = []
