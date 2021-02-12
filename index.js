@@ -511,26 +511,58 @@ function createContext(opts) {
       const gl = this.gl
       const state = this.state
 
-      // if (pass.framebuffer !== state.framebuffer) {
-      if (state.pass.id !== pass.id) {
-        if (this.debugMode)
-          log(
-            'change framebuffer',
-            state.pass.framebuffer,
-            '->',
-            pass.framebuffer
-          )
-        state.pass = pass
-        if (pass.framebuffer._update) {
-          // rebind pass' color and depth to shared FBO
-          this.update(pass.framebuffer, pass.opts)
+      let framebuffer = pass.framebuffer
+
+      // inherit framebuffer from parent command
+      // if pass doesn't specify color or depth attachments
+      // and therefore doesn't have own framebuffer assigned
+      if (!framebuffer) {
+        let i = ctx.stack.length - 1
+        while (!framebuffer && i >= 0) {
+          if (ctx.stack[i].pass) {
+            framebuffer = ctx.stack[i].pass.framebuffer
+          }
+          --i
         }
-        gl.bindFramebuffer(pass.framebuffer.target, pass.framebuffer.handle)
-        if (
-          pass.framebuffer.drawBuffers &&
-          pass.framebuffer.drawBuffers.length > 1
-        ) {
-          gl.drawBuffers(pass.framebuffer.drawBuffers)
+      }
+
+      // Need to find reliable way of deciding if i should update framebuffer
+      // as we now inherit framebuffer from parent command pass
+      // there are two cases:
+      // 1. We want to just clear color or depth in sub command.
+      //    We should inherit framebuffer state from parent command and not bind anything
+      // 2. We want to draw to screen
+      //
+      // Can those two cases be simplified to
+      // 0. If pass has framebuffer, run old code
+      // 1. If there is framebuffer on the stack, change nothing
+      // 2. If there is only screen framebuffer on the stack and currently bound fbo is different, change it        
+      if (pass.framebuffer) {
+        if (state.pass.id !== pass.id) {
+          if (this.debugMode)
+            log(
+              'change framebuffer',
+              state.pass.framebuffer,
+              '->',
+              pass.framebuffer
+            )
+          state.pass = pass
+          if (pass.framebuffer._update) {
+            // rebind pass' color and depth to shared FBO
+            this.update(pass.framebuffer, pass.opts)
+          }
+          gl.bindFramebuffer(pass.framebuffer.target, pass.framebuffer.handle)
+          if (
+            pass.framebuffer.drawBuffers &&
+            pass.framebuffer.drawBuffers.length > 1
+          ) {
+            gl.drawBuffers(pass.framebuffer.drawBuffers)
+          }
+        }
+      } else {
+        if (framebuffer == ctx.defaultState.pass.framebuffer && ctx.state.framebuffer !== framebuffer) {
+          console.log(ctx.state)
+          gl.bindFramebuffer(framebuffer.target, framebuffer.handle)
         }
       }
 

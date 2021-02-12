@@ -32,17 +32,14 @@ function createPass(ctx, opts) {
     }
   }
 
+  // if color or depth targets are present assign shared framebuffer 
+  // otherwise we will inherit framebuffer from parent command or screen
   if (opts.color || opts.depth) {
     if (!ctx.defaultState.pass.sharedFramebuffer) {
       ctx.defaultState.pass.sharedFramebuffer = ctx.framebuffer({})
     }
     pass.framebuffer = ctx.defaultState.pass.sharedFramebuffer
     ctx.defaultState.pass.sharedFramebuffer.refCount++
-  }
-
-  // default screen framebuffer
-  if (!pass.framebuffer) {
-    pass.framebuffer = ctx.defaultState.pass.framebuffer
   }
 
   return pass
