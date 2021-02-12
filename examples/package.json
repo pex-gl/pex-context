@@ -29,6 +29,7 @@
     "pex-random": "^1.0.1",
     "primitive-cube": "^2.0.1",
     "primitive-sphere": "^3.0.0",
+    "primitive-torus": "^1.0.4",
     "raf": "^3.4.1",
     "simplex-noise": "^2.4.0"
   },
