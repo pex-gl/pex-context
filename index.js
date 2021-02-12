@@ -561,7 +561,6 @@ function createContext(opts) {
         }
       } else {
         if (framebuffer == ctx.defaultState.pass.framebuffer && ctx.state.framebuffer !== framebuffer) {
-          console.log(ctx.state)
           gl.bindFramebuffer(framebuffer.target, framebuffer.handle)
         }
       }
