@@ -147,7 +147,11 @@ function createContext(opts) {
   }
 
   const DataType = {
+    Float16: gl.HALF_FLOAT,
     Float32: gl.FLOAT,
+    Int8: gl.BYTE,
+    Int16: gl.SHORT,
+    Int32: gl.INT,
     Uint8: gl.UNSIGNED_BYTE,
     Uint16: gl.UNSIGNED_SHORT,
     Uint32: gl.UNSIGNED_INT
