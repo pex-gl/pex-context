@@ -227,7 +227,7 @@ function createContext(opts) {
     RGB5_A1: [gl.RGBA, gl.UNSIGNED_SHORT_5_5_5_1], // DataType.Uint8, gl.UNSIGNED_INT_2_10_10_10_REV
     RGBA4: [gl.RGBA, gl.UNSIGNED_SHORT_4_4_4_4], // DataType.Uint8
     RGB10_A2: [gl.RGBA, gl.UNSIGNED_INT_2_10_10_10_REV],
-    RGBA16F: [gl.RGBA, DataType.Float32],
+    RGBA16F: [gl.RGBA, DataType.Float16], // DataType.Float32
     RGBA32F: [gl.RGBA, DataType.Float32],
 
     RGBA8UI: [gl.RGBA_INTEGER, DataType.Uint8],
