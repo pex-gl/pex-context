@@ -172,15 +172,94 @@ function createContext(opts) {
     LinearMipmapLinear: gl.LINEAR_MIPMAP_LINEAR
   }
 
+  const TextureFormat = {
+    // Unsized Internal Formats
+    RGB: [gl.RGB, DataType.Uint8], // gl.UNSIGNED_SHORT_5_6_5
+    RGBA: [gl.RGBA, DataType.Uint8], // gl.UNSIGNED_SHORT_4_4_4_4, gl.UNSIGNED_SHORT_5_5_5_1
+    LUMINANCE_ALPHA: [gl.LUMINANCE_ALPHA, DataType.Uint8],
+    LUMINANCE: [gl.LUMINANCE, DataType.Uint8],
+    ALPHA: [gl.ALPHA, DataType.Uint8],
+
+    // Sized internal formats
+    R8: [gl.RED, DataType.Uint8],
+    R8_SNORM: [gl.RED, DataType.Int8],
+    R16F: [gl.RED, DataType.Float16], // DataType.Float32
+    R32F: [gl.RED, DataType.Float32],
+
+    R8UI: [gl.RED_INTEGER, DataType.Uint8],
+    R8I: [gl.RED_INTEGER, DataType.Int8],
+    R16UI: [gl.RED_INTEGER, DataType.Uint16],
+    R16I: [gl.RED_INTEGER, DataType.Int16],
+    R32UI: [gl.RED_INTEGER, DataType.Uint32],
+    R32I: [gl.RED_INTEGER, DataType.Int32],
+
+    RG8: [gl.RG, DataType.Uint8],
+    RG8_SNORM: [gl.RG, DataType.Int8],
+    RG16F: [gl.RG, DataType.Float16], // DataType.Float32
+    RG32F: [gl.RG, DataType.Float32],
+
+    RG8UI: [gl.RG_INTEGER, DataType.Uint8],
+    RG8I: [gl.RG_INTEGER, DataType.Int8],
+    RG16UI: [gl.RG_INTEGER, DataType.Uint16],
+    RG16I: [gl.RG_INTEGER, DataType.Int16],
+    RG32UI: [gl.RG_INTEGER, DataType.Uint32],
+    RG32I: [gl.RG_INTEGER, DataType.Int32],
+
+    RGB8: [gl.RGB, DataType.Uint8],
+    SRGB8: [gl.RGB, DataType.Uint8],
+    RGB565: [gl.RGB, gl.UNSIGNED_SHORT_5_6_5], // DataType.Uint8
+    RGB8_SNORM: [gl.RGB, DataType.Int8],
+    R11F_G11F_B10F: [gl.RGB, gl.UNSIGNED_INT_10F_11F_11F_REV], // DataType.Float16, DataType.Float32
+    RGB9_E5: [gl.RGB, gl.UNSIGNED_INT_5_9_9_9_REV], // DataType.Float16, DataType.Float32
+    RGB16F: [gl.RGB, DataType.Float16], // DataType.Float32
+    RGB32F: [gl.RGB, DataType.Float32],
+
+    RGB8UI: [gl.RGB_INTEGER, DataType.Uint8],
+    RGB8I: [gl.RGB_INTEGER, DataType.Int8],
+    RGB16UI: [gl.RGB_INTEGER, DataType.Uint16],
+    RGB16I: [gl.RGB_INTEGER, DataType.Int16],
+    RGB32UI: [gl.RGB_INTEGER, DataType.Uint32],
+    RGB32I: [gl.RGB_INTEGER, DataType.Int32],
+
+    RGBA8: [gl.RGBA, DataType.Uint8],
+    SRGB8_ALPHA8: [gl.RGBA, DataType.Uint8],
+    RGBA8_SNORM: [gl.RGBA, DataType.Int8],
+    RGB5_A1: [gl.RGBA, gl.UNSIGNED_SHORT_5_5_5_1], // DataType.Uint8, gl.UNSIGNED_INT_2_10_10_10_REV
+    RGBA4: [gl.RGBA, gl.UNSIGNED_SHORT_4_4_4_4], // DataType.Uint8
+    RGB10_A2: [gl.RGBA, gl.UNSIGNED_INT_2_10_10_10_REV],
+    RGBA16F: [gl.RGBA, DataType.Float32],
+    RGBA32F: [gl.RGBA, DataType.Float32],
+
+    RGBA8UI: [gl.RGBA_INTEGER, DataType.Uint8],
+    RGBA8I: [gl.RGBA_INTEGER, DataType.Int8],
+    RGB10_A2UI: [gl.RGBA_INTEGER, gl.UNSIGNED_INT_2_10_10_10_REV],
+    RGBA16UI: [gl.RGBA_INTEGER, DataType.Uint16],
+    RGBA16I: [gl.RGBA_INTEGER, DataType.Int16],
+    RGBA32I: [gl.RGBA_INTEGER, DataType.Int32],
+    RGBA32UI: [gl.RGBA_INTEGER, DataType.Uint32],
+
+    // Depth and stencil
+    DEPTH_COMPONENT16: [gl.DEPTH_COMPONENT, DataType.Uint16], // DataType.Uint32
+    DEPTH_COMPONENT24: [gl.DEPTH_COMPONENT, DataType.Uint32],
+    DEPTH_COMPONENT32F: [gl.DEPTH_COMPONENT, DataType.Float32],
+    DEPTH24_STENCIL8: [gl.DEPTH_STENCIL, gl.UNSIGNED_INT_24_8],
+    DEPTH32F_STENCIL8: [gl.DEPTH_STENCIL, gl.FLOAT_32_UNSIGNED_INT_24_8_REV]
+  }
+  if (capabilities.depthTexture) {
+    TextureFormat.DEPTH_COMPONENT = [gl.DEPTH_COMPONENT, DataType.Uint16]
+    TextureFormat.DEPTH_STENCIL = [gl.DEPTH_STENCIL, DataType.Uint16]
+  }
   const PixelFormat = {
-    RGBA8: 'rgba8', // gl.RGBA + gl.UNSIGNED_BYTE
-    RGBA32F: 'rgba32f', // gl.RGBA + gl.FLOAT
-    RGBA16F: 'rgba16f', // gl.RGBA + gl.HALF_FLOAT
-    R32F: 'r32f', // gl.ALPHA + gl.FLOAT
-    R16F: 'r16f', // gl.ALPHA + gl.HALF_FLOAT
-    Depth: 'depth', // gl.DEPTH_COMPONENT + gl.UNSIGNED_SHORT
-    Depth16: 'depth16', // gl.DEPTH_COMPONENT16 in renderbuffers, gl.DEPTH_COMPONENT + gl.UNSIGNED_SHORT
-    Depth24: 'depth24' // gl.DEPTH_COMPONENT + gl.UNSIGNED_INT
+    ...Object.fromEntries(
+      Object.keys(TextureFormat).map((internalFormat) => [
+        internalFormat,
+        internalFormat
+      ])
+    ),
+    // Legacy
+    Depth: 'DEPTH_COMPONENT',
+    Depth16: 'DEPTH_COMPONENT16',
+    Depth24: 'DEPTH_COMPONENT24'
   }
 
   const Encoding = {
@@ -227,6 +306,7 @@ function createContext(opts) {
     DepthFunc: DepthFunc,
     Face: Face,
     Filter: Filter,
+    TextureFormat: TextureFormat,
     PixelFormat: PixelFormat,
     Encoding: Encoding,
     Primitive: Primitive,

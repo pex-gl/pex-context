@@ -7,6 +7,8 @@ const allowedProps = [
   'width',
   'height',
   'pixelFormat',
+  'internalFormat',
+  'type',
   'encoding',
   'flipY',
   'mipmap',
@@ -17,7 +19,8 @@ const allowedProps = [
   'wrapS',
   'wrapT',
   'aniso',
-  'premultiplayAlpha'
+  'premultiplyAlpha',
+  'compressed'
 ]
 
 function createTexture(ctx, opts) {
@@ -47,13 +50,12 @@ function orValue(a, b) {
   return a !== undefined ? a : b
 }
 
-// opts = { src, width, height }
 // opts = { data, width, height, pixelFormat, encoding, flipY }
 function updateTexture2D(ctx, texture, opts) {
   // checkProps(allowedProps, opts)
 
   const gl = ctx.gl
-  const PixelFormat = ctx.PixelFormat
+  let compressed = opts.compressed
 
   let data = null
   let width = opts.width
@@ -71,9 +73,9 @@ function updateTexture2D(ctx, texture, opts) {
   let wrapT =
     opts.wrapT || texture.wrapT || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
   let aniso = opts.aniso || texture.aniso || 0
-  let premultiplayAlpha = orValue(
-    opts.premultiplayAlpha,
-    orValue(texture.premultiplayAlpha, false)
+  let premultiplyAlpha = orValue(
+    opts.premultiplyAlpha,
+    orValue(texture.premultiplyAlpha, false)
   )
   let internalFormat
   let type
@@ -87,7 +89,7 @@ function updateTexture2D(ctx, texture, opts) {
   ctx.state.activeTextures[textureUnit] = texture
 
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY)
-  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplayAlpha)
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha)
   gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, mag)
   gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, min)
   gl.texParameteri(target, gl.TEXTURE_WRAP_S, wrapS)
@@ -111,7 +113,7 @@ function updateTexture2D(ctx, texture, opts) {
   // array of images for cubemaps (and array textures in webgl2)
   // opts = { data: [ HTMLImage, ... ], width: Number, height: Number, flipY: Boolean }
 
-  // array of pixel data for cubemaps (and array texture in webgl2)
+  // array of pixel data for cubemaps and compressed texture (and array texture in webgl2)
   // opts = { data: [ { data: Array, width: Number, height: Number }, ..], flipY: Boolean }
 
   const img = opts.data ? opts.data : opts
@@ -142,76 +144,102 @@ function updateTexture2D(ctx, texture, opts) {
     data = opts.data ? opts.data.data || opts.data : null
 
     if (!opts.width && data && data.width) width = data.width
-    if (!opts.height && data && data.height) width = data.height
+    if (!opts.height && data && data.height) height = data.height
 
+    if (!compressed) {
+      assert(
+        !data || (width !== undefined && height !== undefined),
+        'Texture2D.update opts.width and opts.height are required when providing opts.data'
+      )
+    }
+
+    // Get internalFormat (format the GPU use internally) from opts.internalFormat (mainly for compressed texture) or pixelFormat
+    internalFormat = opts.internalFormat || gl[pixelFormat] || gl.RGBA
     assert(
-      !data || (width !== undefined && height !== undefined),
-      'Texture2D.update opts.width and opts.height are required when providing opts.data'
+      internalFormat,
+      `Texture2D.update Unknown internalFormat ${internalFormat}.`
     )
 
+    // Get actual format and type (data supplied)
+    ;[format, type] = ctx.TextureFormat[pixelFormat]
+    type = opts.type || type
+    assert(type, `Texture2D.update Unknown type ${type}.`)
+
+    // WEBGL_depth_texture (WebGL1 only) just adds DEPTH_COMPONENT and DEPTH_STENCIL
     if (
-      pixelFormat === PixelFormat.Depth ||
-      pixelFormat === PixelFormat.Depth16
+      ctx.capabilities.depthTexture &&
+      ['DEPTH_COMPONENT16', 'DEPTH_COMPONENT24'].includes(pixelFormat)
     ) {
-      format = gl.DEPTH_COMPONENT
-      internalFormat = gl.DEPTH_COMPONENT
-      type = gl.UNSIGNED_SHORT
-    } else if (pixelFormat === PixelFormat.Depth24) {
-      format = gl.DEPTH_COMPONENT
-      internalFormat = gl.DEPTH_COMPONENT
-      type = gl.UNSIGNED_INT
-    } else if (pixelFormat === PixelFormat.RGBA8) {
-      format = gl.RGBA
-      internalFormat = gl.RGBA
-      type = gl.UNSIGNED_BYTE
-    } else if (pixelFormat === PixelFormat.RGBA32F) {
-      format = gl.RGBA
-      internalFormat = gl.RGBA
-      type = gl.FLOAT
-    } else if (pixelFormat === PixelFormat.RGBA16F) {
-      format = gl.RGBA
-      internalFormat = gl.RGBA
-      type = gl.HALF_FLOAT
-    } else if (pixelFormat === PixelFormat.R32F) {
-      format = gl.ALPHA
-      internalFormat = gl.ALPHA
-      type = gl.FLOAT
-    } else if (pixelFormat) {
-      assert.fail(`Unknown texture pixel format: ${opts.format}`)
+      internalFormat = gl['DEPTH_COMPONENT']
     }
 
     if (target === gl.TEXTURE_2D) {
-      if (Array.isArray(data)) {
-        if (type === gl.UNSIGNED_BYTE) {
-          data = new Uint8Array(data)
-        } else if (type === gl.FLOAT) {
-          data = new Float32Array(data)
-        } else if (type === gl.HALF_FLOAT) {
-          data = new Float32Array(data)
-        } else {
-          assert.fail(`Unknown texture data type: ${type}`)
+      if (compressed) {
+        data = Array.isArray(data) ? data : [data]
+
+        for (let level = 0; level < data.length; level++) {
+          assert(
+            !data[level].data ||
+              (data[level].width !== undefined &&
+                data[level].height !== undefined),
+            'Texture2D.update opts.width and opts.height are required when providing opts.data'
+          )
+          gl.compressedTexImage2D(
+            target,
+            level,
+            internalFormat,
+            data[level].width,
+            data[level].height,
+            0,
+            data[level].data
+          )
         }
-      }
-      if (width && height) {
-        gl.texImage2D(
-          target,
-          lod,
-          internalFormat,
-          width,
-          height,
-          0,
-          format,
-          type,
-          data
-        )
-        texture.width = width
-        texture.height = height
+
+        // Set filtering
+        // TODO: allow override?
+        if (data.length > 1) {
+          if (texture.min === gl.LINEAR) texture.min = gl.NEAREST_MIPMAP_LINEAR
+        } else {
+          if (texture.min === gl.NEAREST_MIPMAP_LINEAR) texture.min = gl.LINEAR
+        }
+
+        texture.width = data[0].width
+        texture.height = data[0].height
+      } else {
+        if (Array.isArray(data)) {
+          if (type === gl.UNSIGNED_BYTE) {
+            data = new Uint8Array(data)
+          } else if (type === gl.FLOAT) {
+            data = new Float32Array(data)
+          } else if (type === gl.HALF_FLOAT) {
+            data = new Float32Array(data)
+          } else {
+            assert.fail(`Unknown texture data type: ${type}`)
+          }
+        }
+
+        if (width && height) {
+          gl.texImage2D(
+            target,
+            lod,
+            internalFormat,
+            width,
+            height,
+            0,
+            format,
+            type,
+            data
+          )
+          texture.width = width
+          texture.height = height
+        }
       }
     } else if (target === gl.TEXTURE_CUBE_MAP) {
       assert(
         !data || (Array.isArray(data) && data.length === 6),
         'TextureCube requires data for 6 faces'
       )
+      // TODO: gl.compressedTexImage2D for cubemap target
       for (let i = 0; i < 6; i++) {
         let faceData = data ? data[i].data || data[i] : null
         const faceTarget = gl.TEXTURE_CUBE_MAP_POSITIVE_X + i
