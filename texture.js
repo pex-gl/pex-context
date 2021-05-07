@@ -69,9 +69,9 @@ function updateTexture2D(ctx, texture, opts) {
   let min = opts.min || texture.min || gl.NEAREST
   let mag = opts.mag || texture.mag || gl.NEAREST
   let wrapS =
-    opts.wrapS || texture.wrapS || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
+    opts.wrapS || opts.wrap || texture.wrapS || texture.wrap || gl.CLAMP_TO_EDGE
   let wrapT =
-    opts.wrapT || texture.wrapT || opts.wrap || texture.wrap || gl.CLAMP_TO_EDGE
+    opts.wrapT || opts.wrap || texture.wrapT || texture.wrap || gl.CLAMP_TO_EDGE
   let aniso = opts.aniso || texture.aniso || 0
   let premultiplyAlpha = orValue(
     opts.premultiplyAlpha,
