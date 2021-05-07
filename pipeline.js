@@ -42,7 +42,11 @@ function createPipeline(ctx, opts) {
       _dispose: function() {
         this.vert = null
         this.frag = null
-        if (this.program && --this.program.refCount === 0 && this.program.handle) {
+        if (
+          this.program &&
+          --this.program.refCount === 0 &&
+          this.program.handle
+        ) {
           ctx.dispose(this.program)
         }
         this.program = null

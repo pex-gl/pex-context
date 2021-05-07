@@ -32,7 +32,7 @@ function createPass(ctx, opts) {
     }
   }
 
-  // if color or depth targets are present assign shared framebuffer 
+  // if color or depth targets are present assign shared framebuffer
   // otherwise we will inherit framebuffer from parent command or screen
   if (opts.color || opts.depth) {
     if (!ctx.defaultState.pass.sharedFramebuffer) {

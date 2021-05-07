@@ -352,8 +352,8 @@ function createContext(opts) {
     },
     debug: function(enabled) {
       this.debugMode = enabled
-      if (enabled) {        
-        this.debugCommands = []     
+      if (enabled) {
+        this.debugCommands = []
       }
     },
     checkError: function() {
@@ -540,7 +540,7 @@ function createContext(opts) {
       // Can those two cases be simplified to
       // 0. If pass has framebuffer, run old code
       // 1. If there is framebuffer on the stack, change nothing
-      // 2. If there is only screen framebuffer on the stack and currently bound fbo is different, change it        
+      // 2. If there is only screen framebuffer on the stack and currently bound fbo is different, change it
       if (pass.framebuffer) {
         if (state.pass.id !== pass.id) {
           if (this.debugMode)
@@ -564,7 +564,10 @@ function createContext(opts) {
           }
         }
       } else {
-        if (framebuffer == ctx.defaultState.pass.framebuffer && ctx.state.framebuffer !== framebuffer) {
+        if (
+          framebuffer == ctx.defaultState.pass.framebuffer &&
+          ctx.state.framebuffer !== framebuffer
+        ) {
           gl.bindFramebuffer(framebuffer.target, framebuffer.handle)
         }
       }
@@ -1025,7 +1028,7 @@ function createContext(opts) {
       }
     },
     submit: function(cmd, batches, subCommand) {
-      if (this.debugMode) {                
+      if (this.debugMode) {
         checkProps(allowedCommandProps, cmd)
         if (batches && subCommand) {
           log('submit', cmd.name || cmd.id, {
