@@ -50,17 +50,32 @@ function orValue(a, b) {
   return a !== undefined ? a : b
 }
 
-// opts = { data, width, height, pixelFormat, encoding, flipY }
+// just an image
+// opts = HTMLImage
+
+// image with flags
+// opts = { data: HTMLImage, flipY: Boolean }
+
+// pixel data
+// opts = { data: Array|TypedArray, width: Number, height: Number, flipY: Boolean }
+
+// pixel data with flags
+// opts = { data: { data: Array|TypedArray, width: Number, height: Number }, flipY: Boolean },
+
+// array of images for cubemaps (and array textures in webgl2)
+// opts = { data: [ HTMLImage, ... ], width: Number, height: Number, flipY: Boolean }
+
+// array of pixel data for cubemaps and manual mipmaps (and array texture in webgl2)
+// opts = { data: [ { data: Array|TypedArray, width: Number, height: Number }, ..], flipY: Boolean }
 function updateTexture2D(ctx, texture, opts) {
   // checkProps(allowedProps, opts)
 
   const gl = ctx.gl
-  let compressed = opts.compressed
+  let compressed = opts.compressed || texture.compressed
 
   let data = null
   let width = opts.width
   let height = opts.height
-  let lod = 0
   let flipY = orValue(opts.flipY, orValue(texture.flipY, false))
   let target = opts.target || texture.target
   let pixelFormat =
@@ -77,11 +92,9 @@ function updateTexture2D(ctx, texture, opts) {
     opts.premultiplyAlpha,
     orValue(texture.premultiplyAlpha, false)
   )
-  let internalFormat
+  let internalFormat = opts.internalFormat || texture.internalFormat
   let type
   let format
-
-  var anisoExt = gl.getExtension('EXT_texture_filter_anisotropic')
 
   const textureUnit = 0
   gl.activeTexture(gl.TEXTURE0 + textureUnit)
@@ -94,27 +107,10 @@ function updateTexture2D(ctx, texture, opts) {
   gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, min)
   gl.texParameteri(target, gl.TEXTURE_WRAP_S, wrapS)
   gl.texParameteri(target, gl.TEXTURE_WRAP_T, wrapT)
-  if (anisoExt && aniso > 0) {
+  if (ctx.capabilities.textureFilterAnisotropic && aniso > 0) {
+    const anisoExt = gl.getExtension('EXT_texture_filter_anisotropic')
     gl.texParameterf(target, anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, aniso)
   }
-
-  // just an image
-  // opts = HTMLImage
-
-  // image with flags
-  // opts = { data: HTMLImage, flipY: Boolean }
-
-  // pixel data
-  // opts = { data: Array, width: Number, height: Number, flipY: Boolean }
-
-  // pixel data with flags
-  // opts = { data: { data: Array, width: Number, height: Number }, flipY: Boolean },
-
-  // array of images for cubemaps (and array textures in webgl2)
-  // opts = { data: [ HTMLImage, ... ], width: Number, height: Number, flipY: Boolean }
-
-  // array of pixel data for cubemaps and compressed texture (and array texture in webgl2)
-  // opts = { data: [ { data: Array, width: Number, height: Number }, ..], flipY: Boolean }
 
   const img = opts.data ? opts.data : opts
   if (img && img.nodeName) {
@@ -129,128 +125,136 @@ function updateTexture2D(ctx, texture, opts) {
     internalFormat = gl.RGBA
     format = gl.RGBA
     type = gl.UNSIGNED_BYTE
-    gl.texImage2D(target, lod, internalFormat, format, type, img)
+    pixelFormat = ctx.PixelFormat.RGBA
+    gl.texImage2D(target, 0, internalFormat, format, type, img)
     texture.width = width
     texture.height = height
   } else if (typeof opts === 'object') {
+    // Check data type
     assert(
       !data ||
         Array.isArray(opts.data) ||
-        opts.data instanceof Uint8Array ||
-        opts.data instanceof Float32Array,
-      'Texture2D.update opts.data has to be null or an Array, Uint8Array or Float32Array'
+        Object.values(ctx.DataTypeConstructor).some(
+          (TypedArray) => opts.data instanceof TypedArray
+        ),
+      'Texture2D.update opts.data has to be null, an Array or a TypedArray'
     )
 
+    // Handle pixel data with flags
     data = opts.data ? opts.data.data || opts.data : null
-
     if (!opts.width && data && data.width) width = data.width
     if (!opts.height && data && data.height) height = data.height
 
-    if (!compressed) {
+    assert(
+      !data || (width !== undefined && height !== undefined),
+      'Texture2D.update opts.width and opts.height are required when providing opts.data'
+    )
+
+    // Get internalFormat (format the GPU use internally) from opts.internalFormat (mainly for compressed texture) or pixelFormat
+    if (!internalFormat || opts.internalFormat) {
+      internalFormat = opts.internalFormat || gl[pixelFormat]
+
+      // WebGL1
+      if (ctx.gl instanceof WebGLRenderingContext) {
+        // WEBGL_depth_texture (WebGL1 only) just adds DEPTH_COMPONENT and DEPTH_STENCIL
+        if (
+          ctx.capabilities.depthTexture &&
+          ['DEPTH_COMPONENT16', 'DEPTH_COMPONENT24'].includes(pixelFormat)
+        ) {
+          internalFormat = gl['DEPTH_COMPONENT']
+        }
+
+        // Handle legacy types
+        if (!internalFormat) {
+          if (pixelFormat === ctx.PixelFormat.R16F) {
+            pixelFormat = 'R16FLegacy'
+            internalFormat = gl.ALPHA
+          } else if (pixelFormat === ctx.PixelFormat.R32F) {
+            pixelFormat = 'R32FLegacy'
+            internalFormat = gl.ALPHA
+          } else if (pixelFormat === ctx.PixelFormat.RGBA8) {
+            pixelFormat = ctx.PixelFormat.RGBA
+            internalFormat = gl.RGBA
+          } else if (
+            pixelFormat === ctx.PixelFormat.RGBA16F ||
+            pixelFormat === ctx.PixelFormat.RGBA32F
+          ) {
+            internalFormat = gl.RGBA
+          }
+        }
+      }
+
       assert(
-        !data || (width !== undefined && height !== undefined),
-        'Texture2D.update opts.width and opts.height are required when providing opts.data'
+        internalFormat,
+        `Texture2D.update Unknown internalFormat "${internalFormat}" for pixelFormat "${pixelFormat}".`
       )
     }
 
-    // Get internalFormat (format the GPU use internally) from opts.internalFormat (mainly for compressed texture) or pixelFormat
-    internalFormat = opts.internalFormat || gl[pixelFormat] || gl.RGBA
-    assert(
-      internalFormat,
-      `Texture2D.update Unknown internalFormat ${internalFormat}.`
-    )
-
-    // Get actual format and type (data supplied)
+    // Get actual format and type (data supplied), allowing type override
     ;[format, type] = ctx.TextureFormat[pixelFormat]
     type = opts.type || type
     assert(type, `Texture2D.update Unknown type ${type}.`)
 
-    // WEBGL_depth_texture (WebGL1 only) just adds DEPTH_COMPONENT and DEPTH_STENCIL
-    if (
-      ctx.capabilities.depthTexture &&
-      ['DEPTH_COMPONENT16', 'DEPTH_COMPONENT24'].includes(pixelFormat)
-    ) {
-      internalFormat = gl['DEPTH_COMPONENT']
-    }
-
     if (target === gl.TEXTURE_2D) {
-      if (compressed) {
-        data = Array.isArray(data) ? data : [data]
+      // Prepare data for mipmaps
+      data =
+        Array.isArray(data) && data[0].data ? data : [{ data, width, height }]
 
-        for (let level = 0; level < data.length; level++) {
-          assert(
-            !data[level].data ||
-              (data[level].width !== undefined &&
-                data[level].height !== undefined),
-            'Texture2D.update opts.width and opts.height are required when providing opts.data'
-          )
+      for (let level = 0; level < data.length; level++) {
+        let { data: levelData, width, height } = data[level]
+
+        // Convert array of numbers to typed array
+        if (Array.isArray(levelData)) {
+          const TypedArray = ctx.DataTypeConstructor[type]
+          assert(TypedArray, `Unknown texture data type: ${type}`)
+          levelData = new TypedArray(levelData)
+        }
+
+        if (compressed) {
           gl.compressedTexImage2D(
             target,
             level,
             internalFormat,
-            data[level].width,
-            data[level].height,
+            width,
+            height,
             0,
-            data[level].data
+            levelData
           )
-        }
-
-        // Set filtering
-        // TODO: allow override?
-        if (data.length > 1) {
-          if (texture.min === gl.LINEAR) texture.min = gl.NEAREST_MIPMAP_LINEAR
-        } else {
-          if (texture.min === gl.NEAREST_MIPMAP_LINEAR) texture.min = gl.LINEAR
-        }
-
-        texture.width = data[0].width
-        texture.height = data[0].height
-      } else {
-        if (Array.isArray(data)) {
-          if (type === gl.UNSIGNED_BYTE) {
-            data = new Uint8Array(data)
-          } else if (type === gl.FLOAT) {
-            data = new Float32Array(data)
-          } else if (type === gl.HALF_FLOAT) {
-            data = new Float32Array(data)
-          } else {
-            assert.fail(`Unknown texture data type: ${type}`)
-          }
-        }
-
-        if (width && height) {
+        } else if (width && height) {
           gl.texImage2D(
             target,
-            lod,
+            level,
             internalFormat,
             width,
             height,
             0,
             format,
             type,
-            data
+            levelData
           )
-          texture.width = width
-          texture.height = height
         }
       }
+
+      if (data[0].width) texture.width = data[0].width
+      if (data[0].height) texture.height = data[0].height
     } else if (target === gl.TEXTURE_CUBE_MAP) {
       assert(
         !data || (Array.isArray(data) && data.length === 6),
         'TextureCube requires data for 6 faces'
       )
-      // TODO: gl.compressedTexImage2D for cubemap target
+
+      // TODO: gl.compressedTexImage2D, manual mimaps
+      let lod = 0
+
       for (let i = 0; i < 6; i++) {
         let faceData = data ? data[i].data || data[i] : null
         const faceTarget = gl.TEXTURE_CUBE_MAP_POSITIVE_X + i
         if (Array.isArray(faceData)) {
-          if (type === gl.UNSIGNED_BYTE) {
-            faceData = new Uint8Array(faceData)
-          } else if (type === gl.FLOAT) {
-            faceData = new Float32Array(data)
-          } else {
-            assert.fail(`Unknown texture data type: ${type}`)
-          }
+          // Convert array of numbers to typed array
+          const TypedArray = ctx.DataTypeConstructor[type]
+          assert(TypedArray, `Unknown texture data type: ${type}`)
+          faceData = new TypedArray(faceData)
+
           gl.texImage2D(
             faceTarget,
             lod,
@@ -290,6 +294,7 @@ function updateTexture2D(ctx, texture, opts) {
     gl.generateMipmap(texture.target)
   }
 
+  texture.compressed = compressed
   texture.target = target
   texture.pixelFormat = pixelFormat
   texture.encoding = encoding

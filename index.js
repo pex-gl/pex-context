@@ -157,6 +157,17 @@ function createContext(opts) {
     Uint32: gl.UNSIGNED_INT
   }
 
+  const DataTypeConstructor = {
+    [DataType.Float16]: Float32Array,
+    [DataType.Float32]: Float32Array,
+    [DataType.Int8]: Int8Array,
+    [DataType.Int16]: Int16Array,
+    [DataType.Int32]: Int32Array,
+    [DataType.Uint8]: Uint8Array,
+    [DataType.Uint16]: Uint16Array,
+    [DataType.Uint32]: Uint32Array
+  }
+
   const Face = {
     Front: gl.FRONT,
     Back: gl.BACK,
@@ -172,6 +183,7 @@ function createContext(opts) {
     LinearMipmapLinear: gl.LINEAR_MIPMAP_LINEAR
   }
 
+  // Mapping of format and type (with alternative types)
   const TextureFormat = {
     // Unsized Internal Formats
     RGB: [gl.RGB, DataType.Uint8], // gl.UNSIGNED_SHORT_5_6_5
@@ -245,9 +257,13 @@ function createContext(opts) {
     DEPTH24_STENCIL8: [gl.DEPTH_STENCIL, gl.UNSIGNED_INT_24_8],
     DEPTH32F_STENCIL8: [gl.DEPTH_STENCIL, gl.FLOAT_32_UNSIGNED_INT_24_8_REV]
   }
-  if (capabilities.depthTexture) {
-    TextureFormat.DEPTH_COMPONENT = [gl.DEPTH_COMPONENT, DataType.Uint16]
-    TextureFormat.DEPTH_STENCIL = [gl.DEPTH_STENCIL, DataType.Uint16]
+  if (gl instanceof WebGLRenderingContext) {
+    if (capabilities.depthTexture) {
+      TextureFormat.DEPTH_COMPONENT = [gl.DEPTH_COMPONENT, DataType.Uint16]
+      TextureFormat.DEPTH_STENCIL = [gl.DEPTH_STENCIL, DataType.Uint16]
+    }
+    TextureFormat.R16FLegacy = [gl.ALPHA, DataType.Float16]
+    TextureFormat.R32FLegacy = [gl.ALPHA, DataType.Float32]
   }
   const PixelFormat = {
     ...Object.fromEntries(
@@ -303,6 +319,7 @@ function createContext(opts) {
     BlendFactor: BlendFactor,
     CubemapFace: CubemapFace,
     DataType: DataType,
+    DataTypeConstructor: DataTypeConstructor,
     DepthFunc: DepthFunc,
     Face: Face,
     Filter: Filter,
