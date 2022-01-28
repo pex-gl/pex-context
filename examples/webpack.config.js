@@ -5,9 +5,8 @@ const NodePolyfillPlugin = require('node-polyfill-webpack-plugin')
 module.exports = {
   entry: './index.js',
   output: {
-    filename: 'main.js',
-    path: path.join(__dirname, 'build'),
-    clean: true
+    filename: 'build/[name].js',
+    path: __dirname
   },
   resolve: {
     fallback: {
