@@ -4,26 +4,25 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --open",
-    "build": "npm run clean && webpack",
+    "build": "npx webpack build",
+    "start": "npx webpack serve --mode=development",
     "screenshots": "node ./scripts/screenshot-examples.js",
-    "diff": "node ./scripts/screenshot-diff.js",
-    "clean": "rm -rf build"
+    "diff": "node ./scripts/screenshot-diff.js"
   },
   "author": "Marcin Ignac <marcin.ignac@gmail.com> (http://marcinignac.com/)",
   "license": "MIT",
   "dependencies": {
     "baboon-image": "^2.1.0",
-    "budo": "^11.6.1",
     "bunny": "^1.0.1",
     "flatten": "^1.0.2",
-    "geom-center-and-normalize": "^1.0.2",
+    "geom-center-and-normalize": "^1.0.3",
     "geom-normals": "^1.0.1",
     "geom-split-vertices": "^1.0.0",
     "is-browser": "^2.1.0",
+    "node-polyfill-webpack-plugin": "^1.1.4",
     "normals": "^1.1.0",
-    "pex-cam": "^2.7.1",
-    "pex-gui": "^2.3.0",
+    "pex-cam": "^2.8.0",
+    "pex-gui": "^2.4.0",
     "pex-io": "^2.1.0",
     "pex-math": "^2.1.1",
     "pex-random": "^1.0.1",
@@ -31,17 +30,20 @@
     "primitive-sphere": "^3.0.0",
     "primitive-torus": "^1.0.4",
     "raf": "^3.4.1",
-    "simplex-noise": "^2.4.0"
+    "simplex-noise": "^3.0.1"
   },
   "devDependencies": {
-    "glob": "^7.1.4",
-    "mkdirp": "^0.5.1",
-    "pixelmatch": "^5.0.2",
-    "pngjs": "^3.4.0",
-    "puppeteer": "^1.19.0",
+    "glob": "^7.2.0",
+    "mkdirp": "^1.0.4",
+    "pixelmatch": "^5.2.1",
+    "pngjs": "^6.0.0",
+    "puppeteer": "^13.1.2",
     "request": "^2.88.0",
-    "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.8",
-    "webpack-dev-server": "^3.11.2"
+    "webpack": "^5.67.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.3"
+  },
+  "engines": {
+    "node": ">=17"
   }
 }

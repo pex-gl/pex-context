@@ -1,4 +1,3 @@
-const assert = require('assert')
 const createContext = require('../')
 const ctx = createContext()
 
@@ -7,12 +6,11 @@ const tex = ctx.texture2D({
   width: 1,
   height: 1
 })
-assert.equal(tex.type, ctx.DataType.Uint8)
-assert.equal(tex.class, 'texture', 'Wrong texture class')
+console.assert(tex.type === ctx.DataType.Uint8)
+console.assert(tex.class === 'texture', 'Wrong texture class')
 
-assert.equal(
-  ctx.state.activeTextures[0],
-  tex,
+console.assert(
+  ctx.state.activeTextures[0] === tex,
   'Creating texture should be remembered in active state'
 )
 
@@ -29,9 +27,8 @@ const vertexBuffers = [
 ]
 
 vertexBuffers.forEach((vertexBuffer, i) => {
-  assert.equal(
-    vertexBuffer.target,
-    ctx.gl.ARRAY_BUFFER,
+  console.assert(
+    vertexBuffer.target === ctx.gl.ARRAY_BUFFER,
     `VertexBuffer ${i} type is wrong ${vertexBuffer.target} != ${
       ctx.gl.ARRAY_BUFFER
     }`
@@ -55,6 +52,10 @@ const pipeline = ctx.pipeline({
 })
 
 ctx.submit({
+  pass: ctx.pass({
+    clearColor: [0.2, 0.2, 0.2, 1],
+    clearDepth: 1
+  }),
   pipeline: pipeline,
   attributes: {
     // aPosition0: [0, 1, 0], // not supported yet
@@ -68,10 +69,11 @@ ctx.submit({
   indices: ctx.indexBuffer([0])
 })
 
-assert.equal(
-  ctx.state.activeTextures[0],
-  tex,
+console.assert(
+  ctx.state.activeTextures[0] === tex,
   'Using texture should be remembered in active state'
 )
 
-window.dispatchEvent(new CustomEvent('pex-screenshot'))
+setTimeout(() => {
+  window.dispatchEvent(new CustomEvent('pex-screenshot'))
+}, 1000)

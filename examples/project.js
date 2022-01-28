@@ -26,10 +26,6 @@ const camera = require('pex-cam/perspective')({
   position: [5, 1, 5]
 })
 
-const orbiter = require('pex-cam/orbiter')({
-  camera: camera
-})
-
 const cube = require('primitive-cube')(0.5)
 
 const cubes = []
@@ -65,7 +61,7 @@ const clearCmd = {
 
 const drawInViewport = {
   pass: ctx.pass({
-    clearColor: [0.3, 0.3, 0.3, 1]
+    clearColor: [0.2, 0.2, 0.2, 1]
   }),
   viewport: viewport,
   scissor: viewport

@@ -57,7 +57,7 @@ if (ctx.capabilities.depthTexture && useDepthTexture) {
 
 const clearCmd = {
   pass: ctx.pass({
-    clearColor: [0, 0, 0, 1],
+    clearColor: [0.2, 0.2, 0.2, 1],
     clearDepth: 1
   })
 }

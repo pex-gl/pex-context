@@ -105,7 +105,7 @@ const depthPassCmd = {
 
 const clearCmd = {
   pass: ctx.pass({
-    clearColor: [0.5, 0.5, 0.5, 1.0],
+    clearColor: [0.2, 0.2, 0.2, 1],
     clearDepth: 1
   })
 }

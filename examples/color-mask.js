@@ -83,29 +83,30 @@ ctx.frame(() => {
   const size = Math.floor(w / 4)
 
   ctx.submit(clearScreenCmd)
+
   ctx.submit(drawTextureCmd, {
-    viewport: [0, h - size, size, size],
-    uniforms: {
-      uTexture: baboonTex
-    }
-  })
-  ctx.submit(drawTextureCmd, {
-    viewport: [size, h - size, size, size],
+    viewport: [0, h * 0.5 - size * 0.5, size, size],
     pipeline: redPipeline,
     uniforms: {
       uTexture: baboonTex
     }
   })
   ctx.submit(drawTextureCmd, {
-    viewport: [size * 2, h - size, size, size],
+    viewport: [size, h * 0.5 - size * 0.5, size, size],
     pipeline: greenPipeline,
     uniforms: {
       uTexture: baboonTex
     }
   })
   ctx.submit(drawTextureCmd, {
-    viewport: [size * 3, h - size, size, size],
+    viewport: [size * 2, h * 0.5 - size * 0.5, size, size],
     pipeline: bluePipeline,
+    uniforms: {
+      uTexture: baboonTex
+    }
+  })
+  ctx.submit(drawTextureCmd, {
+    viewport: [size * 3, h * 0.5 - size * 0.5, size, size],
     uniforms: {
       uTexture: baboonTex
     }

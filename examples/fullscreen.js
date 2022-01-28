@@ -135,10 +135,16 @@ loadImage(assets + '/images/pex.png', (err, img) => {
 
 const gui = new GUI(ctx)
 gui.addHeader('Settings')
-gui.addParam('FOV', settings, 'fov', {
-  min: Math.PI / 4,
-  max: Math.PI / 2
-})
+gui.addParam(
+  'FOV',
+  settings,
+  'fov',
+  {
+    min: Math.PI / 4,
+    max: Math.PI / 2
+  },
+  () => camera.set({ fov: settings.fov })
+)
 gui.addHeader('Resolution')
 gui.addRadioList('Resolution', settings, 'resolution', resolutions, () => {
   const res = resolutions.find((r) => r.value === settings.resolution)

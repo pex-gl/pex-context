@@ -90,7 +90,6 @@ const cubeMesh = {
   }
 }
 
-
 const drawCube = {
   name: 'drawCube',
   pipeline: ctx.pipeline({
@@ -142,6 +141,9 @@ const drawTorus = {
 }
 
 const drawTexturedCubeCmd = {
+  pass: ctx.pass({
+    clearColor: [0.2, 0.2, 0.2, 1]
+  }),
   name: 'drawTexturedCube',
   pipeline: ctx.pipeline({
     vert: texturedVert,
@@ -213,29 +215,25 @@ raf(function frame() {
     scissor: [0, 0, s, s]
   }
 
-  ctx.submit(drawToTexture1Cmd,
-    () => {
-      ctx.submit(
-        leftHalfView, () => {
-          ctx.submit(drawCube)
-        })
-      ctx.submit(
-        rightHalfView, () => {
-          ctx.submit(drawCube, {
-            uniforms: {
-              uBaseColor: [0, 1, 0, 1]
-            }
-          })
-        })
-      ctx.submit(fullView, () => {
-        ctx.submit(drawTorus, {
-          uniforms: {
-            uBaseColor: [1, 0, 1, 1]          
-          }
-        })
-      })      
-    }
-  )
+  ctx.submit(drawToTexture1Cmd, () => {
+    ctx.submit(leftHalfView, () => {
+      ctx.submit(drawCube)
+    })
+    ctx.submit(rightHalfView, () => {
+      ctx.submit(drawCube, {
+        uniforms: {
+          uBaseColor: [0, 1, 0, 1]
+        }
+      })
+    })
+    ctx.submit(fullView, () => {
+      ctx.submit(drawTorus, {
+        uniforms: {
+          uBaseColor: [1, 0, 1, 1]
+        }
+      })
+    })
+  })
 
   camera.set({ aspect: ctx.gl.drawingBufferWidth / ctx.gl.drawingBufferHeight })
 
@@ -245,26 +243,18 @@ raf(function frame() {
       iProjectionMatrix: camera.projectionMatrix
     }
   })
-
-  // ctx.submit(drawTextureCmd, {
-  //   uniforms: {
-  //     uTexture: normalMap
-  //   },
-  //   viewport: [256, 0, 256, 256]
-  // })
-  // ctx.submit(drawTextureCmd, {
-  //   uniforms: {
-  //     uTexture: depthMap
-  //   },
-  //   viewport: [0, 256, 256, 256]
-  // })
-
-  // ctx.submit(drawTextureCmd, {
-  //   uniforms: {
-  //     uTexture: colorMap2
-  //   },
-  //   viewport: [512, 0, 256, 256]
-  // })
+  ctx.submit(drawTextureCmd, {
+    uniforms: {
+      uTexture: colorMap
+    },
+    viewport: [0, 0, 256, 256]
+  })
+  ctx.submit(drawTextureCmd, {
+    uniforms: {
+      uTexture: depthMap
+    },
+    viewport: [256, 0, 256, 256]
+  })
 
   window.dispatchEvent(new CustomEvent('pex-screenshot'))
 

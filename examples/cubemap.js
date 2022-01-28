@@ -29,7 +29,7 @@ const ASSETS_DIR = isBrowser ? '/assets' : `${__dirname}/assets`
 
 const clearScreenCmd = {
   pass: ctx.pass({
-    clearColor: [0.5, 0.5, 0.5, 1],
+    clearColor: [0.2, 0.2, 0.2, 1],
     clearDepth: 1
   })
 }

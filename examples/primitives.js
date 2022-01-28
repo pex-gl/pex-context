@@ -51,7 +51,7 @@ const drawPoints = {
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: mat4.translate(mat4.create(), [-4, 0, 0]),
+    uModelMatrix: mat4.translate(mat4.create(), [-4 - 0.5, -0.5, 0]),
     uColor: [1, 1, 1, 1]
   }
 }
@@ -70,7 +70,7 @@ const drawLines = {
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: mat4.translate(mat4.create(), [-2.5, 0, 0]),
+    uModelMatrix: mat4.translate(mat4.create(), [-2 - 0.5, -0.5, 0]),
     uColor: [1, 1, 1, 1]
   }
 }
@@ -89,7 +89,7 @@ const drawLineStrip = {
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: mat4.translate(mat4.create(), [-1, 0, 0]),
+    uModelMatrix: mat4.translate(mat4.create(), [0 - 0.5, -0.5, 0]),
     uColor: [1, 1, 1, 1]
   }
 }
@@ -108,7 +108,7 @@ const drawTriangles = {
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: mat4.translate(mat4.create(), [0.5, 0, 0]),
+    uModelMatrix: mat4.translate(mat4.create(), [2 - 0.5, -0.5, 0]),
     uColor: [1, 1, 1, 1]
   }
 }
@@ -127,7 +127,7 @@ const drawTriangleStrip = {
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: mat4.translate(mat4.create(), [2, 0, 0]),
+    uModelMatrix: mat4.translate(mat4.create(), [4 - 0.5, -0.5, 0]),
     uColor: [1, 1, 1, 1]
   }
 }

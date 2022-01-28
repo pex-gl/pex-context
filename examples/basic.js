@@ -19,7 +19,7 @@ const clearCmd = {
 
 const drawCmd = {
   pass: ctx.pass({
-    clearColor: [0.2, 0.2, 0.2, 1],
+    clearColor: [0.1, 0.1, 0.1, 1],
     clearDepth: 1
   }),
   pipeline: ctx.pipeline({

@@ -73,7 +73,7 @@ const depthPassCmd = {
 const drawPassCmd = {
   name: 'drawPass',
   pass: ctx.pass({
-    clearColor: [1, 0, 0, 1],
+    clearColor: [0.2, 0.2, 0.2, 1],
     clearDepth: 1
   })
 }

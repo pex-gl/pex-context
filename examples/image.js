@@ -16,7 +16,7 @@ const camera = createCamera({
   target: [0, 0, 0]
 })
 
-createOrbiter({ camera: camera, distance: 10 })
+createOrbiter({ camera: camera, distance: 5 })
 
 const ASSETS_DIR = isBrowser ? '/assets' : `${__dirname}/assets`
 
@@ -24,7 +24,7 @@ const cube = createCube(1)
 
 const drawCmd = {
   pass: ctx.pass({
-    clearColor: [0.5, 0.5, 0.5, 1],
+    clearColor: [0.2, 0.2, 0.2, 1],
     clearDepth: 1
   }),
   pipeline: ctx.pipeline({
