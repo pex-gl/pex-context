@@ -1,7 +1,7 @@
 const path = require('path')
 
 const examplesNames = require
-  .context('./', false, /^(?!.*\/(index|webpack.config|scripts)).*js$/) // Match all .js files at the root except /index, /webpack.config and /scripts
+  .context('./', false, /^(?!.*\/(index|webpack.config|scripts|build|assets)).*js$/) // Match only .js files at the root
   .keys()
   .map((example) => path.basename(example, path.extname(example)))
 
@@ -11,7 +11,7 @@ const ExamplesModules = Object.fromEntries(
       example,
       () =>
         import(/* webpackChunkName: "[request]" */
-        /* webpackInclude: /^(?!.*\/(index|webpack.config|scripts)).*js$/ */
+        /* webpackInclude: /^(?!.*\/(index|webpack.config|scripts|build|assets)).*js$/ */
         `./${example}.js`)
     ])
   )
