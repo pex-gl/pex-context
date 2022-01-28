@@ -3,4 +3,4 @@ node_modules
 experiments
 .tern-port
 examples/screenshots/*-diff.png
-examples/build/main.js
+examples/build/*
