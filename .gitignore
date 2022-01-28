@@ -3,4 +3,3 @@ node_modules
 experiments
 .tern-port
 examples/screenshots/*-diff.png
-examples/build/*
