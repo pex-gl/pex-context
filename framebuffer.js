@@ -47,10 +47,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
     return colorAttachment
   })
 
-  if (opts.depth && !opts.depth.texture) {
-    opts.depth = { texture: opts.depth }
-  }
-  framebuffer.depth = opts.depth
+  framebuffer.depth = opts.depth.texture ? opts.depth : { texture: opts.depth }
 
   framebuffer.width = framebuffer.color[0].texture.width
   framebuffer.height = framebuffer.color[0].texture.height
