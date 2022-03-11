@@ -306,7 +306,7 @@ function createContext(opts) {
     // debugGraph: '',
     debugCommands: [],
     resources: [],
-    stats: [],
+    stats: {},
     queries: [],
     stack: [defaultState],
     defaultState: defaultState,
