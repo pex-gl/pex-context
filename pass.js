@@ -29,6 +29,7 @@ function createPass(ctx, opts) {
   }
 
   // if color or depth targets are present create new framebuffer
+  // otherwise we will inherit framebuffer from parent command or screen
   if (opts.color || opts.depth) {
     pass.framebuffer = ctx.framebuffer(opts)
   }

@@ -1,7 +1,7 @@
 const assert = require('assert')
 const checkProps = require('./check-props')
 
-const allowedProps = ['target', 'data', 'usage', 'type', 'offset']
+const allowedProps = ['target', 'data', 'usage', 'type', 'normalized', 'offset']
 
 function createBuffer(ctx, opts) {
   const gl = ctx.gl
@@ -61,6 +61,8 @@ function updateBuffer(ctx, buffer, opts) {
       data = new Uint16Array(elemSize === 1 ? sourceData : size)
     } else if (type === ctx.DataType.Uint32) {
       data = new Uint32Array(elemSize === 1 ? sourceData : size)
+    } else if (type === ctx.DataType.Int8) {
+      data = new Int8Array(elemSize === 1 ? sourceData : size)
     }
 
     if (elemSize > 1) {
@@ -79,6 +81,8 @@ function updateBuffer(ctx, buffer, opts) {
     type = ctx.DataType.Uint16
   } else if (data instanceof Uint32Array) {
     type = ctx.DataType.Uint32
+  } else if (data instanceof Int8Array) {
+    type = ctx.DataType.Int8
   } else if (data instanceof ArrayBuffer) {
     // assuming type was provided
   } else {

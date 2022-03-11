@@ -437,12 +437,12 @@ const buf = ctx.vertexBuffer({ data: Array }) // aka Attribute Buffer
 const buf = ctx.indexBuffer({ data: Array }) // aka Index Buffer
 ```
 
-| property | info         | type                            | default              |
-| -------- | ------------ | ------------------------------- | -------------------- |
-| `data`   | pixel data   | Array, Uint8Array, Float32Array | null                 |
-| `type`   | data type    | ctx.DataType                    | ctx.DataType.Float32 |
-| `usage`  | buffer usage | ctx.Usage                       | ctx.Usage.StaticDraw |
-| `offset` | data offset in the buffer (update only) | Number/Int      | undefined |
+| property | info                                    | type                            | default              |
+| -------- | --------------------------------------- | ------------------------------- | -------------------- |
+| `data`   | pixel data                              | Array, Uint8Array, Float32Array | null                 |
+| `type`   | data type                               | ctx.DataType                    | ctx.DataType.Float32 |
+| `usage`  | buffer usage                            | ctx.Usage                       | ctx.Usage.StaticDraw |
+| `offset` | data offset in the buffer (update only) | Number/Int                      | undefined            |
 
 ### Query
 
