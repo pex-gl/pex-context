@@ -323,10 +323,8 @@ for (let i = 0; i < numBunnies; i++) {
   })
 }
 
-// console.time('frame')
+// let frameNumber = 0
 raf(function frame() {
-  // console.timeEnd('frame')
-  // console.time('frame')
   updateTime()
   updateCamera()
   updateBunny(ctx)
