@@ -235,6 +235,7 @@ function createContext(opts) {
   const defaultState = {
     pass: {
       framebuffer: {
+        id: 'framebuffer_' + ID++,
         target: gl.FRAMEBUFFER,
         handle: null,
         width: gl.drawingBufferWidth,
@@ -300,6 +301,21 @@ function createContext(opts) {
 
   log('capabilities', capabilities)
 
+  function compareFBOAttachments(framebuffer, passOpts) {
+    const fboDepthAttachment = framebuffer.depth?.texture
+    const passDepthAttachment = passOpts.depth?.texture || passOpts.depth
+    if (fboDepthAttachment != passDepthAttachment) return false
+    if (framebuffer.color.length != passOpts.color.length) return false
+
+    for (let i = 0; i < framebuffer.color.length; i++) {
+      const fboColorAttachment = framebuffer.color[i]?.texture
+      const passColorAttachment = passOpts.color[i]?.texture || passOpts.color[i]
+      if (fboColorAttachment != passColorAttachment) return false
+    }
+
+    return true
+  }
+
   Object.assign(ctx, {
     debugMode: false,
     capabilities: capabilities,
@@ -312,9 +328,7 @@ function createContext(opts) {
     defaultState: defaultState,
     pixelRatio: opts.pixelRatio || 1,
     state: {
-      pass: {
-        framebuffer: defaultState.pass.framebuffer
-      },
+      framebuffer: defaultState.pass.framebuffer,
       pipeline: createPipeline(ctx, {}),
       activeTextures: [],
       activeAttributes: []
@@ -348,8 +362,8 @@ function createContext(opts) {
     },
     debug: function(enabled) {
       this.debugMode = enabled
-      if (enabled) {        
-        this.debugCommands = []     
+      if (enabled) {
+        this.debugCommands = []
       }
     },
     checkError: function() {
@@ -511,12 +525,36 @@ function createContext(opts) {
       const gl = this.gl
       const state = this.state
 
-      let framebuffer = pass.framebuffer
-
-      // inherit framebuffer from parent command
-      // if pass doesn't specify color or depth attachments
-      // and therefore doesn't have own framebuffer assigned
-      if (!framebuffer) {
+      // Need to find reliable way of deciding if i should update framebuffer
+      // 1. If pass has fbo, bind it
+      // 3. Else if there is another framebuffer on stack (currently bound) leave it
+      // 3. Else if there is only screen framebuffer on the stack and currently bound fbo is different, change it
+      // 4. TODO: If there is pass with fbo and another fbo on stack throw error (no interleaved passes are allowed)      
+      if (pass.framebuffer) {
+        let framebuffer = pass.framebuffer
+        if (framebuffer.id !== state.framebuffer.id) {
+          if (this.debugMode) {
+            log(
+              'change framebuffer',
+              state.framebuffer,
+              '->',
+              framebuffer
+            )          
+          }
+          if (framebuffer._update && !compareFBOAttachments(framebuffer, pass.opts)) {
+            this.update(pass.framebuffer, pass.opts)
+          }
+          ctx.state.framebuffer = framebuffer
+          gl.bindFramebuffer(framebuffer.target, framebuffer.handle)
+          if (framebuffer.drawBuffers && framebuffer.drawBuffers.length > 1) {
+            gl.drawBuffers(framebuffer.drawBuffers)
+          }
+        }
+      } else {
+        // inherit framebuffer from parent command
+        // if pass doesn't specify color or depth attachments
+        // and therefore doesn't have own framebuffer assigned
+        let framebuffer
         let i = ctx.stack.length - 1
         while (!framebuffer && i >= 0) {
           if (ctx.stack[i].pass) {
@@ -524,43 +562,11 @@ function createContext(opts) {
           }
           --i
         }
-      }
-
-      // Need to find reliable way of deciding if i should update framebuffer
-      // as we now inherit framebuffer from parent command pass
-      // there are two cases:
-      // 1. We want to just clear color or depth in sub command.
-      //    We should inherit framebuffer state from parent command and not bind anything
-      // 2. We want to draw to screen
-      //
-      // Can those two cases be simplified to
-      // 0. If pass has framebuffer, run old code
-      // 1. If there is framebuffer on the stack, change nothing
-      // 2. If there is only screen framebuffer on the stack and currently bound fbo is different, change it        
-      if (pass.framebuffer) {
-        if (state.pass.id !== pass.id) {
-          if (this.debugMode)
-            log(
-              'change framebuffer',
-              state.pass.framebuffer,
-              '->',
-              pass.framebuffer
-            )
-          state.pass = pass
-          if (pass.framebuffer._update) {
-            // rebind pass' color and depth to shared FBO
-            this.update(pass.framebuffer, pass.opts)
-          }
-          gl.bindFramebuffer(pass.framebuffer.target, pass.framebuffer.handle)
-          if (
-            pass.framebuffer.drawBuffers &&
-            pass.framebuffer.drawBuffers.length > 1
-          ) {
-            gl.drawBuffers(pass.framebuffer.drawBuffers)
-          }
-        }
-      } else {
-        if (framebuffer == ctx.defaultState.pass.framebuffer && ctx.state.framebuffer !== framebuffer) {
+        if (
+          framebuffer == ctx.defaultState.pass.framebuffer &&
+          ctx.state.framebuffer !== framebuffer
+        ) {
+          ctx.state.framebuffer = framebuffer
           gl.bindFramebuffer(framebuffer.target, framebuffer.handle)
         }
       }
@@ -1021,7 +1027,8 @@ function createContext(opts) {
       }
     },
     submit: function(cmd, batches, subCommand) {
-      if (this.debugMode) {                
+      const prevFramebufferId = this.state.framebuffer?.id
+      if (this.debugMode) {
         checkProps(allowedCommandProps, cmd)
         if (batches && subCommand) {
           log('submit', cmd.name || cmd.id, {
@@ -1069,6 +1076,13 @@ function createContext(opts) {
       const parentState = this.stack[this.stack.length - 1]
       const cmdState = this.mergeCommands(parentState, cmd, false)
       this.apply(cmdState)
+
+      const currFramebufferId = this.state.framebuffer?.id
+      if (this.debugMode) {
+        const framebufferCanged = prevFramebufferId != currFramebufferId
+        log('fbo-state', "  ".repeat(this.stack.length), cmd.name, framebufferCanged ? `${prevFramebufferId} -> ${currFramebufferId}` : currFramebufferId)
+      }
+
       if (this.debugMode) {
         cmdState.debugId = this.debugCommands.length
         this.debugCommands.push({

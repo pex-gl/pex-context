@@ -15,31 +15,22 @@ function createPass(ctx, opts) {
   const pass = {
     class: 'pass',
     opts: opts,
-    // framebuffer: opts.framebuffer,
     clearColor: opts.clearColor,
     clearDepth: opts.clearDepth,
     _dispose: function() {
       this.opts = null
       this.clearColor = null
       this.clearDepth = null
-      if (this.framebuffer === ctx.defaultState.pass.sharedFramebuffer) {
-        if (--ctx.defaultState.pass.sharedFramebuffer.refCount === 0) {
-          ctx.defaultState.pass.sharedFramebuffer._dispose()
-          ctx.defaultState.pass.sharedFramebuffer = null
-        }
+      if (this.framebuffer) {
+        ctx.dispose(this.framebuffer)
+        this.framebuffer = null
       }
-      this.framebuffer = null
     }
   }
 
-  // if color or depth targets are present assign shared framebuffer 
-  // otherwise we will inherit framebuffer from parent command or screen
+  // if color or depth targets are present create new framebuffer
   if (opts.color || opts.depth) {
-    if (!ctx.defaultState.pass.sharedFramebuffer) {
-      ctx.defaultState.pass.sharedFramebuffer = ctx.framebuffer({})
-    }
-    pass.framebuffer = ctx.defaultState.pass.sharedFramebuffer
-    ctx.defaultState.pass.sharedFramebuffer.refCount++
+    pass.framebuffer = ctx.framebuffer(opts)
   }
 
   return pass
