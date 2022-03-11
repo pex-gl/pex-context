@@ -1,7 +1,11 @@
 const path = require('path')
 
 const examplesNames = require
-  .context('./', false, /^(?!.*\/(index|webpack.config|scripts|build|assets)).*js$/) // Match only .js files at the root
+  .context(
+    './',
+    false,
+    /^(?!.*\/(index|webpack.config|scripts|build|assets)).*js$/
+  ) // Match only .js files at the root
   .keys()
   .map((example) => path.basename(example, path.extname(example)))
 

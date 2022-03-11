@@ -309,7 +309,8 @@ function createContext(opts) {
 
     for (let i = 0; i < framebuffer.color.length; i++) {
       const fboColorAttachment = framebuffer.color[i]?.texture
-      const passColorAttachment = passOpts.color[i]?.texture || passOpts.color[i]
+      const passColorAttachment =
+        passOpts.color[i]?.texture || passOpts.color[i]
       if (fboColorAttachment != passColorAttachment) return false
     }
 
@@ -529,19 +530,17 @@ function createContext(opts) {
       // 1. If pass has fbo, bind it
       // 3. Else if there is another framebuffer on stack (currently bound) leave it
       // 3. Else if there is only screen framebuffer on the stack and currently bound fbo is different, change it
-      // 4. TODO: If there is pass with fbo and another fbo on stack throw error (no interleaved passes are allowed)      
+      // 4. TODO: If there is pass with fbo and another fbo on stack throw error (no interleaved passes are allowed)
       if (pass.framebuffer) {
         let framebuffer = pass.framebuffer
         if (framebuffer.id !== state.framebuffer.id) {
           if (this.debugMode) {
-            log(
-              'change framebuffer',
-              state.framebuffer,
-              '->',
-              framebuffer
-            )          
+            log('change framebuffer', state.framebuffer, '->', framebuffer)
           }
-          if (framebuffer._update && !compareFBOAttachments(framebuffer, pass.opts)) {
+          if (
+            framebuffer._update &&
+            !compareFBOAttachments(framebuffer, pass.opts)
+          ) {
             this.update(pass.framebuffer, pass.opts)
           }
           ctx.state.framebuffer = framebuffer
@@ -1080,7 +1079,14 @@ function createContext(opts) {
       const currFramebufferId = this.state.framebuffer?.id
       if (this.debugMode) {
         const framebufferCanged = prevFramebufferId != currFramebufferId
-        log('fbo-state', "  ".repeat(this.stack.length), cmd.name, framebufferCanged ? `${prevFramebufferId} -> ${currFramebufferId}` : currFramebufferId)
+        log(
+          'fbo-state',
+          '  '.repeat(this.stack.length),
+          cmd.name,
+          framebufferCanged
+            ? `${prevFramebufferId} -> ${currFramebufferId}`
+            : currFramebufferId
+        )
       }
 
       if (this.debugMode) {
