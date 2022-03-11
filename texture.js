@@ -142,7 +142,7 @@ function updateTexture2D(ctx, texture, opts) {
     data = opts.data ? opts.data.data || opts.data : null
 
     if (!opts.width && data && data.width) width = data.width
-    if (!opts.height && data && data.height) width = data.height
+    if (!opts.height && data && data.height) height = data.height
 
     assert(
       !data || (width !== undefined && height !== undefined),
