@@ -35,6 +35,7 @@
   },
   "homepage": "https://github.com/pex-gl/pex-context",
   "dependencies": {
+    "assert": "^2.0.0",
     "debug": "^2.6.9",
     "is-browser": "^2.0.1",
     "pex-gl": "^2.7.0",
