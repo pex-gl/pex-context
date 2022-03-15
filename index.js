@@ -1186,7 +1186,9 @@ function createContext(opts) {
           cmd.name,
           framebufferCanged
             ? `${prevFramebufferId} -> ${currFramebufferId}`
-            : currFramebufferId
+            : currFramebufferId,
+          [...this.state.viewport],
+          this.state.scissor ? [...this.state.scissor] : "[]"
         )
       }
 
