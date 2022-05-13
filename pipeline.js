@@ -1,29 +1,29 @@
-const checkProps = require('./check-props')
+import { checkProps } from "./utils.js";
 
 const allowedProps = [
-  'vert',
-  'frag',
-  'program',
-  'depthWrite',
-  'depthTest',
-  'depthFunc',
-  'blend',
-  'blendSrcRGBFactor',
-  'blendSrcAlphaFactor',
-  'blendDstRGBFactor',
-  'blendDstAlphaFactor',
-  'cullFace',
-  'cullFaceMode',
-  'colorMask',
-  'primitive'
-]
+  "vert",
+  "frag",
+  "program",
+  "depthWrite",
+  "depthTest",
+  "depthFunc",
+  "blend",
+  "blendSrcRGBFactor",
+  "blendSrcAlphaFactor",
+  "blendDstRGBFactor",
+  "blendDstAlphaFactor",
+  "cullFace",
+  "cullFaceMode",
+  "colorMask",
+  "primitive",
+];
 
 function createPipeline(ctx, opts) {
-  checkProps(allowedProps, opts)
+  checkProps(allowedProps, opts);
 
   const pipeline = Object.assign(
     {
-      class: 'pipeline',
+      class: "pipeline",
       vert: null,
       frag: null,
       program: null,
@@ -39,41 +39,41 @@ function createPipeline(ctx, opts) {
       cullFaceMode: ctx.Face.Back,
       colorMask: [true, true, true, true],
       primitive: ctx.Primitive.Triangles,
-      _dispose: function() {
-        this.vert = null
-        this.frag = null
+      _dispose() {
+        this.vert = null;
+        this.frag = null;
         if (
           this.program &&
           --this.program.refCount === 0 &&
           this.program.handle
         ) {
-          ctx.dispose(this.program)
+          ctx.dispose(this.program);
         }
-        this.program = null
-      }
+        this.program = null;
+      },
     },
     opts
-  )
+  );
 
   if (opts.vert && opts.frag) {
     pipeline.program = ctx.program({
       vert: opts.vert,
-      frag: opts.frag
-    })
+      frag: opts.frag,
+    });
   }
 
   if (pipeline.program && !pipeline.vertexLayout) {
-    pipeline.program.refCount++
-    const attributesPerLocation = pipeline.program.attributesPerLocation
+    pipeline.program.refCount++;
+    const attributesPerLocation = pipeline.program.attributesPerLocation;
     pipeline.vertexLayout = Object.keys(attributesPerLocation).map(
       (location) => {
-        const attribute = attributesPerLocation[location]
-        return [attribute.name, parseInt(location, 10), attribute.size]
+        const attribute = attributesPerLocation[location];
+        return [attribute.name, parseInt(location, 10), attribute.size];
       }
-    )
+    );
   }
 
-  return pipeline
+  return pipeline;
 }
 
-module.exports = createPipeline
+export default createPipeline;

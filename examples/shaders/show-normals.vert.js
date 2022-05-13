@@ -1,4 +1,4 @@
-module.exports = /* glsl */ `
+export default /* glsl */ `
 attribute vec3 aPosition;
 attribute vec3 aNormal;
 
@@ -12,4 +12,4 @@ void main() {
   gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aPosition, 1.0);
   vColor = vec4(aNormal / 2.0 + 0.5, 1.0);
 }
-`
+`;

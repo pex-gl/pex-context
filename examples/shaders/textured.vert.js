@@ -1,4 +1,4 @@
-module.exports = /* glsl */ `
+export default /* glsl */ `
 attribute vec3 aPosition;
 attribute vec2 aTexCoord;
 
@@ -11,4 +11,4 @@ void main () {
   gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
   vTexCoord = aTexCoord;
 }
-`
+`;

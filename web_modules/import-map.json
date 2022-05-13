@@ -1,0 +1,20 @@
+{
+  "imports": {
+    "assert": "./assert.js",
+    "baboon-image-uri": "./baboon-image-uri.js",
+    "bunny": "./bunny.js",
+    "debug": "./debug.js",
+    "es-module-shims": "./es-module-shims.js",
+    "flatten": "./flatten.js",
+    "geom-center-and-normalize": "./geom-center-and-normalize.js",
+    "normals": "./normals.js",
+    "pex-cam": "./pex-cam.js",
+    "pex-color": "./pex-color.js",
+    "pex-gl": "./pex-gl.js",
+    "pex-gui": "./pex-gui.js",
+    "pex-io": "./pex-io.js",
+    "pex-math": "./pex-math.js",
+    "pex-random": "./pex-random.js",
+    "primitive-geometry": "./primitive-geometry.js"
+  }
+}

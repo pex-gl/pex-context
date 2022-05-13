@@ -1,10 +1,9 @@
-module.exports = /* glsl */ `
-precision mediump float;
+export default /* glsl */ `
+precision highp float;
 
-varying vec3 vNormal;
+varying vec4 vColor;
 
-void main () {
-  gl_FragColor.rgb = vNormal * 0.5 + 0.5;
-  gl_FragColor.a = 1.0;
+void main() {
+  gl_FragColor = vColor;
 }
-`
+`;

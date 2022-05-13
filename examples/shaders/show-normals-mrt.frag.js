@@ -1,6 +1,8 @@
-module.exports = /* glsl */ `
-precision highp float;
+export default /* glsl */ `
+#ifdef GL_EXT_draw_buffers
 #extension GL_EXT_draw_buffers : require
+#endif
+precision highp float;
 
 varying vec4 vColor;
 
@@ -11,4 +13,5 @@ void main() {
   gl_FragData[0].a = 1.0;
   gl_FragData[1].rgb = N * 0.5 + 0.5;
   gl_FragData[1].a = 1.0;
-}`
+}
+`;

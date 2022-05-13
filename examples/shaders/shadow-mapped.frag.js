@@ -1,10 +1,9 @@
-const gamma = require('./gamma.glsl.js')
+import gamma from "./gamma.glsl.js";
 
-module.exports = /* glsl */ `
+export default /* glsl */ `
 precision highp float;
 
 uniform vec4 uAmbientColor;
-uniform vec4 uDiffuseColor;
 uniform vec3 uLightPos;
 uniform float uWrap;
 uniform float uLightNear;
@@ -15,6 +14,7 @@ uniform mat4 uLightViewMatrix;
 
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
+varying vec4 vColor;
 
 ${gamma}
 
@@ -37,7 +37,7 @@ void main() {
   vec3 N = normalize(vNormal);
   float NdotL = max(0.0, (dot(N, L) + uWrap) / (1.0 + uWrap));
   vec3 ambient = toLinear(uAmbientColor.rgb);
-  vec3 diffuse = toLinear(uDiffuseColor.rgb);
+  vec3 diffuse = toLinear(vColor.rgb);
 
   vec4 lightViewPosition = uLightViewMatrix * vec4(vWorldPosition, 1.0);
   float lightDist1 = -lightViewPosition.z;
@@ -64,4 +64,4 @@ void main() {
   //gl_FragColor = vec4((lightDist1 - lightNear)/(lightFar - lightNear));
   //gl_FragColor = vec4((lightDist2 - lightNear)/(lightFar - lightNear));
 }
-`
+`;

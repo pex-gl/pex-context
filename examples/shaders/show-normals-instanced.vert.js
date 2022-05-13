@@ -1,6 +1,6 @@
-const { transposeMat4, quatToMat4 } = require('./math.glsl')
+import { transposeMat4, quatToMat4 } from "./math.glsl.js";
 
-module.exports = /* glsl */ `
+export default /* glsl */ `
 attribute vec3 aPosition;
 attribute vec3 aNormal;
 attribute vec3 aOffset;
@@ -25,4 +25,4 @@ void main() {
 
   vColor = vec4(aNormal / 2.0 + 0.5, 1.0);
 }
-`
+`;

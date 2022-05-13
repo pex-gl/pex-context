@@ -1,4 +1,4 @@
-module.exports = /* glsl */ `
+export default /* glsl */ `
 precision highp float;
 
 // uniform sampler2D uEnvMap;
@@ -14,4 +14,4 @@ void main() {
   vec3 color = textureCube(uEnvMap, N).rgb;
   gl_FragColor.rgb = color;
   gl_FragColor.a = 1.0;
-}`
+}`;
