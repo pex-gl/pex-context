@@ -435,6 +435,12 @@ function createContext(opts) {
       activeTextures: [],
       activeAttributes: []
     },
+    get width() {
+      return gl.drawingBufferWidth
+    },
+    get height() {
+      return gl.drawingBufferHeight
+    },
     getGLString: function(glEnum) {
       let str = ''
       for (let key in gl) {
