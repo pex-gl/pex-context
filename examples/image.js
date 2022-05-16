@@ -5,7 +5,7 @@ import { perspective as createCamera, orbiter as createOrbiter } from "pex-cam";
 
 import { cube } from "primitive-geometry";
 
-import texturedVert from "./shaders/textured.vert.js";
+import basicTexturedVert from "./shaders/textured.vert.js";
 
 const ctx = createContext({ debug: true });
 
@@ -29,7 +29,7 @@ const drawCmd = {
     clearDepth: 1,
   }),
   pipeline: ctx.pipeline({
-    vert: texturedVert,
+    vert: basicTexturedVert,
     frag: /* glsl */ `
       precision highp float;
 

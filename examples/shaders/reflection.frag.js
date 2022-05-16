@@ -8,11 +8,8 @@ uniform vec3 uCameraPosition;
 uniform samplerCube uEnvMap;
 
 void main () {
-  vec3 N = normalize(vNormal);
   vec3 I = normalize(vPosition - uCameraPosition);
-  vec3 R = reflect(I, N);
-  R.z *= -1.0;
-
+  vec3 R = reflect(I, normalize(vNormal));
   gl_FragColor = textureCube(uEnvMap, R);
 }
 `;

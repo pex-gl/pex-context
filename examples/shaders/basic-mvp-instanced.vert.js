@@ -3,6 +3,7 @@ import { transposeMat4, quatToMat4 } from "./math.glsl.js";
 export default /* glsl */ `
 attribute vec3 aPosition;
 attribute vec3 aNormal;
+
 attribute vec3 aOffset;
 attribute vec3 aScale;
 attribute vec4 aRotation;
@@ -21,8 +22,9 @@ void main() {
   position.xyz *= aScale;
   position = quatToMat4(aRotation) * position;
   position.xyz += aOffset;
-  gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * position;
 
-  vColor = vec4(aNormal / 2.0 + 0.5, 1.0);
+  vColor = vec4(aNormal * 0.5 + 0.5, 1.0);
+
+  gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * position;
 }
 `;

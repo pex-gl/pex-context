@@ -10,7 +10,7 @@ import { computeNormals, splitVertices } from "./utils.js";
 
 import basicVert from "./shaders/basic.vert.js";
 import basicFrag from "./shaders/basic.frag.js";
-import basicInstancedVert from "./shaders/basic-instanced.vert.js";
+import basicInstancedPositionVert from "./shaders/basic-instanced-position.vert.js";
 
 const ctx = createContext({ debug: true });
 
@@ -53,7 +53,7 @@ const drawCmd = {
 const drawInstancedCmd = {
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: basicInstancedVert,
+    vert: basicInstancedPositionVert,
     frag: basicFrag,
   }),
   uniforms: {

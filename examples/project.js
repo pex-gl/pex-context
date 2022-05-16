@@ -6,7 +6,7 @@ import random from "pex-random";
 
 import { cube } from "primitive-geometry";
 
-import showNormalsVert from "./shaders/show-normals.vert.js";
+import basicMVP from "./shaders/basic-mvp.vert.js";
 import basicFrag from "./shaders/basic.frag.js";
 
 const ctx = createContext({ debug: true });
@@ -69,7 +69,7 @@ const drawInViewport = {
 
 const drawCubeCmd = {
   pipeline: ctx.pipeline({
-    vert: showNormalsVert,
+    vert: basicMVP,
     frag: basicFrag,
     depthTest: true,
   }),

@@ -17,7 +17,7 @@ import {
 
 import shadowMappedFrag from "./shaders/shadow-mapped.frag.js";
 import basicFrag from "./shaders/basic.frag.js";
-import showNormalsInstancedVert from "./shaders/show-normals-instanced.vert.js";
+import basicMVPInstancedVert from "./shaders/basic-mvp-instanced.vert.js";
 import shadowMappedInstancedVert from "./shaders/shadow-mapped-instanced.vert.js";
 
 const NUM_BUNNIES = 1000;
@@ -61,7 +61,7 @@ drawBunnyCmd.pipeline = ctx.pipeline({
 Object.assign(drawBunnyDepthCmd.attributes, bunnyInstancedAttributes);
 drawBunnyDepthCmd.instances = NUM_BUNNIES;
 drawBunnyDepthCmd.pipeline = ctx.pipeline({
-  vert: showNormalsInstancedVert,
+  vert: basicMVPInstancedVert,
   frag: basicFrag,
   depthTest: true,
 });

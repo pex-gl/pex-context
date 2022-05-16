@@ -9,7 +9,7 @@ import { sphere } from "primitive-geometry";
 
 import skyboxVert from "./shaders/skybox.vert.js";
 import skyboxFrag from "./shaders/skybox.frag.js";
-import reflectionVert from "./shaders/reflection.vert.js";
+import positionNormalMVPVert from "./shaders/position-normal-mvp.vert.js";
 import reflectionFrag from "./shaders/reflection.frag.js";
 
 const ctx = createContext({ debug: true });
@@ -18,8 +18,7 @@ const gui = createGUI(ctx);
 const camera = createCamera({
   fov: Math.PI / 4,
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
-  position: [0, 0.5, 3],
-  target: [0, 0, 0],
+  position: [5, 5, 5],
 });
 
 createOrbiter({ camera, element: ctx.gl.canvas });
@@ -31,11 +30,11 @@ const clearScreenCmd = {
   }),
 };
 
-const geom = sphere();
+const geom = sphere({ radius: 1 });
 
 const drawCmd = {
   pipeline: ctx.pipeline({
-    vert: reflectionVert,
+    vert: positionNormalMVPVert,
     frag: reflectionFrag,
     depthTest: true,
   }),

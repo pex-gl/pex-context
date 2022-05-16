@@ -6,8 +6,8 @@ import { perspective as createCamera, orbiter as createOrbiter } from "pex-cam";
 import { cube, torus } from "primitive-geometry";
 
 import basicVert from "./shaders/basic.vert.js";
+import basicTexturedVert from "./shaders/textured.vert.js";
 import diffuseFrag from "./shaders/diffuse.frag.js";
-import texturedVert from "./shaders/textured.vert.js";
 import screenImageVert from "./shaders/screen-image.vert.js";
 import screenImageFrag from "./shaders/screen-image.frag.js";
 
@@ -123,7 +123,7 @@ const drawTexturedCubeCmd = {
   }),
   name: "drawTexturedCube",
   pipeline: ctx.pipeline({
-    vert: texturedVert,
+    vert: basicTexturedVert,
     frag: screenImageFrag,
     depthTest: true,
   }),

@@ -9,8 +9,9 @@ varying vec3 vNormal;
 varying vec4 vColor;
 
 void main () {
-  gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
   vNormal = aNormal;
   vColor = vec4(aNormal * 0.5 + 0.5, 1.0);
+
+  gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
 }
 `;

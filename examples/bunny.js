@@ -10,7 +10,7 @@ import centerAndNormalize from "geom-center-and-normalize";
 import { vertexNormals } from "normals";
 import bunny from "bunny";
 
-import showNormalsVert from "./shaders/show-normals.vert.js";
+import basicMVP from "./shaders/basic-mvp.vert.js";
 import basicFrag from "./shaders/basic.frag.js";
 import shadowMappedVert from "./shaders/shadow-mapped.vert.js";
 import shadowMappedFrag from "./shaders/shadow-mapped.frag.js";
@@ -89,7 +89,7 @@ const shadowMappedPipeline = ctx.pipeline({
 });
 
 const drawDepthPipeline = ctx.pipeline({
-  vert: showNormalsVert,
+  vert: basicMVP,
   frag: basicFrag,
   depthTest: true,
 });

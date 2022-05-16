@@ -1,3 +1,5 @@
+import gamma from "./gamma.glsl.js";
+
 export default /* glsl */ `
 precision highp float;
 
@@ -5,6 +7,8 @@ uniform mat4 uViewMatrix;
 uniform vec4 uDiffuseColor;
 
 varying vec3 vNormal;
+
+${gamma}
 
 void main () {
   vec3 N = normalize(vNormal);
@@ -14,10 +18,10 @@ void main () {
   float wrap = 1.0;
   float diffuse = (dotNL + wrap) / (1.0 + wrap);
 
-  vec3 baseColor = pow(uDiffuseColor.rgb, vec3(2.2));
+  vec3 baseColor = toLinear(uDiffuseColor.rgb);
   vec3 finalColor = baseColor * diffuse;
-  vec3 outputColor = pow(finalColor, vec3(1.0 / 2.2));
-  gl_FragColor.rgb = outputColor;
-  gl_FragColor.a = 1.0;
+  vec3 outputColor = toGamma(finalColor);
+
+  gl_FragColor = vec4(outputColor, 1.0);
 }
 `;

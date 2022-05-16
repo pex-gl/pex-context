@@ -7,12 +7,13 @@ uniform mat4 uModelMatrix;
 
 attribute vec3 aPosition;
 attribute vec3 aNormal;
+
 attribute vec3 aOffset;
-attribute vec3 aScale;
 attribute vec4 aRotation;
+attribute vec3 aScale;
 attribute vec4 aColor;
 
-varying vec3 vWorldPosition;
+varying vec3 vPositionWorld;
 varying vec3 vNormal;
 varying vec4 vColor;
 
@@ -29,14 +30,14 @@ void main() {
   mat4 rotationMat = quatToMat4(aRotation);
   position =  rotationMat * position;
   position.xyz += aOffset;
-  gl_Position = uProjectionMatrix * modelView * position;
-
-  vWorldPosition = (uModelMatrix * position).xyz;
 
   mat4 invViewMatrix = inverse(uViewMatrix);
   vec3 normalView = mat3(transpose(inverse(modelView)) * rotationMat) * aNormal;
 
+  vPositionWorld = (uModelMatrix * position).xyz;
   vNormal = vec3(uModelMatrix * vec4(normalView, 0.0));
   vColor = aColor;
+
+  gl_Position = uProjectionMatrix * modelView * position;
 }
 `;

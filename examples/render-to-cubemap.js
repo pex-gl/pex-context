@@ -7,10 +7,10 @@ import { load } from "pex-io";
 
 import { cube, sphere } from "primitive-geometry";
 
-import diffuseFrag from "./shaders/diffuse.frag.js";
 import skyboxVert from "./shaders/skybox.vert.js";
 import skyboxFrag from "./shaders/skybox.frag.js";
-import reflectionVert from "./shaders/reflection.vert.js";
+import positionNormalMVPVert from "./shaders/position-normal-mvp.vert.js";
+import diffuseFrag from "./shaders/diffuse.frag.js";
 import reflectionFrag from "./shaders/reflection.frag.js";
 
 const ctx = createContext({ debug: true });
@@ -58,23 +58,7 @@ const box = cube();
 const drawBoxCmd = {
   name: "drawBox",
   pipeline: ctx.pipeline({
-    vert: /* glsl */ `
-      attribute vec3 aPosition;
-      attribute vec3 aNormal;
-
-      uniform mat4 uProjectionMatrix;
-      uniform mat4 uViewMatrix;
-      uniform mat4 uModelMatrix;
-
-      uniform vec3 uOffset;
-
-      varying vec3 vNormal;
-
-      void main() {
-        gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aPosition + uOffset, 1.0);
-        vNormal = aNormal;
-      }
-    `,
+    vert: positionNormalMVPVert,
     frag: diffuseFrag,
     depthTest: true,
   }),
@@ -90,47 +74,13 @@ const drawBoxCmd = {
   indices: ctx.indexBuffer(box.cells),
 };
 
-const geom = sphere();
+const geom = sphere({ radius: 1 });
 
 const drawSphereCmd = {
   name: "drawSphere",
   pipeline: ctx.pipeline({
-    vert: /* glsl */ `
-      attribute vec3 aPosition;
-      attribute vec3 aNormal;
-
-      uniform mat4 uProjectionMatrix;
-      uniform mat4 uViewMatrix;
-      uniform mat4 uModelMatrix;
-      uniform vec3 uOffset;
-
-      varying vec3 vNormal;
-
-      void main() {
-        mat4 modelView = uViewMatrix * uModelMatrix;
-        gl_Position = uProjectionMatrix * modelView * vec4(aPosition + uOffset, 1.0);
-        vNormal = vec3(modelView * vec4(aNormal, 0.0));
-      }
-    `,
-    frag: /* glsl */ `
-      precision highp float;
-
-      varying vec3 vNormal;
-      uniform samplerCube uEnvMap;
-      uniform mat4 uInvViewMatrix;
-      uniform float uFlipEnvMap;
-
-      void main() {
-        vec3 eyeDirView = vec3(0.0, 0.0, 1.0);
-        vec3 R = reflect(-eyeDirView, normalize(vNormal));
-        vec3 reflectionWorld = vec3(uInvViewMatrix * vec4(R, 0.0));
-        reflectionWorld.x *= uFlipEnvMap;
-        gl_FragColor.rgb = textureCube(uEnvMap, reflectionWorld).rgb;
-        gl_FragColor.a = 1.0;
-      }
-    `,
-    // vert: reflectionVert,
-    // frag: reflectionFrag,
+    vert: positionNormalMVPVert,
+    frag: reflectionFrag,
     depthTest: true,
   }),
   uniforms: {
@@ -155,7 +105,7 @@ const reflectionMap = ctx.textureCube({
   encoding: ctx.Encoding.SRGB,
 });
 
-gui.addTextureCube("Reflection Cubemap RT", reflectionMap);
+gui.addTextureCube("Reflection Cubemap RT", reflectionMap, { flipEnvMap: -1 });
 gui.addParam("Sphere pos", state, "spherePosition", { min: -3, max: 3 });
 gui.addParam("Reflections", state, "reflections");
 
@@ -198,16 +148,16 @@ function drawBoxes(camera) {
     if (camera) {
       ctx.submit(drawBoxCmd, {
         uniforms: {
-          uOffset: position,
           uDiffuseColor: color,
           uProjectionMatrix: camera.projectionMatrix,
           uViewMatrix: camera.viewMatrix,
+          uModelMatrix: mat4.translate(mat4.create(), position),
         },
       });
     } else {
       ctx.submit(drawBoxCmd, {
         uniforms: {
-          uOffset: position,
+          uModelMatrix: mat4.translate(mat4.create(), position),
           uDiffuseColor: color,
         },
       });
@@ -349,6 +299,7 @@ function drawSkybox(camera) {
 
 ctx.frame(() => {
   ctx.submit(clearScreenCmd);
+
   sides.forEach((side) => {
     const target = [0, 0, 0];
     ctx.submit(side.drawPassCmd, () => {
@@ -363,11 +314,11 @@ ctx.frame(() => {
 
   drawBoxes();
   drawSkybox();
+
   ctx.submit(drawSphereCmd, {
     uniforms: {
       uEnvMap: state.reflections ? reflectionMap : envMap,
-      uFlipEnvMap: state.reflections ? 1 : -1,
-      uOffset: state.spherePosition,
+      uModelMatrix: mat4.translate(mat4.create(), state.spherePosition),
       uInvViewMatrix: mat4.invert(mat4.copy(camera.viewMatrix)),
       uCameraPosition: camera.position,
     },
