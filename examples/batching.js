@@ -25,9 +25,9 @@ random.seed(0);
 for (let i = 0; i < NUM_BUNNIES; i++) {
   const m = mat4.create();
   mat4.translate(m, [
-    random.float(-3, 3),
-    random.float(0, 3),
-    random.float(-3, 3),
+    random.float(-2, 2),
+    random.float(-1, 1),
+    random.float(-2, 2),
   ]);
   mat4.mult(
     m,
@@ -36,7 +36,7 @@ for (let i = 0; i < NUM_BUNNIES; i++) {
       quat.fromTo(quat.create(), [0, 0, 1], vec3.normalize(random.vec3()))
     )
   );
-  mat4.scale(m, [0.2, 0.2, 0.2]);
+  mat4.scale(m, [0.15, 0.15, 0.15]);
 
   shadowBatches.push({
     uniforms: {

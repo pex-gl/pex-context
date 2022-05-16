@@ -20,7 +20,7 @@ import basicFrag from "./shaders/basic.frag.js";
 import basicMVPInstancedVert from "./shaders/basic-mvp-instanced.vert.js";
 import shadowMappedInstancedVert from "./shaders/shadow-mapped-instanced.vert.js";
 
-const NUM_BUNNIES = 1000;
+const NUM_BUNNIES = 500;
 
 const offsets = [];
 const rotations = [];
@@ -30,11 +30,11 @@ const colors = [];
 random.seed(0);
 
 for (let i = 0; i < NUM_BUNNIES; i++) {
-  offsets.push([random.float(-3, 3), random.float(0, 3), random.float(-3, 3)]);
+  offsets.push(random.float(-2, 2), random.float(-1, 1), random.float(-2, 2));
   rotations.push(
     quat.fromTo(quat.create(), [0, 0, 1], vec3.normalize(random.vec3()))
   );
-  scales.push([0.2, 0.2, 0.2]);
+  scales.push([0.15, 0.15, 0.15]);
   colors.push([
     random.float(0.1, 1.0),
     random.float(0.1, 1.0),

@@ -27,7 +27,7 @@ let prevTime = Date.now();
 const camera = createCamera({
   fov: Math.PI / 4,
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
-  position: [5, 5, 5],
+  position: [3, 3, 3],
 });
 
 createOrbiter({ camera, element: ctx.gl.canvas });
@@ -37,7 +37,7 @@ const lightCamera = createCamera({
   aspect: 1,
   near: 1,
   far: 50,
-  position: [3, 4, 3],
+  position: [7, 4, 7],
 });
 
 // Draw
@@ -73,7 +73,7 @@ const clearCmd = {
 };
 
 // Floor
-const floor = cube({ sx: 5, sy: 0.1, sz: 5 });
+const floor = cube({ sx: 4, sy: 0.1, sz: 4 });
 const floorAttributes = {
   attributes: {
     aPosition: ctx.vertexBuffer(floor.positions),
@@ -93,14 +93,14 @@ const drawDepthPipeline = ctx.pipeline({
   frag: basicFrag,
   depthTest: true,
 });
-
+const floorMatrix = mat4.translate(mat4.create(), [0, -1, 0]);
 const drawFloorCmd = {
   name: "drawFloor",
   pipeline: shadowMappedPipeline,
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: mat4.create(),
+    uModelMatrix: floorMatrix,
     uWrap: 0,
     uLightNear: lightCamera.near,
     uLightFar: lightCamera.far,
@@ -120,7 +120,7 @@ const drawFloorDepthCmd = {
   uniforms: {
     uProjectionMatrix: lightCamera.projectionMatrix,
     uViewMatrix: lightCamera.viewMatrix,
-    uModelMatrix: mat4.create(),
+    uModelMatrix: floorMatrix,
   },
   ...floorAttributes,
 };
@@ -154,7 +154,7 @@ const drawBunnyCmd = {
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: mat4.translate(mat4.create(), [0, 1, 0]),
+    uModelMatrix: mat4.create(),
     uWrap: 0,
     uLightNear: lightCamera.near,
     uLightFar: lightCamera.far,
@@ -174,7 +174,7 @@ const drawBunnyDepthCmd = {
   uniforms: {
     uProjectionMatrix: lightCamera.projectionMatrix,
     uViewMatrix: lightCamera.viewMatrix,
-    uModelMatrix: mat4.translate(mat4.create(), [0, 1, 0]),
+    uModelMatrix: mat4.create(),
   },
   ...bunnyAttributes,
 };
