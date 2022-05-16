@@ -26,7 +26,9 @@ function createQuery(ctx, opts = {}) {
   );
 
   if (!query.target) {
-    query.target = ctx.QueryTarget.TimeElapsed;
+    query.target = ctx.capabilities.disjointTimerQuery
+      ? ctx.QueryTarget.TimeElapsed
+      : ctx.QueryTarget.AnySamplesPassed;
   }
 
   return query;

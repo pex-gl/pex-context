@@ -89,6 +89,10 @@ function createContext(options = {}) {
     textureFilterAnisotropic: !!gl.getExtension(
       "EXT_texture_filter_anisotropic"
     ),
+    disjointTimerQuery: !!(
+      gl.getExtension("EXT_disjoint_timer_query_webgl2") ||
+      gl.getExtension("EXT_disjoint_timer_query")
+    ),
   };
 
   if (!gl.HALF_FLOAT) {
@@ -96,25 +100,25 @@ function createContext(options = {}) {
     if (ext) gl.HALF_FLOAT = ext.HALF_FLOAT_OES;
   }
 
-  const extDTQ = capabilities.isWebGL2
-    ? gl.getExtension("EXT_disjoint_timer_query_webgl2")
-    : gl.getExtension("EXT_disjoint_timer_query");
-  if (!extDTQ) {
-    gl.TIME_ELAPSED = "TIME_ELAPSED";
-    gl.GPU_DISJOINT = "GPU_DISJOINT";
-    gl.QUERY_RESULT = "QUERY_RESULT";
-    gl.QUERY_RESULT_AVAILABLE = "QUERY_RESULT_AVAILABLE";
-    gl.createQuery = () => ({});
-    gl.deleteQuery = () => {};
-    gl.beginQuery = () => {};
-    gl.endQuery = () => {};
-    gl.getQueryObject = (q, param) => {
+  if (!capabilities.disjointTimerQuery) {
+    gl.TIME_ELAPSED ||= "TIME_ELAPSED";
+    gl.GPU_DISJOINT ||= "GPU_DISJOINT";
+    gl.QUERY_RESULT ||= "QUERY_RESULT";
+    gl.QUERY_RESULT_AVAILABLE ||= "QUERY_RESULT_AVAILABLE";
+    gl.createQuery ||= () => ({});
+    gl.deleteQuery ||= () => {};
+    gl.beginQuery ||= () => {};
+    gl.endQuery ||= () => {};
+    gl.getQueryParameter = (q, param) => {
       if (param === gl.QUERY_RESULT_AVAILABLE) return true;
       if (param === gl.QUERY_RESULT) return 0;
       return undefined;
     };
-    gl.getQueryParameter = gl.getQueryObject;
+    gl.getQueryObject = gl.getQueryParameter;
   } else {
+    const extDTQ = capabilities.isWebGL2
+      ? gl.getExtension("EXT_disjoint_timer_query_webgl2")
+      : gl.getExtension("EXT_disjoint_timer_query");
     gl.TIME_ELAPSED = extDTQ.TIME_ELAPSED_EXT;
     gl.GPU_DISJOINT = extDTQ.GPU_DISJOINT_EXT;
     gl.QUERY_RESULT ||= extDTQ.QUERY_RESULT_EXT;
