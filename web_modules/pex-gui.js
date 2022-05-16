@@ -1,17 +1,17 @@
+import './common/es.error.cause-d7aeaf96.js';
 import './common/web.dom-collections.iterator-0e2ab85b.js';
 import './common/esnext.iterator.for-each-ae5763c3.js';
 import './common/iterate-3e898cf4.js';
 import './common/esnext.iterator.filter-f1e5be5d.js';
 import './common/esnext.iterator.map-e6a047df.js';
+import './common/esnext.weak-map.emplace-940c5b92.js';
 import './common/plane-b06f3746.js';
 import { o as map, a as clamp } from './common/vec3-68b228db.js';
 import { v as toHex, b as toHSL, a as fromHSL } from './common/hsl-10e84f6c.js';
-import './common/es.error.cause-d7aeaf96.js';
-import './common/esnext.weak-map.emplace-940c5b92.js';
 import './common/es.string.replace-fb144e2e.js';
 import './common/iterators-80846cd5.js';
-import './common/async-iterator-iteration-34014a16.js';
 import './common/to-string-cde6bf5f.js';
+import './common/async-iterator-iteration-34014a16.js';
 
 /**
  * Returns the width of a rectangle.
@@ -40,6 +40,45 @@ function height(a) {
 
 function containsPoint(a, [x, y]) {
   return x >= a[0][0] && x <= a[1][0] && y >= a[0][1] && y <= a[1][1];
+}
+
+function _classApplyDescriptorGet(receiver, descriptor) {
+  if (descriptor.get) {
+    return descriptor.get.call(receiver);
+  }
+
+  return descriptor.value;
+}
+
+function _classExtractFieldDescriptor(receiver, privateMap, action) {
+  if (!privateMap.has(receiver)) {
+    throw new TypeError("attempted to " + action + " private field on non-instance");
+  }
+
+  return privateMap.get(receiver);
+}
+
+function _classPrivateFieldGet(receiver, privateMap) {
+  var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get");
+  return _classApplyDescriptorGet(receiver, descriptor);
+}
+
+function _classApplyDescriptorSet(receiver, descriptor, value) {
+  if (descriptor.set) {
+    descriptor.set.call(receiver, value);
+  } else {
+    if (!descriptor.writable) {
+      throw new TypeError("attempted to set read only private field");
+    }
+
+    descriptor.value = value;
+  }
+}
+
+function _classPrivateFieldSet(receiver, privateMap, value) {
+  var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "set");
+  _classApplyDescriptorSet(receiver, descriptor, value);
+  return value;
 }
 
 function rectSet4(a, x, y, w, h) {
@@ -484,45 +523,6 @@ class CanvasRenderer {
 
 }
 
-function _classApplyDescriptorGet(receiver, descriptor) {
-  if (descriptor.get) {
-    return descriptor.get.call(receiver);
-  }
-
-  return descriptor.value;
-}
-
-function _classExtractFieldDescriptor(receiver, privateMap, action) {
-  if (!privateMap.has(receiver)) {
-    throw new TypeError("attempted to " + action + " private field on non-instance");
-  }
-
-  return privateMap.get(receiver);
-}
-
-function _classPrivateFieldGet(receiver, privateMap) {
-  var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get");
-  return _classApplyDescriptorGet(receiver, descriptor);
-}
-
-function _classApplyDescriptorSet(receiver, descriptor, value) {
-  if (descriptor.set) {
-    descriptor.set.call(receiver, value);
-  } else {
-    if (!descriptor.writable) {
-      throw new TypeError("attempted to set read only private field");
-    }
-
-    descriptor.value = value;
-  }
-}
-
-function _classPrivateFieldSet(receiver, privateMap, value) {
-  var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "set");
-  _classApplyDescriptorSet(receiver, descriptor, value);
-  return value;
-}
-
 function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
 
 function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
@@ -919,6 +919,9 @@ void main() {
   gl_FragColor = encode(color, 2); // to gamma
 }`;
 
+function _classPrivateFieldInitSpec$1(obj, privateMap, value) { _checkPrivateRedeclaration$1(obj, privateMap); privateMap.set(obj, value); }
+
+function _checkPrivateRedeclaration$1(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
 /**
  * @typedef {Object} GUIControlOptions
  * @property {number} [min=0]
@@ -945,6 +948,8 @@ const isArrayLike = value => Array.isArray(value) || ArrayBuffer.isView(value);
  */
 
 
+var _pixelRatio = /*#__PURE__*/new WeakMap();
+
 class GUI {
   get size() {
     return this.ctx.gl ? [this.ctx.gl.drawingBufferWidth, this.ctx.gl.drawingBufferHeight] : [this.ctx.canvas.width, this.ctx.canvas.height];
@@ -952,6 +957,12 @@ class GUI {
 
   get canvas() {
     return this.ctx.gl ? this.ctx.gl.canvas : this.ctx.canvas;
+  }
+
+  set pixelRatio(ratio) {
+    if (this.renderer) this.renderer.pixelRatio = ratio;
+
+    _classPrivateFieldSet(this, _pixelRatio, ratio);
   }
   /**
    * Creates an instance of GUI.
@@ -967,8 +978,15 @@ class GUI {
     responsive = true,
     renderer
   } = {}) {
+    _classPrivateFieldInitSpec$1(this, _pixelRatio, {
+      writable: true,
+      value: void 0
+    });
+
     this.ctx = ctx;
-    this.pixelRatio = this.ctx.gl ? this.ctx.pixelRatio : pixelRatio;
+
+    _classPrivateFieldSet(this, _pixelRatio, this.ctx.gl ? this.ctx.pixelRatio : pixelRatio);
+
     this.theme = { ...DEFAULT_THEME,
       ...theme
     };
@@ -988,7 +1006,7 @@ class GUI {
       ctx: this.ctx,
       width: rendererWidth,
       height: rendererHeight,
-      pixelRatio: this.pixelRatio,
+      pixelRatio: _classPrivateFieldGet(this, _pixelRatio),
       theme: this.theme
     });
 
@@ -1953,7 +1971,8 @@ class GUI {
         }
       }
 
-      const scale = this.scale * this.pixelRatio;
+      const scale = this.scale * _classPrivateFieldGet(this, _pixelRatio);
+
       let bounds = [];
 
       const drawTexture = ({

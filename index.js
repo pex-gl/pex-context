@@ -50,7 +50,7 @@ const allowedCommandProps = [
 
 /**
  * Create a rendering context
- * @param {ContextOptions & import("pex-gl").Options} [options]
+ * @param {PexContextOptions & import("pex-gl").Options} [options]
  * @returns {PexContext}
  */
 function createContext(options = {}) {

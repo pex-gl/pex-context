@@ -82,19 +82,38 @@ const img = await loadImage(
 );
 ctx.update(tex, { data: img, width: img.width, height: img.height });
 
-const gui = createGUI(ctx, { responsive: false });
+const gui = createGUI(ctx);
 
-if (document.location.hash) {
-  const resId = document.location.hash.substr(1);
-  const res = resolutions.find(({ value }) => value === resId);
-  if (res) {
-    config.width = res.width;
-    config.height = res.height;
-    config.pixelRatio = res.pixelRatio;
-    gui.pixelRatio = res.pixelRatio;
-    settings.resolution = resId;
-  }
+const params = new URLSearchParams(document.location.search);
+const paramValue = params.get("value");
+const res = resolutions.find(({ value }) => value === paramValue);
+
+if (res) {
+  config.width = res.width;
+  config.height = res.height;
+  config.pixelRatio = res.pixelRatio;
+  gui.pixelRatio = res.pixelRatio;
+  settings.resolution = paramValue;
 }
+
+const update = () => {
+  const res = resolutions.find(({ value }) => value === settings.resolution);
+  const w = res.width || window.innerWidth;
+  const h = res.height || window.innerHeight;
+
+  const params = new URLSearchParams(document.location.search);
+  params.set("value", res.value);
+  window.history.replaceState({}, "", `?${params}`);
+
+  ctx.set({
+    width: w,
+    height: h,
+    pixelRatio: res.pixelRatio,
+  });
+  camera.set({ aspect: w / h });
+
+  gui.pixelRatio = res.pixelRatio;
+};
 
 gui.addHeader("Settings");
 gui.addParam(
@@ -108,30 +127,20 @@ gui.addParam(
   () => camera.set({ fov: settings.fov })
 );
 gui.addHeader("Resolution");
-gui.addRadioList("Resolution", settings, "resolution", resolutions, () => {
-  const res = resolutions.find(({ value }) => value === settings.resolution);
-  const w = res.width || window.innerWidth;
-  const h = res.height || window.innerHeight;
-
-  if (document && document.location) {
-    document.location.hash = res.value;
-  }
-  ctx.set({
-    width: w,
-    height: h,
-    pixelRatio: res.pixelRatio,
-  });
-  camera.set({ aspect: w / h });
-});
+gui.addRadioList("Resolution", settings, "resolution", resolutions, update);
 gui.addTexture2D("PEX", tex);
 gui.addHeader("Fullscreen");
-gui.addParam("Fullscreen", settings, "fullscreen", {}, () => {
-  if (!settings.fullscreen) {
-    document.exitFullscreen();
-  } else {
-    document.requestFullscreen(ctx.gl.canvas);
+const fullscreenParam = gui.addParam(
+  "Fullscreen",
+  settings,
+  "fullscreen",
+  {},
+  () => {
+    settings.fullscreen
+      ? ctx.gl.canvas.requestFullscreen()
+      : document.exitFullscreen();
   }
-});
+);
 
 const drawCmd = {
   pipeline: ctx.pipeline({
@@ -158,8 +167,9 @@ window.addEventListener("resize", () => {
     camera.set({ aspect: W / H });
   }
 });
-document.addEventListener("fullscreenchange", () => {
-  settings.fullscreen = document.fullscreenElement;
+window.addEventListener("fullscreenchange", () => {
+  settings.fullscreen = !!document.fullscreenElement;
+  fullscreenParam.dirty = true;
 });
 
 ctx.frame(() => {
@@ -178,12 +188,4 @@ ctx.frame(() => {
   window.dispatchEvent(new CustomEvent("pex-screenshot"));
 });
 
-setTimeout(() => {
-  settings.resolution = "800x600-hi-res";
-  ctx.set({
-    width: 800,
-    height: 600,
-    pixelRatio: 2,
-  });
-  camera.set({ aspect: 800 / 600 });
-}, 500);
+update();
