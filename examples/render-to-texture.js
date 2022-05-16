@@ -81,7 +81,12 @@ const drawFloorCmd = {
     vert: ctx.capabilities.isWebGL2 ? es300Vertex(basicVert) : basicVert,
     frag: ctx.capabilities.isWebGL2
       ? es300Fragment(showNormalsMRTFrag, 2)
-      : showNormalsMRTFrag,
+      : /* glsl */ `
+#ifdef GL_EXT_draw_buffers
+  #extension GL_EXT_draw_buffers : require
+#endif
+${showNormalsMRTFrag}
+`,
     depthTest: true,
   }),
   uniforms: {

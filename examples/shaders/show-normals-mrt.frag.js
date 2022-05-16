@@ -1,7 +1,4 @@
 export default /* glsl */ `
-#ifdef GL_EXT_draw_buffers
-#extension GL_EXT_draw_buffers : require
-#endif
 precision highp float;
 
 varying vec4 vColor;
