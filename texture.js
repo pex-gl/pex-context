@@ -1,6 +1,44 @@
 import assert from "assert";
 import { checkProps } from "./utils.js";
 
+/**
+ * @typedef {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement} TextureOptionsData
+ * @property {Array|TypedArray} data
+ * @property {number} width
+ * @property {number} height
+ */
+
+/**
+ * @typedef {WebGLRenderingContext.TEXTURE_2D | WebGLRenderingContext.TEXTURE_CUBE_MAP} TextureTarget
+ */
+
+/**
+ * @typedef {import("./index.js").PexResource} TextureOptions
+ * @property {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | Array | TypedArray |TextureOptionsData | HTMLImageElement[] | TextureOptionsData[]} [data]
+ * @property {number} [width]
+ * @property {number} [height]
+ * @property {ctx.PixelFormat} [pixelFormat=ctx.PixelFormat.RGB8]
+ * @property {ctx.TextureFormat} [internalFormat=ctx.TextureFormat.RGBA]
+ * @property {ctx.DataType} [type=ctx.TextureFormat[opts.pixelFormat]]
+ * @property {ctx.Encoding} [encoding=ctx.Encoding.Linear]
+ * @property {ctx.Wrap} [wrapS=ctx.Wrap.ClampToEdge]
+ * @property {ctx.Wrap} [wrapT=ctx.Wrap.ClampToEdge]
+ * @property {ctx.Wrap} [wrap=ctx.Wrap.ClampToEdge]
+ * @property {ctx.Filter} [min=ctx.Filter.Nearest]
+ * @property {ctx.Filter} [mag=ctx.Filter.Nearest]
+ * @property {number} [aniso=0] requires [EXT_texture_filter_anisotropic](https://www.khronos.org/registry/webgl/extensions/EXT_texture_filter_anisotropic/)
+ * @property {boolean} [mipmap=true] requires `min` to be set to `ctx.Filter.LinearMipmapLinear` or similar
+ * @property {boolean} [premultiplyAlpha=false]
+ * @property {boolean} [flipY=false]
+ * @property {boolean} [compressed=false]
+ * @property {TextureTarget} [target]
+ */
+
+/**
+ * @typedef {TextureCube} TextureCubeOptions
+ * @property {HTMLImage[]|TypedArray[]} [data] 6 images, one for each face +X, -X, +Y, -Y, +Z, -Z
+ */
+
 const allowedProps = [
   "name",
   "data",
@@ -50,23 +88,6 @@ function orValue(a, b) {
   return a !== undefined ? a : b;
 }
 
-// just an image
-// opts = HTMLImage
-
-// image with flags
-// opts = { data: HTMLImage, flipY: Boolean }
-
-// pixel data
-// opts = { data: Array|TypedArray, width: Number, height: Number, flipY: Boolean }
-
-// pixel data with flags
-// opts = { data: { data: Array|TypedArray, width: Number, height: Number }, flipY: Boolean },
-
-// array of images for cubemaps (and array textures in webgl2)
-// opts = { data: [ HTMLImage, ... ], width: Number, height: Number, flipY: Boolean }
-
-// array of pixel data for cubemaps and manual mipmaps (and array texture in webgl2)
-// opts = { data: [ { data: Array|TypedArray, width: Number, height: Number }, ..], flipY: Boolean }
 function updateTexture2D(ctx, texture, opts) {
   // checkProps(allowedProps, opts)
 

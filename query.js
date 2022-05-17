@@ -1,5 +1,16 @@
 import { checkProps } from "./utils.js";
 
+/**
+ * @typedef {import("./index.js").PexResource} QueryOptions
+ * @property {ctx.QueryTarget} [target=ctx.QueryTarget.TimeElapsed] query type
+ */
+
+/**
+ * @typedef {QueryOptions} PexQuery
+ * @property {ctx.QueryState} [state=ctx.QueryState.Ready]
+ * @property {number} [result] result of the measurement
+ */
+
 const allowedProps = ["target"];
 
 function createQuery(ctx, opts = {}) {

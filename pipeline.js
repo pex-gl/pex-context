@@ -1,5 +1,23 @@
 import { checkProps } from "./utils.js";
 
+/**
+ * @typedef {import("./index.js").PexResource} PipelineOptions
+ * @property {string} [vert=null] Vertex shader code
+ * @property {string} [frag=null] Fragment shader code
+ * @property {boolean} [depthWrite=true] Depth write mask
+ * @property {boolean} [depthTest=false] Depth test on/off
+ * @property {ctx.DepthFunc} [depthFunc=ctx.DepthFunc.LessEqual] Depth test function
+ * @property {boolean} [blend=false] Blending on/off
+ * @property {ctx.BlendFactor} [blendSrcRGBFactor=ctx.BlendFactor.One] Blending source color factor
+ * @property {ctx.BlendFactor} [blendSrcAlphaFactor=ctx.BlendFactor.One] Blending source alpha factor
+ * @property {ctx.BlendFactor} [blendDstRGBFactor=ctx.BlendFactor.One] Blending destination color factor
+ * @property {ctx.BlendFactor} [blendDstAlphaFactor=ctx.BlendFactor.One] Blending destination alpha factor
+ * @property {boolean} [cullFace=false] Face culling on/off
+ * @property {ctx.Face} [cullFaceMode=ctx.Face.Back] Face culling mode
+ * @property {boolean[]} [colorMask=[true, true, true, true]] Color write mask for [r, g, b, a]
+ * @property {ctx.Primitive} [primitive=ctx.Primitive.Triangles] Geometry primitive
+ */
+
 const allowedProps = [
   "vert",
   "frag",

@@ -1,13 +1,22 @@
 import assert from "assert";
 import { checkProps } from "./utils.js";
 
+/**
+ * @typedef {import("./index.js").PexResource} BufferOptions
+ * @property {Array|TypedArray|ArrayBuffer} data pixel data
+ * @property {ctx.DataType} [type]
+ * @property {ctx.Usage} [usage=ctx.Usage.StaticDraw]
+ * @property {number} offset data offset in the buffer (update only)
+ * @property {boolean} normalized
+ */
+
 const allowedProps = [
   "target",
   "data",
   "usage",
   "type",
-  "normalized",
   "offset",
+  "normalized",
 ];
 
 function createBuffer(ctx, opts) {

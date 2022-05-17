@@ -7,6 +7,12 @@ log.enabled = true;
 
 // const allowedProps = ["color", "depth"];
 
+/**
+ * @typedef {Object} Attachment
+ * @property {import("./index.js").PexResource} texture
+ * @property {WebGLRenderingContext.FRAMEBUFFER} target
+ */
+
 function createFramebuffer(ctx, opts) {
   const gl = ctx.gl;
 
