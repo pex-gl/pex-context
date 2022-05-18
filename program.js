@@ -226,6 +226,12 @@ function updateAttributes(ctx, program) {
       case gl.FLOAT_VEC4:
         size = 4;
         break;
+      case gl.FLOAT_MAT2:
+        size = 8;
+        break;
+      case gl.FLOAT_MAT3:
+        size = 12;
+        break;
       case gl.FLOAT_MAT4:
         size = 16;
         break;
