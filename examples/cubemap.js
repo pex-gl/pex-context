@@ -14,6 +14,8 @@ import reflectionFrag from "./shaders/reflection.frag.js";
 
 const ctx = createContext({ debug: true });
 const gui = createGUI(ctx);
+gui.addFPSMeeter();
+gui.addStats();
 
 const camera = createCamera({
   fov: Math.PI / 4,

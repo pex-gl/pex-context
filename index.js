@@ -223,10 +223,7 @@ function createContext(options = {}) {
       for (let key in gl) {
         if (gl[key] === glEnum) str = key;
       }
-      if (!str) {
-        str = "UNDEFINED";
-      }
-      return str;
+      return str || "UNDEFINED";
     },
     checkError() {
       if (this.debugMode) {

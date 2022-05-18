@@ -114,7 +114,7 @@ ctx.frame(() => {
       aOffset: { buffer: offsets, divisor: 1 },
     },
     indices,
-    instances: instances,
+    instances,
   });
 
   // unindexed instanced
@@ -127,7 +127,7 @@ ctx.frame(() => {
       aOffset: { buffer: offsets, divisor: 1 },
     },
     count: unindexedCube.positions.length / 3,
-    instances: instances,
+    instances,
   });
 
   ctx.debug(false);

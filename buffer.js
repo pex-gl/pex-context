@@ -3,10 +3,10 @@ import { checkProps } from "./utils.js";
 
 /**
  * @typedef {import("./index.js").PexResource} BufferOptions
- * @property {Array|TypedArray|ArrayBuffer} data pixel data
+ * @property {Array|TypedArray|ArrayBuffer} data
  * @property {ctx.DataType} [type]
  * @property {ctx.Usage} [usage=ctx.Usage.StaticDraw]
- * @property {number} offset data offset in the buffer (update only)
+ * @property {number} offset
  * @property {boolean} normalized
  */
 

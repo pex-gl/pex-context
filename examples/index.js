@@ -43,10 +43,10 @@
     document.querySelector(".MainHeader").remove();
     document.querySelector("body").style.backgroundColor = getComputedStyle(
       document.body
-    ).getPropertyValue("--color-black");
+    ).getPropertyValue("--color-grey");
 
     await importShim(`./examples/${id}.js`);
 
-    list.querySelector(`a[href="?id=${id}"]`).scrollIntoView(true);
+    list.querySelector(`a[href="?id=${id}"]`)?.scrollIntoView(true);
   }
 })();

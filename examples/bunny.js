@@ -20,6 +20,7 @@ import screenImageFrag from "./shaders/screen-image.frag.js";
 const ctx = createContext({ debug: true });
 const gui = createGUI(ctx);
 gui.addFPSMeeter();
+gui.addStats();
 
 let elapsedSeconds = 0;
 let prevTime = Date.now();
