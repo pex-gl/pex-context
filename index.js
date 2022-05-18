@@ -64,6 +64,7 @@ function createContext(options = {}) {
     maxVertexTextureImageUnits: gl.getParameter(
       gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS
     ),
+    maxVertexAttribs: gl.getParameter(gl.MAX_VERTEX_ATTRIBS),
     maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
     maxCubeMapTextureSize: gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
     instancedArrays: false,
