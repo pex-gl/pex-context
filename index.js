@@ -284,7 +284,6 @@ function createContext(options = {}) {
         this.debugCommands = [];
         if (!log.enabled) {
           enableNamespace(NAMESPACE);
-          log("capabilities", capabilities);
         }
       }
     },
@@ -1201,7 +1200,10 @@ function createContext(options = {}) {
     },
   });
 
-  if (opts.debug) ctx.debug(true);
+  if (opts.debug) {
+    ctx.debug(true);
+    log("capabilities", capabilities);
+  }
 
   ctx.apply(defaultState);
   return ctx;
