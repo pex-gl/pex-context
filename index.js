@@ -9,6 +9,7 @@ import createFramebuffer from "./framebuffer.js";
 import createRenderbuffer from "./renderbuffer.js";
 import createPass from "./pass.js";
 import createPipeline from "./pipeline.js";
+import createVertexArray from "./vertex-array.js";
 import createProgram from "./program.js";
 import createBuffer from "./buffer.js";
 import createQuery from "./query.js";
@@ -20,6 +21,7 @@ import {
   log,
   NAMESPACE,
   compareFBOAttachments,
+  enableVertexData,
 } from "./utils.js";
 import { addEnums } from "./types.js";
 
@@ -34,6 +36,7 @@ const allowedCommandProps = [
   "indices",
   "count",
   "instances",
+  "vertexArray",
   "viewport",
   "scissor",
 ];
@@ -69,6 +72,7 @@ function createContext(options = {}) {
     maxCubeMapTextureSize: gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
     instancedArrays: false,
     instancing: false, // TODO: deprecate
+    vertexArrayObject: false,
     elementIndexUint32: !!gl.getExtension("OES_element_index_uint"),
     standardDerivatives: !!gl.getExtension("OES_standard_derivatives"),
     depthTexture: !!gl.getExtension("WEBGL_depth_texture"),
@@ -89,6 +93,21 @@ function createContext(options = {}) {
   if (!gl.HALF_FLOAT) {
     const ext = gl.getExtension("OES_texture_half_float");
     if (ext) gl.HALF_FLOAT = ext.HALF_FLOAT_OES;
+  }
+
+  if (!gl.createVertexArray) {
+    const ext = gl.getExtension("OES_vertex_array_object");
+    if (!ext) {
+      gl.createVertexArray = function () {
+        throw new Error("OES_vertex_array_object not supported");
+      };
+    } else {
+      gl.createVertexArray = ext.createVertexArrayOES.bind(ext);
+      gl.bindVertexArray = ext.bindVertexArrayOES.bind(ext);
+      capabilities.vertexArrayObject = true;
+    }
+  } else {
+    capabilities.vertexArrayObject = true;
   }
 
   if (!capabilities.disjointTimerQuery) {
@@ -513,8 +532,8 @@ function createContext(options = {}) {
     },
 
     /**
-     * Create a VAO.
-     * @param {import("./pipeline.js").VaoOptions} opts
+     * Create a VAO resource.
+     * @param {import("./vertex-array.js").VertexArrayOptions} opts
      * @returns {import("./types.js").PexResource}
      */
     vertexArray(opts) {
@@ -970,158 +989,86 @@ function createContext(options = {}) {
       this.checkError();
     },
     drawVertexData(cmd) {
-      const state = this.state;
-      const vertexLayout = state.vertexLayout;
+      const { vertexLayout, program, vertexArray } = this.state;
 
-      if (!state.program) {
+      if (!program) {
         assert.fail("Trying to draw without an active program");
       }
 
       if (this.debugMode) {
         // TODO: can vertex layout be ever different if it's derived from pipeline's shader?
         if (
-          vertexLayout.length !== Object.keys(state.program.attributes).length
+          Object.keys(vertexLayout).length !==
+          Object.keys(program.attributes).length
         ) {
           log(
             "Invalid vertex layout not matching the shader",
             vertexLayout,
-            state.program.attributes,
+            program.attributes,
             cmd
           );
           assert.fail("Invalid vertex layout not matching the shader");
         }
       }
 
-      let instanced = false;
-      // TODO: disable unused vertex array slots
-      for (let i = 0; i < 16; i++) {
-        state.activeAttributes[i] = null;
-        gl.disableVertexAttribArray(i);
+      if (cmd.vertexArray) {
+        //TODO: verify vertex layout
+        for (let i = 0; i < vertexLayout.length; i++) {
+          const [name, location] = vertexLayout[i];
+          if (
+            !cmd.vertexArray.attributes[name] ||
+            !cmd.vertexArray.attributes[name].location === location
+          ) {
+            log(
+              "Invalid command",
+              cmd,
+              "vertex array doesn't satisfy vertex layout",
+              vertexLayout
+            );
+            assert.fail(
+              `Command is missing attribute "${name}" at location ${location}`
+            );
+          }
+        }
+
+        if (vertexArray !== cmd.vertexArray.handle) {
+          this.state.vertexArray = cmd.vertexArray.handle;
+          gl.bindVertexArray(cmd.vertexArray.handle);
+        }
+        if (cmd.vertexArray.indices) {
+          let indexBuffer = cmd.vertexArray.indices.buffer;
+          if (!indexBuffer && cmd.vertexArray.indices.class === "indexBuffer") {
+            indexBuffer = cmd.vertexArray.indices;
+          }
+          this.state.indexBuffer = indexBuffer;
+        }
+      } else {
+        if (this.state.vertexArray !== undefined) {
+          this.state.vertexArray = undefined;
+          gl.bindVertexArray(null);
+        }
+
+        // sets ctx.state.indexBuffer and ctx.state.activeAttributes
+        enableVertexData(ctx, vertexLayout, cmd, true);
       }
 
-      // TODO: the same as i support [tex] and { texture: tex } i should support buffers in attributes?
-      vertexLayout.forEach((layout, i) => {
-        const name = layout[0];
-        const location = layout[1];
-        const size = layout[2];
-        const attrib = cmd.attributes[i] || cmd.attributes[name];
+      const instanced = Object.values(
+        cmd.attributes || cmd.vertexArray.attributes
+      ).some((attrib) => attrib.divisor);
 
-        if (!attrib) {
-          log(
-            "Invalid command",
-            cmd,
-            "doesn't satisfy vertex layout",
-            vertexLayout
-          );
-          assert.fail(
-            `Command is missing attribute "${name}" at location ${location} with ${attrib}`
-          );
-        }
+      const primitive = cmd.pipeline.primitive;
 
-        let buffer = attrib.buffer;
-        if (!buffer && attrib.class === "vertexBuffer") {
-          buffer = attrib;
-        }
+      if (cmd.indices || cmd.vertexArray?.indices) {
+        // TODO: is that always correct
+        const count = this.state.indexBuffer.length;
+        const offset =
+          cmd.indices?.offset || cmd.vertexArray?.indices?.offset || 0;
+        const type =
+          cmd.indices?.type ||
+          cmd.vertexArray?.indices?.offset ||
+          this.state.indexBuffer.type;
 
-        if (!buffer || !buffer.target) {
-          log("Invalid command", cmd);
-          assert.fail(
-            `Trying to draw arrays with invalid buffer for attribute : ${name}`
-          );
-        }
-
-        gl.bindBuffer(buffer.target, buffer.handle);
-        if (size === 16) {
-          gl.enableVertexAttribArray(location + 0);
-          gl.enableVertexAttribArray(location + 1);
-          gl.enableVertexAttribArray(location + 2);
-          gl.enableVertexAttribArray(location + 3);
-          state.activeAttributes[location + 0] = buffer;
-          state.activeAttributes[location + 1] = buffer;
-          state.activeAttributes[location + 2] = buffer;
-          state.activeAttributes[location + 3] = buffer;
-          // we still check for buffer type because while e.g. pex-renderer would copy buffer type to attrib
-          // a raw pex-context example probably would not
-          gl.vertexAttribPointer(
-            location,
-            4,
-            attrib.type || buffer.type,
-            attrib.normalized || false,
-            attrib.stride || 64,
-            attrib.offset || 0
-          );
-          gl.vertexAttribPointer(
-            location + 1,
-            4,
-            attrib.type || buffer.type,
-            attrib.normalized || false,
-            attrib.stride || 64,
-            attrib.offset || 16
-          );
-          gl.vertexAttribPointer(
-            location + 2,
-            4,
-            attrib.type || buffer.type,
-            attrib.normalized || false,
-            attrib.stride || 64,
-            attrib.offset || 32
-          );
-          gl.vertexAttribPointer(
-            location + 3,
-            4,
-            attrib.type || buffer.type,
-            attrib.normalized || false,
-            attrib.stride || 64,
-            attrib.offset || 48
-          );
-          if (attrib.divisor) {
-            gl.vertexAttribDivisor(location + 0, attrib.divisor);
-            gl.vertexAttribDivisor(location + 1, attrib.divisor);
-            gl.vertexAttribDivisor(location + 2, attrib.divisor);
-            gl.vertexAttribDivisor(location + 3, attrib.divisor);
-            instanced = true;
-          } else if (capabilities.instancing) {
-            gl.vertexAttribDivisor(location + 0, 0);
-            gl.vertexAttribDivisor(location + 1, 0);
-            gl.vertexAttribDivisor(location + 2, 0);
-            gl.vertexAttribDivisor(location + 3, 0);
-          }
-        } else {
-          gl.enableVertexAttribArray(location);
-          state.activeAttributes[location] = buffer;
-          gl.vertexAttribPointer(
-            location,
-            size,
-            attrib.type || buffer.type,
-            attrib.normalized || false,
-            attrib.stride || 0,
-            attrib.offset || 0
-          );
-          if (attrib.divisor) {
-            gl.vertexAttribDivisor(location, attrib.divisor);
-            instanced = true;
-          } else if (capabilities.instancing) {
-            gl.vertexAttribDivisor(location, 0);
-          }
-        }
-        // TODO: how to match index with vertexLayout location?
-      });
-
-      let primitive = cmd.pipeline.primitive;
-      if (cmd.indices) {
-        let indexBuffer = cmd.indices.buffer;
-        if (!indexBuffer && cmd.indices.class === "indexBuffer") {
-          indexBuffer = cmd.indices;
-        }
-        if (!indexBuffer || !indexBuffer.target) {
-          log("Invalid command", cmd);
-          assert.fail(`Trying to draw arrays with invalid buffer for elements`);
-        }
-        state.indexBuffer = indexBuffer;
-        gl.bindBuffer(indexBuffer.target, indexBuffer.handle);
-        const count = cmd.count || indexBuffer.length;
-        const offset = cmd.indices.offset || 0;
-        const type = cmd.indices.type || indexBuffer.type;
+        //repeated code {
         if (instanced) {
           // TODO: check if instancing available
           gl.drawElementsInstanced(
@@ -1142,38 +1089,38 @@ function createContext(options = {}) {
           gl.drawArrays(primitive, first, cmd.count);
         }
       } else {
-        assert.fail("Vertex arrays requres elements or count to draw");
+        assert.fail("Vertex arrays requires elements or count to draw");
       }
+
       this.checkError();
     },
 
     // TODO: switching to lightweight resources would allow to just clone state
     // and use commands as state modifiers?
     apply(cmd) {
-      const state = this.state;
-
-      if (this.debugMode)
+      if (this.debugMode) {
         log("apply", cmd.name || cmd.id, {
           cmd,
-          state: JSON.parse(JSON.stringify(state)),
+          state: JSON.parse(JSON.stringify(this.state)),
         });
+      }
 
       this.checkError();
 
       if (cmd.scissor) {
-        if (cmd.scissor !== state.scissor) {
-          state.scissor = cmd.scissor;
+        if (cmd.scissor !== this.state.scissor) {
+          this.state.scissor = cmd.scissor;
           gl.enable(gl.SCISSOR_TEST);
           gl.scissor(
-            state.scissor[0],
-            state.scissor[1],
-            state.scissor[2],
-            state.scissor[3]
+            this.state.scissor[0],
+            this.state.scissor[1],
+            this.state.scissor[2],
+            this.state.scissor[3]
           );
         }
       } else {
-        if (cmd.scissor !== state.scissor) {
-          state.scissor = cmd.scissor;
+        if (cmd.scissor !== this.state.scissor) {
+          this.state.scissor = cmd.scissor;
           gl.disable(gl.SCISSOR_TEST);
         }
       }
@@ -1182,21 +1129,17 @@ function createContext(options = {}) {
       if (cmd.pipeline) this.applyPipeline(cmd.pipeline);
       if (cmd.uniforms) this.applyUniforms(cmd.uniforms);
 
-      if (cmd.viewport) {
-        if (cmd.viewport !== state.viewport) {
-          state.viewport = cmd.viewport;
-          gl.viewport(
-            state.viewport[0],
-            state.viewport[1],
-            state.viewport[2],
-            state.viewport[3]
-          );
-        }
+      if (cmd.viewport && cmd.viewport !== this.state.viewport) {
+        this.state.viewport = cmd.viewport;
+        gl.viewport(
+          this.state.viewport[0],
+          this.state.viewport[1],
+          this.state.viewport[2],
+          this.state.viewport[3]
+        );
       }
 
-      if (cmd.attributes) {
-        this.drawVertexData(cmd);
-      }
+      if (cmd.attributes || cmd.vertexArray) this.drawVertexData(cmd);
     },
   });
 

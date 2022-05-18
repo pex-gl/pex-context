@@ -18,28 +18,42 @@ console.assert(
 // update with array, should default to Uint8
 // const tex2 = ctx.texture2D({ data: [0, 0, 0, 0], width: 1, height: 1 })
 
-const vertexBuffers = [
-  ctx.vertexBuffer([0, 1, 2, 3, 4, 5]),
-  ctx.vertexBuffer([
+const vertexBuffers = {
+  aFlatArray: ctx.vertexBuffer([0, 1, 2, 3, 4, 5]),
+  aElementArray: ctx.vertexBuffer([
     [0, 1, 2],
     [3, 4, 5],
   ]),
-  ctx.vertexBuffer(new Float32Array([0, 1, 2, 3, 4, 5])),
-  ctx.vertexBuffer({ data: [0, 1, 2, 3, 4, 5] }),
-  ctx.vertexBuffer({
+  aTypedArray: ctx.vertexBuffer(new Float32Array([0, 1, 2, 3, 4, 5])),
+  aDataArray: ctx.vertexBuffer({ data: [0, 1, 2, 3, 4, 5] }),
+  aDataElementArray: ctx.vertexBuffer({
     data: [
       [0, 1, 2],
       [3, 4, 5],
     ],
   }),
-  ctx.vertexBuffer({ data: new Float32Array([0, 1, 2, 3, 4, 5]) }),
-];
+  aDataTypedArray: ctx.vertexBuffer({
+    data: new Float32Array([0, 1, 2, 3, 4, 5]),
+  }),
+};
 
-vertexBuffers.forEach(({ target }, i) => {
+Object.values(vertexBuffers).forEach(({ target }, i) => {
   console.assert(
     target === ctx.gl.ARRAY_BUFFER,
     `VertexBuffer ${i} type is wrong ${target} != ${ctx.gl.ARRAY_BUFFER}`
   );
+});
+
+const vertexLayout = Object.fromEntries(
+  Object.entries(vertexBuffers).map(([key], index) => [
+    key,
+    { location: index, type: "vec3" },
+  ])
+);
+
+ctx.vertexArray({
+  vertexLayout,
+  attributes: vertexBuffers,
 });
 
 const pipeline = ctx.pipeline({

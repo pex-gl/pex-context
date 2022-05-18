@@ -5,7 +5,7 @@
   const examples = [
     "basic",
     "batching",
-    "buffers",
+    // "buffers",
     "camera",
     "color-mask",
     "cubemap",
@@ -19,8 +19,10 @@
     "render-to-texture",
     "shadows",
     "sub-pass",
-    "test",
+    // "test",
     "unindexed",
+    "vao",
+    "vao-instanced",
   ];
 
   const list = document.querySelector(".Examples-list");

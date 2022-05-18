@@ -110,6 +110,11 @@ function updateBuffer(ctx, buffer, opts) {
     data.length ??
     data.byteLength / ctx.DataTypeConstructor[type].BYTES_PER_ELEMENT;
 
+  if (ctx.state.vertexArray) {
+    ctx.state.vertexArray = undefined;
+    gl.bindVertexArray(null);
+  }
+
   // TODO: push state, and pop as this can modify existing VBO?
   gl.bindBuffer(buffer.target, buffer.handle);
   if (offset) {

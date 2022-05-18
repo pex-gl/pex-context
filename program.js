@@ -2,8 +2,6 @@ import assert from "assert";
 
 import { log as debug } from "./utils.js";
 
-// const allowedProps = ["vert", "frag"];
-
 const log = debug.extend("program");
 log.enabled = true;
 
@@ -82,7 +80,7 @@ function createProgram(ctx, opts) {
   return program;
 }
 
-function updateProgram(ctx, program, { vert, frag }) {
+function updateProgram(ctx, program, { vert, frag, vertexLayout }) {
   assert(typeof vert === "string", "Vertex shader source must be a string");
   assert(typeof frag === "string", "Fragment shader source must be a string");
 
@@ -92,6 +90,12 @@ function updateProgram(ctx, program, { vert, frag }) {
 
   // TODO: implement custom vertex layouts
   // gl.bindAttribLocation(program, location, attributeName)
+
+  if (vertexLayout) {
+    for (let [name, attribute] of Object.entries(vertexLayout)) {
+      gl.bindAttribLocation(program.handle, attribute.location, name);
+    }
+  }
 
   gl.attachShader(program.handle, vertShader);
   gl.attachShader(program.handle, fragShader);
