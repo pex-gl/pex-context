@@ -21,17 +21,33 @@ const polyfill = (ctx) => {
 
   if (!gl.createVertexArray) {
     const ext = gl.getExtension("OES_vertex_array_object");
+    gl.createVertexArray = ext.createVertexArrayOES.bind(ext);
+    gl.bindVertexArray = ext.bindVertexArrayOES.bind(ext);
+  }
+
+  if (!gl.drawElementsInstanced) {
+    const ext = gl.getExtension("ANGLE_instanced_arrays");
+    gl.drawElementsInstanced = ext.drawElementsInstancedANGLE.bind(ext);
+    gl.drawArraysInstanced = ext.drawArraysInstancedANGLE.bind(ext);
+    gl.vertexAttribDivisor = ext.vertexAttribDivisorANGLE.bind(ext);
+  }
+
+  if (!gl.drawBuffers) {
+    const ext = gl.getExtension("WEBGL_draw_buffers");
     if (!ext) {
-      gl.createVertexArray = function () {
-        throw new Error("OES_vertex_array_object not supported");
+      gl.drawBuffers = () => {
+        throw new Error("WEBGL_draw_buffers not supported");
       };
     } else {
-      gl.createVertexArray = ext.createVertexArrayOES.bind(ext);
-      gl.bindVertexArray = ext.bindVertexArrayOES.bind(ext);
-      capabilities.vertexArrayObject = true;
+      gl.drawBuffers = ext.drawBuffersWEBGL.bind(ext);
+      capabilities.maxColorAttachments = gl.getParameter(
+        ext.MAX_COLOR_ATTACHMENTS_WEBGL
+      );
     }
   } else {
-    capabilities.vertexArrayObject = true;
+    capabilities.maxColorAttachments = gl.getParameter(
+      gl.MAX_COLOR_ATTACHMENTS
+    );
   }
 
   if (!capabilities.disjointTimerQuery) {
@@ -62,56 +78,6 @@ const polyfill = (ctx) => {
     gl.beginQuery ||= extDTQ.beginQueryEXT.bind(extDTQ);
     gl.endQuery ||= extDTQ.endQueryEXT.bind(extDTQ);
     gl.getQueryParameter ||= extDTQ.getQueryObjectEXT.bind(extDTQ);
-  }
-
-  if (!gl.drawElementsInstanced) {
-    const ext = gl.getExtension("ANGLE_instanced_arrays");
-    if (!ext) {
-      // TODO: this._caps[CAPS_INSTANCED_ARRAYS] = false;
-      gl.drawElementsInstanced = () => {
-        throw new Error(
-          "gl.drawElementsInstanced not available. ANGLE_instanced_arrays not supported"
-        );
-      };
-      gl.drawArraysInstanced = () => {
-        throw new Error(
-          "gl.drawArraysInstanced not available. ANGLE_instanced_arrays not supported"
-        );
-      };
-      gl.vertexAttribDivisor = () => {
-        throw new Error(
-          "gl.vertexAttribDivisor not available. ANGLE_instanced_arrays not supported"
-        );
-      };
-    } else {
-      // TODO: this._caps[CAPS_INSTANCED_ARRAYS] = true;
-      gl.drawElementsInstanced = ext.drawElementsInstancedANGLE.bind(ext);
-      gl.drawArraysInstanced = ext.drawArraysInstancedANGLE.bind(ext);
-      gl.vertexAttribDivisor = ext.vertexAttribDivisorANGLE.bind(ext);
-      capabilities.instancedArrays = true;
-      capabilities.instancing = true; // TODO: deprecate
-    }
-  } else {
-    capabilities.instancedArrays = true;
-    capabilities.instancing = true; // TODO: deprecate
-  }
-
-  if (!gl.drawBuffers) {
-    const ext = gl.getExtension("WEBGL_draw_buffers");
-    if (!ext) {
-      gl.drawBuffers = () => {
-        throw new Error("WEBGL_draw_buffers not supported");
-      };
-    } else {
-      gl.drawBuffers = ext.drawBuffersWEBGL.bind(ext);
-      capabilities.maxColorAttachments = gl.getParameter(
-        ext.MAX_COLOR_ATTACHMENTS_WEBGL
-      );
-    }
-  } else {
-    capabilities.maxColorAttachments = gl.getParameter(
-      gl.MAX_COLOR_ATTACHMENTS
-    );
   }
 };
 
@@ -217,17 +183,11 @@ function enableVertexData(ctx, vertexLayout, cmd, updateState) {
         attrib.stride || 64,
         attrib.offset || 48
       );
-      if (attrib.divisor) {
-        gl.vertexAttribDivisor(location + 0, attrib.divisor);
-        gl.vertexAttribDivisor(location + 1, attrib.divisor);
-        gl.vertexAttribDivisor(location + 2, attrib.divisor);
-        gl.vertexAttribDivisor(location + 3, attrib.divisor);
-      } else if (ctx.capabilities.instancing) {
-        gl.vertexAttribDivisor(location + 0, 0);
-        gl.vertexAttribDivisor(location + 1, 0);
-        gl.vertexAttribDivisor(location + 2, 0);
-        gl.vertexAttribDivisor(location + 3, 0);
-      }
+      const divisor = attrib.divisor || 0;
+      gl.vertexAttribDivisor(location + 0, divisor);
+      gl.vertexAttribDivisor(location + 1, divisor);
+      gl.vertexAttribDivisor(location + 2, divisor);
+      gl.vertexAttribDivisor(location + 3, divisor);
     } else {
       gl.enableVertexAttribArray(location);
       if (updateState) ctx.state.activeAttributes[location] = buffer;
@@ -239,11 +199,7 @@ function enableVertexData(ctx, vertexLayout, cmd, updateState) {
         attrib.stride || 0,
         attrib.offset || 0
       );
-      if (attrib.divisor) {
-        gl.vertexAttribDivisor(location, attrib.divisor);
-      } else if (ctx.capabilities.instancing) {
-        gl.vertexAttribDivisor(location, 0);
-      }
+      gl.vertexAttribDivisor(location, attrib.divisor || 0);
     }
     // TODO: how to match index with vertexLayout location?
   }

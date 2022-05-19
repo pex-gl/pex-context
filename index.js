@@ -67,11 +67,6 @@ function createContext(options = {}) {
     maxVertexAttribs: gl.getParameter(gl.MAX_VERTEX_ATTRIBS),
     maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
     maxCubeMapTextureSize: gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
-    instancedArrays: false,
-    instancing: false, // TODO: deprecate
-    vertexArrayObject: false,
-    elementIndexUint32: !!gl.getExtension("OES_element_index_uint"),
-    standardDerivatives: !!gl.getExtension("OES_standard_derivatives"),
     depthTexture: !!gl.getExtension("WEBGL_depth_texture"),
     shaderTextureLod: !!gl.getExtension("EXT_shader_texture_lod"),
     textureFloat: !!gl.getExtension("OES_texture_float"),
@@ -947,7 +942,6 @@ function createContext(options = {}) {
           this.state.indexBuffer.type;
 
         if (instanced) {
-          // TODO: check if instancing available
           gl.drawElementsInstanced(
             primitive,
             count,
