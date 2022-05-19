@@ -10,6 +10,7 @@ precision highp float;
 #define varying in
 #define texture2D texture
 #define gl_FragData FragData
+#define gl_FragColor gl_FragData[0]
 out vec4 FragData[${size}];
 ${shader}`;
 

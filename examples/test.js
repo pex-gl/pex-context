@@ -1,7 +1,16 @@
 import createContext from "../index.js";
 
+import baboon from "baboon-image-uri";
+import { loadImage } from "pex-io";
+
+import testVert from "./shaders/test.vert.js";
+import screenImageFrag from "./shaders/screen-image.frag.js";
+
+import { es300Fragment } from "./utils.js";
+
 const ctx = createContext();
 
+// Texture
 const tex = ctx.texture2D({
   data: new Uint8Array([0, 0, 0, 0]),
   width: 1,
@@ -18,6 +27,7 @@ console.assert(
 // update with array, should default to Uint8
 // const tex2 = ctx.texture2D({ data: [0, 0, 0, 0], width: 1, height: 1 })
 
+// Buffers
 const vertexBuffers = {
   aFlatArray: ctx.vertexBuffer([0, 1, 2, 3, 4, 5]),
   aElementArray: ctx.vertexBuffer([
@@ -44,6 +54,7 @@ Object.values(vertexBuffers).forEach(({ target }, i) => {
   );
 });
 
+// VAO
 const vertexLayout = Object.fromEntries(
   Object.entries(vertexBuffers).map(([key], index) => [
     key,
@@ -56,6 +67,7 @@ ctx.vertexArray({
   attributes: vertexBuffers,
 });
 
+// Pipeline
 const pipeline = ctx.pipeline({
   vert: /* glsl */ `
     attribute vec3 aPosition0;
@@ -95,6 +107,114 @@ console.assert(
   "Using texture should be remembered in active state"
 );
 
-setTimeout(() => {
-  window.dispatchEvent(new CustomEvent("pex-screenshot"));
-}, 1000);
+// Uniforms
+ctx.submit({
+  pass: ctx.pass({
+    clearColor: [0.2, 0.2, 0.2, 1],
+    clearDepth: 1,
+  }),
+  pipeline: ctx.pipeline({
+    vert: testVert,
+    frag: es300Fragment(screenImageFrag),
+  }),
+  attributes: {
+    aPosition: ctx.vertexBuffer([
+      [-1, -1],
+      [1, -1],
+      [1, 1],
+      [-1, 1],
+    ]),
+    aTexCoord: ctx.vertexBuffer([
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, 1],
+    ]),
+  },
+  indices: ctx.indexBuffer([
+    [0, 1, 2],
+    [0, 2, 3],
+  ]),
+  uniforms: {
+    uTexture: ctx.texture2D({
+      data: await loadImage(baboon),
+      flipY: true,
+    }),
+
+    uInt: -1,
+    uUint: 1,
+    uBoolean: true,
+    uFloat: 1.0,
+
+    uFloatVec2: [1.0, 1.0],
+    uFloatVec3: [1.0, 1.0, 1.0],
+    uFloatVec4: [1.0, 1.0, 1.0, 1.0],
+
+    uIntVec2: [-1, -1],
+    uIntVec3: [-1, -1, -1],
+    uIntVec4: [-1, -1, -1, -1],
+
+    uUnsignedIntVec2: [1, 1],
+    uUnsignedIntVec3: [1, 1, 1],
+    uUnsignedIntVec4: [1, 1, 1, 1],
+
+    uBoolVec2: [1, 1],
+    uBoolVec3: [1, 1, 1],
+    uBoolVec4: [1, 1, 1, 1],
+
+    // prettier-ignore
+    uFloatMat2: [
+      1, 0,
+      0, 1
+    ],
+    // prettier-ignore
+    uFloatMat3: [
+      1, 0, 0,
+      0, 1, 0,
+      0, 0, 1,
+    ],
+    // prettier-ignore
+    uFloatMat4: [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1,
+    ],
+    // prettier-ignore
+    uFloatMat2x3: [
+      1, 0,
+      0, 1,
+      0, 0,
+    ],
+    // prettier-ignore
+    uFloatMat2x4: [
+      1, 0,
+      0, 1,
+      0, 0,
+      0, 0,
+    ],
+    // prettier-ignore
+    uFloatMat3x2: [
+      1, 0, 0,
+      0, 1, 0,
+    ],
+    // prettier-ignore
+    uFloatMat3x4: [
+      1, 0, 0,
+      0, 1, 0,
+      0, 0, 1,
+      0, 0, 0,
+    ],
+    // prettier-ignore
+    uFloatMat4x2: [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+    ],
+    // prettier-ignore
+    uFloatMat4x3: [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+    ],
+  },
+});
