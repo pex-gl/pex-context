@@ -115,6 +115,133 @@ export const addEnums = (ctx) => {
   };
 
   /** @enum {number} */
+  ctx.UniformMethod = {
+    [gl.BOOL]: "uniform1i",
+    [gl.INT]: "uniform1i",
+
+    [gl.SAMPLER_2D]: "uniform1i",
+    [gl.INT_SAMPLER_2D]: "uniform1i",
+    [gl.UNSIGNED_INT_SAMPLER_2D]: "uniform1i",
+    [gl.SAMPLER_2D_SHADOW]: "uniform1i",
+    [gl.SAMPLER_2D_ARRAY]: "uniform1i",
+    [gl.INT_SAMPLER_2D_ARRAY]: "uniform1i",
+    [gl.UNSIGNED_INT_SAMPLER_2D_ARRAY]: "uniform1i",
+    [gl.SAMPLER_2D_ARRAY_SHADOW]: "uniform1i",
+    [gl.SAMPLER_CUBE]: "uniform1i",
+    [gl.INT_SAMPLER_CUBE]: "uniform1i",
+    [gl.UNSIGNED_INT_SAMPLER_CUBE]: "uniform1i",
+    [gl.SAMPLER_CUBE_SHADOW]: "uniform1i",
+    [gl.SAMPLER_3D]: "uniform1i",
+    [gl.INT_SAMPLER_3D]: "uniform1i",
+    [gl.UNSIGNED_INT_SAMPLER_3D]: "uniform1i",
+
+    [gl.UNSIGNED_INT]: "uniform1ui",
+
+    [gl.FLOAT]: "uniform1f",
+    [gl.FLOAT_VEC2]: "uniform2fv",
+    [gl.FLOAT_VEC3]: "uniform3fv",
+    [gl.FLOAT_VEC4]: "uniform4fv",
+
+    [gl.INT_VEC2]: "uniform2iv",
+    [gl.INT_VEC3]: "uniform3iv",
+    [gl.INT_VEC4]: "uniform4iv",
+
+    [gl.UNSIGNED_INT_VEC2]: "uniform2uiv",
+    [gl.UNSIGNED_INT_VEC3]: "uniform3uiv",
+    [gl.UNSIGNED_INT_VEC4]: "uniform4uiv",
+
+    [gl.BOOL_VEC2]: "uniform2iv",
+    [gl.BOOL_VEC3]: "uniform3iv",
+    [gl.BOOL_VEC4]: "uniform4iv",
+
+    [gl.FLOAT_MAT2]: "uniformMatrix2fv",
+    [gl.FLOAT_MAT3]: "uniformMatrix3fv",
+    [gl.FLOAT_MAT4]: "uniformMatrix4fv",
+
+    [gl.FLOAT_MAT2x3]: "uniformMatrix2x3fv",
+    [gl.FLOAT_MAT2x4]: "uniformMatrix2x4fv",
+    [gl.FLOAT_MAT3x2]: "uniformMatrix3x2fv",
+    [gl.FLOAT_MAT3x4]: "uniformMatrix3x4fv",
+    [gl.FLOAT_MAT4x2]: "uniformMatrix4x2fv",
+    [gl.FLOAT_MAT4x3]: "uniformMatrix4x3fv",
+  };
+
+  /** @enum {number} */
+  ctx.UniformSize = {
+    [gl.BOOL]: 1,
+    [gl.INT]: 1,
+
+    [gl.SAMPLER_2D]: 1,
+    [gl.INT_SAMPLER_2D]: 1,
+    [gl.UNSIGNED_INT_SAMPLER_2D]: 1,
+    [gl.SAMPLER_2D_SHADOW]: 1,
+    [gl.SAMPLER_2D_ARRAY]: 1,
+    [gl.INT_SAMPLER_2D_ARRAY]: 1,
+    [gl.UNSIGNED_INT_SAMPLER_2D_ARRAY]: 1,
+    [gl.SAMPLER_2D_ARRAY_SHADOW]: 1,
+    [gl.SAMPLER_CUBE]: 1,
+    [gl.INT_SAMPLER_CUBE]: 1,
+    [gl.UNSIGNED_INT_SAMPLER_CUBE]: 1,
+    [gl.SAMPLER_CUBE_SHADOW]: 1,
+    [gl.SAMPLER_3D]: 1,
+    [gl.INT_SAMPLER_3D]: 1,
+    [gl.UNSIGNED_INT_SAMPLER_3D]: 1,
+
+    [gl.UNSIGNED_INT]: 1,
+
+    [gl.FLOAT]: 1,
+    [gl.FLOAT_VEC2]: 2,
+    [gl.FLOAT_VEC3]: 3,
+    [gl.FLOAT_VEC4]: 4,
+
+    [gl.INT_VEC2]: 2,
+    [gl.INT_VEC3]: 3,
+    [gl.INT_VEC4]: 4,
+
+    [gl.UNSIGNED_INT_VEC2]: 2,
+    [gl.UNSIGNED_INT_VEC3]: 3,
+    [gl.UNSIGNED_INT_VEC4]: 4,
+
+    [gl.BOOL_VEC2]: 2,
+    [gl.BOOL_VEC3]: 3,
+    [gl.BOOL_VEC4]: 4,
+
+    [gl.FLOAT_MAT2]: 4,
+    [gl.FLOAT_MAT3]: 9,
+    [gl.FLOAT_MAT4]: 16,
+
+    [gl.FLOAT_MAT2x3]: 6,
+    [gl.FLOAT_MAT2x4]: 8,
+    [gl.FLOAT_MAT3x2]: 6,
+    [gl.FLOAT_MAT3x4]: 12,
+    [gl.FLOAT_MAT4x2]: 8,
+    [gl.FLOAT_MAT4x3]: 12,
+  };
+
+  /** @enum {number} */
+  ctx.AttributeSize = {
+    [gl.INT]: 1,
+
+    [gl.UNSIGNED_INT]: 1,
+    [gl.FLOAT]: 1,
+    [gl.FLOAT_VEC2]: 2,
+    [gl.FLOAT_VEC3]: 3,
+    [gl.FLOAT_VEC4]: 4,
+
+    [gl.INT_VEC2]: 2,
+    [gl.INT_VEC3]: 3,
+    [gl.INT_VEC4]: 4,
+
+    [gl.UNSIGNED_INT_VEC2]: 2,
+    [gl.UNSIGNED_INT_VEC3]: 3,
+    [gl.UNSIGNED_INT_VEC4]: 4,
+
+    [gl.FLOAT_MAT2]: 4,
+    [gl.FLOAT_MAT3]: 9,
+    [gl.FLOAT_MAT4]: 16,
+  };
+
+  /** @enum {number} */
   ctx.Face = {
     Front: gl.FRONT,
     Back: gl.BACK,

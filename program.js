@@ -28,44 +28,16 @@ function createProgram(ctx, opts) {
       const type = uniform.type;
       const location = uniform.location;
 
-      switch (uniform.type) {
-        case gl.INT:
-          gl.uniform1i(location, value);
-          break;
-        case gl.BOOL:
-          gl.uniform1i(location, value);
-          break;
-        case gl.FLOAT:
-          gl.uniform1f(location, value);
-          break;
-        case gl.FLOAT_VEC2:
-          gl.uniform2fv(location, value);
-          break;
-        case gl.FLOAT_VEC3:
-          gl.uniform3fv(location, value);
-          break;
-        case gl.FLOAT_VEC4:
-          gl.uniform4fv(location, value);
-          break;
-        case gl.FLOAT_MAT2:
-          gl.uniformMatrix2fv(location, false, value);
-          break;
-        case gl.FLOAT_MAT3:
-          gl.uniformMatrix3fv(location, false, value);
-          break;
-        case gl.FLOAT_MAT4:
-          gl.uniformMatrix4fv(location, false, value);
-          break;
-        case gl.SAMPLER_2D:
-          gl.uniform1i(location, value);
-          break;
-        case gl.SAMPLER_CUBE:
-          gl.uniform1i(location, value);
-          break;
-        default:
-          throw new Error(
-            `Invalid uniform type ${type} : ${ctx.getGLString(type)}`
-          );
+      const uniformMethod = ctx.UniformMethod[uniform.type];
+
+      if (!uniformMethod) {
+        throw new Error(
+          `Invalid uniform type ${type} : ${ctx.getGLString(type)}`
+        );
+      } else if (name.includes("Matrix")) {
+        gl[uniformMethod](location, false, value);
+      } else {
+        gl[uniformMethod](location, value);
       }
     },
   };
@@ -143,46 +115,15 @@ function updateUniforms(ctx, program) {
   for (let i = 0; i < numUniforms; ++i) {
     const info = gl.getActiveUniform(program.handle, i);
     const name = info.name;
-    let size = 0;
-    switch (info.type) {
-      case gl.INT:
-        size = 1;
-        break;
-      case gl.BOOL:
-        size = 1;
-        break;
-      case gl.FLOAT:
-        size = 1;
-        break;
-      case gl.FLOAT_VEC2:
-        size = 2;
-        break;
-      case gl.FLOAT_VEC3:
-        size = 3;
-        break;
-      case gl.FLOAT_VEC4:
-        size = 4;
-        break;
-      case gl.FLOAT_MAT2:
-        size = 4;
-        break;
-      case gl.FLOAT_MAT3:
-        size = 9;
-        break;
-      case gl.FLOAT_MAT4:
-        size = 16;
-        break;
-      case gl.SAMPLER_2D:
-        size = 0;
-        break;
-      case gl.SAMPLER_CUBE:
-        size = 0;
-        break;
-      default:
-        throw new Error(
-          `Unknwon attribute type ${info.type} : ${ctx.getGLString(info.type)}`
-        );
+
+    const size = ctx.UniformSize[info.type];
+
+    if (size === undefined) {
+      throw new Error(
+        `Unknwon uniform type ${info.type} : ${ctx.getGLString(info.type)}`
+      );
     }
+
     program.uniforms[name] = {
       name,
       type: info.type,
@@ -216,33 +157,12 @@ function updateAttributes(ctx, program) {
   for (let i = 0; i < numAttributes; ++i) {
     const info = gl.getActiveAttrib(program.handle, i);
     const name = info.name;
-    let size = 0;
-    switch (info.type) {
-      case gl.FLOAT:
-        size = 1;
-        break;
-      case gl.FLOAT_VEC2:
-        size = 2;
-        break;
-      case gl.FLOAT_VEC3:
-        size = 3;
-        break;
-      case gl.FLOAT_VEC4:
-        size = 4;
-        break;
-      case gl.FLOAT_MAT2:
-        size = 8;
-        break;
-      case gl.FLOAT_MAT3:
-        size = 12;
-        break;
-      case gl.FLOAT_MAT4:
-        size = 16;
-        break;
-      default:
-        throw new Error(
-          `Unknwon attribute type ${info.type} : ${ctx.getGLString(info.type)}`
-        );
+    const size = ctx.AttributeSize[info.type];
+
+    if (size === undefined) {
+      throw new Error(
+        `Unknwon uniform type ${info.type} : ${ctx.getGLString(info.type)}`
+      );
     }
     const attrib = {
       name,
