@@ -1,17 +1,15 @@
-import './common/es.error.cause-d7aeaf96.js';
-import './common/web.dom-collections.iterator-0e2ab85b.js';
-import './common/esnext.iterator.for-each-ae5763c3.js';
-import './common/iterate-3e898cf4.js';
-import './common/esnext.iterator.filter-f1e5be5d.js';
-import './common/esnext.iterator.map-e6a047df.js';
-import './common/esnext.weak-map.emplace-940c5b92.js';
-import './common/plane-b06f3746.js';
+import './common/es.error.cause-85d8db04.js';
+import './common/web.dom-collections.iterator-72266c99.js';
+import { v as toHex, b as toHSL, a as fromHSL } from './common/hsl-aba440c3.js';
+import './common/iterate-aedf72be.js';
+import './common/esnext.iterator.filter-b13a3115.js';
+import './common/esnext.iterator.map-88bfc258.js';
+import { a as anObject, b as aCallable, s as functionCall, _ as _export } from './common/iterators-core-5c29a195.js';
+import './common/plane-6008dfc4.js';
 import { o as map, a as clamp } from './common/vec3-68b228db.js';
-import { v as toHex, b as toHSL, a as fromHSL } from './common/hsl-10e84f6c.js';
-import './common/es.string.replace-fb144e2e.js';
-import './common/iterators-80846cd5.js';
-import './common/to-string-cde6bf5f.js';
-import './common/async-iterator-iteration-34014a16.js';
+import './common/es.string.replace-fc7a9f9f.js';
+import './common/to-string-03643265.js';
+import './common/async-iterator-iteration-1410a330.js';
 
 /**
  * Returns the width of a rectangle.
@@ -80,6 +78,45 @@ function _classPrivateFieldSet(receiver, privateMap, value) {
   _classApplyDescriptorSet(receiver, descriptor, value);
   return value;
 }
+
+// https://github.com/tc39/collection-methods
+var collectionDeleteAll = function deleteAll(/* ...elements */) {
+  var collection = anObject(this);
+  var remover = aCallable(collection['delete']);
+  var allDeleted = true;
+  var wasDeleted;
+  for (var k = 0, len = arguments.length; k < len; k++) {
+    wasDeleted = functionCall(remover, collection, arguments[k]);
+    allDeleted = allDeleted && wasDeleted;
+  }
+  return !!allDeleted;
+};
+
+// `WeakMap.prototype.deleteAll` method
+// https://github.com/tc39/proposal-collection-methods
+_export({ target: 'WeakMap', proto: true, real: true, forced: true }, {
+  deleteAll: collectionDeleteAll
+});
+
+// `Map.prototype.emplace` method
+// https://github.com/thumbsupep/proposal-upsert
+var mapEmplace = function emplace(key, handler) {
+  var map = anObject(this);
+  var get = aCallable(map.get);
+  var has = aCallable(map.has);
+  var set = aCallable(map.set);
+  var value = (functionCall(has, map, key) && 'update' in handler)
+    ? handler.update(functionCall(get, map, key), key, map)
+    : handler.insert(key, map);
+  functionCall(set, map, key, value);
+  return value;
+};
+
+// `WeakMap.prototype.emplace` method
+// https://github.com/tc39/proposal-upsert
+_export({ target: 'WeakMap', proto: true, real: true, forced: true }, {
+  emplace: mapEmplace
+});
 
 function rectSet4(a, x, y, w, h) {
   a[0][0] = x;

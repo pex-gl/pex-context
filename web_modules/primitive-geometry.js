@@ -1,13 +1,12 @@
-import { a as typedArrayConstructorsRequireWrappers, b as arrayBufferViewCore } from './common/esnext.typed-array.with-4d90e236.js';
-import './common/es.typed-array.float32-array-fe16d1f2.js';
-import './common/es.typed-array.uint32-array-29a265d1.js';
-import './common/es.typed-array.uint16-array-c87c051c.js';
-import './common/web.dom-collections.iterator-0e2ab85b.js';
-import './common/es.error.cause-d7aeaf96.js';
-import './common/esnext.iterator.map-e6a047df.js';
-import './common/iterators-80846cd5.js';
-import './common/array-sort-65ff65f3.js';
-import './common/to-string-cde6bf5f.js';
+import { a as typedArrayConstructorsRequireWrappers, b as arrayBufferViewCore, t as typedArrayConstructor } from './common/esnext.typed-array.with-8b312403.js';
+import './common/es.typed-array.float32-array-f5942f17.js';
+import './common/es.typed-array.uint16-array-bdd4f01c.js';
+import './common/web.dom-collections.iterator-72266c99.js';
+import './common/es.error.cause-85d8db04.js';
+import './common/esnext.iterator.map-88bfc258.js';
+import './common/iterators-core-5c29a195.js';
+import './common/array-sort-332ddaea.js';
+import './common/to-string-03643265.js';
 
 var aTypedArrayConstructor = arrayBufferViewCore.aTypedArrayConstructor;
 var exportTypedArrayStaticMethod = arrayBufferViewCore.exportTypedArrayStaticMethod;
@@ -21,6 +20,22 @@ exportTypedArrayStaticMethod('of', function of(/* ...items */) {
   while (length > index) result[index] = arguments[index++];
   return result;
 }, typedArrayConstructorsRequireWrappers);
+
+// `Int8Array` constructor
+// https://tc39.es/ecma262/#sec-typedarray-objects
+typedArrayConstructor('Int8', function (init) {
+  return function Int8Array(data, byteOffset, length) {
+    return init(this, data, byteOffset, length);
+  };
+});
+
+// `Uint32Array` constructor
+// https://tc39.es/ecma262/#sec-typedarray-objects
+typedArrayConstructor('Uint32', function (init) {
+  return function Uint32Array(data, byteOffset, length) {
+    return init(this, data, byteOffset, length);
+  };
+});
 
 /**
  * @module utils

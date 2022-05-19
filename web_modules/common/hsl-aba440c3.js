@@ -1,8 +1,30 @@
-import './es.string.replace-fb144e2e.js';
-import './esnext.iterator.map-e6a047df.js';
-import './web.dom-collections.iterator-0e2ab85b.js';
-import './esnext.iterator.for-each-ae5763c3.js';
-import './iterate-3e898cf4.js';
+import './es.string.replace-fc7a9f9f.js';
+import './esnext.iterator.map-88bfc258.js';
+import './web.dom-collections.iterator-72266c99.js';
+import { _ as _export, a as anObject } from './iterators-core-5c29a195.js';
+import { a as asyncIteratorIteration } from './async-iterator-iteration-1410a330.js';
+import { i as iterate } from './iterate-aedf72be.js';
+
+// https://github.com/tc39/proposal-iterator-helpers
+
+var $forEach = asyncIteratorIteration.forEach;
+
+_export({ target: 'AsyncIterator', proto: true, real: true, forced: true }, {
+  forEach: function forEach(fn) {
+    return $forEach(this, fn);
+  }
+});
+
+// https://github.com/tc39/proposal-iterator-helpers
+
+
+
+
+_export({ target: 'Iterator', proto: true, real: true, forced: true }, {
+  forEach: function forEach(fn) {
+    iterate(anObject(this), fn, { IS_ITERATOR: true });
+  }
+});
 
 /**
  * @typedef {number[]} oklab Cartesian form using D65 standard illuminant.

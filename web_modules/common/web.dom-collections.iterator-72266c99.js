@@ -1,40 +1,21 @@
-import { c as global_1, i as isCallable, d as functionUncurryThis, a as anObject, K as documentCreateElement, w as wellKnownSymbol, A as objectDefineProperty, o as objectCreate, C as hasOwnProperty_1, h as createPropertyDescriptor, E as iteratorsCore, I as iterators, k as objectGetPrototypeOf, r as redefine, l as createNonEnumerableProperty, f as functionCall, _ as _export, L as functionName, q as internalState, D as descriptors, M as toIndexedObject } from './iterators-80846cd5.js';
+import { w as wellKnownSymbol, o as objectDefineProperty, e as objectCreate, g as documentCreateElement, h as hasOwnProperty_1, i as createPropertyDescriptor, j as iteratorsCore, k as iterators, l as global_1, m as isCallable, n as functionUncurryThis, a as anObject, p as objectGetPrototypeOf, r as redefine, q as createNonEnumerableProperty, s as functionCall, _ as _export, t as functionName, u as internalState, v as descriptors, x as toIndexedObject } from './iterators-core-5c29a195.js';
 
-var String = global_1.String;
-var TypeError = global_1.TypeError;
+var UNSCOPABLES = wellKnownSymbol('unscopables');
+var ArrayPrototype = Array.prototype;
 
-var aPossiblePrototype = function (argument) {
-  if (typeof argument == 'object' || isCallable(argument)) return argument;
-  throw TypeError("Can't set " + String(argument) + ' as a prototype');
+// Array.prototype[@@unscopables]
+// https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
+if (ArrayPrototype[UNSCOPABLES] == undefined) {
+  objectDefineProperty.f(ArrayPrototype, UNSCOPABLES, {
+    configurable: true,
+    value: objectCreate(null)
+  });
+}
+
+// add a key to Array.prototype[@@unscopables]
+var addToUnscopables = function (key) {
+  ArrayPrototype[UNSCOPABLES][key] = true;
 };
-
-/* eslint-disable no-proto -- safe */
-
-
-
-
-// `Object.setPrototypeOf` method
-// https://tc39.es/ecma262/#sec-object.setprototypeof
-// Works with __proto__ only. Old v8 can't work with null proto objects.
-// eslint-disable-next-line es-x/no-object-setprototypeof -- safe
-var objectSetPrototypeOf = Object.setPrototypeOf || ('__proto__' in {} ? function () {
-  var CORRECT_SETTER = false;
-  var test = {};
-  var setter;
-  try {
-    // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
-    setter = functionUncurryThis(Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').set);
-    setter(test, []);
-    CORRECT_SETTER = test instanceof Array;
-  } catch (error) { /* empty */ }
-  return function setPrototypeOf(O, proto) {
-    anObject(O);
-    aPossiblePrototype(proto);
-    if (CORRECT_SETTER) setter(O, proto);
-    else O.__proto__ = proto;
-    return O;
-  };
-}() : undefined);
 
 // iterable DOM collections
 // flag - `iterable` interface - 'entries', 'keys', 'values', 'forEach' methods
@@ -80,23 +61,6 @@ var DOMTokenListPrototype = classList && classList.constructor && classList.cons
 
 var domTokenListPrototype = DOMTokenListPrototype === Object.prototype ? undefined : DOMTokenListPrototype;
 
-var UNSCOPABLES = wellKnownSymbol('unscopables');
-var ArrayPrototype = Array.prototype;
-
-// Array.prototype[@@unscopables]
-// https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
-if (ArrayPrototype[UNSCOPABLES] == undefined) {
-  objectDefineProperty.f(ArrayPrototype, UNSCOPABLES, {
-    configurable: true,
-    value: objectCreate(null)
-  });
-}
-
-// add a key to Array.prototype[@@unscopables]
-var addToUnscopables = function (key) {
-  ArrayPrototype[UNSCOPABLES][key] = true;
-};
-
 var defineProperty = objectDefineProperty.f;
 
 
@@ -125,6 +89,42 @@ var createIteratorConstructor = function (IteratorConstructor, NAME, next, ENUME
   iterators[TO_STRING_TAG] = returnThis;
   return IteratorConstructor;
 };
+
+var String = global_1.String;
+var TypeError = global_1.TypeError;
+
+var aPossiblePrototype = function (argument) {
+  if (typeof argument == 'object' || isCallable(argument)) return argument;
+  throw TypeError("Can't set " + String(argument) + ' as a prototype');
+};
+
+/* eslint-disable no-proto -- safe */
+
+
+
+
+// `Object.setPrototypeOf` method
+// https://tc39.es/ecma262/#sec-object.setprototypeof
+// Works with __proto__ only. Old v8 can't work with null proto objects.
+// eslint-disable-next-line es-x/no-object-setprototypeof -- safe
+var objectSetPrototypeOf = Object.setPrototypeOf || ('__proto__' in {} ? function () {
+  var CORRECT_SETTER = false;
+  var test = {};
+  var setter;
+  try {
+    // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
+    setter = functionUncurryThis(Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').set);
+    setter(test, []);
+    CORRECT_SETTER = test instanceof Array;
+  } catch (error) { /* empty */ }
+  return function setPrototypeOf(O, proto) {
+    anObject(O);
+    aPossiblePrototype(proto);
+    if (CORRECT_SETTER) setter(O, proto);
+    else O.__proto__ = proto;
+    return O;
+  };
+}() : undefined);
 
 var PROPER_FUNCTION_NAME = functionName.PROPER;
 var CONFIGURABLE_FUNCTION_NAME = functionName.CONFIGURABLE;

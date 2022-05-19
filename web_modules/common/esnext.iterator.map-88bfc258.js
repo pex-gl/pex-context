@@ -1,13 +1,4 @@
-import { H as functionBindNative, w as wellKnownSymbol, c as global_1, u as classofRaw, i as isCallable, j as objectIsPrototypeOf, d as functionUncurryThis, b as aCallable, I as iterators, x as getMethod, a as anObject, f as functionCall, F as tryToString, r as redefine, J as sharedStore, k as objectGetPrototypeOf, g as getBuiltIn, q as internalState, o as objectCreate, l as createNonEnumerableProperty, _ as _export, E as iteratorsCore } from './iterators-80846cd5.js';
-
-var FunctionPrototype = Function.prototype;
-var apply = FunctionPrototype.apply;
-var call = FunctionPrototype.call;
-
-// eslint-disable-next-line es-x/no-reflect -- safe
-var functionApply = typeof Reflect == 'object' && Reflect.apply || (functionBindNative ? call.bind(apply) : function () {
-  return call.apply(apply, arguments);
-});
+import { w as wellKnownSymbol, l as global_1, H as classofRaw, m as isCallable, n as functionUncurryThis, Z as functionBindNative, b as aCallable, N as objectIsPrototypeOf, a as anObject, J as getMethod, s as functionCall, k as iterators, Q as tryToString, r as redefine, $ as sharedStore, p as objectGetPrototypeOf, M as getBuiltIn, u as internalState, e as objectCreate, q as createNonEnumerableProperty, _ as _export, j as iteratorsCore } from './iterators-core-5c29a195.js';
 
 var TO_STRING_TAG = wellKnownSymbol('toStringTag');
 var test = {};
@@ -41,13 +32,6 @@ var classof = toStringTagSupport ? classofRaw : function (it) {
     : (result = classofRaw(O)) == 'Object' && isCallable(O.callee) ? 'Arguments' : result;
 };
 
-var TypeError = global_1.TypeError;
-
-var anInstance = function (it, Prototype) {
-  if (objectIsPrototypeOf(Prototype, it)) return it;
-  throw TypeError('Incorrect invocation');
-};
-
 var bind = functionUncurryThis(functionUncurryThis.bind);
 
 // optional / simple context binding
@@ -56,6 +40,42 @@ var functionBindContext = function (fn, that) {
   return that === undefined ? fn : functionBindNative ? bind(fn, that) : function (/* ...args */) {
     return fn.apply(that, arguments);
   };
+};
+
+var TypeError = global_1.TypeError;
+
+var anInstance = function (it, Prototype) {
+  if (objectIsPrototypeOf(Prototype, it)) return it;
+  throw TypeError('Incorrect invocation');
+};
+
+var iteratorClose = function (iterator, kind, value) {
+  var innerResult, innerError;
+  anObject(iterator);
+  try {
+    innerResult = getMethod(iterator, 'return');
+    if (!innerResult) {
+      if (kind === 'throw') throw value;
+      return value;
+    }
+    innerResult = functionCall(innerResult, iterator);
+  } catch (error) {
+    innerError = true;
+    innerResult = error;
+  }
+  if (kind === 'throw') throw value;
+  if (innerError) throw innerResult;
+  anObject(innerResult);
+  return value;
+};
+
+// call something on iterator step with safe closing on error
+var callWithSafeIterationClosing = function (iterator, fn, value, ENTRIES) {
+  try {
+    return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
+  } catch (error) {
+    iteratorClose(iterator, 'throw', error);
+  }
 };
 
 var ITERATOR = wellKnownSymbol('iterator');
@@ -82,30 +102,19 @@ var getIterator = function (argument, usingIterator) {
   throw TypeError$1(tryToString(argument) + ' is not iterable');
 };
 
-var iteratorClose = function (iterator, kind, value) {
-  var innerResult, innerError;
-  anObject(iterator);
-  try {
-    innerResult = getMethod(iterator, 'return');
-    if (!innerResult) {
-      if (kind === 'throw') throw value;
-      return value;
-    }
-    innerResult = functionCall(innerResult, iterator);
-  } catch (error) {
-    innerError = true;
-    innerResult = error;
-  }
-  if (kind === 'throw') throw value;
-  if (innerError) throw innerResult;
-  anObject(innerResult);
-  return value;
-};
-
 var redefineAll = function (target, src, options) {
   for (var key in src) redefine(target, key, src[key], options);
   return target;
 };
+
+var FunctionPrototype = Function.prototype;
+var apply = FunctionPrototype.apply;
+var call = FunctionPrototype.call;
+
+// eslint-disable-next-line es-x/no-reflect -- safe
+var functionApply = typeof Reflect == 'object' && Reflect.apply || (functionBindNative ? call.bind(apply) : function () {
+  return call.apply(apply, arguments);
+});
 
 var USE_FUNCTION_CONSTRUCTOR = 'USE_FUNCTION_CONSTRUCTOR';
 var ASYNC_ITERATOR = wellKnownSymbol('asyncIterator');
@@ -277,15 +286,6 @@ var iteratorCreateProxy = function (nextHandler, IS_ITERATOR) {
   return IteratorProxy;
 };
 
-// call something on iterator step with safe closing on error
-var callWithSafeIterationClosing = function (iterator, fn, value, ENTRIES) {
-  try {
-    return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
-  } catch (error) {
-    iteratorClose(iterator, 'throw', error);
-  }
-};
-
 // https://github.com/tc39/proposal-iterator-helpers
 
 
@@ -310,4 +310,4 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
   }
 });
 
-export { functionApply as a, anInstance as b, getIteratorMethod as c, iteratorClose as d, classof as e, functionBindContext as f, getIterator as g, asyncIteratorCreateProxy as h, isArrayIteratorMethod as i, iteratorCreateProxy as j, callWithSafeIterationClosing as k, redefineAll as r };
+export { asyncIteratorCreateProxy as a, functionBindContext as b, callWithSafeIterationClosing as c, isArrayIteratorMethod as d, getIterator as e, functionApply as f, getIteratorMethod as g, anInstance as h, iteratorCreateProxy as i, classof as j, iteratorClose as k, redefineAll as r };

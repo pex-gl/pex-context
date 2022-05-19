@@ -18,40 +18,6 @@ function commonjsRequire () {
 	throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
 }
 
-var fails = function (exec) {
-  try {
-    return !!exec();
-  } catch (error) {
-    return true;
-  }
-};
-
-var functionBindNative = !fails(function () {
-  // eslint-disable-next-line es-x/no-function-prototype-bind -- safe
-  var test = (function () { /* empty */ }).bind();
-  // eslint-disable-next-line no-prototype-builtins -- safe
-  return typeof test != 'function' || test.hasOwnProperty('prototype');
-});
-
-var call = Function.prototype.call;
-
-var functionCall = functionBindNative ? call.bind(call) : function () {
-  return call.apply(call, arguments);
-};
-
-var FunctionPrototype = Function.prototype;
-var bind = FunctionPrototype.bind;
-var call$1 = FunctionPrototype.call;
-var uncurryThis = functionBindNative && bind.bind(call$1, call$1);
-
-var functionUncurryThis = functionBindNative ? function (fn) {
-  return fn && uncurryThis(fn);
-} : function (fn) {
-  return fn && function () {
-    return call$1.apply(fn, arguments);
-  };
-};
-
 var check = function (it) {
   return it && it.Math == Math && it;
 };
@@ -67,11 +33,32 @@ var global_1 =
   // eslint-disable-next-line no-new-func -- fallback
   (function () { return this; })() || Function('return this')();
 
+var fails = function (exec) {
+  try {
+    return !!exec();
+  } catch (error) {
+    return true;
+  }
+};
+
 // Detect IE8's incomplete defineProperty implementation
 var descriptors = !fails(function () {
   // eslint-disable-next-line es-x/no-object-defineproperty -- required for testing
   return Object.defineProperty({}, 1, { get: function () { return 7; } })[1] != 7;
 });
+
+var functionBindNative = !fails(function () {
+  // eslint-disable-next-line es-x/no-function-prototype-bind -- safe
+  var test = (function () { /* empty */ }).bind();
+  // eslint-disable-next-line no-prototype-builtins -- safe
+  return typeof test != 'function' || test.hasOwnProperty('prototype');
+});
+
+var call = Function.prototype.call;
+
+var functionCall = functionBindNative ? call.bind(call) : function () {
+  return call.apply(call, arguments);
+};
 
 var $propertyIsEnumerable = {}.propertyIsEnumerable;
 // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
@@ -97,6 +84,19 @@ var createPropertyDescriptor = function (bitmap, value) {
     configurable: !(bitmap & 2),
     writable: !(bitmap & 4),
     value: value
+  };
+};
+
+var FunctionPrototype = Function.prototype;
+var bind = FunctionPrototype.bind;
+var call$1 = FunctionPrototype.call;
+var uncurryThis = functionBindNative && bind.bind(call$1, call$1);
+
+var functionUncurryThis = functionBindNative ? function (fn) {
+  return fn && uncurryThis(fn);
+} : function (fn) {
+  return fn && function () {
+    return call$1.apply(fn, arguments);
   };
 };
 
@@ -910,6 +910,8 @@ var objectCreate = Object.create || function create(O, Properties) {
   return Properties === undefined ? result : objectDefineProperties.f(result, Properties);
 };
 
+var iterators = {};
+
 var correctPrototypeGetter = !fails(function () {
   function F() { /* empty */ }
   F.prototype.constructor = null;
@@ -971,6 +973,4 @@ var iteratorsCore = {
   BUGGY_SAFARI_ITERATORS: BUGGY_SAFARI_ITERATORS
 };
 
-var iterators = {};
-
-export { objectPropertyIsEnumerable as $, objectDefineProperty as A, isObject as B, hasOwnProperty_1 as C, descriptors as D, iteratorsCore as E, tryToString as F, lengthOfArrayLike as G, functionBindNative as H, iterators as I, sharedStore as J, documentCreateElement as K, functionName as L, toIndexedObject as M, uid as N, toAbsoluteIndex as O, objectGetOwnPropertyNames as P, indexedObject as Q, toPropertyKey as R, isSymbol as S, objectGetOwnPropertyDescriptor as T, engineUserAgent as U, engineV8Version as V, inspectSource as W, arrayIncludes as X, objectKeys as Y, objectGetOwnPropertySymbols as Z, _export as _, anObject as a, objectDefineProperties as a0, getDefaultExportFromNamespaceIfNotNamed as a1, aCallable as b, global_1 as c, functionUncurryThis as d, copyConstructorProperties as e, functionCall as f, getBuiltIn as g, createPropertyDescriptor as h, isCallable as i, objectIsPrototypeOf as j, objectGetPrototypeOf as k, createNonEnumerableProperty as l, fails as m, createCommonjsModule as n, objectCreate as o, commonjsGlobal as p, internalState as q, redefine as r, shared as s, toObject as t, classofRaw as u, requireObjectCoercible as v, wellKnownSymbol as w, getMethod as x, toLength as y, toIntegerOrInfinity as z };
+export { sharedStore as $, objectKeys as A, objectGetOwnPropertySymbols as B, objectPropertyIsEnumerable as C, lengthOfArrayLike as D, isObject as E, objectDefineProperties as F, shared as G, classofRaw as H, requireObjectCoercible as I, getMethod as J, toLength as K, toIntegerOrInfinity as L, getBuiltIn as M, objectIsPrototypeOf as N, copyConstructorProperties as O, uid as P, tryToString as Q, toAbsoluteIndex as R, objectGetOwnPropertyNames as S, createCommonjsModule as T, toPropertyKey as U, isSymbol as V, objectGetOwnPropertyDescriptor as W, engineUserAgent as X, engineV8Version as Y, functionBindNative as Z, _export as _, anObject as a, inspectSource as a0, getDefaultExportFromNamespaceIfNotNamed as a1, aCallable as b, commonjsGlobal as c, arrayIncludes as d, objectCreate as e, fails as f, documentCreateElement as g, hasOwnProperty_1 as h, createPropertyDescriptor as i, iteratorsCore as j, iterators as k, global_1 as l, isCallable as m, functionUncurryThis as n, objectDefineProperty as o, objectGetPrototypeOf as p, createNonEnumerableProperty as q, redefine as r, functionCall as s, functionName as t, internalState as u, descriptors as v, wellKnownSymbol as w, toIndexedObject as x, toObject as y, indexedObject as z };

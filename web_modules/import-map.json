@@ -1,9 +1,7 @@
 {
   "imports": {
-    "assert": "./assert.js",
     "baboon-image-uri": "./baboon-image-uri.js",
     "bunny": "./bunny.js",
-    "debug": "./debug.js",
     "es-module-shims": "./es-module-shims.js",
     "flatten": "./flatten.js",
     "geom-center-and-normalize": "./geom-center-and-normalize.js",
