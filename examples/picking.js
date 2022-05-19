@@ -53,13 +53,13 @@ if (ctx.capabilities.depthTexture && useDepthTexture) {
   depthTex = ctx.texture2D({
     width: W,
     height: H,
-    pixelFormat: ctx.PixelFormat.Depth,
+    pixelFormat: ctx.PixelFormat.DEPTH_COMPONENT,
   });
 } else {
   depthRenderbuffer = ctx.renderbuffer({
     width: W,
     height: H,
-    pixelFormat: ctx.PixelFormat.Depth16,
+    pixelFormat: ctx.PixelFormat.DEPTH_COMPONENT16,
   });
 }
 

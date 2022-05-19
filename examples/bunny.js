@@ -46,7 +46,7 @@ const depthMapSize = 1024;
 const depthMap = ctx.texture2D({
   width: depthMapSize,
   height: depthMapSize,
-  pixelFormat: ctx.PixelFormat.Depth24,
+  pixelFormat: ctx.PixelFormat.DEPTH_COMPONENT24,
   encoding: ctx.Encoding.Linear,
 });
 const colorMap = ctx.texture2D({
