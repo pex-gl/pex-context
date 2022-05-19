@@ -1,9 +1,6 @@
-import assert from "assert";
-import debug from "debug";
-
-const NAMESPACE = "pex-context";
-
 // Debug
+const NAMESPACE = "\x1b[31mpex-context\x1b[39m";
+
 const checkProps = (allowedProps, obj) =>
   Object.keys(obj).forEach((prop) => {
     if (!allowedProps.includes(prop)) throw new Error(`Unknown prop "${prop}"`);
@@ -12,25 +9,6 @@ const checkProps = (allowedProps, obj) =>
 const isWebGL2 = (gl) =>
   typeof WebGL2RenderingContext !== "undefined" &&
   gl instanceof WebGL2RenderingContext;
-
-const log = (...args) => console.debug(`${NAMESPACE}`, ...args);
-log.extend = () => log;
-// const log = debug(NAMESPACE);
-// log.color = "#f00";
-
-const enableNamespace = (namespace) =>
-  debug.enable([...debug.disable().split(","), namespace].join(","));
-
-const disableNamespace = (namespace) =>
-  debug.enable(
-    debug
-      .disable()
-      .split(",")
-      .filter((n) => n !== namespace)
-      .join(",")
-  );
-
-disableNamespace(NAMESPACE);
 
 // State and gl
 function compareFBOAttachments(framebuffer, passOpts) {
@@ -48,16 +26,6 @@ function compareFBOAttachments(framebuffer, passOpts) {
   return true;
 }
 
-// TODO: match updateUniforms/updateAttributes
-const TYPE_TO_SIZE = {
-  float: 1,
-  vec2: 2,
-  vec3: 3,
-  vec4: 4,
-  mat3: 12,
-  mat4: 16,
-};
-
 function enableVertexData(ctx, vertexLayout, cmd, updateState) {
   const gl = ctx.gl;
 
@@ -74,13 +42,14 @@ function enableVertexData(ctx, vertexLayout, cmd, updateState) {
     const attrib = attributes[i] || attributes[name];
 
     if (!attrib) {
-      log(
-        "Invalid command",
+      console.debug(
+        NAMESPACE,
+        "invalid command",
         cmd,
         "doesn't satisfy vertex layout",
         vertexLayout
       );
-      assert.fail(
+      throw new Error(
         `Command is missing attribute "${name}" at location ${location} with ${attrib}`
       );
     }
@@ -91,7 +60,7 @@ function enableVertexData(ctx, vertexLayout, cmd, updateState) {
     }
 
     if (!buffer || !buffer.target) {
-      assert.fail(
+      throw new Error(
         `Trying to draw arrays with invalid buffer for attribute : ${name}`
       );
     }
@@ -181,8 +150,8 @@ function enableVertexData(ctx, vertexLayout, cmd, updateState) {
       indexBuffer = indices;
     }
     if (!indexBuffer || !indexBuffer.target) {
-      // log("Invalid command", ;
-      assert.fail(`Trying to draw arrays with invalid buffer for elements`);
+      console.debug(NAMESPACE, "invalid command", cmd, "buffer", indexBuffer);
+      throw new Error(`Trying to draw arrays with invalid buffer for elements`);
     }
     if (updateState) ctx.state.indexBuffer = indexBuffer;
 
@@ -194,9 +163,6 @@ export {
   NAMESPACE,
   isWebGL2,
   checkProps,
-  log,
-  enableNamespace,
-  disableNamespace,
   compareFBOAttachments,
   enableVertexData,
 };

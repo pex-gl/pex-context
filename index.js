@@ -1,7 +1,5 @@
 /** @module ctx */
 
-import assert from "assert";
-
 import createGL from "pex-gl";
 
 import createTexture from "./texture.js";
@@ -16,12 +14,10 @@ import createQuery from "./query.js";
 
 import {
   checkProps,
-  enableNamespace,
   isWebGL2,
-  log,
-  NAMESPACE,
   compareFBOAttachments,
   enableVertexData,
+  NAMESPACE,
 } from "./utils.js";
 import { addEnums } from "./types.js";
 
@@ -58,7 +54,7 @@ function createContext(options = {}) {
   }
 
   const gl = opts.gl || createGL(opts);
-  assert(gl, "pex-context: createContext failed");
+  console.assert(gl, "pex-context: createContext failed");
 
   const capabilities = {
     isWebGL2: isWebGL2(gl),
@@ -223,7 +219,6 @@ function createContext(options = {}) {
 
   Object.assign(ctx, {
     debugMode: false,
-    // debugGraph: '',
     debugCommands: [],
     resources: [],
     stats: {},
@@ -238,27 +233,28 @@ function createContext(options = {}) {
       activeAttributes: [],
     },
     getGLString(glEnum) {
-      let str = "";
+      let str = "UNDEFINED";
       for (let key in gl) {
-        if (gl[key] === glEnum) str = key;
+        if (gl[key] === glEnum) {
+          str = key;
+          break;
+        }
       }
-      return str || "UNDEFINED";
+      return str;
     },
     checkError() {
       if (this.debugMode) {
         const error = gl.getError();
         if (error) {
           this.debugMode = false; // prevents rolling errors
-          log("State", this.state.state);
-          throw new Error(`GL error ${error} : ${this.getGLString(error)}`);
+          console.debug(NAMESPACE, "state", this.state);
+          throw new Error(`GL error ${error}: ${this.getGLString(error)}`);
         }
       }
     },
     resource(res) {
       res.id = `${res.class}_${ID++}`;
-      if (!this.stats[res.class]) {
-        this.stats[res.class] = { alive: 0, total: 0 };
-      }
+      this.stats[res.class] ||= { alive: 0, total: 0 };
       this.stats[res.class].alive++;
       this.stats[res.class].total++;
       this.resources.push(res);
@@ -299,12 +295,7 @@ function createContext(options = {}) {
      */
     debug(enabled) {
       this.debugMode = enabled;
-      if (enabled) {
-        this.debugCommands = [];
-        if (!log.enabled) {
-          enableNamespace(NAMESPACE);
-        }
-      }
+      if (enabled) this.debugCommands = [];
     },
 
     /**
@@ -399,31 +390,15 @@ function createContext(options = {}) {
       const prevFramebufferId = this.state.framebuffer?.id;
       if (this.debugMode) {
         checkProps(allowedCommandProps, cmd);
-        if (batches && subCommand) {
-          log("submit", cmd.name || cmd.id, {
-            depth: this.stack.length,
-            cmd,
-            batches,
-            subCommand,
-            state: this.state,
-            stack: this.stack,
-          });
-        } else if (batches) {
-          log("submit", cmd.name || cmd.id, {
-            depth: this.stack.length,
-            cmd,
-            batches,
-            state: this.state,
-            stack: this.stack,
-          });
-        } else {
-          log("submit", cmd.name || cmd.id, {
-            depth: this.stack.length,
-            cmd,
-            state: this.state,
-            stack: this.stack,
-          });
-        }
+
+        console.debug(NAMESPACE, "submit", cmd.name || cmd.id, {
+          depth: this.stack.length,
+          cmd,
+          batches,
+          subCommand,
+          state: this.state,
+          stack: this.stack,
+        });
       }
 
       if (batches) {
@@ -446,10 +421,11 @@ function createContext(options = {}) {
       const cmdState = this.mergeCommands(parentState, cmd, false);
       this.apply(cmdState);
 
-      const currFramebufferId = this.state.framebuffer?.id;
       if (this.debugMode) {
+        const currFramebufferId = this.state.framebuffer?.id;
         const framebufferCanged = prevFramebufferId != currFramebufferId;
-        log(
+        console.debug(
+          NAMESPACE,
           "fbo-state",
           "  ".repeat(this.stack.length),
           cmd.name,
@@ -459,9 +435,7 @@ function createContext(options = {}) {
           [...this.state.viewport],
           this.state.scissor ? [...this.state.scissor] : "[]"
         );
-      }
 
-      if (this.debugMode) {
         cmdState.debugId = this.debugCommands.length;
         this.debugCommands.push({
           cmd,
@@ -469,40 +443,18 @@ function createContext(options = {}) {
           parentState,
         });
       }
+
       if (subCommand) {
-        if (this.debugMode) {
-          this.debugGraph += `subgraph cluster_${cmd.name || cmd.id} {\n`;
-          this.debugGraph += `label = "${cmd.name}"\n`;
-          if (cmd.program) {
-            this.debugGraph += `${cmd.program.id} -> cluster_${
-              cmd.name || cmd.id
-            }\n`;
-          }
-          if (cmd.framebuffer) {
-            this.debugGraph += `${cmd.framebuffer.id} -> cluster_${
-              cmd.name || cmd.id
-            }\n`;
-            for (let i = 0; i < cmd.framebuffer.color; i++) {
-              const attachment = cmd.framebuffer.color[i];
-              this.debugGraph += `${attachment.texture.id} -> ${cmd.framebuffer.id}\n`;
-            }
-            if (cmd.framebuffer.depth) {
-              this.debugGraph += `${cmd.framebuffer.depth.texture.id} -> ${cmd.framebuffer.id}\n`;
-            }
-          }
-        }
         this.stack.push(cmdState);
         subCommand();
         this.stack.pop();
-        if (this.debugMode) {
-          this.debugGraph += "}\n";
-        }
       }
+
       this.checkError();
     },
 
     program(opts) {
-      log("program", opts);
+      console.debug(NAMESPACE, "program", opts);
       return this.resource(createProgram(this, opts));
     },
 
@@ -513,7 +465,8 @@ function createContext(options = {}) {
      * @returns {import("./types.js").PexResource}
      */
     pass(opts) {
-      log(
+      console.debug(
+        NAMESPACE,
         "pass",
         opts,
         opts.color?.map(({ texture, info }) => texture?.info || info) || ""
@@ -527,7 +480,7 @@ function createContext(options = {}) {
      * @returns {import("./types.js").PexResource}
      */
     pipeline(opts) {
-      log("pipeline", opts);
+      console.debug(NAMESPACE, "pipeline", opts);
       return this.resource(createPipeline(this, opts));
     },
 
@@ -537,7 +490,7 @@ function createContext(options = {}) {
      * @returns {import("./types.js").PexResource}
      */
     vertexArray(opts) {
-      log("vertexArray", opts);
+      console.debug(NAMESPACE, "vertexArray", opts);
       return this.resource(createVertexArray(this, opts));
     },
 
@@ -559,7 +512,7 @@ function createContext(options = {}) {
      * ```
      */
     texture2D(opts) {
-      log("texture2D", opts);
+      console.debug(NAMESPACE, "texture2D", opts);
       opts.target = gl.TEXTURE_2D;
       return this.resource(createTexture(this, opts));
     },
@@ -578,14 +531,14 @@ function createContext(options = {}) {
      * ```
      */
     textureCube(opts) {
-      log("textureCube", opts);
+      console.debug(NAMESPACE, "textureCube", opts);
       opts.target = gl.TEXTURE_CUBE_MAP;
       return this.resource(createTexture(this, opts));
     },
     // framebuffer({ color: [ Texture2D, .. ], depth: Texture2D }
     // framebuffer({ color: [ { texture: Texture2D, target: Enum, level: int }, .. ], depth: { texture: Texture2D }})
     framebuffer(opts) {
-      log("framebuffer", opts);
+      console.debug(NAMESPACE, "framebuffer", opts);
       return this.resource(createFramebuffer(this, opts));
     },
     // renderbuffer({ width: int, height: int })
@@ -604,7 +557,7 @@ function createContext(options = {}) {
      * ```
      */
     renderbuffer(opts) {
-      log("renderbuffer", opts);
+      console.debug(NAMESPACE, "renderbuffer", opts);
       return this.resource(createRenderbuffer(this, opts));
     },
 
@@ -623,7 +576,7 @@ function createContext(options = {}) {
      * @returns {import("./types.js").PexResource}
      */
     vertexBuffer(opts) {
-      log("vertexBuffer", opts);
+      console.debug(NAMESPACE, "vertexBuffer", opts);
       if (opts.length) opts = { data: opts };
       opts.target = gl.ARRAY_BUFFER;
       return this.resource(createBuffer(this, opts));
@@ -635,7 +588,7 @@ function createContext(options = {}) {
      * @returns {import("./types.js").PexResource}
      */
     indexBuffer(opts) {
-      log("indexBuffer", opts);
+      console.debug(NAMESPACE, "indexBuffer", opts);
       if (opts.length) opts = { data: opts };
       opts.target = gl.ELEMENT_ARRAY_BUFFER;
       return this.resource(createBuffer(this, opts));
@@ -647,7 +600,7 @@ function createContext(options = {}) {
      * @returns {import("./types.js").PexResource}
      */
     query(opts) {
-      log("query", opts);
+      console.debug(NAMESPACE, "query", opts);
       return this.resource(createQuery(this, opts));
     },
     /**
@@ -656,7 +609,10 @@ function createContext(options = {}) {
      * @param {import("./query.js").PexQuery} query
      */
     beginQuery(query) {
-      assert(!this.activeQuery, "Only one query can be active at the time");
+      console.assert(
+        !this.activeQuery,
+        "Only one query can be active at the time"
+      );
       if (query._begin(this, query)) {
         this.activeQuery = query;
       }
@@ -690,7 +646,9 @@ function createContext(options = {}) {
      * @param {Object} opts
      */
     update(resource, opts) {
-      if (this.debugMode) log("update", { resource, opts });
+      if (this.debugMode) {
+        console.debug(NAMESPACE, "update", { resource, opts });
+      }
       resource._update(this, resource, opts);
     },
 
@@ -700,17 +658,20 @@ function createContext(options = {}) {
      * @param {import("./types.js").PexResource} resource
      */
     dispose(resource) {
-      log("dispose", resource);
-      assert(
+      if (this.debugMode) console.debug(NAMESPACE, "dispose", resource);
+      console.assert(
         resource || arguments.length === 0,
         "Trying to dispose undefined resource"
       );
       if (resource) {
         if (!resource._dispose) {
-          assert(resource._dispose, "Trying to dispose non resource");
+          console.assert(resource._dispose, "Trying to dispose non resource");
         }
         const idx = this.resources.indexOf(resource);
-        assert(idx !== -1, "Trying to dispose resource from another context");
+        console.assert(
+          idx !== -1,
+          "Trying to dispose resource from another context"
+        );
         this.resources.splice(idx, 1);
         this.stats[resource.class].alive--;
         resource._dispose();
@@ -773,7 +734,13 @@ function createContext(options = {}) {
         let framebuffer = pass.framebuffer;
         if (framebuffer.id !== state.framebuffer.id) {
           if (this.debugMode) {
-            log("change framebuffer", state.framebuffer, "->", framebuffer);
+            console.debug(
+              NAMESPACE,
+              "change framebuffer",
+              state.framebuffer,
+              "->",
+              framebuffer
+            );
           }
           if (
             framebuffer._update &&
@@ -810,7 +777,9 @@ function createContext(options = {}) {
 
       let clearBits = 0;
       if (pass.clearColor !== undefined) {
-        if (this.debugMode) log("clearing color", pass.clearColor);
+        if (this.debugMode) {
+          console.debug(NAMESPACE, "clearing color", pass.clearColor);
+        }
         clearBits |= gl.COLOR_BUFFER_BIT;
         // TODO this might be unnecesary but we don't know because we don't store the clearColor in state
         gl.clearColor(
@@ -822,7 +791,9 @@ function createContext(options = {}) {
       }
 
       if (pass.clearDepth !== undefined) {
-        if (this.debugMode) log("clearing depth", pass.clearDepth);
+        if (this.debugMode) {
+          console.debug(NAMESPACE, "clearing depth", pass.clearDepth);
+        }
         clearBits |= gl.DEPTH_BUFFER_BIT;
 
         if (!state.depthWrite) {
@@ -833,9 +804,8 @@ function createContext(options = {}) {
         gl.clearDepth(pass.clearDepth);
       }
 
-      if (clearBits) {
-        gl.clear(clearBits);
-      }
+      if (clearBits) gl.clear(clearBits);
+
       this.checkError();
     },
     applyPipeline(pipeline) {
@@ -914,45 +884,47 @@ function createContext(options = {}) {
         }
       }
 
-      if (pipeline.vertexLayout) {
-        state.vertexLayout = pipeline.vertexLayout;
-      }
+      if (pipeline.vertexLayout) state.vertexLayout = pipeline.vertexLayout;
+
       this.checkError();
     },
     applyUniforms(uniforms, cmd) {
       const gl = this.gl;
-      const state = this.state;
-      let numTextures = 0;
+      const { program, activeTextures } = this.state;
 
-      if (!state.program) {
-        assert.fail("Trying to draw without an active program");
+      if (!program) {
+        throw new Error("Trying to draw without an active program");
       }
 
+      let numTextures = 0;
+
       const requiredUniforms = this.debugMode
-        ? Object.keys(state.program.uniforms)
+        ? Object.keys(program.uniforms)
         : null;
 
       for (const name in uniforms) {
         let value = uniforms[name];
         // TODO: find a better way to not trying to set unused uniforms that might have been inherited
-        if (
-          !state.program.uniforms[name] &&
-          !state.program.uniforms[`${name}[0]`]
-        ) {
+        if (!program.uniforms[name] && !program.uniforms[`${name}[0]`]) {
           continue;
         }
         if (value === null || value === undefined) {
-          log("invalid command", cmd);
-          assert.fail(`Can't set uniform "${name}" with a null value`);
+          if (this.debugMode) console.debug(NAMESPACE, "invalid command", cmd);
+          throw new Error(`Can't set uniform "${name}" with a null value`);
         }
         // FIXME: uniform array hack
-        if (Array.isArray(value) && !state.program.uniforms[name]) {
+        if (Array.isArray(value) && !program.uniforms[name]) {
           if (this.debugMode) {
-            log("unknown uniform", name, Object.keys(state.program.uniforms));
+            console.debug(
+              NAMESPACE,
+              "unknown uniform",
+              name,
+              Object.keys(program.uniforms)
+            );
           }
           for (let i = 0; i < value.length; i++) {
             const nameIndex = `${name}[${i}]`;
-            state.program.setUniform(nameIndex, value[i]);
+            program.setUniform(nameIndex, value[i]);
             if (this.debugMode) {
               requiredUniforms.splice(requiredUniforms.indexOf(nameIndex), 1);
             }
@@ -962,27 +934,27 @@ function createContext(options = {}) {
           // FIXME: texture binding hack
           const slot = numTextures++;
           gl.activeTexture(gl.TEXTURE0 + slot);
-          if (state.activeTextures[slot] !== value) {
+          if (activeTextures[slot] !== value) {
             gl.bindTexture(value.target, value.handle);
-            state.activeTextures[slot] = value;
+            activeTextures[slot] = value;
           }
-          state.program.setUniform(name, slot);
+          program.setUniform(name, slot);
           if (this.debugMode) {
             requiredUniforms.splice(requiredUniforms.indexOf(name), 1);
           }
         } else if (!value.length && typeof value === "object") {
-          log("invalid command", cmd);
-          assert.fail(`Can set uniform "${name}" with an Object value`);
+          if (this.debugMode) console.debug(NAMESPACE, "invalid command", cmd);
+          throw new Error(`Can set uniform "${name}" with an Object value`);
         } else {
-          state.program.setUniform(name, value);
+          program.setUniform(name, value);
           if (this.debugMode) {
             requiredUniforms.splice(requiredUniforms.indexOf(name), 1);
           }
         }
       }
       if (this.debugMode && requiredUniforms.length > 0) {
-        log("invalid command", cmd);
-        assert.fail(
+        console.debug(NAMESPACE, "invalid command", cmd);
+        throw new Error(
           `Trying to draw with missing uniforms: ${requiredUniforms.join(", ")}`
         );
       }
@@ -992,7 +964,7 @@ function createContext(options = {}) {
       const { vertexLayout, program, vertexArray } = this.state;
 
       if (!program) {
-        assert.fail("Trying to draw without an active program");
+        throw new Error("Trying to draw without an active program");
       }
 
       if (this.debugMode) {
@@ -1001,13 +973,14 @@ function createContext(options = {}) {
           Object.keys(vertexLayout).length !==
           Object.keys(program.attributes).length
         ) {
-          log(
+          console.debug(
+            NAMESPACE,
             "Invalid vertex layout not matching the shader",
             vertexLayout,
             program.attributes,
             cmd
           );
-          assert.fail("Invalid vertex layout not matching the shader");
+          throw new Error("Invalid vertex layout not matching the shader");
         }
       }
 
@@ -1019,13 +992,16 @@ function createContext(options = {}) {
             !cmd.vertexArray.attributes[name] ||
             !cmd.vertexArray.attributes[name].location === location
           ) {
-            log(
-              "Invalid command",
-              cmd,
-              "vertex array doesn't satisfy vertex layout",
-              vertexLayout
-            );
-            assert.fail(
+            if (this.debugMode) {
+              console.debug(
+                NAMESPACE,
+                "invalid command",
+                cmd,
+                "vertex array doesn't satisfy vertex layout",
+                vertexLayout
+              );
+            }
+            throw new Error(
               `Command is missing attribute "${name}" at location ${location}`
             );
           }
@@ -1048,7 +1024,7 @@ function createContext(options = {}) {
           gl.bindVertexArray(null);
         }
 
-        // sets ctx.state.indexBuffer and ctx.state.activeAttributes
+        // Sets ctx.state.indexBuffer and ctx.state.activeAttributes
         enableVertexData(ctx, vertexLayout, cmd, true);
       }
 
@@ -1068,7 +1044,6 @@ function createContext(options = {}) {
           cmd.vertexArray?.indices?.offset ||
           this.state.indexBuffer.type;
 
-        //repeated code {
         if (instanced) {
           // TODO: check if instancing available
           gl.drawElementsInstanced(
@@ -1089,7 +1064,7 @@ function createContext(options = {}) {
           gl.drawArrays(primitive, first, cmd.count);
         }
       } else {
-        assert.fail("Vertex arrays requires elements or count to draw");
+        throw new Error("Vertex arrays requires elements or count to draw");
       }
 
       this.checkError();
@@ -1099,7 +1074,7 @@ function createContext(options = {}) {
     // and use commands as state modifiers?
     apply(cmd) {
       if (this.debugMode) {
-        log("apply", cmd.name || cmd.id, {
+        console.debug(NAMESPACE, "apply", cmd.name || cmd.id, {
           cmd,
           state: JSON.parse(JSON.stringify(this.state)),
         });
@@ -1145,8 +1120,8 @@ function createContext(options = {}) {
 
   if (opts.debug) {
     ctx.debug(true);
-    log("capabilities", capabilities);
   }
+  console.debug(NAMESPACE, "capabilities", capabilities);
 
   ctx.apply(defaultState);
   return ctx;

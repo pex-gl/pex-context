@@ -1,4 +1,3 @@
-import assert from "assert";
 import { checkProps } from "./utils.js";
 
 /**
@@ -143,7 +142,7 @@ function updateTexture2D(ctx, texture, opts) {
 
   const img = opts.data ? opts.data : opts;
   if (img && img.nodeName) {
-    assert(
+    console.assert(
       img instanceof window.HTMLImageElement ||
         img instanceof window.HTMLVideoElement ||
         img instanceof window.HTMLCanvasElement,
@@ -160,7 +159,7 @@ function updateTexture2D(ctx, texture, opts) {
     texture.height = height;
   } else if (typeof opts === "object") {
     // Check data type
-    assert(
+    console.assert(
       !data ||
         Array.isArray(opts.data) ||
         Object.values(ctx.DataTypeConstructor).some(
@@ -174,7 +173,7 @@ function updateTexture2D(ctx, texture, opts) {
     if (!opts.width && data && data.width) width = data.width;
     if (!opts.height && data && data.height) height = data.height;
 
-    assert(
+    console.assert(
       !data || (width !== undefined && height !== undefined),
       "Texture2D.update opts.width and opts.height are required when providing opts.data"
     );
@@ -213,7 +212,7 @@ function updateTexture2D(ctx, texture, opts) {
         }
       }
 
-      assert(
+      console.assert(
         internalFormat,
         `Texture2D.update Unknown internalFormat "${internalFormat}" for pixelFormat "${pixelFormat}".`
       );
@@ -222,7 +221,7 @@ function updateTexture2D(ctx, texture, opts) {
     // Get actual format and type (data supplied), allowing type override
     [format, type] = ctx.TextureFormat[pixelFormat];
     type = opts.type || type;
-    assert(type, `Texture2D.update Unknown type ${type}.`);
+    console.assert(type, `Texture2D.update Unknown type ${type}.`);
 
     if (target === gl.TEXTURE_2D) {
       // Prepare data for mipmaps
@@ -235,7 +234,7 @@ function updateTexture2D(ctx, texture, opts) {
         // Convert array of numbers to typed array
         if (Array.isArray(levelData)) {
           const TypedArray = ctx.DataTypeConstructor[type];
-          assert(TypedArray, `Unknown texture data type: ${type}`);
+          console.assert(TypedArray, `Unknown texture data type: ${type}`);
           levelData = new TypedArray(levelData);
         }
 
@@ -267,7 +266,7 @@ function updateTexture2D(ctx, texture, opts) {
       if (data[0].width) texture.width = data[0].width;
       if (data[0].height) texture.height = data[0].height;
     } else if (target === gl.TEXTURE_CUBE_MAP) {
-      assert(
+      console.assert(
         !data || (Array.isArray(data) && data.length === 6),
         "TextureCube requires data for 6 faces"
       );
@@ -281,7 +280,7 @@ function updateTexture2D(ctx, texture, opts) {
         if (Array.isArray(faceData)) {
           // Convert array of numbers to typed array
           const TypedArray = ctx.DataTypeConstructor[type];
-          assert(TypedArray, `Unknown texture data type: ${type}`);
+          console.assert(TypedArray, `Unknown texture data type: ${type}`);
           faceData = new TypedArray(faceData);
 
           gl.texImage2D(
@@ -323,7 +322,7 @@ function updateTexture2D(ctx, texture, opts) {
     }
   } else {
     // TODO: should i assert of throw new Error(msg)?
-    assert.fail("Texture2D.update opts has to be a HTMLElement or Object");
+    throw new Error("Texture2D.update opts has to be a HTMLElement or Object");
   }
 
   if (opts.mipmap) {

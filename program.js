@@ -1,9 +1,4 @@
-import assert from "assert";
-
-import { log as debug } from "./utils.js";
-
-const log = debug.extend("program");
-log.enabled = true;
+import { NAMESPACE } from "./utils.js";
 
 function createProgram(ctx, opts) {
   const gl = ctx.gl;
@@ -81,8 +76,14 @@ function createProgram(ctx, opts) {
 }
 
 function updateProgram(ctx, program, { vert, frag, vertexLayout }) {
-  assert(typeof vert === "string", "Vertex shader source must be a string");
-  assert(typeof frag === "string", "Fragment shader source must be a string");
+  console.assert(
+    typeof vert === "string",
+    "Vertex shader source must be a string"
+  );
+  console.assert(
+    typeof frag === "string",
+    "Fragment shader source must be a string"
+  );
 
   const gl = ctx.gl;
   const vertShader = compileSource(ctx, gl.VERTEX_SHADER, vert);
@@ -121,8 +122,7 @@ function compileSource(ctx, type, src) {
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
     const shaderType = type === gl.VERTEX_SHADER ? "Vertex" : "Fragment";
     if (ctx.debugMode) {
-      log(`${shaderType} shader compilation failed`);
-      log(src);
+      console.debug(NAMESPACE, `${shaderType} shader compilation failed`, src);
     }
     throw new Error(
       `${shaderType} shader error: ${gl.getShaderInfoLog(shader)}`

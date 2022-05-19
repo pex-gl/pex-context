@@ -1,4 +1,3 @@
-import assert from "assert";
 import { checkProps } from "./utils.js";
 
 /**
@@ -23,7 +22,7 @@ function createBuffer(ctx, opts) {
   checkProps(allowedProps, opts);
 
   const gl = ctx.gl;
-  assert(
+  console.assert(
     opts.target === gl.ARRAY_BUFFER || opts.target === gl.ELEMENT_ARRAY_BUFFER,
     "Invalid buffer target"
   );

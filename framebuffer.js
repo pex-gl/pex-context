@@ -1,11 +1,4 @@
-import assert from "assert";
-
-import { log as debug } from "./utils.js";
-
-const log = debug.extend("framebuffer");
-log.enabled = true;
-
-// const allowedProps = ["color", "depth"];
+import { NAMESPACE } from "./utils.js";
 
 /**
  * @typedef {Object} Attachment
@@ -99,7 +92,10 @@ function updateFramebuffer(ctx, framebuffer, opts) {
   }
 
   if (framebuffer.depth) {
-    if (ctx.debugMode) log("fbo attaching depth", framebuffer.depth);
+    if (ctx.debugMode) {
+      console.debug(NAMESPACE, "fbo attaching depth", framebuffer.depth);
+    }
+
     const depthAttachment = framebuffer.depth;
 
     if (depthAttachment.texture.target === gl.RENDERBUFFER) {
@@ -119,7 +115,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
       );
     }
   } else {
-    if (ctx.debugMode) log("fbo deattaching depth");
+    if (ctx.debugMode) console.debug(NAMESPACE, "fbo deattaching depth");
     gl.framebufferRenderbuffer(
       gl.FRAMEBUFFER,
       gl.DEPTH_ATTACHMENT,
@@ -134,21 +130,12 @@ function updateFramebuffer(ctx, framebuffer, opts) {
       0
     );
   }
-  const statusStr = [];
-  statusStr[gl.FRAMEBUFFER_COMPLETE] = "FRAMEBUFFER_COMPLETE";
-  statusStr[gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT] =
-    "FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
-  statusStr[gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT] =
-    "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
-  statusStr[gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS] =
-    "FRAMEBUFFER_INCOMPLETE_DIMENSIONS";
-  statusStr[gl.FRAMEBUFFER_UNSUPPORTED] = "FRAMEBUFFER_UNSUPPORTED";
 
   if (ctx.debugMode) {
     const fboStatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-    assert(
+    console.assert(
       fboStatus === gl.FRAMEBUFFER_COMPLETE,
-      `FBO incomplete ${statusStr[fboStatus]}`
+      `FBO incomplete ${ctx.getGLString(fboStatus)}`
     );
   }
 

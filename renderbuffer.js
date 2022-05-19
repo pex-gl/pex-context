@@ -1,5 +1,3 @@
-import assert from "assert";
-
 /**
  * @typedef {import("./index.js").PexResource} RenderbufferOptions
  * @property {number} width
@@ -34,7 +32,7 @@ function updateRenderbuffer(ctx, renderbuffer, opts) {
 
   const gl = ctx.gl;
 
-  assert(
+  console.assert(
     renderbuffer.pixelFormat === ctx.PixelFormat.DEPTH_COMPONENT16,
     "Only PixelFormat.DEPTH_COMPONENT16 is supported for renderbuffers"
   );
