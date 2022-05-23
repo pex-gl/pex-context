@@ -24,6 +24,7 @@
     "vao",
     "vao-instanced",
   ];
+  window.pexExamples = examples;
 
   const list = document.querySelector(".Examples-list");
   if (params.has("screenshot")) {

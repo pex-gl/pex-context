@@ -73,4 +73,6 @@ ctx.frame(() => {
   ctx.debug(false);
 
   gui.draw();
+
+  window.dispatchEvent(new CustomEvent("pex-screenshot"));
 });
