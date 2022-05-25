@@ -153,7 +153,6 @@ export {
   NAMESPACE,
   isWebGL2,
   checkProps,
-  polyfill,
   compareFBOAttachments,
   enableVertexData,
 };
