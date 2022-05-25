@@ -18,8 +18,8 @@ import {
   compareFBOAttachments,
   enableVertexData,
   NAMESPACE,
-  polyfill,
 } from "./utils.js";
+import polyfill from "./polyfill.js";
 import { addEnums } from "./types.js";
 
 let ID = 0;
