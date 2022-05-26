@@ -98,6 +98,14 @@ function updateBuffer(ctx, buffer, opts) {
     type = ctx.DataType.Int8;
   } else if (data instanceof ArrayBuffer) {
     // assuming type was provided
+    if (!type) {
+      if (opts.target === gl.ARRAY_BUFFER) {
+        type = ctx.DataType.Float32;
+      }
+      if (opts.target === gl.ELEMENT_ARRAY_BUFFER) {
+        type = ctx.DataType.Uint16;
+      }
+    }
   } else {
     throw new Error(`Unknown buffer data type: ${data.constructor}`);
   }
