@@ -354,7 +354,7 @@ export const addEnums = (ctx) => {
       ])
     ),
     // Legacy
-    Depth: "DEPTH_COMPONENT",
+    Depth: "DEPTH_COMPONENT16",
     Depth16: "DEPTH_COMPONENT16",
     Depth24: "DEPTH_COMPONENT24",
   };
