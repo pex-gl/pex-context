@@ -34,7 +34,7 @@ function createProgram(ctx, opts) {
         throw new Error(
           `Invalid uniform type ${type} : ${ctx.getGLString(type)}`
         );
-      } else if (name.includes("Matrix")) {
+      } else if (uniformMethod.includes("Matrix")) {
         gl[uniformMethod](location, false, value);
       } else {
         gl[uniformMethod](location, value);
