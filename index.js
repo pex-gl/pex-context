@@ -933,7 +933,7 @@ function createContext(options = {}) {
 
       if (cmd.indices || cmd.vertexArray?.indices) {
         // TODO: is that always correct
-        const count = this.state.indexBuffer.length;
+        const count = cmd.count || this.state.indexBuffer.length;
         const offset =
           cmd.indices?.offset || cmd.vertexArray?.indices?.offset || 0;
         const type =
