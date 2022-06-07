@@ -35,7 +35,7 @@
     "release": "snowdev release"
   },
   "dependencies": {
-    "pex-gl": "github:pex-gl/pex-gl#v3"
+    "pex-gl": "^3.0.0-alpha.0"
   },
   "devDependencies": {
     "baboon-image-uri": "^1.0.1",

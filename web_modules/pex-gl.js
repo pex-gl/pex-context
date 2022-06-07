@@ -10,7 +10,7 @@ const FALLBACKS = {
   bitmaprenderer: [],
   webgl: ["experimental-webgl"],
   webgl2: ["webgl", "experimental-webgl"],
-  webgpu: ["webgl2", "webgl", "experimental-webgl"]
+  webgpu: []
 };
 /**
  * @typedef {Object} Options Options for context creation. All optional.
