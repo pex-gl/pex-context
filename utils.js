@@ -1,5 +1,5 @@
 // Debug
-const NAMESPACE = "\x1b[31mpex-context\x1b[39m";
+const NAMESPACE = "pex-context";
 
 const checkProps = (allowedProps, obj) =>
   Object.keys(obj).forEach((prop) => {
