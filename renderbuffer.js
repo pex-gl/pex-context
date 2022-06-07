@@ -2,7 +2,7 @@
  * @typedef {import("./index.js").PexResource} RenderbufferOptions
  * @property {number} width
  * @property {number} height
- * @property {ctx.PixelFormat} [pixelFormat=ctx.PixelFormat.RGB8] only `PixelFormat.Depth16` equal to `gl.DEPTH_COMPONENT16` is currently supported for use as render pass depth storage (e.g. `ctx.pass({ depth: renderbuffer })`) for platforms with no `WEBGL_depth_texture` support.
+ * @property {ctx.PixelFormat} [pixelFormat=ctx.PixelFormat.DEPTH_COMPONENT16] only `PixelFormat.DEPTH_COMPONENT16` is currently supported for use as render pass depth storage (e.g. `ctx.pass({ depth: renderbuffer })`) for platforms with no `WEBGL_depth_texture` support.
  */
 
 function createRenderbuffer(ctx, opts) {

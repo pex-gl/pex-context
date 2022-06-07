@@ -1,5 +1,3 @@
-/** @module ctx */
-
 import createGL from "pex-gl";
 
 import createTexture from "./texture.js";
@@ -39,9 +37,9 @@ const allowedCommandProps = [
 ];
 
 /**
- * Create a rendering context
- * @param {PexContextOptions & import("pex-gl").Options} [options]
- * @returns {import("./types.js").PexContext}
+ * Create a context object
+ * @param {import("./types.js").PexContextOptions & import("pex-gl").Options} [options]
+ * @returns {ctx}
  */
 function createContext(options = {}) {
   const opts = {
@@ -57,37 +55,56 @@ function createContext(options = {}) {
   const gl = opts.gl || createGL(opts);
   console.assert(gl, "pex-context: createContext failed");
 
-  const capabilities = {
-    isWebGL2: isWebGL2(gl),
-    maxColorAttachments: 1,
-    maxTextureImageUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
-    maxVertexTextureImageUnits: gl.getParameter(
-      gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS
-    ),
-    maxVertexAttribs: gl.getParameter(gl.MAX_VERTEX_ATTRIBS),
-    maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
-    maxCubeMapTextureSize: gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
-    depthTexture: !!gl.getExtension("WEBGL_depth_texture"),
-    shaderTextureLod: !!gl.getExtension("EXT_shader_texture_lod"),
-    textureFloat: !!gl.getExtension("OES_texture_float"),
-    textureFloatLinear: !!gl.getExtension("OES_texture_float_linear"),
-    textureHalfFloat: !!gl.getExtension("OES_texture_half_float"),
-    textureHalfFloatLinear: !!gl.getExtension("OES_texture_half_float_linear"),
-    textureFilterAnisotropic: !!gl.getExtension(
-      "EXT_texture_filter_anisotropic"
-    ),
-    disjointTimerQuery: !!(
-      gl.getExtension("EXT_disjoint_timer_query_webgl2") ||
-      gl.getExtension("EXT_disjoint_timer_query")
-    ),
-  };
-
+  /**
+   * @namespace ctx
+   */
   const ctx = {
+    /**
+     * The `RenderingContext` returned by `pex-gl`
+     * @memberof ctx
+     */
     gl,
-    capabilities,
+    /**
+     * Max capabilities and extensions availability. See {@link #capabilitiesTable|Capabilities Table}.
+     * @memberof ctx
+     */
+    capabilities: {
+      isWebGL2: isWebGL2(gl),
+      maxColorAttachments: 1,
+      maxTextureImageUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
+      maxVertexTextureImageUnits: gl.getParameter(
+        gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS
+      ),
+      maxVertexAttribs: gl.getParameter(gl.MAX_VERTEX_ATTRIBS),
+      maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
+      maxCubeMapTextureSize: gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
+      depthTexture: !!gl.getExtension("WEBGL_depth_texture"),
+      shaderTextureLod: !!gl.getExtension("EXT_shader_texture_lod"),
+      textureFloat: !!gl.getExtension("OES_texture_float"),
+      textureFloatLinear: !!gl.getExtension("OES_texture_float_linear"),
+      textureHalfFloat: !!gl.getExtension("OES_texture_half_float"),
+      textureHalfFloatLinear: !!gl.getExtension(
+        "OES_texture_half_float_linear"
+      ),
+      textureFilterAnisotropic: !!gl.getExtension(
+        "EXT_texture_filter_anisotropic"
+      ),
+      disjointTimerQuery: !!(
+        gl.getExtension("EXT_disjoint_timer_query_webgl2") ||
+        gl.getExtension("EXT_disjoint_timer_query")
+      ),
+    },
+    /**
+     * Getter for `gl.drawingBufferWidth`
+     * @memberof ctx
+     */
     get width() {
       return gl.drawingBufferWidth;
     },
+    /**
+     * Getter for `gl.drawingBufferHeight`
+     * @memberof ctx
+     */
     get height() {
       return gl.drawingBufferHeight;
     },
@@ -164,13 +181,14 @@ function createContext(options = {}) {
     /**
      * Set the context size and pixelRatio
      * The new size and resolution will not be applied immediately but before drawing the next frame to avoid flickering.
-     * Context's canvas doesn't resize automatically, even if you skip width/height on init and the canvas will be asigned dimensions of the window. To handle resizing use the following code:
+     * Context's canvas doesn't resize automatically, even if you don't pass width/height on init and the canvas is assigned the dimensions of the window. To handle resizing use the following code:
      * ```js
      * window.addEventListener('resize', () => {
      *   ctx.set({ width: window.innerWidth, height: window.innerHeight });
      * })
      * ```
-     * @param {{ pixelRatio: number, width: number, height: number }} options
+     * @memberof ctx
+     * @param {import("./types.js").PexContextSetOptions} options
      */
     set({ pixelRatio, width, height }) {
       if (pixelRatio) {
@@ -189,6 +207,7 @@ function createContext(options = {}) {
     /**
      * Enable debug mode
      * @param {boolean} [enabled]
+     * @memberof ctx
      */
     debug(enabled) {
       this.debugMode = enabled;
@@ -197,6 +216,7 @@ function createContext(options = {}) {
 
     /**
      * Render Loop
+     * @memberof ctx
      * @param {Function} cb Request Animation Frame callback
      */
     frame(cb) {
@@ -248,11 +268,27 @@ function createContext(options = {}) {
      * Submit a command to the GPU.
      * Commands are plain js objects with GPU resources needed to complete a draw call.
      *
-     * Either indices or count need to be specified when drawing geometry.
-     * Scissor region is by default set to null and scissor test disabled.
+     * ```js
+     * const cmd = {
+     *   pass: Pass
+     *   pipeline: Pipeline,
+     *   attributes: { name:  VertexBuffer | { buffer: VertexBuffer, offset: number, stride: number } },
+     *   indices: IndexBuffer | { buffer: IndexBuffer, offset: number, count: number },
+     *   // or
+     *   count: number,
+     *   instances: number,
+     *   uniforms: { name: number, name: Array, name: Texture2D },
+     *   viewport: [0, 0, 1920, 1080],
+     *   scissor: [0, 0, 1920, 1080]
+     * }
+     * ```
+     *
+     * _Note: Either indices or count need to be specified when drawing geometry._
+     * _Note: Scissor region is by default set to null and scissor test disabled._
      *
      * @example
-     * `ctx.submit(cmd, opts)`: submit partially updated command without modifying the original one.
+     *
+     * - `ctx.submit(cmd, opts)`: submit partially updated command without modifying the original one.
      * ```js
      * // Draw mesh with custom color
      * ctx.submit(cmd, {
@@ -262,7 +298,7 @@ function createContext(options = {}) {
      * })
      * ```
      *
-     * `ctx.submit(cmd, [opts1, opts2, opts3...])`: submit a batch of commands differences in opts.
+     * - `ctx.submit(cmd, [opts1, opts2, opts3...])`: submit a batch of commands differences in opts.
      * ```js
      * // Draw same mesh twice with different material and position
      * ctx.submit(cmd, [
@@ -271,7 +307,7 @@ function createContext(options = {}) {
      * ])
      * ```
      *
-     * `ctx.submit(cmd, cb)`: submit command while preserving state from another command. This approach allows to simulate state stack with automatic cleanup at the end of callback.
+     * - `ctx.submit(cmd, cb)`: submit command while preserving state from another command. This approach allows to simulate state stack with automatic cleanup at the end of callback.
      * ```js
      * // Render to texture
      * ctx.submit(renderToFboCmd, () => {
@@ -279,6 +315,7 @@ function createContext(options = {}) {
      * })
      * ```
      *
+     * @memberof ctx
      * @param {import("./types.js").PexCommand} cmd
      * @param {import("./types.js").PexCommand | import("./types.js").PexCommand[]} [optsBatchesOrSubCommand]
      * @param {import("./types.js").PexCommand} [subCommand]
@@ -358,8 +395,20 @@ function createContext(options = {}) {
     /**
      * Passes are responsible for setting render targets (textures) and their clearing values.
      * FBOs are created internally and automatically.
+     * @memberof ctx
      * @param {import("./pass.js").PassOptions} opts
      * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const pass = ctx.pass({
+     *   color: [Texture2D, ...]
+     *   color: [{ texture: Texture2D | TextureCube, target: CubemapFace }, ...]
+     *   depth: Texture2D
+     *   clearColor: Array,
+     *   clearDepth: number,
+     * })
+     * ```
      */
     pass(opts) {
       console.debug(
@@ -373,8 +422,29 @@ function createContext(options = {}) {
 
     /**
      * Pipelines represent the state of the GPU rendering pipeline (shaders, blending, depth test etc).
+     * @memberof ctx
      * @param {import("./pipeline.js").PipelineOptions} opts
      * @returns {import("./types.js").PexResource}
+     *
+     *  @example
+     * ```js
+     * const pipeline = ctx.pipeline({
+     *   vert: String,
+     *   frag: String,
+     *   depthWrite: Boolean,
+     *   depthTest: Boolean,
+     *   depthFunc: DepthFunc,
+     *   blend: Boolean,
+     *   blendSrcRGBFactor: BlendFactor,
+     *   blendSrcAlphaFactor: BlendFactor,
+     *   blendDstRGBFactor: BlendFactor,
+     *   blendDstAlphaFactor: BlendFactor,
+     *   cullFace: Boolean,
+     *   cullFaceMode: Face,
+     *   colorMask: Array,
+     *   primitive: Primitive
+     * })
+     * ```
      */
     pipeline(opts) {
       console.debug(NAMESPACE, "pipeline", opts);
@@ -383,8 +453,33 @@ function createContext(options = {}) {
 
     /**
      * Create a VAO resource.
+     * @memberof ctx
      * @param {import("./vertex-array.js").VertexArrayOptions} opts
      * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const vertexLayout = {
+     *   aPosition: { location: 0, type: "vec3" },
+     *   aNormal: { location: 1, type: "vec3" },
+     * };
+     *
+     * const drawCmd = {
+     *   pipeline: ctx.pipeline({
+     *     vertexLayout,
+     *     // ...
+     *   }),
+     *   vertexArray: ctx.vertexArray({
+     *     vertexLayout,
+     *     attributes: {
+     *       aPosition: ctx.vertexBuffer(geom.positions),
+     *       aNormal: { buffer: ctx.vertexBuffer(geom.normals) },
+     *     },
+     *     indices: ctx.indexBuffer(geom.cells),
+     *   }),
+     *   // ...
+     * };
+     * ```
      */
     vertexArray(opts) {
       console.debug(NAMESPACE, "vertexArray", opts);
@@ -393,6 +488,7 @@ function createContext(options = {}) {
 
     /**
      * Create a 2D Texture resource.
+     * @memberof ctx
      * @param {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | import("./texture.js").TextureOptions} opts
      * @returns {import("./types.js").PexResource}
      *
@@ -415,6 +511,7 @@ function createContext(options = {}) {
     },
     /**
      * Create a 2D Texture cube resource.
+     * @memberof ctx
      * @param {HTMLImageElement | import("./texture.js").TextureOptions} opts
      * @returns {import("./types.js").PexResource}
      *
@@ -438,9 +535,10 @@ function createContext(options = {}) {
       console.debug(NAMESPACE, "framebuffer", opts);
       return this.resource(createFramebuffer(this, opts));
     },
-    // renderbuffer({ width: int, height: int })
+
     /**
      * Renderbuffers represent pixel data store for rendering operations.
+     * @memberof ctx
      * @param {import("./renderbuffer.js").RenderbufferOptions} opts
      * @returns {import("./types.js").PexResource}
      *
@@ -449,7 +547,7 @@ function createContext(options = {}) {
      * const tex = ctx.renderbuffer({
      *   width: 1280,
      *   height: 720,
-     *   pixelFormat: ctx.PixelFormat.Depth16
+     *   pixelFormat: ctx.PixelFormat.DEPTH_COMPONENT16
      * })
      * ```
      */
@@ -467,10 +565,15 @@ function createContext(options = {}) {
     // }
 
     /**
-     * Create an attribute buffer (ARRAY_BUFFER) resource.
-     * Buffers store vertex and index data in the GPU memory.
+     * Create an attribute buffer (ARRAY_BUFFER) resource. Stores vertex data in the GPU memory.
+     * @memberof ctx
      * @param {import("./buffer.js").BufferOptions} opts
      * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const vertexBuffer = ctx.vertexBuffer({ data: Array|TypedArray|ArrayBuffer })
+     * ```
      */
     vertexBuffer(opts) {
       console.debug(NAMESPACE, "vertexBuffer", opts);
@@ -479,10 +582,15 @@ function createContext(options = {}) {
       return this.resource(createBuffer(this, opts));
     },
     /**
-     * Create an index buffer (ELEMENT_ARRAY_BUFFER) resource.
-     * Buffers store vertex and index data in the GPU memory.
+     * Create an index buffer (ELEMENT_ARRAY_BUFFER) resource. Stores index data in the GPU memory.
+     * @memberof ctx
      * @param {import("./buffer.js").BufferOptions} opts
      * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const indexBuffer = ctx.vertexBuffer({ data: Array|TypedArray|ArrayBuffer })
+     * ```
      */
     indexBuffer(opts) {
       console.debug(NAMESPACE, "indexBuffer", opts);
@@ -493,8 +601,16 @@ function createContext(options = {}) {
 
     /**
      * Queries can be used for GPU timers.
+     * @memberof ctx
      * @param {import("./query.js").QueryOptions} opts
      * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const query = ctx.query({
+     *   target: QueryTarget
+     * })
+     * ```
      */
     query(opts) {
       console.debug(NAMESPACE, "query", opts);
@@ -502,8 +618,9 @@ function createContext(options = {}) {
     },
     /**
      * Begin the query measurement.
-     * There can be only one query running at the time.
+     * @memberof ctx
      * @param {import("./query.js").PexQuery} query
+     * _Note: There can be only one query running at the time._
      */
     beginQuery(query) {
       console.assert(
@@ -516,8 +633,9 @@ function createContext(options = {}) {
     },
     /**
      * End the query measurement.
-     * The result is not available immediately and will be `null` until the state changes from `ctx.QueryState.Pending` to `ctx.QueryState.Ready`.
+     * @memberof ctx
      * @param {import("./query.js").PexQuery} query
+     * _Note: The result is not available immediately and will be `null` until the state changes from `ctx.QueryState.Pending` to `ctx.QueryState.Ready`._
      */
     endQuery(query) {
       if (query._end(this, query)) {
@@ -528,6 +646,7 @@ function createContext(options = {}) {
 
     /**
      * Helper to read a block of pixels from a specified rectangle of the current color framebuffer.
+     * @memberof ctx
      * @param {{ x: number, y: number, width: number, height: number }} viewport
      * @returns {Uint8Array}
      */
@@ -539,8 +658,20 @@ function createContext(options = {}) {
 
     /**
      * Update a resource.
+     * @memberof ctx
      * @param {import("./types.js").PexResource} resource
      * @param {Object} opts
+     *
+     * @example
+     * ```js
+     * ctx.update(buffer, { data: [] })
+     *
+     * ctx.update(texture, {
+     *   width: 1,
+     *   height: 1,
+     *   data: new Uint8Array([255, 0, 0, 255])
+     * })
+     * ```
      */
     update(resource, opts) {
       if (this.debugMode) {
@@ -550,9 +681,22 @@ function createContext(options = {}) {
     },
 
     /**
-     * Delete a resource. Disposed resource is no longer valid for use.
-     * Framebuffers are ref counted and released by Pass. Programs are also ref counted and released by Pipeline.
-     * @param {import("./types.js").PexResource} resource
+     * Delete one or all resource(s). Disposed resources are no longer valid for use.
+     * @memberof ctx
+     * @param {import("./types.js").PexResource} [resource]
+     *
+     * @example
+     *
+     * Delete all allocated resources:
+     * ```js
+     * ctx.dispose()
+     * ```
+     *
+     * Delete a single resource:
+     * ```js
+     * ctx.dispose(texture)
+     * ```
+     * _Note: Framebuffers are ref counted and released by Pass. Programs are also ref counted and released by Pipeline._
      */
     dispose(resource) {
       if (this.debugMode) console.debug(NAMESPACE, "dispose", resource);
@@ -1014,10 +1158,8 @@ function createContext(options = {}) {
     },
   });
 
-  if (opts.debug) {
-    ctx.debug(true);
-  }
-  console.debug(NAMESPACE, "capabilities", capabilities);
+  if (opts.debug) ctx.debug(true);
+  console.debug(NAMESPACE, "capabilities", ctx.capabilities);
 
   ctx.apply(defaultState);
   return ctx;

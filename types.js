@@ -1,25 +1,6 @@
 /**
- * @typedef {Object} PexContext
- * @property {enum} BlendFactor
- * @property {enum} CubemapFace
- * @property {enum} DepthFunc
- * @property {enum} DataType
- * @property {enum} DataTypeConstructor
- * @property {enum} Face
- * @property {enum} Filter
- * @property {enum} TextureFormat
- * @property {enum} PixelFormat
- * @property {enum} Encoding
- * @property {enum} Primitive
- * @property {enum} Usage
- * @property {enum} Wrap
- * @property {enum} QueryTarget
- * @property {enum} QueryState
- */
-
-/**
  * @typedef {Object} PexContextOptions
- * @property {RenderingContext} [gl=WebGL2RenderingContext]
+ * @property {WebGLRenderingContext | WebGL2RenderingContext} [gl=WebGL2RenderingContext]
  * @property {number} [width=window.innerWidth]
  * @property {number} [height=window.innerHeight]
  * @property {number} [pixelRatio=1]
@@ -35,10 +16,6 @@
  */
 
 /**
- * @typedef {number[]} Viewport [x, y, w, h]
- */
-
-/**
  * @typedef {Object} PexCommand
  * @property {ctx.Pass} pass
  * @property {ctx.Pipeline} pipeline
@@ -51,10 +28,24 @@
  * @property {Viewport} scissor scissor test bounds
  */
 
+/**
+ * @typedef {Object} PexContextSetOptions
+ * @property {number} [width]
+ * @property {number} [height]
+ * @property {number} [pixelRatio]
+ */
+
+/**
+ * @typedef {number[]} Viewport [x, y, w, h]
+ */
+/**
+ * @typedef {number[]} Color [r, g, b, a]
+ */
+
 export const addEnums = (ctx) => {
   const { gl, capabilities } = ctx;
 
-  /** @enum {number} */
+  /** @enum */
   ctx.BlendFactor = {
     One: gl.ONE,
     Zero: gl.ZERO,
@@ -68,7 +59,7 @@ export const addEnums = (ctx) => {
     OneMinusDstColor: gl.ONE_MINUS_DST_COLOR,
   };
 
-  /** @enum {number} */
+  /** @enum */
   ctx.CubemapFace = {
     PositiveX: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
     NegativeX: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -78,7 +69,7 @@ export const addEnums = (ctx) => {
     NegativeZ: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
   };
 
-  /** @enum {number} */
+  /** @enum */
   ctx.DepthFunc = {
     Never: gl.NEVER,
     Less: gl.LESS,
@@ -90,7 +81,10 @@ export const addEnums = (ctx) => {
     Always: gl.ALWAYS,
   };
 
-  /** @enum {number} */
+  /**
+   * @enum
+   * @private
+   */
   ctx.DataType = {
     Float16: gl.HALF_FLOAT,
     Float32: gl.FLOAT,
@@ -102,7 +96,10 @@ export const addEnums = (ctx) => {
     Uint32: gl.UNSIGNED_INT,
   };
 
-  /** @enum {number} */
+  /**
+   * @enum
+   * @private
+   */
   ctx.DataTypeConstructor = {
     [ctx.DataType.Float16]: Float32Array,
     [ctx.DataType.Float32]: Float32Array,
@@ -114,7 +111,10 @@ export const addEnums = (ctx) => {
     [ctx.DataType.Uint32]: Uint32Array,
   };
 
-  /** @enum {number} */
+  /**
+   * @enum
+   * @private
+   */
   ctx.UniformMethod = {
     [gl.BOOL]: "uniform1i",
     [gl.INT]: "uniform1i",
@@ -166,7 +166,10 @@ export const addEnums = (ctx) => {
     [gl.FLOAT_MAT4x3]: "uniformMatrix4x3fv",
   };
 
-  /** @enum {number} */
+  /**
+   * @enum
+   * @private
+   */
   ctx.UniformSize = {
     [gl.BOOL]: 1,
     [gl.INT]: 1,
@@ -218,7 +221,10 @@ export const addEnums = (ctx) => {
     [gl.FLOAT_MAT4x3]: 12,
   };
 
-  /** @enum {number} */
+  /**
+   * @enum
+   * @private
+   */
   ctx.AttributeSize = {
     [gl.INT]: 1,
 
@@ -241,14 +247,14 @@ export const addEnums = (ctx) => {
     [gl.FLOAT_MAT4]: 16,
   };
 
-  /** @enum {number} */
+  /** @enum */
   ctx.Face = {
     Front: gl.FRONT,
     Back: gl.BACK,
     FrontAndBack: gl.FRONT_AND_BACK,
   };
 
-  /** @enum {number} */
+  /** @enum */
   ctx.Filter = {
     Nearest: gl.NEAREST,
     Linear: gl.LINEAR,
@@ -258,8 +264,12 @@ export const addEnums = (ctx) => {
     LinearMipmapLinear: gl.LINEAR_MIPMAP_LINEAR,
   };
 
-  // Mapping of format and type (with alternative types)
-  /** @enum {number} */
+  /**
+   * @enum
+   *
+   * @description
+   * Mapping of format and type (with alternative types).
+   */
   ctx.TextureFormat = {
     // Unsized Internal Formats
     RGB: [gl.RGB, ctx.DataType.Uint8], // gl.UNSIGNED_SHORT_5_6_5
@@ -345,7 +355,11 @@ export const addEnums = (ctx) => {
     ctx.TextureFormat.R32FLegacy = [gl.ALPHA, ctx.DataType.Float32];
   }
 
-  /** @enum {number} */
+  /**
+   * @enum
+   * @description
+   * Mapping of {@link #ctx.TextureFormat|ctx.TextureFormat} keys to their string values and legacy depth formats
+   */
   ctx.PixelFormat = {
     ...Object.fromEntries(
       Object.keys(ctx.TextureFormat).map((internalFormat) => [
@@ -359,7 +373,7 @@ export const addEnums = (ctx) => {
     Depth24: "DEPTH_COMPONENT24",
   };
 
-  /** @enum {number} */
+  /** @enum */
   ctx.Encoding = {
     Linear: 1,
     Gamma: 2,
@@ -367,7 +381,7 @@ export const addEnums = (ctx) => {
     RGBM: 4,
   };
 
-  /** @enum {number} */
+  /** @enum */
   ctx.Primitive = {
     Points: gl.POINTS,
     Lines: gl.LINES,
@@ -376,20 +390,20 @@ export const addEnums = (ctx) => {
     TriangleStrip: gl.TRIANGLE_STRIP,
   };
 
-  /** @enum {number} */
+  /** @enum */
   ctx.Usage = {
     StaticDraw: gl.STATIC_DRAW,
     DynamicDraw: gl.DYNAMIC_DRAW,
     StreamDraw: gl.STREAM_DRAW,
   };
 
-  /** @enum {number} */
+  /** @enum */
   ctx.Wrap = {
     ClampToEdge: gl.CLAMP_TO_EDGE,
     Repeat: gl.REPEAT,
   };
 
-  /** @enum {number} */
+  /** @enum */
   ctx.QueryTarget = {
     TimeElapsed: gl.TIME_ELAPSED,
     // webgl2
@@ -399,7 +413,7 @@ export const addEnums = (ctx) => {
       gl.TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN,
   };
 
-  /** @enum {number} */
+  /** @enum */
   ctx.QueryState = {
     Ready: "ready",
     Active: "active",
