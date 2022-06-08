@@ -66,4 +66,9 @@ export default function polyfill(ctx) {
     gl.endQuery ||= extDTQ.endQueryEXT.bind(extDTQ);
     gl.getQueryParameter ||= extDTQ.getQueryObjectEXT.bind(extDTQ);
   }
+
+  if (!capabilities.isWebGL2) {
+    gl.getExtension("OES_element_index_uint");
+    gl.getExtension("OES_standard_derivatives");
+  }
 }
