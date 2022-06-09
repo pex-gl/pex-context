@@ -141,12 +141,16 @@ function updateTexture2D(ctx, texture, opts) {
   }
 
   const img = opts.data ? opts.data : opts;
-  if (img && img.nodeName) {
+  if (
+    (img && img.nodeName) ||
+    (!ctx.capabilities.isWebGL2 && img instanceof ImageBitmap)
+  ) {
     console.assert(
-      img instanceof window.HTMLImageElement ||
-        img instanceof window.HTMLVideoElement ||
-        img instanceof window.HTMLCanvasElement,
-      "Texture2D.update opts has to be Image, Canvas or Video element"
+      img instanceof HTMLImageElement ||
+        img instanceof HTMLVideoElement ||
+        img instanceof HTMLCanvasElement ||
+        img instanceof ImageBitmap,
+      "Texture2D.update opts has to be HTMLImageElement, HTMLVideoElement, HTMLCanvasElement or ImageBitmap"
     );
     width = img.width || img.videoHeight;
     height = img.height || img.videoHeight;
@@ -322,7 +326,9 @@ function updateTexture2D(ctx, texture, opts) {
     }
   } else {
     // TODO: should i assert of throw new Error(msg)?
-    throw new Error("Texture2D.update opts has to be a HTMLElement or Object");
+    throw new Error(
+      "Texture2D.update opts has to be a HTMLElement, ImageBitmap or Object"
+    );
   }
 
   if (opts.mipmap) {
