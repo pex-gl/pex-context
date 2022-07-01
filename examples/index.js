@@ -36,7 +36,10 @@
   list.innerHTML = examples.reduce(
     (html, example) =>
       (html += `<div class="Examples-list-item"><a href="?id=${example}">
-      <img src="examples/screenshots/${example}.png" /><h3>${example}</h3></a></div>`),
+      <img src="${new URL(
+        `screenshots/${example}.png`,
+        import.meta.url
+      )}" /><h3>${example}</h3></a></div>`),
     !id
       ? ""
       : '<div class="Examples-list-item"><a href="/"><h3>home</h3></a></div>'
@@ -49,7 +52,7 @@
     ).getPropertyValue("--color-grey");
 
     try {
-      await importShim(`./examples/${id}.js`);
+      await importShim(new URL(`${id}.js`, import.meta.url).toString());
     } catch (error) {
       console.error(error);
     }
