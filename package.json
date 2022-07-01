@@ -40,7 +40,7 @@
   "devDependencies": {
     "baboon-image-uri": "^1.0.1",
     "bunny": "^1.0.1",
-    "es-module-shims": "^1.5.4",
+    "es-module-shims": "^1.5.8",
     "flatten": "^1.0.2",
     "geom-center-and-normalize": "^1.0.3",
     "normals": "^1.1.0",
@@ -50,7 +50,7 @@
     "pex-io": "github:pex-gl/pex-io#v3",
     "pex-math": "github:pex-gl/pex-math#v4",
     "pex-random": "github:pex-gl/pex-random#v2",
-    "primitive-geometry": "^2.6.0"
+    "primitive-geometry": "^2.7.0"
   },
   "engines": {
     "node": ">=16.0.0",

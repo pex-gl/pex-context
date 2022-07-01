@@ -114,7 +114,7 @@ const PLANE_DIRECTIONS = {
  * @private
  */
 
-function computePlane(geometry, indices, su, sv, nu, nv, direction = "z", pw = 0, uvScale = [1, 1], uvOffset = [0, 0], center = [0, 0, 0]) {
+function computePlane(geometry, indices, su, sv, nu, nv, direction = "z", pw = 0, quads = false, uvScale = [1, 1], uvOffset = [0, 0], center = [0, 0, 0]) {
   const {
     positions,
     normals,
@@ -136,13 +136,23 @@ function computePlane(geometry, indices, su, sv, nu, nv, direction = "z", pw = 0
 
       if (j < nv && i < nu) {
         const n = vertexOffset + j * (nu + 1) + i;
-        cells[indices.cell] = n;
-        cells[indices.cell + 1] = n + nu + 1;
-        cells[indices.cell + 2] = n + nu + 2;
-        cells[indices.cell + 3] = n;
-        cells[indices.cell + 4] = n + nu + 2;
-        cells[indices.cell + 5] = n + 1;
-        indices.cell += 6;
+
+        if (quads) {
+          const o = vertexOffset + (j + 1) * (nu + 1) + i;
+          cells[indices.cell] = n;
+          cells[indices.cell + 1] = o;
+          cells[indices.cell + 2] = o + 1;
+          cells[indices.cell + 3] = n + 1;
+        } else {
+          cells[indices.cell] = n;
+          cells[indices.cell + 1] = n + nu + 1;
+          cells[indices.cell + 2] = n + nu + 2;
+          cells[indices.cell + 3] = n;
+          cells[indices.cell + 4] = n + nu + 2;
+          cells[indices.cell + 5] = n + 1;
+        }
+
+        indices.cell += quads ? 4 : 6;
       }
     }
   }
@@ -189,16 +199,17 @@ function quad({
 }
 
 /**
- * @typedef {"x" | "-x" | "y" | "-y" | "z" | "-z"} PlaneDirection
- */
-
-/**
  * @typedef {Object} PlaneOptions
  * @property {number} [sx=1]
  * @property {number} [sy=sx]
  * @property {number} [nx=1]
  * @property {number} [ny=nx]
  * @property {PlaneDirection} [direction="z"]
+ * @property {boolean} [quads=false]
+ */
+
+/**
+ * @typedef {"x" | "-x" | "y" | "-y" | "z" | "-z"} PlaneDirection
  */
 
 /**
@@ -212,7 +223,8 @@ function plane({
   sy = sx,
   nx = 1,
   ny = nx,
-  direction = "z"
+  direction = "z",
+  quads = false
 } = {}) {
   checkArguments(arguments);
   const size = (nx + 1) * (ny + 1);
@@ -220,11 +232,11 @@ function plane({
     positions: new Float32Array(size * 3),
     normals: new Float32Array(size * 3),
     uvs: new Float32Array(size * 2),
-    cells: new (getCellsTypedArray(size))(nx * ny * 6)
+    cells: new (getCellsTypedArray(size))(nx * ny * (quads ? 4 : 6))
   }, {
     vertex: 0,
     cell: 0
-  }, sx, sy, nx, ny, direction);
+  }, sx, sy, nx, ny, direction, 0, quads);
 }
 
 /**
@@ -341,7 +353,7 @@ function roundedCube({
   for (let j = 0; j < PLANES.length; j++) {
     const [su, sv, nu, nv, direction, pw, uvScale, uvOffset, center] = PLANES[j]; // Cube faces
 
-    computePlane(geometry, indices, su, sv, nu, nv, direction, pw, uvScale, uvOffset); // Corner order: ccw uv-like order and L/B (0) R/T (2)
+    computePlane(geometry, indices, su, sv, nu, nv, direction, pw, false, uvScale, uvOffset); // Corner order: ccw uv-like order and L/B (0) R/T (2)
     // 0,1 -- 1,1
     //  |  --  |
     // 0,0 -- 1,0
@@ -352,13 +364,13 @@ function roundedCube({
       const x = (ceil === 0 ? -1 : 1) * (su + radius) * 0.5;
       const y = (floor === 0 ? -1 : 1) * (sv + radius) * 0.5; // Corners
 
-      computePlane(geometry, indices, radius, radius, roundSegments, roundSegments, direction, pw, [radius / (su + r2), radius / (sv + r2)], uvOffsetCorner(su, sv)[i], center(x, y)); // Edges
+      computePlane(geometry, indices, radius, radius, roundSegments, roundSegments, direction, pw, false, [radius / (su + r2), radius / (sv + r2)], uvOffsetCorner(su, sv)[i], center(x, y)); // Edges
 
       if (i === 0 || i === 2) {
         // Left / Right
-        computePlane(geometry, indices, radius, sv, roundSegments, edgeSegments, direction, pw, [uvOffset[0], uvScale[1]], ceil === 0 ? uvOffsetStart(su, sv) : uvOffsetEnd(su, sv), center(x, 0)); // Bottom/Top
+        computePlane(geometry, indices, radius, sv, roundSegments, edgeSegments, direction, pw, false, [uvOffset[0], uvScale[1]], ceil === 0 ? uvOffsetStart(su, sv) : uvOffsetEnd(su, sv), center(x, 0)); // Bottom/Top
 
-        computePlane(geometry, indices, su, radius, edgeSegments, roundSegments, direction, pw, [uvScale[0], uvOffset[1]], floor === 0 ? [...uvOffsetStart(sv, su)].reverse() : [...uvOffsetEnd(sv, su)].reverse(), center(0, y));
+        computePlane(geometry, indices, su, radius, edgeSegments, roundSegments, direction, pw, false, [uvScale[0], uvOffset[1]], floor === 0 ? [...uvOffsetStart(sv, su)].reverse() : [...uvOffsetEnd(sv, su)].reverse(), center(0, y));
       }
     }
   }

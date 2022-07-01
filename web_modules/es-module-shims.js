@@ -38,30 +38,35 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
   }
 });
 
-/* ES Module Shims 1.5.4 */
+/* ES Module Shims 1.5.8 */
 
 (function () {
+  const hasWindow = typeof window !== 'undefined';
+  const hasDocument = typeof document !== 'undefined';
+
   const noop = () => {};
 
-  const optionsScript = document.querySelector('script[type=esms-options]');
+  const optionsScript = hasDocument ? document.querySelector('script[type=esms-options]') : undefined;
   const esmsInitOptions = optionsScript ? JSON.parse(optionsScript.innerHTML) : {};
   Object.assign(esmsInitOptions, self.esmsInitOptions || {});
-  let shimMode = !!esmsInitOptions.shimMode;
+  let shimMode = hasDocument ? !!esmsInitOptions.shimMode : true;
   const importHook = globalHook(shimMode && esmsInitOptions.onimport);
   const resolveHook = globalHook(shimMode && esmsInitOptions.resolve);
   let fetchHook = esmsInitOptions.fetch ? globalHook(esmsInitOptions.fetch) : fetch;
   const metaHook = esmsInitOptions.meta ? globalHook(shimModule && esmsInitOptions.meta) : noop;
   const skip = esmsInitOptions.skip ? new RegExp(esmsInitOptions.skip) : null;
-  let nonce = esmsInitOptions.nonce;
   const mapOverrides = esmsInitOptions.mapOverrides;
+  let nonce = esmsInitOptions.nonce;
 
-  if (!nonce) {
+  if (!nonce && hasDocument) {
     const nonceElement = document.querySelector('script[nonce]');
     if (nonceElement) nonce = nonceElement.nonce || nonceElement.getAttribute('nonce');
   }
 
   const onerror = globalHook(esmsInitOptions.onerror || noop);
-  const onpolyfill = esmsInitOptions.onpolyfill ? globalHook(esmsInitOptions.onpolyfill) : () => console.log('%c^^ Module TypeError above is polyfilled and can be ignored ^^', 'font-weight:900;color:#391');
+  const onpolyfill = esmsInitOptions.onpolyfill ? globalHook(esmsInitOptions.onpolyfill) : () => {
+    console.log('%c^^ Module TypeError above is polyfilled and can be ignored ^^', 'font-weight:900;color:#391');
+  };
   const {
     revokeBlobURLs,
     noLoadEventRetriggers,
@@ -81,7 +86,7 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
   }
 
   const edge = !navigator.userAgentData && !!navigator.userAgent.match(/Edge\/\d+\.\d+/);
-  const baseUrl = document.baseURI;
+  const baseUrl = hasDocument ? document.baseURI : `${location.protocol}//${location.host}${location.pathname.includes('/') ? location.pathname.slice(0, location.pathname.lastIndexOf('/') + 1) : location.pathname}`;
 
   function createBlob(source, type = 'text/javascript') {
     return URL.createObjectURL(new Blob([source], {
@@ -94,7 +99,7 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
   });
 
   const throwError = err => {
-    (window.reportError || window.safari && console.error || eoop)(err), void onerror(err);
+    (self.reportError || hasWindow && window.safari && console.error || eoop)(err), void onerror(err);
   };
 
   function fromParent(parent) {
@@ -309,25 +314,35 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
 
   let supportsJsonAssertions = false;
   let supportsCssAssertions = false;
-  let supportsImportMeta = false;
-  let supportsImportMaps = false;
+  let supportsImportMaps = hasDocument && HTMLScriptElement.supports ? HTMLScriptElement.supports('importmap') : false;
+  let supportsImportMeta = supportsImportMaps;
   let supportsDynamicImport = false;
-  const featureDetectionPromise = Promise.resolve(supportsDynamicImportCheck).then(_supportsDynamicImport => {
+  const featureDetectionPromise = Promise.resolve(supportsImportMaps || supportsDynamicImportCheck).then(_supportsDynamicImport => {
     if (!_supportsDynamicImport) return;
     supportsDynamicImport = true;
-    return Promise.all([dynamicImport(createBlob('import.meta')).then(() => supportsImportMeta = true, noop), cssModulesEnabled && dynamicImport(createBlob('import"data:text/css,{}"assert{type:"css"}')).then(() => supportsCssAssertions = true, noop), jsonModulesEnabled && dynamicImport(createBlob('import"data:text/json,{}"assert{type:"json"}')).then(() => supportsJsonAssertions = true, noop), new Promise(resolve => {
-      self._$s = v => {
-        document.head.removeChild(iframe);
-        if (v) supportsImportMaps = true;
-        delete self._$s;
-        resolve();
-      };
-
+    return Promise.all([supportsImportMaps || dynamicImport(createBlob('import.meta')).then(() => supportsImportMeta = true, noop), cssModulesEnabled && dynamicImport(createBlob(`import"${createBlob('', 'text/css')}"assert{type:"css"}`)).then(() => supportsCssAssertions = true, noop), jsonModulesEnabled && dynamicImport(createBlob(`import"${createBlob('{}', 'text/json')}"assert{type:"json"}`)).then(() => supportsJsonAssertions = true, noop), supportsImportMaps || hasDocument && (HTMLScriptElement.supports || new Promise(resolve => {
       const iframe = document.createElement('iframe');
       iframe.style.display = 'none';
-      iframe.srcdoc = `<script type=importmap nonce="${nonce}">{"imports":{"x":"data:text/javascript,"}}<${''}/script><script nonce="${nonce}">import('x').then(()=>1,()=>0).then(v=>parent._$s(v))<${''}/script>`;
+      iframe.setAttribute('nonce', nonce); // setting src to a blob URL results in a navigation event in webviews
+      // setting srcdoc is not supported in React native webviews on iOS
+      // therefore, we need to first feature detect srcdoc support
+
+      iframe.srcdoc = `<!doctype html><script nonce="${nonce}"><${''}/script>`;
       document.head.appendChild(iframe);
-    })]);
+
+      iframe.onload = () => {
+        self._$s = v => {
+          document.head.removeChild(iframe);
+          supportsImportMaps = v;
+          delete self._$s;
+          resolve();
+        };
+
+        const supportsSrcDoc = iframe.contentDocument.head.childNodes.length > 0;
+        const importMapTest = `<!doctype html><script type=importmap nonce="${nonce}">{"imports":{"x":"${createBlob('')}"}<${''}/script><script nonce="${nonce}">import('x').catch(() => {}).then(v=>parent._$s(!!v))<${''}/script>`;
+        if (supportsSrcDoc) iframe.srcdoc = importMapTest;else iframe.contentDocument.write(importMapTest);
+      };
+    }))]);
   });
   /* es-module-lexer 0.10.5 */
 
@@ -2492,7 +2507,7 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
     if (importHook) await importHook(id, typeof args[1] !== 'string' ? args[1] : {}, parentUrl);
 
     if (acceptingImportMaps || shimMode || !baselinePassthrough) {
-      processImportMaps();
+      if (hasDocument) processImportMaps();
       if (!shimMode) acceptingImportMaps = false;
     }
 
@@ -2525,6 +2540,11 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
   importShim.resolve = resolveSync;
 
   importShim.getImportMap = () => JSON.parse(JSON.stringify(importMap));
+
+  importShim.addImportMap = importMapIn => {
+    if (!shimMode) throw new Error('Unsupported in polyfill mode.');
+    importMap = resolveAndComposeImportMap(importMapIn, baseUrl, importMap);
+  };
 
   const registry = importShim._r = {};
 
@@ -2563,26 +2583,51 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
 
     baselinePassthrough = esmsInitOptions.polyfillEnable !== true && supportsDynamicImport && supportsImportMeta && supportsImportMaps && (!jsonModulesEnabled || supportsJsonAssertions) && (!cssModulesEnabled || supportsCssAssertions) && !importMapSrcOrLazy && !false;
 
-    if (shimMode || !baselinePassthrough) {
-      new MutationObserver(mutations => {
-        for (const mutation of mutations) {
-          if (mutation.type !== 'childList') continue;
+    if (hasDocument) {
+      if (!supportsImportMaps) {
+        const supports = HTMLScriptElement.supports || (type => type === 'classic' || type === 'module');
 
-          for (const node of mutation.addedNodes) {
-            if (node.tagName === 'SCRIPT') {
-              if (node.type === (shimMode ? 'module-shim' : 'module')) processScript(node);
-              if (node.type === (shimMode ? 'importmap-shim' : 'importmap')) processImportMap(node);
-            } else if (node.tagName === 'LINK' && node.rel === (shimMode ? 'modulepreload-shim' : 'modulepreload')) processPreload(node);
+        HTMLScriptElement.supports = type => type === 'importmap' || supports(type);
+      }
+
+      if (shimMode || !baselinePassthrough) {
+        new MutationObserver(mutations => {
+          for (const mutation of mutations) {
+            if (mutation.type !== 'childList') continue;
+
+            for (const node of mutation.addedNodes) {
+              if (node.tagName === 'SCRIPT') {
+                if (node.type === (shimMode ? 'module-shim' : 'module')) processScript(node);
+                if (node.type === (shimMode ? 'importmap-shim' : 'importmap')) processImportMap(node);
+              } else if (node.tagName === 'LINK' && node.rel === (shimMode ? 'modulepreload-shim' : 'modulepreload')) processPreload(node);
+            }
           }
+        }).observe(document, {
+          childList: true,
+          subtree: true
+        });
+        processImportMaps();
+        processScriptsAndPreloads();
+
+        if (document.readyState === 'complete') {
+          readyStateCompleteCheck();
+        } else {
+          async function readyListener() {
+            await initPromise;
+            processImportMaps();
+
+            if (document.readyState === 'complete') {
+              readyStateCompleteCheck();
+              document.removeEventListener('readystatechange', readyListener);
+            }
+          }
+
+          document.addEventListener('readystatechange', readyListener);
         }
-      }).observe(document, {
-        childList: true,
-        subtree: true
-      });
-      processImportMaps();
-      processScriptsAndPreloads();
-      return undefined;
+      }
     }
+
+    return undefined;
   });
   let importMapPromise = initPromise;
   let firstPolyfillLoad = true;
@@ -2879,7 +2924,7 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
         n,
         d
       }) => {
-        if (d >= 0 && !supportsDynamicImport || d === 2 && !supportsImportMeta) load.n = true;
+        if (d >= 0 && !supportsDynamicImport || d === -2 && !supportsImportMeta) load.n = true;
         if (d !== -1 || !n) return;
         const {
           r,
@@ -2924,26 +2969,19 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
   } // this should always trigger because we assume es-module-shims is itself a domcontentloaded requirement
 
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    await initPromise;
-    domContentLoadedCheck();
-
-    if (shimMode || !baselinePassthrough) {
-      processImportMaps();
-      processScriptsAndPreloads();
-    }
-  });
-  let readyStateCompleteCnt = 1;
-
-  if (document.readyState === 'complete') {
-    readyStateCompleteCheck();
-  } else {
-    document.addEventListener('readystatechange', async () => {
-      processImportMaps();
+  if (hasDocument) {
+    document.addEventListener('DOMContentLoaded', async () => {
       await initPromise;
-      readyStateCompleteCheck();
+      domContentLoadedCheck();
+
+      if (shimMode || !baselinePassthrough) {
+        processImportMaps();
+        processScriptsAndPreloads();
+      }
     });
   }
+
+  let readyStateCompleteCnt = 1;
 
   function readyStateCompleteCheck() {
     if (--readyStateCompleteCnt === 0 && !noLoadEventRetriggers) document.dispatchEvent(new Event('readystatechange'));
@@ -2977,14 +3015,13 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
     if (!script.src && !script.innerHTML) return;
     script.ep = true; // does this load block readystate complete
 
-    const isReadyScript = readyStateCompleteCnt > 0; // does this load block DOMContentLoaded
+    const isBlockingReadyScript = script.getAttribute('async') === null && readyStateCompleteCnt > 0; // does this load block DOMContentLoaded
 
     const isDomContentLoadedScript = domContentLoadedCnt > 0;
-    if (isReadyScript) readyStateCompleteCnt++;
+    if (isBlockingReadyScript) readyStateCompleteCnt++;
     if (isDomContentLoadedScript) domContentLoadedCnt++;
-    const blocks = script.getAttribute('async') === null && isReadyScript;
-    const loadPromise = topLevelLoad(script.src || baseUrl, getFetchOpts(script), !script.src && script.innerHTML, !shimMode, blocks && lastStaticLoadPromise).catch(throwError);
-    if (blocks) lastStaticLoadPromise = loadPromise.then(readyStateCompleteCheck);
+    const loadPromise = topLevelLoad(script.src || baseUrl, getFetchOpts(script), !script.src && script.innerHTML, !shimMode, isBlockingReadyScript && lastStaticLoadPromise).catch(throwError);
+    if (isBlockingReadyScript) lastStaticLoadPromise = loadPromise.then(readyStateCompleteCheck);
     if (isDomContentLoadedScript) loadPromise.then(domContentLoadedCheck);
   }
 
