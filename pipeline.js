@@ -1,7 +1,7 @@
 import { checkProps } from "./utils.js";
 
 /**
- * @typedef {import("./index.js").PexResource} PipelineOptions
+ * @typedef {import("./types.js").PexResource} PipelineOptions
  * @property {string} [vert=null] Vertex shader code
  * @property {string} [frag=null] Fragment shader code
  * @property {boolean} [depthWrite=true] Depth write mask

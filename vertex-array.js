@@ -1,7 +1,7 @@
 import { enableVertexData } from "./utils.js";
 
 /**
- * @typedef {import("./index.js").PexResource} VertexArrayOptions
+ * @typedef {import("./types.js").PexResource} VertexArrayOptions
  * @property {Object} vertexLayout
  * @property {Object} [attributes]
  * @property {Object} [indices]

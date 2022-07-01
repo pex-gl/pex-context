@@ -1,7 +1,7 @@
 import { checkProps } from "./utils.js";
 
 /**
- * @typedef {import("./index.js").PexResource} BufferOptions
+ * @typedef {import("./types.js").PexResource} BufferOptions
  * @property {Array|TypedArray|ArrayBuffer} data
  * @property {ctx.DataType} [type]
  * @property {ctx.Usage} [usage=ctx.Usage.StaticDraw]

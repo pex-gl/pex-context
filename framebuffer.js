@@ -2,7 +2,7 @@ import { NAMESPACE } from "./utils.js";
 
 /**
  * @typedef {Object} Attachment
- * @property {import("./index.js").PexResource} texture
+ * @property {import("./types.js").PexResource} texture
  * @property {WebGLRenderingContext.FRAMEBUFFER} target
  */
 

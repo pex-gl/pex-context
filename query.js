@@ -1,7 +1,7 @@
 import { checkProps } from "./utils.js";
 
 /**
- * @typedef {import("./index.js").PexResource} QueryOptions
+ * @typedef {import("./types.js").PexResource} QueryOptions
  * @property {ctx.QueryTarget} [target=ctx.QueryTarget.TimeElapsed] query type
  */
 

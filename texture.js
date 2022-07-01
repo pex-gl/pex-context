@@ -12,7 +12,7 @@ import { checkProps } from "./utils.js";
  */
 
 /**
- * @typedef {import("./index.js").PexResource} TextureOptions
+ * @typedef {import("./types.js").PexResource} TextureOptions
  * @property {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | Array | TypedArray |TextureOptionsData | HTMLImageElement[] | TextureOptionsData[]} [data]
  * @property {number} [width]
  * @property {number} [height]
