@@ -1104,17 +1104,17 @@ Please note those props are read only. To set new values or upload new data to G
 **Kind**: global typedef
 **Properties**
 
-| Name       | Type                               | Description                                                                                                                                              |
-| ---------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| pass       | <code>ctx.Pass</code>              |                                                                                                                                                          |
-| pipeline   | <code>ctx.Pipeline</code>          |                                                                                                                                                          |
-| attributes | <code>Object</code>                | vertex attributes, map of `attibuteName: ctx.VertexBuffer` or `attributeName: { buffer: VertexBuffer, offset: number, stride: number, divisor: number }` |
-| indices    | <code>Object</code>                | indices, `ctx.IndexBuffer` or `{ buffer: IndexBuffer, offset: number, stride: number }`                                                                  |
-| count      | <code>number</code>                | number of vertices to draw                                                                                                                               |
-| instances  | <code>number</code>                | number instances to draw                                                                                                                                 |
-| uniforms   | <code>Object</code>                | shader uniforms, map of `name: value`                                                                                                                    |
-| viewport   | [<code>Viewport</code>](#Viewport) | drawing viewport bounds                                                                                                                                  |
-| scissor    | [<code>Viewport</code>](#Viewport) | scissor test bounds                                                                                                                                      |
+| Name       | Type                                             | Description                                                                                                                                              |
+| ---------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| pass       | [<code>PassOptions</code>](#PassOptions)         |                                                                                                                                                          |
+| pipeline   | [<code>PipelineOptions</code>](#PipelineOptions) |                                                                                                                                                          |
+| attributes | <code>Object</code>                              | vertex attributes, map of `attibuteName: ctx.VertexBuffer` or `attributeName: { buffer: VertexBuffer, offset: number, stride: number, divisor: number }` |
+| indices    | <code>Object</code>                              | indices, `ctx.IndexBuffer` or `{ buffer: IndexBuffer, offset: number, stride: number }`                                                                  |
+| count      | <code>number</code>                              | number of vertices to draw                                                                                                                               |
+| instances  | <code>number</code>                              | number instances to draw                                                                                                                                 |
+| uniforms   | <code>Object</code>                              | shader uniforms, map of `name: value`                                                                                                                    |
+| viewport   | [<code>Viewport</code>](#Viewport)               | drawing viewport bounds                                                                                                                                  |
+| scissor    | [<code>Viewport</code>](#Viewport)               | scissor test bounds                                                                                                                                      |
 
 <a name="PexContextSetOptions"></a>
 
