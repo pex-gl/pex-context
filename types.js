@@ -17,8 +17,8 @@
 
 /**
  * @typedef {Object} PexCommand
- * @property {ctx.Pass} pass
- * @property {ctx.Pipeline} pipeline
+ * @property {import("./pass.js").PassOptions} pass
+ * @property {import("./pipeline.js").PipelineOptions} pipeline
  * @property {Object} attributes vertex attributes, map of `attibuteName: ctx.VertexBuffer`   or `attributeName: { buffer: VertexBuffer, offset: number, stride: number, divisor: number }`
  * @property {Object} indices indices, `ctx.IndexBuffer` or `{ buffer: IndexBuffer, offset: number, stride: number }`
  * @property {number} count number of vertices to draw
