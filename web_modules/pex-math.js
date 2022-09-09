@@ -1,10 +1,11 @@
-import { i as shallowCopy, p as cross, h as set$4, k as dot$1, E as EPSILON, a as clamp } from './common/vec3-68b228db.js';
-export { u as utils, v as vec3 } from './common/vec3-68b228db.js';
-export { m as mat4, v as vec2 } from './common/vec2-e9551923.js';
+import { t as cross$1, d as set$6, e as dot$2 } from './common/vec3-6bf2dc83.js';
+export { u as mat4, v as vec2, w as vec3 } from './common/vec3-6bf2dc83.js';
+import { E as EPSILON, c as clamp } from './common/utils-22518481.js';
+export { u as utils } from './common/utils-22518481.js';
+import './common/web.dom-collections.iterator-13a35a91.js';
 
-/**
- * @module mat2x3
- */
+/** @module mat2x3 */
+
 /**
  * Returns a 2x3 identity matrix, a short form for a 3x3 matrix with the last row ignored.
  *
@@ -27,17 +28,16 @@ export { m as mat4, v as vec2 } from './common/vec2-e9551923.js';
  * m01 m11
  * m02 m12
  * ```
- * @returns {mat2x3}
+ * @returns {import("./types.js").mat2x3}
  */
-
 function create() {
   // prettier-ignore
   return [1, 0, 0, 1, 0, 0];
 }
 /**
  * Sets a matrix to the identity matrix.
- * @param {mat2x3} a
- * @returns {mat2x3}
+ * @param {import("./types.js").mat2x3} a
+ * @returns {import("./types.js").mat2x3}
  */
 
 function identity(a) {
@@ -47,16 +47,18 @@ function identity(a) {
 }
 /**
  * Returns a copy of a matrix.
- * @param {mat2x3} a
- * @returns {mat2x3}
+ * @param {import("./types.js").mat2x3} a
+ * @returns {import("./types.js").mat2x3}
  */
 
-const copy = shallowCopy;
+function copy(a) {
+  return a.slice();
+}
 /**
  * Sets a matrix from another matrix.
- * @param {mat2x3} a
- * @param {mat2x3} b
- * @returns {mat2x3}
+ * @param {import("./types.js").mat2x3} a
+ * @param {import("./types.js").mat2x3} b
+ * @returns {import("./types.js").mat2x3}
  */
 
 function set(a, b) {
@@ -70,8 +72,8 @@ function set(a, b) {
 }
 /**
  * Compares two matrices.
- * @param {mat2x3} a
- * @param {mat2x3} b
+ * @param {import("./types.js").mat2x3} a
+ * @param {import("./types.js").mat2x3} b
  * @returns {boolean}
  */
 
@@ -80,9 +82,9 @@ function equals(a, b) {
 }
 /**
  * Multiplies two matrices.
- * @param {mat2x3} a
- * @param {mat2x3} b
- * @returns {mat2x3}
+ * @param {import("./types.js").mat2x3} a
+ * @param {import("./types.js").mat2x3} b
+ * @returns {import("./types.js").mat2x3}
  */
 
 function mult(a, b) {
@@ -108,9 +110,9 @@ function mult(a, b) {
 }
 /**
  * Translates a matrix by a vector.
- * @param {mat2x3} a
- * @param {vec2} v
- * @returns {mat2x3}
+ * @param {import("./types.js").mat2x3} a
+ * @param {import("./types.js").vec2} v
+ * @returns {import("./types.js").mat2x3}
  */
 
 function translate(a, v) {
@@ -132,9 +134,9 @@ function translate(a, v) {
 }
 /**
  * Rotates a matrix by an angle.
- * @param {mat2x3} a
- * @param {Radians} rad
- * @returns {mat2x3}
+ * @param {import("./types.js").mat2x3} a
+ * @param {import("./types.js").Radians} rad
+ * @returns {import("./types.js").mat2x3}
  */
 
 function rotate(a, rad) {
@@ -152,9 +154,9 @@ function rotate(a, rad) {
 }
 /**
  * Scales a matrix by a vector.
- * @param {mat2x3} a
- * @param {vec2} v
- * @returns {mat2x3}
+ * @param {import("./types.js").mat2x3} a
+ * @param {import("./types.js").vec2} v
+ * @returns {import("./types.js").mat2x3}
  */
 
 function scale(a, v) {
@@ -182,9 +184,8 @@ var mat2x3 = /*#__PURE__*/Object.freeze({
   scale: scale
 });
 
-/**
- * @module mat3
- */
+/** @module mat3 */
+
 /**
  * Returns a 3x3 identity matrix.
  *
@@ -207,17 +208,16 @@ var mat2x3 = /*#__PURE__*/Object.freeze({
  *  m01 m11 m21
  *  m02 m12 m22
  * ```
- * @returns {mat3}
+ * @returns {import("./types.js").mat3}
  */
-
 function create$1() {
   // prettier-ignore
   return [1, 0, 0, 0, 1, 0, 0, 0, 1];
 }
 /**
  * Sets a matrix to the identity matrix.
- * @param {mat3} a
- * @returns {mat3}
+ * @param {import("./types.js").mat3} a
+ * @returns {import("./types.js").mat3}
  */
 
 function identity$1(a) {
@@ -227,16 +227,18 @@ function identity$1(a) {
 }
 /**
  * Returns a copy of a matrix.
- * @param {mat3} a
- * @returns {mat3}
+ * @param {import("./types.js").mat3} a
+ * @returns {import("./types.js").mat3}
  */
 
-const copy$1 = shallowCopy;
+function copy$1(a) {
+  return a.slice();
+}
 /**
  * Sets a matrix from another matrix.
- * @param {mat3} a
- * @param {mat3} b
- * @returns {mat3}
+ * @param {import("./types.js").mat3} a
+ * @param {import("./types.js").mat3} b
+ * @returns {import("./types.js").mat3}
  */
 
 function set$1(a, b) {
@@ -253,8 +255,8 @@ function set$1(a, b) {
 }
 /**
  * Compares two matrices.
- * @param {mat3} a
- * @param {mat3} b
+ * @param {import("./types.js").mat3} a
+ * @param {import("./types.js").mat3} b
  * @returns {boolean}
  */
 
@@ -263,9 +265,9 @@ function equals$1(a, b) {
 }
 /**
  * Multiplies two matrices.
- * @param {mat3} a
- * @param {mat3} b
- * @returns {mat3}
+ * @param {import("./types.js").mat3} a
+ * @param {import("./types.js").mat3} b
+ * @returns {import("./types.js").mat3}
  */
 
 function mult$1(a, b) {
@@ -300,8 +302,8 @@ function mult$1(a, b) {
 }
 /**
  * Transposes a matrix.
- * @param {mat3} a
- * @returns {mat3}
+ * @param {import("./types.js").mat3} a
+ * @returns {import("./types.js").mat3}
  */
 
 function transpose(a) {
@@ -318,9 +320,9 @@ function transpose(a) {
 }
 /**
  * Sets matrix to a quaternion.
- * @param {mat3} a
- * @param {quat} q
- * @returns {mat3}
+ * @param {import("./types.js").mat3} a
+ * @param {import("./types.js").quat} q
+ * @returns {import("./types.js").mat3}
  */
 
 function fromQuat(a, q) {
@@ -353,9 +355,9 @@ function fromQuat(a, q) {
 }
 /**
  * Sets a 3x3 matrix from a 2x3 matrix.
- * @param {mat3} a
- * @param {mat2x3} b
- * @returns {mat3}
+ * @param {import("./types.js").mat3} a
+ * @param {import("./types.js").mat2x3} b
+ * @returns {import("./types.js").mat3}
  */
 
 function fromMat2x3(a, b) {
@@ -372,9 +374,9 @@ function fromMat2x3(a, b) {
 }
 /**
  * Sets a 3x3 matrix to a 4x4 matrix.
- * @param {mat3} a
- * @param {mat4} b
- * @returns {mat3}
+ * @param {import("./types.js").mat3} a
+ * @param {import("./types.js").mat4} b
+ * @returns {import("./types.js").mat3}
  */
 
 function fromMat4(a, b) {
@@ -404,29 +406,29 @@ var mat3 = /*#__PURE__*/Object.freeze({
   fromMat4: fromMat4
 });
 
-/**
- * @module vec4
- */
+/** @module vec4 */
+
 /**
  * Returns a new vec4 at 0, 0, 0, 1.
- * @returns {vec4}
+ * @returns {import("./types.js").vec4}
  */
-
 function create$2() {
   return [0, 0, 0, 1];
 }
 /**
  * Returns a copy of a vector.
- * @param {vec4} a
- * @returns {vec4}
+ * @param {import("./types.js").vec4} a
+ * @returns {import("./types.js").vec4}
  */
 
-const copy$2 = shallowCopy;
+function copy$2(a) {
+  return a.slice();
+}
 /**
  * Sets a vector to another vector.
- * @param {vec4} a
- * @param {vec4} b
- * @returns {vec4}
+ * @param {import("./types.js").vec4} a
+ * @param {import("./types.js").vec4} b
+ * @returns {import("./types.js").vec4}
  */
 
 function set$2(a, b) {
@@ -438,8 +440,8 @@ function set$2(a, b) {
 }
 /**
  * Compares two vectors.
- * @param {vec4} a
- * @param {vec4} b
+ * @param {import("./types.js").vec4} a
+ * @param {import("./types.js").vec4} b
  * @returns {boolean}
  */
 
@@ -448,9 +450,9 @@ function equals$2(a, b) {
 }
 /**
  * Adds a vector to another.
- * @param {vec4} a
- * @param {vec4} b
- * @returns {vec4}
+ * @param {import("./types.js").vec4} a
+ * @param {import("./types.js").vec4} b
+ * @returns {import("./types.js").vec4}
  */
 
 function add(a, b) {
@@ -462,9 +464,9 @@ function add(a, b) {
 }
 /**
  * Subtracts a vector from another.
- * @param {vec4} a
- * @param {vec4} b
- * @returns {vec4}
+ * @param {import("./types.js").vec4} a
+ * @param {import("./types.js").vec4} b
+ * @returns {import("./types.js").vec4}
  */
 
 function sub(a, b) {
@@ -476,38 +478,38 @@ function sub(a, b) {
 }
 /**
  * Scales a vector by a number.
- * @param {vec4} a
- * @param {number} n
- * @returns {vec4}
+ * @param {import("./types.js").vec4} a
+ * @param {number} s
+ * @returns {import("./types.js").vec4}
  */
 
-function scale$1(a, n) {
-  a[0] *= n;
-  a[1] *= n;
-  a[2] *= n;
-  a[3] *= n;
+function scale$1(a, s) {
+  a[0] *= s;
+  a[1] *= s;
+  a[2] *= s;
+  a[3] *= s;
   return a;
 }
 /**
  * Adds two vectors after scaling the second one.
- * @param {vec4} a
- * @param {vec4} b
- * @param {number} n
- * @returns {vec4}
+ * @param {import("./types.js").vec4} a
+ * @param {import("./types.js").vec4} b
+ * @param {number} s
+ * @returns {import("./types.js").vec4}
  */
 
-function addScaled(a, b, n) {
-  a[0] += b[0] * n;
-  a[1] += b[1] * n;
-  a[2] += b[2] * n;
-  a[3] += b[3] * n;
+function addScaled(a, b, s) {
+  a[0] += b[0] * s;
+  a[1] += b[1] * s;
+  a[2] += b[2] * s;
+  a[3] += b[3] * s;
   return a;
 }
 /**
  * Create a vec4 from vec3.
- * @param {vec4} a
- * @param {vec3} b
- * @returns {vec4}
+ * @param {import("./types.js").vec4} a
+ * @param {import("./types.js").vec3} b
+ * @returns {import("./types.js").vec4}
  */
 
 function fromVec3(a, b) {
@@ -519,9 +521,9 @@ function fromVec3(a, b) {
 }
 /**
  * Multiplies a vector with a matrix.
- * @param {vec4} a
- * @param {mat4} m
- * @returns {vec4}
+ * @param {import("./types.js").vec4} a
+ * @param {import("./types.js").mat4} m
+ * @returns {import("./types.js").vec4}
  */
 
 function multMat4(a, m) {
@@ -536,26 +538,27 @@ function multMat4(a, m) {
   return a;
 }
 /**
- * Normalises a vector.
- * @param {vec4} a
- * @returns {vec4}
+ * Linearly interpolates between two vectors.
+ * @param {import("./types.js").vec4} a
+ * @param {import("./types.js").vec4} b
+ * @param {number} t
+ * @returns {import("./types.js").vec4}
  */
 
-function normalize(a) {
+function lerp(a, b, t) {
   const x = a[0];
   const y = a[1];
   const z = a[2];
   const w = a[3];
-  const l = 1 / (Math.sqrt(x * x + y * y + z * z + w * w) || 1);
-  a[0] *= l;
-  a[1] *= l;
-  a[2] *= l;
-  a[3] *= l;
+  a[0] = x + (b[0] - x) * t;
+  a[1] = y + (b[1] - y) * t;
+  a[2] = z + (b[2] - z) * t;
+  a[3] = w + (b[3] - w) * t;
   return a;
 }
 /**
  * Prints a vector to a string.
- * @param {vec4} a
+ * @param {import("./types.js").vec4} a
  * @param {number} [precision=4]
  * @returns {string}
  */
@@ -578,16 +581,426 @@ var vec4 = /*#__PURE__*/Object.freeze({
   addScaled: addScaled,
   fromVec3: fromVec3,
   multMat4: multMat4,
-  normalize: normalize,
+  lerp: lerp,
   toString: toString
 });
 
+/** @module avec3 */
+
 /**
- * @module quat
+ * Sets a vector components.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {number} x
+ * @param {number} y
+ * @param {number} z
  */
+function set3(a, i, x, y, z) {
+  a[i * 3 + 0] = x;
+  a[i * 3 + 1] = y;
+  a[i * 3 + 2] = z;
+}
+/**
+ * Sets a vector to another vector.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {import("./types.js").avec3} b
+ * @param {number} j
+ */
+
+function set$3(a, i, b, j) {
+  a[i * 3] = b[j * 3];
+  a[i * 3 + 1] = b[j * 3 + 1];
+  a[i * 3 + 2] = b[j * 3 + 2];
+}
+/**
+ * Compares two vectors.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {import("./types.js").avec3} b
+ * @param {number} j
+ * @returns {boolean}
+ */
+
+function equals$3(a, i, b, j) {
+  return a[i * 3] === b[j * 3] && a[i * 3 + 1] === b[j * 3 + 1] && a[i * 3 + 2] === b[j * 3 + 2];
+}
+/**
+ * Adds a vector to another.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {import("./types.js").avec3} b
+ * @param {number} j
+ */
+
+function add$1(a, i, b, j) {
+  a[i * 3] += b[j * 3];
+  a[i * 3 + 1] += b[j * 3 + 1];
+  a[i * 3 + 2] += b[j * 3 + 2];
+}
+/**
+ * Subtracts a vector from another.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {import("./types.js").avec3} b
+ * @param {number} j
+ */
+
+function sub$1(a, i, b, j) {
+  a[i * 3] -= b[j * 3];
+  a[i * 3 + 1] -= b[j * 3 + 1];
+  a[i * 3 + 2] -= b[j * 3 + 2];
+}
+/**
+ * Scales a vector by a number.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {number} s
+ */
+
+function scale$2(a, i, s) {
+  a[i * 3] *= s;
+  a[i * 3 + 1] *= s;
+  a[i * 3 + 2] *= s;
+}
+/**
+ * Adds two vectors after scaling the second one.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {import("./types.js").avec3} b
+ * @param {number} j
+ * @param {number} s
+ */
+
+function addScaled$1(a, i, b, j, s) {
+  a[i * 3] += b[j * 3] * s;
+  a[i * 3 + 1] += b[j * 3 + 1] * s;
+  a[i * 3 + 2] += b[j * 3 + 2] * s;
+}
+/**
+ * Calculates the dot product of two vectors.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {import("./types.js").avec3} b
+ * @param {number} j
+ */
+
+function dot(a, i, b, j) {
+  return a[i * 3] * b[j * 3] + a[i * 3 + 1] * b[j * 3 + 1] + a[i * 3 + 2] * b[j * 3 + 2];
+}
+/**
+ * Calculates the cross product of two vectors.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {import("./types.js").avec3} b
+ * @param {number} j
+ */
+
+function cross(a, i, b, j) {
+  const x = a[i * 3];
+  const y = a[i * 3 + 1];
+  const z = a[i * 3 + 2];
+  const vx = b[j * 3];
+  const vy = b[j * 3 + 1];
+  const vz = b[j * 3 + 2];
+  a[i * 3] = y * vz - vy * z;
+  a[i * 3 + 1] = z * vx - vz * x;
+  a[i * 3 + 2] = x * vy - vx * y;
+}
+/**
+ * Calculates the length of a vector.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @returns {number}
+ */
+
+function length(a, i) {
+  const x = a[i * 3];
+  const y = a[i * 3 + 1];
+  const z = a[i * 3 + 2];
+  return Math.sqrt(x * x + y * y + z * z);
+}
+/**
+ * Calculates the squared length of a vector.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @returns {number}
+ */
+
+function lengthSq(a, i) {
+  const x = a[i * 3];
+  const y = a[i * 3 + 1];
+  const z = a[i * 3 + 2];
+  return x * x + y * y + z * z;
+}
+/**
+ * Normalises a vector.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ */
+
+function normalize(a, i) {
+  const lenSq = a[i * 3] * a[i * 3] + a[i * 3 + 1] * a[i * 3 + 1] + a[i * 3 + 2] * a[i * 3 + 2];
+
+  if (lenSq > 0) {
+    const len = Math.sqrt(lenSq);
+    a[i * 3] /= len;
+    a[i * 3 + 1] /= len;
+    a[i * 3 + 2] /= len;
+  }
+}
+/**
+ * Calculates the distance between two vectors.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {import("./types.js").avec3} b
+ * @param {number} j
+ * @returns {number}
+ */
+
+function distance(a, i, b, j) {
+  const dx = b[j * 3] - a[i * 3];
+  const dy = b[j * 3 + 1] - a[i * 3 + 1];
+  const dz = b[j * 3 + 2] - a[i * 3 + 2];
+  return Math.sqrt(dx * dx + dy * dy + dz * dz);
+}
+/**
+ * Calculates the squared distance between two vectors.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {import("./types.js").avec3} b
+ * @param {number} j
+ * @returns {number}
+ */
+
+function distanceSq(a, i, b, j) {
+  const dx = b[j * 3] - a[i * 3];
+  const dy = b[j * 3 + 1] - a[i * 3 + 1];
+  const dz = b[j * 3 + 2] - a[i * 3 + 2];
+  return dx * dx + dy * dy + dz * dz;
+}
+/**
+ * Limits a vector to a length.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {number} len
+ */
+
+function limit(a, i, len) {
+  const x = a[i * 3];
+  const y = a[i * 3 + 1];
+  const z = a[i * 3 + 2];
+  const dsq = x * x + y * y + z * z;
+  const lsq = len * len;
+
+  if (lsq > 0 && dsq > lsq) {
+    const nd = len / Math.sqrt(dsq);
+    a[i * 3] *= nd;
+    a[i * 3 + 1] *= nd;
+    a[i * 3 + 2] *= nd;
+  }
+}
+/**
+ * Linearly interpolates between two vectors.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {import("./types.js").avec3} b
+ * @param {number} j
+ * @param {number} t
+ */
+
+function lerp$1(a, i, b, j, t) {
+  const x = a[i * 3];
+  const y = a[i * 3 + 1];
+  const z = a[i * 3 + 2];
+  a[i * 3] = x + (b[j * 3] - x) * t;
+  a[i * 3 + 1] = y + (b[j * 3 + 1] - y) * t;
+  a[i * 3 + 2] = z + (b[j * 3 + 2] - z) * t;
+}
+/**
+ * Prints a vector to a string.
+ * @param {import("./types.js").avec3} a
+ * @param {number} i
+ * @param {number} [precision=4]
+ * @returns {string}
+ */
+
+function toString$1(a, i, precision = 4) {
+  const scale = 10 ** precision; // prettier-ignore
+
+  return `[${Math.floor(a[i * 3] * scale) / scale}, ${Math.floor(a[i * 3 + 1] * scale) / scale}, ${Math.floor(a[i * 3 + 2] * scale) / scale}]`;
+}
+
+var avec3 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  set3: set3,
+  set: set$3,
+  equals: equals$3,
+  add: add$1,
+  sub: sub$1,
+  scale: scale$2,
+  addScaled: addScaled$1,
+  dot: dot,
+  cross: cross,
+  length: length,
+  lengthSq: lengthSq,
+  normalize: normalize,
+  distance: distance,
+  distanceSq: distanceSq,
+  limit: limit,
+  lerp: lerp$1,
+  toString: toString$1
+});
+
+/** @module avec4 */
+
+/**
+ * Sets a vector components.
+ * @param {import("./types.js").avec4} a
+ * @param {number} i
+ * @param {number} x
+ * @param {number} y
+ * @param {number} z
+ * @param {number} w
+ */
+function set4(a, i, x, y, z, w) {
+  a[i * 4 + 0] = x;
+  a[i * 4 + 1] = y;
+  a[i * 4 + 2] = z;
+  a[i * 4 + 3] = w;
+}
+/**
+ * Sets a vector to another vector.
+ * @param {import("./types.js").avec4} a
+ * @param {number} i
+ * @param {import("./types.js").avec4} b
+ * @param {number} j
+ */
+
+function set$4(a, i, b, j) {
+  a[i * 4] = b[j * 4];
+  a[i * 4 + 1] = b[j * 4 + 1];
+  a[i * 4 + 2] = b[j * 4 + 2];
+  a[i * 4 + 3] = b[j * 4 + 3];
+}
+/**
+ * Compares two vectors.
+ * @param {import("./types.js").avec4} a
+ * @param {number} i
+ * @param {import("./types.js").avec4} b
+ * @param {number} j
+ * @returns {boolean}
+ */
+
+function equals$4(a, i, b, j) {
+  return a[i * 4] === b[j * 4] && a[i * 4 + 1] === b[j * 4 + 1] && a[i * 4 + 2] === b[j * 4 + 2] && a[i * 4 + 3] === b[j * 4 + 3];
+}
+/**
+ * Adds a vector to another.
+ * @param {import("./types.js").avec4} a
+ * @param {number} i
+ * @param {import("./types.js").avec4} b
+ * @param {number} j
+ */
+
+function add$2(a, i, b, j) {
+  a[i * 4] += b[j * 4];
+  a[i * 4 + 1] += b[j * 4 + 1];
+  a[i * 4 + 2] += b[j * 4 + 2];
+  a[i * 4 + 3] += b[j * 4 + 3];
+}
+/**
+ * Subtracts a vector from another.
+ * @param {import("./types.js").avec4} a
+ * @param {number} i
+ * @param {import("./types.js").avec4} b
+ * @param {number} j
+ */
+
+function sub$2(a, i, b, j) {
+  a[i * 4] -= b[j * 4];
+  a[i * 4 + 1] -= b[j * 4 + 1];
+  a[i * 4 + 2] -= b[j * 4 + 2];
+  a[i * 4 + 3] -= b[j * 4 + 3];
+}
+/**
+ * Scales a vector by a number.
+ * @param {import("./types.js").avec4} a
+ * @param {number} i
+ * @param {number} s
+ */
+
+function scale$3(a, i, s) {
+  a[i * 4] *= s;
+  a[i * 4 + 1] *= s;
+  a[i * 4 + 2] *= s;
+  a[i * 4 + 3] *= s;
+}
+/**
+ * Adds two vectors after scaling the second one.
+ * @param {import("./types.js").avec4} a
+ * @param {number} i
+ * @param {import("./types.js").avec4} b
+ * @param {number} j
+ * @param {number} s
+ */
+
+function addScaled$2(a, i, b, j, s) {
+  a[i * 4] += b[j * 4] * s;
+  a[i * 4 + 1] += b[j * 4 + 1] * s;
+  a[i * 4 + 2] += b[j * 4 + 2] * s;
+  a[i * 4 + 3] += b[j * 4 + 3] * s;
+}
+/**
+ * Linearly interpolates between two vectors.
+ * @param {import("./types.js").avec4} a
+ * @param {number} i
+ * @param {import("./types.js").avec4} b
+ * @param {number} j
+ * @param {number} t
+ */
+
+function lerp$2(a, i, b, j, t) {
+  const x = a[i * 4];
+  const y = a[i * 4 + 1];
+  const z = a[i * 4 + 2];
+  const w = a[i * 4 + 3];
+  a[i * 4] = x + (b[j * 4] - x) * t;
+  a[i * 4 + 1] = y + (b[j * 4 + 1] - y) * t;
+  a[i * 4 + 2] = z + (b[j * 4 + 2] - z) * t;
+  a[i * 4 + 3] = w + (b[j * 4 + 3] - w) * t;
+}
+/**
+ * Prints a vector to a string.
+ * @param {import("./types.js").avec4} a
+ * @param {number} i
+ * @param {number} [precision=4]
+ * @returns {string}
+ */
+
+function toString$2(a, i, precision = 4) {
+  const scale = 10 ** precision; // prettier-ignore
+
+  return `[${Math.floor(a[i * 4] * scale) / scale}, ${Math.floor(a[i * 4 + 1] * scale) / scale}, ${Math.floor(a[i * 4 + 2] * scale) / scale}, ${Math.floor(a[i * 4 + 3] * scale) / scale}]`;
+}
+
+var avec4 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  set4: set4,
+  set: set$4,
+  equals: equals$4,
+  add: add$2,
+  sub: sub$2,
+  scale: scale$3,
+  addScaled: addScaled$2,
+  lerp: lerp$2,
+  toString: toString$2
+});
+
+/** @module quat */
 /**
  * Returns a new quat at 0, 0, 0, 1.
- * @returns {quat}
+ * @returns {import("./types.js").quat}
  */
 
 function create$3() {
@@ -595,8 +1008,8 @@ function create$3() {
 }
 /**
  * Sets a quaternion to the identity quaternion.
- * @param {quat} a
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @returns {import("./types.js").quat}
  */
 
 function identity$2(a) {
@@ -606,32 +1019,34 @@ function identity$2(a) {
 }
 /**
  * Returns a copy of a quaternion.
- * @param {quat} a
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @returns {import("./types.js").quat}
  */
 
-const copy$3 = shallowCopy;
+function copy$3(a) {
+  return a.slice();
+}
 /**
  * Sets a quaternion to another quaternion.
- * @param {quat} a
- * @param {quat} b
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @param {import("./types.js").quat} b
+ * @returns {import("./types.js").quat}
  */
 
-const set$3 = set$2;
+const set$5 = set$2;
 /**
  * Compares two quaternions.
- * @param {quat} a
- * @param {quat} b
+ * @param {import("./types.js").quat} a
+ * @param {import("./types.js").quat} b
  * @returns {boolean}
  */
 
-const equals$3 = equals$2;
+const equals$5 = equals$2;
 /**
  * Multiplies one quaternion by another.
- * @param {quat} a
- * @param {quat} b
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @param {import("./types.js").quat} b
+ * @returns {import("./types.js").quat}
  */
 
 function mult$2(a, b) {
@@ -651,12 +1066,12 @@ function mult$2(a, b) {
 }
 /**
  * Inverts a quaternion.
- * @param {quat} a
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @returns {import("./types.js").quat}
  */
 
 function invert(a) {
-  let l = dot(a, a);
+  let l = dot$1(a, a);
   l = l ? 1 / l : 0;
   a[0] *= -l;
   a[1] *= -l;
@@ -666,8 +1081,8 @@ function invert(a) {
 }
 /**
  * Conjugates a quaternion.
- * @param {quat} a
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @returns {import("./types.js").quat}
  */
 
 function conjugate(a) {
@@ -678,11 +1093,11 @@ function conjugate(a) {
 }
 /**
  * Calculates the length of a quaternion.
- * @param {quat} a
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @returns {import("./types.js").quat}
  */
 
-function length(a) {
+function length$1(a) {
   const x = a[0];
   const y = a[1];
   const z = a[2];
@@ -691,26 +1106,37 @@ function length(a) {
 }
 /**
  * Normalizes a quaternion.
- * @param {quat} a
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @returns {import("./types.js").quat}
  */
 
-const normalize$1 = normalize;
+function normalize$1(a) {
+  const x = a[0];
+  const y = a[1];
+  const z = a[2];
+  const w = a[3];
+  const l = 1 / (Math.sqrt(x * x + y * y + z * z + w * w) || 1);
+  a[0] *= l;
+  a[1] *= l;
+  a[2] *= l;
+  a[3] *= l;
+  return a;
+}
 /**
  * Calculates the dot product of two quaternions.
- * @param {quat} a
- * @param {quat} b
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @param {import("./types.js").quat} b
+ * @returns {import("./types.js").quat}
  */
 
-function dot(a, b) {
+function dot$1(a, b) {
   return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
 }
 /**
  * Set euler angles to a quaternion. Assumes XYZ rotation order.
- * @param {quat} a
- * @param {euler} e
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @param {import("./types.js").euler} e
+ * @returns {import("./types.js").quat}
  */
 
 function fromEuler(a, e) {
@@ -731,10 +1157,10 @@ function fromEuler(a, e) {
 }
 /**
  * Set the angle at an axis of a quaternion.
- * @param {quat} a
- * @param {vec3} v
- * @param {Radians} r
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @param {import("./types.js").vec3} v
+ * @param {import("./types.js").Radians} r
+ * @returns {import("./types.js").quat}
  */
 
 function fromAxisAngle(a, v, r) {
@@ -788,11 +1214,11 @@ function _fromMat39(a, m0, m1, m2, m3, m4, m5, m6, m7, m8) {
 }
 /**
  * Sets a quaternion from orthonormal base xyz.
- * @param {quat} a
- * @param {vec3} x
- * @param {vec3} y
- * @param {vec3} z
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @param {import("./types.js").vec3} x
+ * @param {import("./types.js").vec3} y
+ * @param {import("./types.js").vec3} z
+ * @returns {import("./types.js").quat}
  */
 
 function fromAxes(a, x, y, z) {
@@ -800,9 +1226,9 @@ function fromAxes(a, x, y, z) {
 }
 /**
  * Sets a quaternion to a 3x3 matrix.
- * @param {quat} a
- * @param {mat3} m
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @param {import("./types.js").mat3} m
+ * @returns {import("./types.js").quat}
  */
 
 function fromMat3(a, m) {
@@ -810,9 +1236,9 @@ function fromMat3(a, m) {
 }
 /**
  * Sets a quaternion to a 4x4 matrix.
- * @param {quat} a
- * @param {mat4} m
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @param {import("./types.js").mat4} m
+ * @returns {import("./types.js").quat}
  */
 
 function fromMat4$1(a, m) {
@@ -820,30 +1246,30 @@ function fromMat4$1(a, m) {
 }
 /**
  * Sets a quaternion to represent the shortest rotation from one vector to another.
- * @param {quat} a
- * @param {vec3} v
- * @param {vec3} w
- * @returns {quat}
+ * @param {import("./types.js").quat} a
+ * @param {import("./types.js").vec3} v
+ * @param {import("./types.js").vec3} w
+ * @returns {import("./types.js").quat}
  */
 
 const fromTo = (() => {
   let u = [];
   return (a, v, w) => {
-    u = cross(set$4(u, v), w);
+    u = cross$1(set$6(u, v), w);
     a[0] = u[0];
     a[1] = u[1];
     a[2] = u[2];
-    a[3] = 1 + dot$1(v, w);
+    a[3] = 1 + dot$2(v, w);
     normalize$1(a);
     return a;
   };
 })();
 /**
  * Spherical linear interpolates between two quaternions.
- * @param {quat} a
- * @param {quat} b
+ * @param {import("./types.js").quat} a
+ * @param {import("./types.js").quat} b
  * @param {number} t
- * @returns {quat}
+ * @returns {import("./types.js").quat}
  */
 
 function slerp(a, b, t) {
@@ -861,7 +1287,7 @@ function slerp(a, b, t) {
   let sinom;
   let scale0;
   let scale1;
-  cosom = dot(a, b);
+  cosom = dot$1(a, b);
 
   if (cosom < 0) {
     cosom = -cosom;
@@ -894,26 +1320,26 @@ function slerp(a, b, t) {
 }
 /**
  * Prints a quaternion to a string.
- * @param {quat} a
+ * @param {import("./types.js").quat} a
  * @param {number} precision
- * @returns {quat}
+ * @returns {import("./types.js").quat}
  */
 
-const toString$1 = toString;
+const toString$3 = toString;
 
 var quat = /*#__PURE__*/Object.freeze({
   __proto__: null,
   create: create$3,
   identity: identity$2,
   copy: copy$3,
-  set: set$3,
-  equals: equals$3,
+  set: set$5,
+  equals: equals$5,
   mult: mult$2,
   invert: invert,
   conjugate: conjugate,
-  length: length,
+  length: length$1,
   normalize: normalize$1,
-  dot: dot,
+  dot: dot$1,
   fromEuler: fromEuler,
   fromAxisAngle: fromAxisAngle,
   _fromMat39: _fromMat39,
@@ -922,15 +1348,13 @@ var quat = /*#__PURE__*/Object.freeze({
   fromMat4: fromMat4$1,
   fromTo: fromTo,
   slerp: slerp,
-  toString: toString$1
+  toString: toString$3
 });
 
-/**
- * @module euler
- */
+/** @module euler */
 /**
  * Create a new euler angles [0, 0, 0]: vec3 array of [x, y, z] rotation [yaw, pitch, roll] in radians.
- * @returns {euler}
+ * @returns {import("./types.js").euler}
  */
 
 function create$4() {
@@ -938,9 +1362,9 @@ function create$4() {
 }
 /**
  * Creates euler angles from quaternion. Assumes XYZ order of rotations.
- * @param {euler} a
- * @param {quat} q
- * @returns {euler}
+ * @param {import("./types.js").euler} a
+ * @param {import("./types.js").quat} q
+ * @returns {import("./types.js").euler}
  */
 
 function fromQuat$1(a, q) {
@@ -960,4 +1384,4 @@ var euler = /*#__PURE__*/Object.freeze({
   fromQuat: fromQuat$1
 });
 
-export { euler, mat2x3, mat3, quat, vec4 };
+export { avec3, avec4, euler, mat2x3, mat3, quat, vec4 };

@@ -3,7 +3,6 @@
     "baboon-image-uri": "./baboon-image-uri.js",
     "bunny": "./bunny.js",
     "es-module-shims": "./es-module-shims.js",
-    "flatten": "./flatten.js",
     "geom-center-and-normalize": "./geom-center-and-normalize.js",
     "normals": "./normals.js",
     "pex-cam": "./pex-cam.js",

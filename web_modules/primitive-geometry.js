@@ -1,12 +1,9 @@
-import { a as typedArrayConstructorsRequireWrappers, b as arrayBufferViewCore, t as typedArrayConstructor } from './common/esnext.typed-array.with-8b312403.js';
-import './common/es.typed-array.float32-array-f5942f17.js';
-import './common/es.typed-array.uint16-array-bdd4f01c.js';
-import './common/web.dom-collections.iterator-72266c99.js';
-import './common/es.error.cause-85d8db04.js';
-import './common/esnext.iterator.map-88bfc258.js';
-import './common/iterators-core-5c29a195.js';
-import './common/array-sort-332ddaea.js';
-import './common/to-string-03643265.js';
+import { a as typedArrayConstructorsRequireWrappers, b as arrayBufferViewCore, t as typedArrayConstructor } from './common/esnext.typed-array.with-962bc47b.js';
+import './common/es.typed-array.uint16-array-8ab4b94b.js';
+import './common/web.dom-collections.iterator-13a35a91.js';
+import './common/es.error.cause-284a267a.js';
+import './common/esnext.iterator.map-dd12ba51.js';
+import './common/array-sort-447cf137.js';
 
 var aTypedArrayConstructor = arrayBufferViewCore.aTypedArrayConstructor;
 var exportTypedArrayStaticMethod = arrayBufferViewCore.exportTypedArrayStaticMethod;
@@ -20,6 +17,14 @@ exportTypedArrayStaticMethod('of', function of(/* ...items */) {
   while (length > index) result[index] = arguments[index++];
   return result;
 }, typedArrayConstructorsRequireWrappers);
+
+// `Float32Array` constructor
+// https://tc39.es/ecma262/#sec-typedarray-objects
+typedArrayConstructor('Float32', function (init) {
+  return function Float32Array(data, byteOffset, length) {
+    return init(this, data, byteOffset, length);
+  };
+});
 
 // `Int8Array` constructor
 // https://tc39.es/ecma262/#sec-typedarray-objects

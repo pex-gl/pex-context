@@ -1,5 +1,5 @@
-import { M as getBuiltIn, n as functionUncurryThis, f as fails, m as isCallable, a0 as inspectSource, U as toPropertyKey, o as objectDefineProperty, i as createPropertyDescriptor, l as global_1, D as lengthOfArrayLike, R as toAbsoluteIndex } from './iterators-core-5c29a195.js';
-import { j as classof } from './esnext.iterator.map-88bfc258.js';
+import { L as getBuiltIn, j as functionUncurryThis, f as fails, y as isCallable, a4 as inspectSource, V as toPropertyKey, o as objectDefineProperty, B as createPropertyDescriptor, r as lengthOfArrayLike, R as toAbsoluteIndex } from './web.dom-collections.iterator-13a35a91.js';
+import { l as classof } from './esnext.iterator.map-dd12ba51.js';
 
 var noop = function () { /* empty */ };
 var empty = [];
@@ -53,14 +53,14 @@ var createProperty = function (object, key, value) {
   else object[propertyKey] = value;
 };
 
-var Array = global_1.Array;
+var $Array = Array;
 var max = Math.max;
 
 var arraySliceSimple = function (O, start, end) {
   var length = lengthOfArrayLike(O);
   var k = toAbsoluteIndex(start, length);
   var fin = toAbsoluteIndex(end === undefined ? length : end, length);
-  var result = Array(max(fin - k, 0));
+  var result = $Array(max(fin - k, 0));
   for (var n = 0; k < fin; k++, n++) createProperty(result, n, O[k]);
   result.length = n;
   return result;

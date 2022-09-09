@@ -1,12 +1,9 @@
-import './common/es.error.cause-85d8db04.js';
-import './common/web.dom-collections.iterator-72266c99.js';
-import './common/web.url.constructor-1fac474b.js';
-import { b as aCallable, _ as _export, s as functionCall, a as anObject } from './common/iterators-core-5c29a195.js';
-import { i as iterate } from './common/iterate-aedf72be.js';
-import './common/esnext.iterator.map-88bfc258.js';
-import { a as asyncIteratorIteration } from './common/async-iterator-iteration-1410a330.js';
-import './common/to-string-03643265.js';
-import './common/array-sort-332ddaea.js';
+import './common/es.error.cause-284a267a.js';
+import { a as aCallable, _ as _export, g as functionCall } from './common/web.dom-collections.iterator-13a35a91.js';
+import './common/web.url.constructor-9e5e4d27.js';
+import { p as perform, g as getIteratorDirect } from './common/esnext.iterator.map-dd12ba51.js';
+import { i as iterate, a as asyncIteratorIteration } from './common/iterate-4062619f.js';
+import './common/array-sort-447cf137.js';
 
 var PromiseCapability = function (C) {
   var resolve, reject;
@@ -27,14 +24,6 @@ var f = function (C) {
 
 var newPromiseCapability = {
 	f: f
-};
-
-var perform = function (exec) {
-  try {
-    return { error: false, value: exec() };
-  } catch (error) {
-    return { error: true, value: error };
-  }
 };
 
 // `Promise.allSettled` method
@@ -91,11 +80,11 @@ _export({ target: 'AsyncIterator', proto: true, real: true, forced: true }, {
 
 _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
   find: function find(fn) {
-    anObject(this);
+    var record = getIteratorDirect(this);
     aCallable(fn);
-    return iterate(this, function (value, stop) {
+    return iterate(record, function (value, stop) {
       if (fn(value)) return stop(value);
-    }, { IS_ITERATOR: true, INTERRUPTED: true }).result;
+    }, { IS_RECORD: true, INTERRUPTED: true }).result;
   }
 });
 

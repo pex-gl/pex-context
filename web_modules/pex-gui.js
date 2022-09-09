@@ -1,44 +1,11 @@
-import './common/es.error.cause-85d8db04.js';
-import './common/web.dom-collections.iterator-72266c99.js';
-import { v as toHex, b as toHSL, a as fromHSL } from './common/hsl-aba440c3.js';
-import './common/iterate-aedf72be.js';
-import './common/esnext.iterator.filter-b13a3115.js';
-import './common/esnext.iterator.map-88bfc258.js';
-import { a as anObject, b as aCallable, s as functionCall, _ as _export } from './common/iterators-core-5c29a195.js';
-import './common/plane-6008dfc4.js';
-import { o as map, a as clamp } from './common/vec3-68b228db.js';
-import './common/es.string.replace-fc7a9f9f.js';
-import './common/to-string-03643265.js';
-import './common/async-iterator-iteration-1410a330.js';
-
-/**
- * Returns the width of a rectangle.
- * @param {rect} a
- * @returns {number}
- */
-
-function width(a) {
-  return a[1][0] - a[0][0];
-}
-/**
- * Returns the height of a rectangle.
- * @param {rect} a
- * @returns {number}
- */
-
-function height(a) {
-  return a[1][1] - a[0][1];
-}
-/**
- * Checks if a point is inside a rectangle.
- * @param {rect} a
- * @param {import("pex-math").vec2} p
- * @returns {boolean}
- */
-
-function containsPoint(a, [x, y]) {
-  return x >= a[0][0] && x <= a[1][0] && y >= a[0][1] && y <= a[1][1];
-}
+import './common/es.error.cause-284a267a.js';
+import { e as anObject, a as aCallable, g as functionCall, _ as _export } from './common/web.dom-collections.iterator-13a35a91.js';
+import { v as toHex, b as toHSL, a as fromHSL } from './common/hsl-1fac1a4b.js';
+import './common/iterate-4062619f.js';
+import './common/esnext.iterator.filter-db88bd42.js';
+import './common/esnext.iterator.map-dd12ba51.js';
+import { m as map, c as clamp } from './common/utils-22518481.js';
+import './common/es.string.replace-67d563a6.js';
 
 function _classApplyDescriptorGet(receiver, descriptor) {
   if (descriptor.get) {
@@ -105,11 +72,17 @@ var mapEmplace = function emplace(key, handler) {
   var get = aCallable(map.get);
   var has = aCallable(map.has);
   var set = aCallable(map.set);
-  var value = (functionCall(has, map, key) && 'update' in handler)
-    ? handler.update(functionCall(get, map, key), key, map)
-    : handler.insert(key, map);
-  functionCall(set, map, key, value);
-  return value;
+  var value, inserted;
+  if (functionCall(has, map, key)) {
+    value = functionCall(get, map, key);
+    if ('update' in handler) {
+      value = handler.update(value, key, map);
+      functionCall(set, map, key, value);
+    } return value;
+  }
+  inserted = handler.insert(key, map);
+  functionCall(set, map, key, inserted);
+  return inserted;
 };
 
 // `WeakMap.prototype.emplace` method
@@ -117,6 +90,61 @@ var mapEmplace = function emplace(key, handler) {
 _export({ target: 'WeakMap', proto: true, real: true, forced: true }, {
   emplace: mapEmplace
 });
+
+/**
+ * Enum for different side values
+ * @readonly
+ * @enum {number}
+ */
+
+const Side = Object.freeze({
+  OnPlane: 0,
+  Same: -1,
+  Opposite: 1
+});
+
+/**
+ * Enum for different intersections values
+ * @readonly
+ * @enum {number}
+ */
+
+const Intersections = Object.freeze({
+  Intersect: 1,
+  NoIntersect: 0,
+  SamePlane: -1,
+  Parallel: -2,
+  TriangleDegenerate: -2
+});
+
+/**
+ * Returns the width of a rectangle.
+ * @param {import("./types.js").rect} a
+ * @returns {number}
+ */
+
+function width(a) {
+  return a[1][0] - a[0][0];
+}
+/**
+ * Returns the height of a rectangle.
+ * @param {import("./types.js").rect} a
+ * @returns {number}
+ */
+
+function height(a) {
+  return a[1][1] - a[0][1];
+}
+/**
+ * Checks if a point is inside a rectangle.
+ * @param {import("./types.js").rect} a
+ * @param {import("pex-math/types/types").vec2} p
+ * @returns {boolean}
+ */
+
+function containsPoint(a, [x, y]) {
+  return x >= a[0][0] && x <= a[1][0] && y >= a[0][1] && y <= a[1][1];
+}
 
 function rectSet4(a, x, y, w, h) {
   a[0][0] = x;
@@ -967,6 +995,7 @@ function _checkPrivateRedeclaration$1(obj, privateCollection) { if (privateColle
  * @property {boolean} [alpha] Add a 4th slider for colors.
  * @property {HTMLImageElement} [palette] Draw a palette image as color picker.
  * @property {boolean} [flipEnvMap] Should be 1 for dynamic cubemaps and -1 for cubemaps from file with X axis flipped.
+ * @property {boolean} [flipY] Flip texture 2D vertically.
  * @property {number} [level] Level of detail for cube textures.
  */
 
@@ -1094,8 +1123,10 @@ class GUI {
 
       this.drawTexture2d = ({
         texture,
-        rect
+        rect,
+        flipY
       }) => {
+        if (flipY) [rect[1], rect[3]] = [rect[3], rect[1]];
         ctx.submit(drawTexture2dCmd, {
           viewport: this.viewport,
           uniforms: {
@@ -1128,9 +1159,18 @@ class GUI {
     } else {
       this.drawTexture2d = ({
         texture,
-        rect
+        rect,
+        flipY
       }) => {
-        ctx.drawImage(texture, rect[0] + this.x * pixelRatio, rect[1] + this.y * pixelRatio, rect[2] - rect[0], rect[3] - rect[1]);
+        const x = rect[0] + this.x * pixelRatio;
+        const y = rect[1] + this.y * pixelRatio;
+        const width = rect[2] - rect[0];
+        const height = rect[3] - rect[1];
+        ctx.save();
+        ctx.translate(x + width / 2, y + height / 2);
+        if (flipY) ctx.scale(1, -1);
+        ctx.drawImage(texture, -width / 2, -height / 2, width, height);
+        ctx.restore();
       };
     }
 
@@ -2016,8 +2056,11 @@ class GUI {
         activeArea,
         texture
       }) => {
+        var _item$options3;
+
         // we are trying to match flipped gui texture which 0,0 starts at the top with window coords that have 0,0 at the bottom
         bounds = [activeArea[0][0] * scale, activeArea[1][1] * scale, activeArea[1][0] * scale, activeArea[0][1] * scale];
+        const flipY = (_item$options3 = item.options) === null || _item$options3 === void 0 ? void 0 : _item$options3.flipY;
 
         if (texture.flipY) {
           [bounds[1], bounds[3]] = [bounds[3], bounds[1]];
@@ -2025,7 +2068,8 @@ class GUI {
 
         this.drawTexture2d({
           texture,
-          rect: bounds
+          rect: bounds,
+          flipY
         });
       };
 

@@ -1,7 +1,5 @@
-import { o as objectDefineProperty, m as isCallable, E as isObject, q as createNonEnumerableProperty, n as functionUncurryThis, f as fails, i as createPropertyDescriptor, M as getBuiltIn, h as hasOwnProperty_1, N as objectIsPrototypeOf, O as copyConstructorProperties, v as descriptors, l as global_1, _ as _export } from './iterators-core-5c29a195.js';
-import { f as functionApply } from './esnext.iterator.map-88bfc258.js';
-import { o as objectSetPrototypeOf } from './web.dom-collections.iterator-72266c99.js';
-import { t as toString_1 } from './to-string-03643265.js';
+import { o as objectDefineProperty, K as objectSetPrototypeOf, y as isCallable, z as isObject, E as createNonEnumerableProperty, j as functionUncurryThis, f as fails, B as createPropertyDescriptor, L as getBuiltIn, C as hasOwnProperty_1, M as objectIsPrototypeOf, N as copyConstructorProperties, n as descriptors, s as global_1, _ as _export } from './web.dom-collections.iterator-13a35a91.js';
+import { t as toString_1, m as functionApply } from './esnext.iterator.map-dd12ba51.js';
 
 var defineProperty = objectDefineProperty.f;
 
@@ -126,14 +124,14 @@ var FORCED = Error('e', { cause: 7 }).cause !== 7;
 var exportGlobalErrorCauseWrapper = function (ERROR_NAME, wrapper) {
   var O = {};
   O[ERROR_NAME] = wrapErrorConstructorWithCause(ERROR_NAME, wrapper, FORCED);
-  _export({ global: true, forced: FORCED }, O);
+  _export({ global: true, constructor: true, arity: 1, forced: FORCED }, O);
 };
 
 var exportWebAssemblyErrorCauseWrapper = function (ERROR_NAME, wrapper) {
   if (WebAssembly && WebAssembly[ERROR_NAME]) {
     var O = {};
     O[ERROR_NAME] = wrapErrorConstructorWithCause(WEB_ASSEMBLY + '.' + ERROR_NAME, wrapper, FORCED);
-    _export({ target: WEB_ASSEMBLY, stat: true, forced: FORCED }, O);
+    _export({ target: WEB_ASSEMBLY, stat: true, constructor: true, arity: 1, forced: FORCED }, O);
   }
 };
 

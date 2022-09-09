@@ -1,9 +1,7 @@
-import { s as stringMultibyte } from './async-iterator-iteration-1410a330.js';
-import { t as toString_1 } from './to-string-03643265.js';
-import { u as internalState, w as wellKnownSymbol, f as fails, n as functionUncurryThis, y as toObject, z as indexedObject, A as objectKeys, v as descriptors, s as functionCall, B as objectGetOwnPropertySymbols, C as objectPropertyIsEnumerable, l as global_1, D as lengthOfArrayLike, r as redefine, _ as _export, m as isCallable, E as isObject, e as objectCreate, i as createPropertyDescriptor, a as anObject, h as hasOwnProperty_1, F as objectDefineProperties } from './iterators-core-5c29a195.js';
-import { d as defineIterator, c as createIteratorConstructor, s as setToStringTag } from './web.dom-collections.iterator-72266c99.js';
-import { b as functionBindContext, g as getIteratorMethod, d as isArrayIteratorMethod, e as getIterator, c as callWithSafeIterationClosing, r as redefineAll, h as anInstance, j as classof } from './esnext.iterator.map-88bfc258.js';
-import { i as isConstructor, c as createProperty, a as arraySort, b as arraySliceSimple } from './array-sort-332ddaea.js';
+import { s as stringMultibyte } from './iterate-4062619f.js';
+import { t as toString_1, f as functionBindContext, d as getIteratorMethod, e as isArrayIteratorMethod, h as getIterator, c as callWithSafeIterationClosing, j as defineBuiltIns, k as anInstance, l as classof } from './esnext.iterator.map-dd12ba51.js';
+import { i as internalState, h as defineIterator, w as wellKnownSymbol, f as fails, o as objectDefineProperty, m as makeBuiltIn_1, j as functionUncurryThis, t as toObject, k as indexedObject, l as objectKeys, n as descriptors, g as functionCall, p as objectGetOwnPropertySymbols, q as objectPropertyIsEnumerable, r as lengthOfArrayLike, s as global_1, u as createIteratorConstructor, v as defineBuiltIn, x as setToStringTag, _ as _export, y as isCallable, z as isObject, A as objectCreate, B as createPropertyDescriptor, e as anObject, C as hasOwnProperty_1 } from './web.dom-collections.iterator-13a35a91.js';
+import { i as isConstructor, c as createProperty, a as arraySort, b as arraySliceSimple } from './array-sort-447cf137.js';
 
 var isPure = false;
 
@@ -68,6 +66,12 @@ var nativeUrl = !fails(function () {
     || new URL('http://x', undefined).host !== 'x';
 });
 
+var defineBuiltInAccessor = function (target, name, descriptor) {
+  if (descriptor.get) makeBuiltIn_1(descriptor.get, name, { getter: true });
+  if (descriptor.set) makeBuiltIn_1(descriptor.set, name, { setter: true });
+  return objectDefineProperty.f(target, name, descriptor);
+};
+
 // eslint-disable-next-line es-x/no-object-assign -- safe
 var $assign = Object.assign;
 // eslint-disable-next-line es-x/no-object-defineproperty -- required for testing
@@ -115,7 +119,7 @@ var objectAssign = !$assign || fails(function () {
   } return T;
 } : $assign;
 
-var Array$1 = global_1.Array;
+var $Array = Array;
 
 // `Array.from` method implementation
 // https://tc39.es/ecma262/#sec-array.from
@@ -130,7 +134,7 @@ var arrayFrom = function from(arrayLike /* , mapfn = undefined, thisArg = undefi
   var index = 0;
   var length, result, step, iterator, next, value;
   // if the target is not iterable or it's an array with the default iterator - use a simple case
-  if (iteratorMethod && !(this == Array$1 && isArrayIteratorMethod(iteratorMethod))) {
+  if (iteratorMethod && !(this === $Array && isArrayIteratorMethod(iteratorMethod))) {
     iterator = getIterator(O, iteratorMethod);
     next = iterator.next;
     result = IS_CONSTRUCTOR ? new this() : [];
@@ -140,7 +144,7 @@ var arrayFrom = function from(arrayLike /* , mapfn = undefined, thisArg = undefi
     }
   } else {
     length = lengthOfArrayLike(O);
-    result = IS_CONSTRUCTOR ? new this(length) : Array$1(length);
+    result = IS_CONSTRUCTOR ? new this(length) : $Array(length);
     for (;length > index; index++) {
       value = mapping ? mapfn(O[index], index) : O[index];
       createProperty(result, index, value);
@@ -151,7 +155,6 @@ var arrayFrom = function from(arrayLike /* , mapfn = undefined, thisArg = undefi
 };
 
 // based on https://github.com/bestiejs/punycode.js/blob/master/punycode.js
-
 
 
 var maxInt = 2147483647; // aka. 0x7FFFFFFF or 2^31-1
@@ -168,7 +171,7 @@ var regexSeparators = /[.\u3002\uFF0E\uFF61]/g; // RFC 3490 separators
 var OVERFLOW_ERROR = 'Overflow: input needs wider integers to process';
 var baseMinusTMin = base - tMin;
 
-var RangeError = global_1.RangeError;
+var $RangeError = RangeError;
 var exec = functionUncurryThis(regexSeparators.exec);
 var floor = Math.floor;
 var fromCharCode = String.fromCharCode;
@@ -283,7 +286,7 @@ var encode = function (input) {
     // Increase `delta` enough to advance the decoder's <n,i> state to <m,0>, but guard against overflow.
     var handledCPCountPlusOne = handledCPCount + 1;
     if (m - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
-      throw RangeError(OVERFLOW_ERROR);
+      throw $RangeError(OVERFLOW_ERROR);
     }
 
     delta += (m - n) * handledCPCountPlusOne;
@@ -292,7 +295,7 @@ var encode = function (input) {
     for (i = 0; i < input.length; i++) {
       currentValue = input[i];
       if (currentValue < n && ++delta > maxInt) {
-        throw RangeError(OVERFLOW_ERROR);
+        throw $RangeError(OVERFLOW_ERROR);
       }
       if (currentValue == n) {
         // Represent delta as a generalized variable-length integer.
@@ -332,10 +335,10 @@ var stringPunycodeToAscii = function (input) {
   return join(encoded, '.');
 };
 
-var TypeError = global_1.TypeError;
+var $TypeError = TypeError;
 
 var validateArgumentsLength = function (passed, required) {
-  if (passed < required) throw TypeError('Not enough arguments');
+  if (passed < required) throw $TypeError('Not enough arguments');
   return passed;
 };
 
@@ -548,7 +551,7 @@ var URLSearchParamsConstructor = function URLSearchParams(/* init */) {
 
 var URLSearchParamsPrototype = URLSearchParamsConstructor.prototype;
 
-redefineAll(URLSearchParamsPrototype, {
+defineBuiltIns(URLSearchParamsPrototype, {
   // `URLSearchParams.prototype.append` method
   // https://url.spec.whatwg.org/#dom-urlsearchparams-append
   append: function append(name, value) {
@@ -667,17 +670,17 @@ redefineAll(URLSearchParamsPrototype, {
 }, { enumerable: true });
 
 // `URLSearchParams.prototype[@@iterator]` method
-redefine(URLSearchParamsPrototype, ITERATOR$1, URLSearchParamsPrototype.entries, { name: 'entries' });
+defineBuiltIn(URLSearchParamsPrototype, ITERATOR$1, URLSearchParamsPrototype.entries, { name: 'entries' });
 
 // `URLSearchParams.prototype.toString` method
 // https://url.spec.whatwg.org/#urlsearchparams-stringification-behavior
-redefine(URLSearchParamsPrototype, 'toString', function toString() {
+defineBuiltIn(URLSearchParamsPrototype, 'toString', function toString() {
   return getInternalParamsState(this).serialize();
 }, { enumerable: true });
 
 setToStringTag(URLSearchParamsConstructor, URL_SEARCH_PARAMS);
 
-_export({ global: true, forced: !nativeUrl }, {
+_export({ global: true, constructor: true, forced: !nativeUrl }, {
   URLSearchParams: URLSearchParamsConstructor
 });
 
@@ -704,7 +707,7 @@ if (!nativeUrl && isCallable(Headers)) {
   };
 
   if (isCallable(nativeFetch)) {
-    _export({ global: true, enumerable: true, noTargetGet: true, forced: true }, {
+    _export({ global: true, enumerable: true, dontCallGetSet: true, forced: true }, {
       fetch: function fetch(input /* , init */) {
         return nativeFetch(input, arguments.length > 1 ? wrapRequestOptions(arguments[1]) : {});
       }
@@ -720,7 +723,7 @@ if (!nativeUrl && isCallable(Headers)) {
     RequestPrototype.constructor = RequestConstructor;
     RequestConstructor.prototype = RequestPrototype;
 
-    _export({ global: true, forced: true, noTargetGet: true }, {
+    _export({ global: true, constructor: true, dontCallGetSet: true, forced: true }, {
       Request: RequestConstructor
     });
   }
@@ -739,7 +742,7 @@ var web_urlSearchParams_constructor = {
 
 
 
-var defineProperties = objectDefineProperties.f;
+
 
 
 
@@ -1706,55 +1709,53 @@ var accessorDescriptor = function (getter, setter) {
 };
 
 if (descriptors) {
-  defineProperties(URLPrototype, {
-    // `URL.prototype.href` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-href
-    href: accessorDescriptor('serialize', 'setHref'),
-    // `URL.prototype.origin` getter
-    // https://url.spec.whatwg.org/#dom-url-origin
-    origin: accessorDescriptor('getOrigin'),
-    // `URL.prototype.protocol` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-protocol
-    protocol: accessorDescriptor('getProtocol', 'setProtocol'),
-    // `URL.prototype.username` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-username
-    username: accessorDescriptor('getUsername', 'setUsername'),
-    // `URL.prototype.password` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-password
-    password: accessorDescriptor('getPassword', 'setPassword'),
-    // `URL.prototype.host` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-host
-    host: accessorDescriptor('getHost', 'setHost'),
-    // `URL.prototype.hostname` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-hostname
-    hostname: accessorDescriptor('getHostname', 'setHostname'),
-    // `URL.prototype.port` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-port
-    port: accessorDescriptor('getPort', 'setPort'),
-    // `URL.prototype.pathname` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-pathname
-    pathname: accessorDescriptor('getPathname', 'setPathname'),
-    // `URL.prototype.search` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-search
-    search: accessorDescriptor('getSearch', 'setSearch'),
-    // `URL.prototype.searchParams` getter
-    // https://url.spec.whatwg.org/#dom-url-searchparams
-    searchParams: accessorDescriptor('getSearchParams'),
-    // `URL.prototype.hash` accessors pair
-    // https://url.spec.whatwg.org/#dom-url-hash
-    hash: accessorDescriptor('getHash', 'setHash')
-  });
+  // `URL.prototype.href` accessors pair
+  // https://url.spec.whatwg.org/#dom-url-href
+  defineBuiltInAccessor(URLPrototype, 'href', accessorDescriptor('serialize', 'setHref'));
+  // `URL.prototype.origin` getter
+  // https://url.spec.whatwg.org/#dom-url-origin
+  defineBuiltInAccessor(URLPrototype, 'origin', accessorDescriptor('getOrigin'));
+  // `URL.prototype.protocol` accessors pair
+  // https://url.spec.whatwg.org/#dom-url-protocol
+  defineBuiltInAccessor(URLPrototype, 'protocol', accessorDescriptor('getProtocol', 'setProtocol'));
+  // `URL.prototype.username` accessors pair
+  // https://url.spec.whatwg.org/#dom-url-username
+  defineBuiltInAccessor(URLPrototype, 'username', accessorDescriptor('getUsername', 'setUsername'));
+  // `URL.prototype.password` accessors pair
+  // https://url.spec.whatwg.org/#dom-url-password
+  defineBuiltInAccessor(URLPrototype, 'password', accessorDescriptor('getPassword', 'setPassword'));
+  // `URL.prototype.host` accessors pair
+  // https://url.spec.whatwg.org/#dom-url-host
+  defineBuiltInAccessor(URLPrototype, 'host', accessorDescriptor('getHost', 'setHost'));
+  // `URL.prototype.hostname` accessors pair
+  // https://url.spec.whatwg.org/#dom-url-hostname
+  defineBuiltInAccessor(URLPrototype, 'hostname', accessorDescriptor('getHostname', 'setHostname'));
+  // `URL.prototype.port` accessors pair
+  // https://url.spec.whatwg.org/#dom-url-port
+  defineBuiltInAccessor(URLPrototype, 'port', accessorDescriptor('getPort', 'setPort'));
+  // `URL.prototype.pathname` accessors pair
+  // https://url.spec.whatwg.org/#dom-url-pathname
+  defineBuiltInAccessor(URLPrototype, 'pathname', accessorDescriptor('getPathname', 'setPathname'));
+  // `URL.prototype.search` accessors pair
+  // https://url.spec.whatwg.org/#dom-url-search
+  defineBuiltInAccessor(URLPrototype, 'search', accessorDescriptor('getSearch', 'setSearch'));
+  // `URL.prototype.searchParams` getter
+  // https://url.spec.whatwg.org/#dom-url-searchparams
+  defineBuiltInAccessor(URLPrototype, 'searchParams', accessorDescriptor('getSearchParams'));
+  // `URL.prototype.hash` accessors pair
+  // https://url.spec.whatwg.org/#dom-url-hash
+  defineBuiltInAccessor(URLPrototype, 'hash', accessorDescriptor('getHash', 'setHash'));
 }
 
 // `URL.prototype.toJSON` method
 // https://url.spec.whatwg.org/#dom-url-tojson
-redefine(URLPrototype, 'toJSON', function toJSON() {
+defineBuiltIn(URLPrototype, 'toJSON', function toJSON() {
   return getInternalURLState(this).serialize();
 }, { enumerable: true });
 
 // `URL.prototype.toString` method
 // https://url.spec.whatwg.org/#URL-stringification-behavior
-redefine(URLPrototype, 'toString', function toString() {
+defineBuiltIn(URLPrototype, 'toString', function toString() {
   return getInternalURLState(this).serialize();
 }, { enumerable: true });
 
@@ -1763,14 +1764,14 @@ if (NativeURL) {
   var nativeRevokeObjectURL = NativeURL.revokeObjectURL;
   // `URL.createObjectURL` method
   // https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL
-  if (nativeCreateObjectURL) redefine(URLConstructor, 'createObjectURL', functionBindContext(nativeCreateObjectURL, NativeURL));
+  if (nativeCreateObjectURL) defineBuiltIn(URLConstructor, 'createObjectURL', functionBindContext(nativeCreateObjectURL, NativeURL));
   // `URL.revokeObjectURL` method
   // https://developer.mozilla.org/en-US/docs/Web/API/URL/revokeObjectURL
-  if (nativeRevokeObjectURL) redefine(URLConstructor, 'revokeObjectURL', functionBindContext(nativeRevokeObjectURL, NativeURL));
+  if (nativeRevokeObjectURL) defineBuiltIn(URLConstructor, 'revokeObjectURL', functionBindContext(nativeRevokeObjectURL, NativeURL));
 }
 
 setToStringTag(URLConstructor, 'URL');
 
-_export({ global: true, forced: !nativeUrl, sham: !descriptors }, {
+_export({ global: true, constructor: true, forced: !nativeUrl, sham: !descriptors }, {
   URL: URLConstructor
 });

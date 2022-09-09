@@ -1,8 +1,6 @@
-import { c as create, l as lookAt, s as set, i as invert, f as frustum, p as perspective$1, o as ortho, d as distance$1 } from './common/vec2-e9551923.js';
-import { n as normalize, m as multMat4, s as sub, c as copy, d as distance, a as clamp, t as toDegrees, b as toRadians, l as lerp$1, e as scale, f as add, g as length, h as set$1 } from './common/vec3-68b228db.js';
-import './common/web.dom-collections.iterator-72266c99.js';
-import { h as hitTestPlane } from './common/plane-6008dfc4.js';
-import './common/iterators-core-5c29a195.js';
+import { c as create, l as lookAt, s as set, i as invert, f as frustum, p as perspective$1, n as normalize, m as multMat4, a as sub, o as ortho, b as create$1, d as set$1, e as dot, g as add, h as scale, j as copy, k as distance, q as length, r as distance$1 } from './common/vec3-6bf2dc83.js';
+import './common/web.dom-collections.iterator-13a35a91.js';
+import { c as clamp, t as toDegrees, a as toRadians, l as lerp$1 } from './common/utils-22518481.js';
 
 /**
  * An interface for cameras to extend
@@ -102,7 +100,7 @@ class PerspectiveCamera extends Camera {
    * @param {number} y mouse y
    * @param {number} windowWidth
    * @param {number} windowHeight
-   * @returns {ray}
+   * @returns {import("pex-geom").ray}
    */
 
 
@@ -129,7 +127,7 @@ class PerspectiveCamera extends Camera {
    * @param {number} y
    * @param {number} windowWidth
    * @param {number} windowHeight
-   * @returns {ray}
+   * @returns {import("pex-geom").ray}
    */
 
 
@@ -223,6 +221,55 @@ class OrthographicCamera extends Camera {
 
 }
 
+/**
+ * Enum for different side values
+ * @readonly
+ * @enum {number}
+ */
+
+const Side = Object.freeze({
+  OnPlane: 0,
+  Same: -1,
+  Opposite: 1
+});
+
+/**
+ * Enum for different intersections values
+ * @readonly
+ * @enum {number}
+ */
+
+const Intersections = Object.freeze({
+  Intersect: 1,
+  NoIntersect: 0,
+  SamePlane: -1,
+  Parallel: -2,
+  TriangleDegenerate: -2
+});
+const TEMP_0 = create$1();
+const TEMP_1 = create$1();
+const TEMP_2 = create$1();
+/**
+ * Determines if a ray intersect a plane and set intersection point
+ * @see {@link https://www.cs.princeton.edu/courses/archive/fall00/cs426/lectures/raycast/sld017.htm}
+ * @param {import("./types.js").ray} ray
+ * @param {import("./types.js").plane} plane
+ * @param {import("pex-math/types/types").vec3} out
+ * @returns {number}
+ */
+
+function hitTestPlane([origin, direction], [point, normal], out = create$1()) {
+  set$1(TEMP_0, origin);
+  set$1(TEMP_1, direction);
+  const dotDirectionNormal = dot(TEMP_1, normal);
+  if (dotDirectionNormal === 0) return Intersections.SamePlane;
+  set$1(TEMP_2, point);
+  const t = dot(sub(TEMP_2, TEMP_0), normal) / dotDirectionNormal;
+  if (t < 0) return Intersections.Parallel;
+  set$1(out, add(TEMP_0, scale(TEMP_1, t)));
+  return Intersections.Intersect;
+}
+
 function lerp(v0, v1, t) {
   return v0 * (1 - t) + v1 * t;
 }
@@ -314,8 +361,8 @@ class OrbiterControls {
       zoom: true,
       pan: true,
       drag: true,
-      minDistance: 0.1,
-      maxDistance: 10,
+      minDistance: 0.01,
+      maxDistance: Infinity,
       minLat: -89.5,
       maxLat: 89.5,
       minLon: -Infinity,
@@ -457,7 +504,7 @@ class OrbiterControls {
       set$1(this.clickTarget, camera.target);
       const targetInViewSpace = multMat4(copy(this.clickTarget), camera.viewMatrix);
       this.panPlane = [targetInViewSpace, [0, 0, 1]];
-      hitTestPlane(camera.getViewRay(clickPosWindow[0], clickPosWindow[1], this.width, this.height), this.panPlane[0], this.panPlane[1], this.clickPosPlane);
+      hitTestPlane(camera.getViewRay(clickPosWindow[0], clickPosWindow[1], this.width, this.height), this.panPlane, this.clickPosPlane);
     }
   }
 
@@ -480,7 +527,7 @@ class OrbiterControls {
 
     if (this.pan && camera && this.panPlane) {
       const dragPosWindow = touch1 ? [(touch0[0] + touch1[0]) * 0.5, (touch0[1] + touch1[1]) * 0.5] : touch0;
-      hitTestPlane(camera.getViewRay(dragPosWindow[0], dragPosWindow[1], this.width, this.height), this.panPlane[0], this.panPlane[1], this.dragPosPlane);
+      hitTestPlane(camera.getViewRay(dragPosWindow[0], dragPosWindow[1], this.width, this.height), this.panPlane, this.dragPosPlane);
       multMat4(set$1(this.clickPosWorld, this.clickPosPlane), camera.invViewMatrix);
       multMat4(set$1(this.dragPosWorld, this.dragPosPlane), camera.invViewMatrix);
       const diffWorld = sub(copy(this.dragPosWorld), this.clickPosWorld);

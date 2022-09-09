@@ -1,9 +1,7 @@
-import './es.string.replace-fc7a9f9f.js';
-import './esnext.iterator.map-88bfc258.js';
-import './web.dom-collections.iterator-72266c99.js';
-import { _ as _export, a as anObject } from './iterators-core-5c29a195.js';
-import { a as asyncIteratorIteration } from './async-iterator-iteration-1410a330.js';
-import { i as iterate } from './iterate-aedf72be.js';
+import './es.string.replace-67d563a6.js';
+import { g as getIteratorDirect } from './esnext.iterator.map-dd12ba51.js';
+import { _ as _export } from './web.dom-collections.iterator-13a35a91.js';
+import { a as asyncIteratorIteration, i as iterate } from './iterate-4062619f.js';
 
 // https://github.com/tc39/proposal-iterator-helpers
 
@@ -22,7 +20,7 @@ _export({ target: 'AsyncIterator', proto: true, real: true, forced: true }, {
 
 _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
   forEach: function forEach(fn) {
-    iterate(anObject(this), fn, { IS_ITERATOR: true });
+    iterate(getIteratorDirect(this), fn, { IS_RECORD: true });
   }
 });
 
@@ -61,12 +59,12 @@ function linearSrgbToOklab(color, lr, lg, lb) {
 }
 /**
  * Updates a color based on Oklab values and alpha.
- * @param {color} color
+ * @param {import("./color.js").color} color
  * @param {number} l
  * @param {number} a
  * @param {number} b
  * @param {number} [α]
- * @return {color}
+ * @return {import("./color.js").color}
  */
 
 function fromOklab(color, L, a, b, α) {
@@ -78,7 +76,7 @@ function fromOklab(color, L, a, b, α) {
 }
 /**
  * Returns an Oklab representation of a given color.
- * @param {color} color
+ * @param {import("./color.js").color} color
  * @param {Array} out
  * @return {oklab}
  */
@@ -301,9 +299,9 @@ var utils = /*#__PURE__*/Object.freeze({
 
 /**
  * Updates a color based on a hexadecimal string.
- * @param {color} color
+ * @param {import("./color.js").color} color
  * @param {hex} hex Leading '#' is optional.
- * @return {color}
+ * @return {import("./color.js").color}
  */
 function fromHex(color, hex) {
   hex = hex.replace(/^#/, "");
@@ -330,7 +328,7 @@ function fromHex(color, hex) {
 }
 /**
  * Returns a hexadecimal string representation of a given color.
- * @param {color} color
+ * @param {import("./color.js").color} color
  * @param {boolean} alpha Handle alpha
  * @return {hex}
  */
@@ -357,12 +355,12 @@ function hue2rgb(p, q, t) {
 }
 /**
  * Updates a color based on HSL values and alpha.
- * @param {color} color
+ * @param {import("./color.js").color} color
  * @param {number} h
  * @param {number} s
  * @param {number} l
  * @param {number} [a]
- * @return {color}
+ * @return {import("./color.js").color}
  */
 
 
@@ -381,7 +379,7 @@ function fromHSL(color, h, s, l, a) {
 }
 /**
  * Returns a HSL representation of a given color.
- * @param {color} color
+ * @param {import("./color.js").color} color
  * @param {Array} out
  * @return {hsl}
  */
