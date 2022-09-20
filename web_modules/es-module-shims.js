@@ -1,13 +1,14 @@
-import './common/esnext.iterator.filter-db88bd42.js';
-import { _ as _export, a as aCallable, c as commonjsGlobal } from './common/web.dom-collections.iterator-13a35a91.js';
-import './common/web.url.constructor-9e5e4d27.js';
-import './common/es.string.replace-67d563a6.js';
-import './common/es.error.cause-284a267a.js';
-import './common/esnext.typed-array.with-962bc47b.js';
-import './common/es.typed-array.uint16-array-8ab4b94b.js';
-import { g as getIteratorDirect } from './common/esnext.iterator.map-dd12ba51.js';
-import { a as asyncIteratorIteration, i as iterate } from './common/iterate-4062619f.js';
-import './common/array-sort-447cf137.js';
+import './common/es.array.includes-ee97dfa9.js';
+import { _ as _export, a as aCallable, c as commonjsGlobal } from './common/web.dom-collections.iterator-7ea8a356.js';
+import './common/web.url.constructor-2bd3b55e.js';
+import './common/es.string.replace-a4fa4326.js';
+import './common/es.error.cause-c4c3fd35.js';
+import './common/esnext.typed-array.with-1c0553db.js';
+import './common/es.typed-array.uint16-array-e5c1fa83.js';
+import { g as getIteratorDirect } from './common/esnext.iterator.map-e3ab2956.js';
+import { a as asyncIteratorIteration, i as iterate } from './common/iterate-b9a2a58a.js';
+import './common/esnext.iterator.filter-5ef67ce8.js';
+import './common/array-sort-2272a817.js';
 
 // https://github.com/tc39/proposal-iterator-helpers
 
@@ -35,7 +36,7 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
   }
 });
 
-/* ES Module Shims 1.5.17 */
+/* ES Module Shims 1.5.18 */
 
 (function () {
   const hasWindow = typeof window !== 'undefined';
@@ -132,23 +133,15 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
       return false;
     }
   }
-  /*
-   * Import maps implementation
-   *
-   * To make lookups fast we pre-resolve the entire import map
-   * and then match based on backtracked hash lookups
-   *
-   */
-
 
   function resolveUrl(relUrl, parentUrl) {
     return resolveIfNotPlainOrUrl(relUrl, parentUrl) || (isURL(relUrl) ? relUrl : resolveIfNotPlainOrUrl('./' + relUrl, parentUrl));
   }
 
   function resolveIfNotPlainOrUrl(relUrl, parentUrl) {
-    // strip off any trailing query params or hashes
-    const queryHashIndex = parentUrl.indexOf('?', parentUrl.indexOf('#') === -1 ? parentUrl.indexOf('#') : parentUrl.length);
-    if (queryHashIndex !== -1) parentUrl = parentUrl.slice(0, queryHashIndex);
+    const hIdx = parentUrl.indexOf('#'),
+          qIdx = parentUrl.indexOf('?');
+    if (hIdx + qIdx > -2) parentUrl = parentUrl.slice(0, hIdx === -1 ? qIdx : qIdx === -1 || qIdx > hIdx ? hIdx : qIdx);
     if (relUrl.indexOf('\\') !== -1) relUrl = relUrl.replace(backslashRegEx, '/'); // protocol-relative
 
     if (relUrl[0] === '/' && relUrl[1] === '/') {
@@ -2891,14 +2884,14 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
           dynamicImportEndStack.push(statementEnd - 1);
           lastIndex = start;
         }
-      } // support progressive cycle binding updates
+      } // support progressive cycle binding updates (try statement avoids tdz errors)
 
 
-      if (load.s) resolvedSource += `\n;import{u$_}from'${load.s}';u$_({ ${exports.filter(e => e.ln).map(({
+      if (load.s) resolvedSource += `\n;import{u$_}from'${load.s}';try{u$_({${exports.filter(e => e.ln).map(({
         s,
         e,
         ln
-      }) => `${source.slice(s, e)}: ${ln}`).join(',')} });\n`;
+      }) => `${source.slice(s, e)}: ${ln}`).join(',')}})}catch(_){};\n`;
       pushStringTo(source.length);
     }
 

@@ -1,11 +1,12 @@
-import './common/es.error.cause-284a267a.js';
-import { e as anObject, a as aCallable, g as functionCall, _ as _export } from './common/web.dom-collections.iterator-13a35a91.js';
-import { v as toHex, b as toHSL, a as fromHSL } from './common/hsl-1fac1a4b.js';
-import './common/iterate-4062619f.js';
-import './common/esnext.iterator.filter-db88bd42.js';
-import './common/esnext.iterator.map-dd12ba51.js';
+import './common/es.error.cause-c4c3fd35.js';
+import { B as anObject, a as aCallable, l as functionCall, _ as _export } from './common/web.dom-collections.iterator-7ea8a356.js';
+import { v as toHex, b as toHSL, a as fromHSL } from './common/hsl-82b53c22.js';
+import './common/iterate-b9a2a58a.js';
+import './common/esnext.iterator.filter-5ef67ce8.js';
+import './common/esnext.iterator.map-e3ab2956.js';
 import { m as map, c as clamp } from './common/utils-22518481.js';
-import './common/es.string.replace-67d563a6.js';
+import './common/es.array.includes-ee97dfa9.js';
+import './common/es.string.replace-a4fa4326.js';
 
 function _classApplyDescriptorGet(receiver, descriptor) {
   if (descriptor.get) {
@@ -176,8 +177,8 @@ class CanvasRenderer {
     this.pixelRatio = pixelRatio;
     this.theme = theme;
     this.canvas = document.createElement("canvas");
-    this.canvas.width = width;
-    this.canvas.height = height;
+    this.canvas.width = width * this.pixelRatio;
+    this.canvas.height = height * this.pixelRatio;
     this.ctx = this.canvas.getContext("2d");
     this.dirty = true;
   }
@@ -1016,6 +1017,8 @@ const isArrayLike = value => Array.isArray(value) || ArrayBuffer.isView(value);
 
 var _pixelRatio = /*#__PURE__*/new WeakMap();
 
+var _scale = /*#__PURE__*/new WeakMap();
+
 class GUI {
   get size() {
     return this.ctx.gl ? [this.ctx.gl.drawingBufferWidth, this.ctx.gl.drawingBufferHeight] : [this.ctx.canvas.width, this.ctx.canvas.height];
@@ -1049,14 +1052,22 @@ class GUI {
       value: void 0
     });
 
+    _classPrivateFieldInitSpec$1(this, _scale, {
+      writable: true,
+      value: void 0
+    });
+
     this.ctx = ctx;
 
-    _classPrivateFieldSet(this, _pixelRatio, this.ctx.gl ? this.ctx.pixelRatio : pixelRatio);
+    _classPrivateFieldSet(this, _pixelRatio, pixelRatio);
 
     this.theme = { ...DEFAULT_THEME,
       ...theme
     };
     this.scale = scale;
+
+    _classPrivateFieldSet(this, _scale, scale);
+
     this.responsive = responsive;
     this.enabled = true;
     const [W, H] = this.size;
@@ -1969,7 +1980,7 @@ class GUI {
   }
 
   getScaledActiveArea(activeArea) {
-    return activeArea.map(a => a.map(b => b * this.scale));
+    return activeArea.map(a => a.map(b => b * _classPrivateFieldGet(this, _scale)));
   }
 
   update() {
@@ -1995,6 +2006,10 @@ class GUI {
     }
   } // Draw
 
+
+  getScale() {
+    return this.canvas.height / this.canvas.clientHeight;
+  }
   /**
    * Renders the GUI. Should be called at the end of the frame.
    */
@@ -2012,18 +2027,24 @@ class GUI {
       resized = true;
     }
 
+    const texture = this.renderer.getTexture();
+    const canvasScale = this.getScale();
+    const rendererWidth = texture.width / this.renderer.pixelRatio;
+    const rendererHeight = texture.height / this.renderer.pixelRatio;
+
     if (this.isAnyItemDirty(this.items) || resized || this.renderer.dirty) {
       this.renderer.draw(this.items);
 
       if (this.responsive) {
-        this.scale = Math.min(Math.min(W / this.renderer.canvas.width, H / this.renderer.canvas.height), 1);
+        _classPrivateFieldSet(this, _scale, Math.min(Math.min(this.canvas.clientWidth / rendererWidth, this.canvas.clientHeight / rendererHeight), this.scale));
+      } else {
+        _classPrivateFieldSet(this, _scale, this.scale);
       }
     }
 
-    const texture = this.renderer.getTexture();
     this.drawTexture2d({
       texture,
-      rect: [0, 0, texture.width * this.scale || 2, texture.height * this.scale || 2]
+      rect: [0, 0, canvasScale * _classPrivateFieldGet(this, _scale) * rendererWidth || 2, canvasScale * _classPrivateFieldGet(this, _scale) * rendererHeight || 2]
     });
     this.drawTextures();
   }
@@ -2048,8 +2069,7 @@ class GUI {
         }
       }
 
-      const scale = this.scale * _classPrivateFieldGet(this, _pixelRatio);
-
+      const scale = _classPrivateFieldGet(this, _scale) * this.getScale();
       let bounds = [];
 
       const drawTexture = ({

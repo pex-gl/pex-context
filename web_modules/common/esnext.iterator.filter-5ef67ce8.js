@@ -1,25 +1,5 @@
-import { f as fails, _ as _export, b as addToUnscopables, d as arrayIncludes, a as aCallable, e as anObject, g as functionCall } from './web.dom-collections.iterator-13a35a91.js';
-import { g as getIteratorDirect, a as asyncIteratorCreateProxy, b as asyncIteratorClose, i as iteratorCreateProxy, c as callWithSafeIterationClosing } from './esnext.iterator.map-dd12ba51.js';
-
-var $includes = arrayIncludes.includes;
-
-
-
-// FF99+ bug
-var BROKEN_ON_SPARSE = fails(function () {
-  return !Array(1).includes();
-});
-
-// `Array.prototype.includes` method
-// https://tc39.es/ecma262/#sec-array.prototype.includes
-_export({ target: 'Array', proto: true, forced: BROKEN_ON_SPARSE }, {
-  includes: function includes(el /* , fromIndex = 0 */) {
-    return $includes(this, el, arguments.length > 1 ? arguments[1] : undefined);
-  }
-});
-
-// https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
-addToUnscopables('includes');
+import { _ as _export, a as aCallable, B as anObject, l as functionCall } from './web.dom-collections.iterator-7ea8a356.js';
+import { g as getIteratorDirect, m as asyncIteratorCreateProxy, k as asyncIteratorClose, n as iteratorCreateProxy, c as callWithSafeIterationClosing } from './esnext.iterator.map-e3ab2956.js';
 
 // https://github.com/tc39/proposal-iterator-helpers
 
