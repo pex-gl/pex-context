@@ -1069,9 +1069,7 @@ function createContext(options = {}) {
         enableVertexData(ctx, vertexLayout, cmd, true);
       }
 
-      const instanced = Object.values(
-        cmd.attributes || cmd.vertexArray.attributes
-      ).some((attrib) => attrib.divisor);
+      const instanced = Number.isFinite(cmd.instances) && cmd.instances >= 1;
 
       const primitive = cmd.pipeline.primitive;
 
