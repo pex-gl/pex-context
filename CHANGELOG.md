@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [3.0.0-alpha.2](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.1...v3.0.0-alpha.2) (2022-09-20)
+
+
+### Features
+
+* use cmd.instances to check for instancing ([f6f2728](https://github.com/pex-gl/pex-context/commit/f6f27284e78d3383b628eca160d806ad2981ae78)), closes [#126](https://github.com/pex-gl/pex-context/issues/126)
+
+
+
 # [3.0.0-alpha.1](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.0...v3.0.0-alpha.1) (2022-09-09)
 
 
