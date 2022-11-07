@@ -32,20 +32,35 @@ function updateRenderbuffer(ctx, renderbuffer, opts) {
 
   const gl = ctx.gl;
 
-  console.assert(
-    renderbuffer.pixelFormat === ctx.PixelFormat.DEPTH_COMPONENT16,
-    "Only PixelFormat.DEPTH_COMPONENT16 is supported for renderbuffers"
-  );
+  // TODO: make this webgl1 conditional
+  // console.assert(
+  //   renderbuffer.pixelFormat === ctx.PixelFormat.DEPTH_COMPONENT16,
+  //   "Only PixelFormat.DEPTH_COMPONENT16 is supported for renderbuffers"
+  // );
   renderbuffer.format = gl[renderbuffer.pixelFormat];
 
   gl.bindRenderbuffer(renderbuffer.target, renderbuffer.handle);
-  gl.renderbufferStorage(
-    renderbuffer.target,
-    renderbuffer.format,
-    renderbuffer.width,
-    renderbuffer.height
-  );
+  if (opts.msaa) {
+    gl.renderbufferStorageMultisample(
+      renderbuffer.target,
+      Math.min(opts.msaa, ctx.capabilities.maxSamples),
+      renderbuffer.format,
+      renderbuffer.width,
+      renderbuffer.height
+    );
+  } else {
+    gl.renderbufferStorage(
+      renderbuffer.target,
+      renderbuffer.format,
+      renderbuffer.width,
+      renderbuffer.height
+    );
+  }
   gl.bindRenderbuffer(renderbuffer.target, null);
+
+  renderbuffer.info = `${Object.keys(ctx.PixelFormat).find(
+    (key) => ctx.PixelFormat[key] === renderbuffer.pixelFormat
+  )}`;
 }
 
 export default createRenderbuffer;

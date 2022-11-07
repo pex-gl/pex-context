@@ -71,6 +71,7 @@ function createContext(options = {}) {
     capabilities: {
       isWebGL2: isWebGL2(gl),
       maxColorAttachments: 1,
+      maxSamples: gl.getParameter(gl.SAMPLES),
       maxTextureImageUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
       maxVertexTextureImageUnits: gl.getParameter(
         gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS

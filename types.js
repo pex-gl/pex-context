@@ -374,6 +374,13 @@ export const addEnums = (ctx) => {
   };
 
   /** @enum */
+  ctx.FramebufferTarget = {
+    Framebuffer: gl.FRAMEBUFFER,
+    ReadFramebuffer: gl.READ_FRAMEBUFFER,
+    DrawFramebuffer: gl.DRAW_FRAMEBUFFER,
+  };
+
+  /** @enum */
   ctx.Encoding = {
     Linear: 1,
     Gamma: 2,

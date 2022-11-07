@@ -58,6 +58,7 @@ const allowedProps = [
   "aniso",
   "premultiplyAlpha",
   "compressed",
+  "storage",
 ];
 
 function createTexture(ctx, opts) {
@@ -92,12 +93,13 @@ function updateTexture2D(ctx, texture, opts) {
 
   const gl = ctx.gl;
   let compressed = opts.compressed || texture.compressed;
+  let storage = opts.storage || texture.storage;
 
   let data = null;
   let width = opts.width;
   let height = opts.height;
   let flipY = orValue(opts.flipY, orValue(texture.flipY, false));
-  let target = opts.target || texture.target;
+  let target = opts.target || texture.target; // TODO: support gl.TEXTURE_3D/TEXTURE_2D_ARRAY
   let pixelFormat =
     opts.pixelFormat || texture.pixelFormat || ctx.PixelFormat.RGBA8;
   let encoding = opts.encoding || texture.encoding || ctx.Encoding.Linear;
@@ -232,38 +234,42 @@ function updateTexture2D(ctx, texture, opts) {
       data =
         Array.isArray(data) && data[0].data ? data : [{ data, width, height }];
 
-      for (let level = 0; level < data.length; level++) {
-        let { data: levelData, width, height } = data[level];
+      if (storage) {
+        gl.texStorage2D(target, storage, internalFormat, width, height);
+      } else {
+        for (let level = 0; level < data.length; level++) {
+          let { data: levelData, width, height } = data[level];
 
-        // Convert array of numbers to typed array
-        if (Array.isArray(levelData)) {
-          const TypedArray = ctx.DataTypeConstructor[type];
-          console.assert(TypedArray, `Unknown texture data type: ${type}`);
-          levelData = new TypedArray(levelData);
-        }
+          // Convert array of numbers to typed array
+          if (Array.isArray(levelData)) {
+            const TypedArray = ctx.DataTypeConstructor[type];
+            console.assert(TypedArray, `Unknown texture data type: ${type}`);
+            levelData = new TypedArray(levelData);
+          }
 
-        if (compressed) {
-          gl.compressedTexImage2D(
-            target,
-            level,
-            internalFormat,
-            width,
-            height,
-            0,
-            levelData
-          );
-        } else if (width && height) {
-          gl.texImage2D(
-            target,
-            level,
-            internalFormat,
-            width,
-            height,
-            0,
-            format,
-            type,
-            levelData
-          );
+          if (compressed) {
+            gl.compressedTexImage2D(
+              target,
+              level,
+              internalFormat,
+              width,
+              height,
+              0,
+              levelData
+            );
+          } else if (width && height) {
+            gl.texImage2D(
+              target,
+              level,
+              internalFormat,
+              width,
+              height,
+              0,
+              format,
+              type,
+              levelData
+            );
+          }
         }
       }
 
@@ -335,6 +341,7 @@ function updateTexture2D(ctx, texture, opts) {
     gl.generateMipmap(texture.target);
   }
 
+  texture.storage = storage;
   texture.compressed = compressed;
   texture.target = target;
   texture.pixelFormat = pixelFormat;

@@ -3,7 +3,7 @@ import { NAMESPACE } from "./utils.js";
 /**
  * @typedef {Object} Attachment
  * @property {import("./types.js").PexResource} texture
- * @property {WebGLRenderingContext.FRAMEBUFFER} target
+ * @property {WebGLRenderingContext.FRAMEBUFFER|WebGL2RenderingContext.READ_FRAMEBUFFER|WebGL2RenderingContext.DRAW_FRAMEBUFFER} target
  */
 
 function createFramebuffer(ctx, opts) {
@@ -42,6 +42,8 @@ function updateFramebuffer(ctx, framebuffer, opts) {
 
   // TODO: if color.length > 1 check for WebGL2 or gl.getExtension('WEBGL_draw_buffers')
   framebuffer.color = opts.color.map((attachment) => {
+    if (attachment.target === gl.RENDERBUFFER) return attachment;
+
     const colorAttachment = attachment.texture
       ? attachment
       : { texture: attachment };
@@ -58,8 +60,11 @@ function updateFramebuffer(ctx, framebuffer, opts) {
       : { texture: opts.depth }
     : null;
 
-  framebuffer.width = framebuffer.color[0].texture.width;
-  framebuffer.height = framebuffer.color[0].texture.height;
+  // Set dimensions from render buffer or texture
+  framebuffer.width =
+    framebuffer.color[0].width || framebuffer.color[0].texture.width;
+  framebuffer.height =
+    framebuffer.color[0].height || framebuffer.color[0].texture.height;
 
   // TODO: ctx push framebuffer
   gl.bindFramebuffer(framebuffer.target, framebuffer.handle);
@@ -67,28 +72,48 @@ function updateFramebuffer(ctx, framebuffer, opts) {
   framebuffer.drawBuffers.length = 0;
 
   framebuffer.color.forEach((colorAttachment, i) => {
-    framebuffer.drawBuffers.push(gl.COLOR_ATTACHMENT0 + i);
-    gl.framebufferTexture2D(
-      framebuffer.target,
-      gl.COLOR_ATTACHMENT0 + i,
-      colorAttachment.target,
-      colorAttachment.texture.handle,
-      colorAttachment.level
-    );
+    if (colorAttachment.target === gl.RENDERBUFFER) {
+      gl.framebufferRenderbuffer(
+        gl.FRAMEBUFFER,
+        gl.COLOR_ATTACHMENT0 + i,
+        gl.RENDERBUFFER,
+        colorAttachment.handle
+      );
+    } else {
+      framebuffer.drawBuffers.push(gl.COLOR_ATTACHMENT0 + i);
+      gl.framebufferTexture2D(
+        framebuffer.target,
+        gl.COLOR_ATTACHMENT0 + i,
+        colorAttachment.target,
+        colorAttachment.texture.handle,
+        colorAttachment.level
+      );
+    }
   });
 
+  // Attachment is a texture or a render buffer
   for (
     let i = framebuffer.color.length;
     i < ctx.capabilities.maxColorAttachments;
     i++
   ) {
-    gl.framebufferTexture2D(
-      framebuffer.target,
-      gl.COLOR_ATTACHMENT0 + i,
-      gl.TEXTURE_2D,
-      null,
-      0
-    );
+    if (framebuffer.target === gl.RENDERBUFFER) {
+      // gl.framebufferTexture2D(
+      //   gl.FRAMEBUFFER,
+      //   gl.COLOR_ATTACHMENT0 + i,
+      //   gl.TEXTURE_2D,
+      //   framebuffer.color[i].texture, // TODO: Where would that be from
+      //   0
+      // );
+    } else {
+      gl.framebufferTexture2D(
+        framebuffer.target,
+        gl.COLOR_ATTACHMENT0 + i,
+        gl.TEXTURE_2D,
+        null,
+        0
+      );
+    }
   }
 
   if (framebuffer.depth) {
@@ -116,6 +141,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
     }
   } else {
     if (ctx.debugMode) console.debug(NAMESPACE, "fbo deattaching depth");
+    if (ctx.debugMode) console.debug(NAMESPACE, "FBO", framebuffer, opts);
     gl.framebufferRenderbuffer(
       gl.FRAMEBUFFER,
       gl.DEPTH_ATTACHMENT,

@@ -2,7 +2,7 @@ import { checkProps } from "./utils.js";
 
 /**
  * @typedef {import("./types.js").PexResource} PassOptions
- * @property {Texture2D[]|import("./framebuffer.js").Attachment[]} [color] render target
+ * @property {Texture2D[]|import("./framebuffer.js").Attachment[]|WebGLRenderingContext.RENDERBUFFER[]} [color] render target
  * @property {Texture2D} [depth] render target
  * @property {import("./types.js").Color} [clearColor]
  * @property {number} [clearDepth]
@@ -36,7 +36,7 @@ function createPass(ctx, opts) {
     },
   };
 
-  // Inherits framebuffer from parent command or screen, if no target specified
+  // Inherits framebuffer from parent command or screen, if no attachment specified
   if (opts.color || opts.depth) pass.framebuffer = ctx.framebuffer(opts);
 
   return pass;
