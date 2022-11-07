@@ -12,6 +12,7 @@
     "fullscreen",
     "image",
     "instancing",
+    "msaa",
     "picking",
     "primitives",
     "project",
