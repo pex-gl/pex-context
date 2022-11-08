@@ -5,6 +5,10 @@ import { cube } from "primitive-geometry";
 import { perspective as createCamera, orbiter as createOrbiter } from "pex-cam";
 
 import basicTexturedVert from "./shaders/textured.vert.js";
+import screenImageVert from "./shaders/screen-image.vert.js";
+import screenImageFrag from "./shaders/screen-image.frag.js";
+
+const devicePixelRatio = 1; //temp
 
 const ctx = createContext({
   pixelRatio: devicePixelRatio,
@@ -15,7 +19,7 @@ const ctx = createContext({
 const camera = createCamera({
   fov: Math.PI / 4,
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
-  position: [1, 0.6, 1],
+  position: [2, 1.2, 2],
 });
 createOrbiter({ camera, element: ctx.gl.canvas });
 
@@ -31,8 +35,9 @@ let tex = ctx.texture2D({
   height,
   pixelFormat: ctx.PixelFormat.RGBA8,
   encoding: ctx.Encoding.SRGB,
-  storage: 1,
+  // storage: 1,
   min: ctx.Filter.Linear,
+  mag: ctx.Filter.Linear,
 });
 
 // Color render buffer
@@ -43,18 +48,52 @@ const msRB = ctx.renderbuffer({
   msaa: 4,
 });
 
+const msDB = ctx.renderbuffer({
+  width: width * devicePixelRatio,
+  height: height * devicePixelRatio,
+  pixelFormat: ctx.PixelFormat.DEPTH_COMPONENT24,
+  msaa: 4,
+});
+
 // Use a render buffer as pass color attachment
 // Pass
-const pass = ctx.pass({
+const msaaPass = ctx.pass({
   color: [msRB],
-  clearColor: [0.52, 0.2, 0.2, 1],
+  depth: msDB,
+  clearColor: [0.2, 0.2, 0.2, 1],
   clearDepth: 1,
 });
+
+const captureMsaaCmd = {
+  pass: msaaPass,
+};
 
 // Resolve frame buffer
 const texFB = ctx.framebuffer({
   color: [tex],
 });
+
+const resolvePass = ctx.pass({
+  // framebuffer: texFB,
+  // blit: msaaPass.framebuffer,
+  color: [tex],
+  clearColor: [1, 0.2, 0.2, 1],
+  clearDepth: 1,
+});
+
+const msaaAndAutoResolve = ctx.pass({
+  // framebuffer: texFB,
+  // blit: msaaPass.framebuffer,
+  color: [tex],
+  depth: depthMap,
+  clearColor: [1, 0.2, 0.2, 1],
+  clearDepth: 1,
+  msaa: 4,
+});
+
+const resolveCmd = {
+  pass: resolvePass,
+};
 
 const geom = cube();
 
@@ -71,7 +110,6 @@ void main () {
 `;
 const drawCmd = {
   name: "DrawCmd",
-  pass,
   pipeline: ctx.pipeline({
     vert: basicTexturedVert,
     frag,
@@ -92,38 +130,80 @@ const drawCmd = {
       flipY: true,
       pixelFormat: ctx.PixelFormat.RGBA8,
       encoding: ctx.Encoding.Linear,
+      min: ctx.Filter.LinearMipmapLinear,
+      mag: ctx.Filter.Linear,
+      mipmap: true,
+      aniso: 16,
     }),
   },
 };
 
+const drawTextureCmd = {
+  name: "drawTexture",
+  pipeline: ctx.pipeline({
+    vert: screenImageVert,
+    frag: screenImageFrag,
+  }),
+  attributes: {
+    aPosition: ctx.vertexBuffer([
+      [-1, -1],
+      [1, -1],
+      [1, 1],
+      [-1, 1],
+    ]),
+    aTexCoord: ctx.vertexBuffer([
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, 1],
+    ]),
+  },
+  indices: ctx.indexBuffer([
+    [0, 1, 2],
+    [0, 2, 3],
+  ]),
+  uniforms: {
+    uTexture: null,
+  },
+};
+
 ctx.frame(() => {
-  ctx.submit(drawCmd, {
+  ctx.submit(captureMsaaCmd, () => {
+    ctx.submit(drawCmd, {
+      uniforms: {
+        uProjectionMatrix: camera.projectionMatrix,
+        uViewMatrix: camera.viewMatrix,
+      },
+    });
+  });
+
+  // ctx.update(texFB, { color: [tex] });
+
+  ctx.submit(resolveCmd, () => {
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, msaaPass.framebuffer.handle);
+    // gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, texFB.handle);
+    gl.blitFramebuffer(
+      0,
+      0,
+      width,
+      height,
+      0,
+      0,
+      width,
+      height,
+      gl.COLOR_BUFFER_BIT,
+      gl.NEAREST
+    );
+  });
+
+  ctx.submit(drawTextureCmd, {
     uniforms: {
-      uProjectionMatrix: camera.projectionMatrix,
-      uViewMatrix: camera.viewMatrix,
+      uTexture: tex,
     },
   });
 
-  ctx.update(texFB, { color: [tex] });
-
-  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, pass.framebuffer.handle);
-  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, texFB.handle);
-
-  gl.blitFramebuffer(
-    0,
-    0,
-    width,
-    height,
-    0,
-    0,
-    width,
-    height,
-    gl.COLOR_BUFFER_BIT,
-    gl.LINEAR
-  );
-
   // TODO: Render to screen
-  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  // gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
   ctx.debug(false);
 
@@ -196,5 +276,5 @@ const onResize = () => {
     height: height * devicePixelRatio,
   });
 };
-window.addEventListener("resize", onResize);
-onResize();
+// window.addEventListener("resize", onResize);
+// onResize();
