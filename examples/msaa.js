@@ -41,58 +41,43 @@ let tex = ctx.texture2D({
 });
 
 // Color render buffer
-const msRB = ctx.renderbuffer({
-  width: width * devicePixelRatio,
-  height: height * devicePixelRatio,
+const msaaColorBuffer = ctx.renderbuffer({
+  width,
+  height,
   pixelFormat: ctx.PixelFormat.RGBA8,
   msaa: 4,
 });
 
-const msDB = ctx.renderbuffer({
-  width: width * devicePixelRatio,
-  height: height * devicePixelRatio,
+const msaaDepthBuffer = ctx.renderbuffer({
+  width,
+  height,
   pixelFormat: ctx.PixelFormat.DEPTH_COMPONENT24,
   msaa: 4,
 });
 
 // Use a render buffer as pass color attachment
-// Pass
-const msaaPass = ctx.pass({
-  color: [msRB],
-  depth: msDB,
-  clearColor: [0.2, 0.2, 0.2, 1],
-  clearDepth: 1,
-});
-
 const captureMsaaCmd = {
-  pass: msaaPass,
+  name: "CaptureMSAA",
+  pass: ctx.pass({
+    color: [msaaColorBuffer],
+    depth: msaaDepthBuffer,
+    clearColor: [0.2, 0.2, 0.2, 1],
+    clearDepth: 1,
+  }),
 };
 
 // Resolve frame buffer
-const texFB = ctx.framebuffer({
-  color: [tex],
-});
-
-const resolvePass = ctx.pass({
-  // framebuffer: texFB,
-  // blit: msaaPass.framebuffer,
-  color: [tex],
-  clearColor: [1, 0.2, 0.2, 1],
-  clearDepth: 1,
-});
-
-const msaaAndAutoResolve = ctx.pass({
-  // framebuffer: texFB,
-  // blit: msaaPass.framebuffer,
-  color: [tex],
-  depth: depthMap,
-  clearColor: [1, 0.2, 0.2, 1],
-  clearDepth: 1,
-  msaa: 4,
-});
-
 const resolveCmd = {
-  pass: resolvePass,
+  name: "ResolveMSAA",
+  pass: ctx.pass({
+    // TODO: auto resolve
+    // framebuffer: texFB,
+    // blit: msaaPass.framebuffer,
+    //   msaa: 4,
+    color: [tex],
+    clearColor: [0, 0, 0, 1],
+    clearDepth: 1,
+  }),
 };
 
 const geom = cube();
@@ -105,7 +90,8 @@ precision highp float;
 varying vec2 vTexCoord;
 uniform sampler2D uTexture;
 void main () {
-  gl_FragColor = texture2D(uTexture, vTexCoord);
+  gl_FragColor = texture2D(uTexture, vTexCoord / 6.0);
+  gl_FragColor = gl_FragColor + vec4(vTexCoord, 0.0, 1.0);
 }
 `;
 const drawCmd = {
@@ -177,10 +163,11 @@ ctx.frame(() => {
     });
   });
 
-  // ctx.update(texFB, { color: [tex] });
-
   ctx.submit(resolveCmd, () => {
-    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, msaaPass.framebuffer.handle);
+    gl.bindFramebuffer(
+      gl.READ_FRAMEBUFFER,
+      captureMsaaCmd.pass.framebuffer.handle
+    );
     // gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, texFB.handle);
     gl.blitFramebuffer(
       0,
@@ -192,18 +179,13 @@ ctx.frame(() => {
       width,
       height,
       gl.COLOR_BUFFER_BIT,
-      gl.NEAREST
+      gl.LINEAR
     );
   });
 
   ctx.submit(drawTextureCmd, {
-    uniforms: {
-      uTexture: tex,
-    },
+    uniforms: { uTexture: tex },
   });
-
-  // TODO: Render to screen
-  // gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
   ctx.debug(false);
 
@@ -260,21 +242,26 @@ const onResize = () => {
   // ctxAliased.set({ width, height });
   camera.set({ aspect: width / height });
 
+  ctx.update(tex, { width, height });
   // No can do, storage texture is immutable
-  // ctx.update(tex, { width, height });
-  tex = ctx.texture2D({
+  // tex = ctx.texture2D({
+  //   width,
+  //   height,
+  //   pixelFormat: ctx.PixelFormat.RGBA8,
+  //   encoding: ctx.Encoding.SRGB,
+  //   // storage: 1,
+  //   min: ctx.Filter.Linear,
+  //   mag: ctx.Filter.Linear,
+  // });
+  // ctx.update(texFB, { color: [tex] });
+  ctx.update(msaaColorBuffer, {
     width,
     height,
-    pixelFormat: ctx.PixelFormat.RGBA8,
-    encoding: ctx.Encoding.SRGB,
-    storage: 1,
-    min: ctx.Filter.Linear,
   });
-  ctx.update(texFB, { color: [tex] });
-  ctx.update(msRB, {
-    width: width * devicePixelRatio,
-    height: height * devicePixelRatio,
+  ctx.update(msaaDepthBuffer, {
+    width,
+    height,
   });
 };
-// window.addEventListener("resize", onResize);
+window.addEventListener("resize", onResize);
 // onResize();
