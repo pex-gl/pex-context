@@ -4,28 +4,25 @@ import createContext from "../index.js";
 import { perspective as createCamera, orbiter as createOrbiter } from "pex-cam";
 
 import { cube } from "primitive-geometry";
+import { loadImage } from "pex-io";
 
-import basicVert from "./shaders/basic.vert.js";
-import basicFrag from "./shaders/basic.frag.js";
 import screenImageVert from "./shaders/screen-image.vert.js";
 import screenImageFrag from "./shaders/screen-image.frag.js";
-import { es300Fragment, es300Vertex } from "./utils.js";
+import basicTexturedVert from "./shaders/textured.vert.js";
 
 const ctx = createContext({
   debug: true,
-  pixelRatio: 1,
+  pixelRatio: devicePixelRatio,
   antialias: false,
 });
 const gl = ctx.gl;
 
 const geom = cube();
 const camera = createCamera({
-  position: [2, 2, 2],
+  position: [1, 0.6, 1],
   fov: Math.PI / 3,
 });
-const orbiter = createOrbiter({
-  camera: camera,
-});
+createOrbiter({ camera });
 
 const clearCmd = {
   pass: ctx.pass({
@@ -120,6 +117,16 @@ function initTextures() {
   // );
   multisampledFbo = fb;
 }
+const frag = /* glsl */ `
+precision highp float;
+
+varying vec2 vTexCoord;
+uniform sampler2D uTexture;
+void main () {
+  gl_FragColor = texture2D(uTexture, vTexCoord);
+}
+`;
+const img = await loadImage(new URL("./assets/checker.jpg", import.meta.url));
 
 const drawTextureCmd = {
   name: "drawTexture",
@@ -153,17 +160,25 @@ const drawTextureCmd = {
 const drawCmd = {
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: basicVert,
-    frag: basicFrag,
+    vert: basicTexturedVert,
+    frag,
   }),
   attributes: {
     aPosition: ctx.vertexBuffer(geom.positions),
-    aNormal: ctx.vertexBuffer(geom.normals),
+    aTexCoord: ctx.vertexBuffer(geom.uvs),
   },
   indices: ctx.indexBuffer(geom.cells),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
+    uTexture: ctx.texture2D({
+      data: img.data || img,
+      width: img.width,
+      height: img.height,
+      flipY: true,
+      pixelFormat: ctx.PixelFormat.RGBA8,
+      encoding: ctx.Encoding.Linear,
+    }),
   },
 };
 
