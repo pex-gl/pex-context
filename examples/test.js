@@ -9,6 +9,7 @@ import screenImageFrag from "./shaders/screen-image.frag.js";
 import { es300Fragment } from "./utils.js";
 
 const ctx = createContext();
+const ctxWebGL1 = createContext({ type: "webgl", width: 2, height: 2 });
 
 // Texture
 const tex = ctx.texture2D({
@@ -218,3 +219,15 @@ ctx.submit({
     ],
   },
 });
+
+// Renderbuffer
+ctxWebGL1.renderbuffer({ pixelFormat: ctxWebGL1.PixelFormat.RGBA16F });
+ctxWebGL1.renderbuffer({ pixelFormat: ctxWebGL1.PixelFormat.RGBA32F });
+ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.RGBA16F });
+ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.RGBA32F });
+ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.R16F });
+ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.RG16F });
+ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.R32F });
+ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.RG32F });
+ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.RGBA32F });
+ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.R11F_G11F_B10F });

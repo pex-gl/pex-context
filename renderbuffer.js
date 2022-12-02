@@ -27,10 +27,41 @@ function createRenderbuffer(ctx, opts) {
   return renderbuffer;
 }
 
+const FLOAT_FORMATS_MAP = {
+  EXT_color_buffer_half_float: ["RGB16F", "RGBA16F"],
+  WEBGL_color_buffer_float: ["RGB32F", "RGBA32F"],
+  EXT_color_buffer_float: [
+    "R16F",
+    "RG16F",
+    "RGBA16F",
+    "R32F",
+    "RG32F",
+    "RGBA32F",
+    "R11F_G11F_B10F",
+  ],
+};
+const FLOAT_FORMATS_EXTS = Object.keys(FLOAT_FORMATS_MAP);
+const FLOAT_FORMATS = Object.values(FLOAT_FORMATS_MAP).flat();
+
 function updateRenderbuffer(ctx, renderbuffer, opts) {
   Object.assign(renderbuffer, opts);
 
   const gl = ctx.gl;
+
+  if (FLOAT_FORMATS.includes(renderbuffer.pixelFormat)) {
+    const suportedFormats = FLOAT_FORMATS_EXTS.map(
+      (extension) =>
+        !!gl.getExtension(extension) && FLOAT_FORMATS_MAP[extension]
+    )
+      .flat()
+      // RGB32F and RGB16F are texture only
+      .filter((format) => format && !["RGB16F", "RGB32F"].includes(format));
+
+    console.assert(
+      suportedFormats.includes(renderbuffer.pixelFormat),
+      `Unsupported float renderable format ${renderbuffer.pixelFormat}`
+    );
+  }
 
   renderbuffer.format = gl[renderbuffer.pixelFormat];
 

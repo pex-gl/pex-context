@@ -93,6 +93,7 @@ function createContext(options = {}) {
         gl.getExtension("EXT_disjoint_timer_query_webgl2") ||
         gl.getExtension("EXT_disjoint_timer_query")
       ),
+      // Note: supported color buffer types vary
       colorBufferFloat: isWebGL2
         ? !!gl.getExtension("EXT_color_buffer_float")
         : !!gl.getExtension("WEBGL_color_buffer_float"),

@@ -71,4 +71,20 @@ export default function polyfill(ctx) {
     gl.getExtension("OES_element_index_uint");
     gl.getExtension("OES_standard_derivatives");
   }
+
+  if (!gl.RGB16F) {
+    const ext = gl.getExtension("EXT_color_buffer_half_float");
+    if (ext) {
+      gl.RGB16F = ext.RGB16F_EXT;
+      gl.RGBA16F ||= ext.RGBA16F_EXT;
+    }
+  }
+
+  if (!gl.RGB32F) {
+    const ext = gl.getExtension("WEBGL_color_buffer_float");
+    if (ext) {
+      gl.RGB32F = ext.RGB32F_EXT;
+      gl.RGBA32F ||= ext.RGBA32F_EXT;
+    }
+  }
 }
