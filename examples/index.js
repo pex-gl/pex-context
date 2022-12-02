@@ -7,6 +7,7 @@
     "batching",
     // "buffers",
     "camera",
+    "capabilities",
     "color-mask",
     "cubemap",
     "fullscreen",
