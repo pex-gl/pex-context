@@ -12,7 +12,7 @@ import createQuery from "./query.js";
 
 import {
   checkProps,
-  isWebGL2,
+  isWebGL2 as checkWebGL2Context,
   compareFBOAttachments,
   enableVertexData,
   NAMESPACE,
@@ -54,7 +54,7 @@ function createContext(options = {}) {
 
   const gl = opts.gl || createGL(opts);
   console.assert(gl, "pex-context: createContext failed");
-  const isWebGL2 = isWebGL2(gl);
+  const isWebGL2 = checkWebGL2Context(gl);
 
   /**
    * @namespace ctx
