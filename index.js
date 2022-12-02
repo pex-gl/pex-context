@@ -54,6 +54,7 @@ function createContext(options = {}) {
 
   const gl = opts.gl || createGL(opts);
   console.assert(gl, "pex-context: createContext failed");
+  const isWebGL2 = isWebGL2(gl);
 
   /**
    * @namespace ctx
@@ -69,7 +70,7 @@ function createContext(options = {}) {
      * @memberof ctx
      */
     capabilities: {
-      isWebGL2: isWebGL2(gl),
+      isWebGL2,
       maxColorAttachments: 1,
       maxTextureImageUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
       maxVertexTextureImageUnits: gl.getParameter(
@@ -78,11 +79,11 @@ function createContext(options = {}) {
       maxVertexAttribs: gl.getParameter(gl.MAX_VERTEX_ATTRIBS),
       maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
       maxCubeMapTextureSize: gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
-      depthTexture: !!gl.getExtension("WEBGL_depth_texture"),
-      shaderTextureLod: !!gl.getExtension("EXT_shader_texture_lod"),
-      textureFloat: !!gl.getExtension("OES_texture_float"),
+      depthTexture: isWebGL2 || !!gl.getExtension("WEBGL_depth_texture"),
+      shaderTextureLod: isWebGL2 || !!gl.getExtension("EXT_shader_texture_lod"),
+      textureFloat: isWebGL2 || !!gl.getExtension("OES_texture_float"),
       textureFloatLinear: !!gl.getExtension("OES_texture_float_linear"),
-      textureHalfFloat: !!gl.getExtension("OES_texture_half_float"),
+      textureHalfFloat: isWebGL2 || !!gl.getExtension("OES_texture_half_float"),
       textureHalfFloatLinear: !!gl.getExtension(
         "OES_texture_half_float_linear"
       ),
