@@ -84,9 +84,8 @@ function createContext(options = {}) {
       textureFloat: isWebGL2 || !!gl.getExtension("OES_texture_float"),
       textureFloatLinear: !!gl.getExtension("OES_texture_float_linear"),
       textureHalfFloat: isWebGL2 || !!gl.getExtension("OES_texture_half_float"),
-      textureHalfFloatLinear: !!gl.getExtension(
-        "OES_texture_half_float_linear"
-      ),
+      textureHalfFloatLinear:
+        isWebGL2 || !!gl.getExtension("OES_texture_half_float_linear"),
       textureFilterAnisotropic: !!gl.getExtension(
         "EXT_texture_filter_anisotropic"
       ),
