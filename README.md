@@ -1166,23 +1166,25 @@ Please note those props are read only. To set new values or upload new data to G
 const maxTextureSize = ctx.capabilities.maxTextureSize;
 ```
 
-| Name                         | Type    | Default                                                                                                   |
-| ---------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| `isWebGL2`                   | number  | `isWebGL2(gl)`                                                                                            |
-| `maxColorAttachments`        | number  | `gl.getParameter(gl.MAX_COLOR_ATTACHMENTS)`                                                               |
-| `maxTextureImageUnits`       | number  | `gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS)`                                                             |
-| `maxVertexTextureImageUnits` | number  | `gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS)`                                                      |
-| `maxVertexAttribs`           | number  | `gl.getParameter(gl.MAX_VERTEX_ATTRIBS)`                                                                  |
-| `maxTextureSize`             | number  | `gl.getParameter(gl.MAX_TEXTURE_SIZE)`                                                                    |
-| `maxCubeMapTextureSize`      | number  | `gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE)`                                                           |
-| `depthTexture`               | Boolean | `!!gl.getExtension("WEBGL_depth_texture")`                                                                |
-| `shaderTextureLod`           | Boolean | `!!gl.getExtension("EXT_shader_texture_lod")`                                                             |
-| `textureFloat`               | Boolean | `!!gl.getExtension("OES_texture_float")`                                                                  |
-| `textureFloatLinear`         | Boolean | `!!gl.getExtension("OES_texture_float_linear")`                                                           |
-| `textureHalfFloat`           | Boolean | `!!gl.getExtension("OES_texture_half_float")`                                                             |
-| `textureHalfFloatLinear`     | Boolean | `!!gl.getExtension("OES_texture_half_float_linear")`                                                      |
-| `textureFilterAnisotropic`   | Boolean | `!!gl.getExtension("EXT_texture_filter_anisotropic")`                                                     |
-| `disjointTimerQuery`         | Boolean | `!!(gl.getExtension("EXT_disjoint_timer_query_webgl2") \|\| gl.getExtension("EXT_disjoint_timer_query"))` |
+| Name                         | Type    |
+| ---------------------------- | ------- |
+| `isWebGL2`                   | number  |
+| `maxColorAttachments`        | number  |
+| `maxTextureImageUnits`       | number  |
+| `maxVertexTextureImageUnits` | number  |
+| `maxVertexAttribs`           | number  |
+| `maxTextureSize`             | number  |
+| `maxCubeMapTextureSize`      | number  |
+| `depthTexture`               | Boolean |
+| `shaderTextureLod`           | Boolean |
+| `textureFloat`               | Boolean |
+| `textureFloatLinear`         | Boolean |
+| `textureHalfFloat`           | Boolean |
+| `textureHalfFloatLinear`     | Boolean |
+| `textureFilterAnisotropic`   | Boolean |
+| `disjointTimerQuery`         | Boolean |
+| `colorBufferFloat`           | Boolean |
+| `colorBufferHalfFloat`       | Boolean |
 
 ## License
 

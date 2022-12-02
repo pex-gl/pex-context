@@ -120,6 +120,8 @@ console.assert(
   `Invalid data type: ${i9.type}`
 );
 
+// TODO: stride
+
 setTimeout(() => {
   window.dispatchEvent(new CustomEvent("pex-screenshot"));
 }, 1000);
