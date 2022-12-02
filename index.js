@@ -93,6 +93,10 @@ function createContext(options = {}) {
         gl.getExtension("EXT_disjoint_timer_query_webgl2") ||
         gl.getExtension("EXT_disjoint_timer_query")
       ),
+      colorBufferFloat: isWebGL2
+        ? !!gl.getExtension("EXT_color_buffer_float")
+        : !!gl.getExtension("WEBGL_color_buffer_float"),
+      colorBufferHalfFloat: !!gl.getExtension("EXT_color_buffer_half_float"),
     },
     /**
      * Getter for `gl.drawingBufferWidth`

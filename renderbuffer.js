@@ -32,10 +32,6 @@ function updateRenderbuffer(ctx, renderbuffer, opts) {
 
   const gl = ctx.gl;
 
-  console.assert(
-    renderbuffer.pixelFormat === ctx.PixelFormat.DEPTH_COMPONENT16,
-    "Only PixelFormat.DEPTH_COMPONENT16 is supported for renderbuffers"
-  );
   renderbuffer.format = gl[renderbuffer.pixelFormat];
 
   gl.bindRenderbuffer(renderbuffer.target, renderbuffer.handle);

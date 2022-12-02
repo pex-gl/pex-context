@@ -3,7 +3,7 @@ import createContext from "../index.js";
 import createGUI from "pex-gui";
 
 const ctx = createContext({ width: 640, height: 480, pixelRatio: 2 });
-const ctxWebGL1 = createContext({ type: "webgl" });
+const ctxWebGL1 = createContext({ type: "webgl", width: 2, height: 2 });
 
 const gui = createGUI(ctx, { theme: { columnWidth: 320 } });
 gui.addColumn("WebGL1");
