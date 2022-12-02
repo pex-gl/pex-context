@@ -31,7 +31,6 @@ void main() {
   position =  rotationMat * position;
   position.xyz += aOffset;
 
-  mat4 invViewMatrix = inverse(uViewMatrix);
   vec3 normalView = mat3(transpose(inverse(modelView)) * rotationMat) * aNormal;
 
   vPositionWorld = (uModelMatrix * position).xyz;

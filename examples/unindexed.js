@@ -21,7 +21,7 @@ const halfH = Math.floor(H / 2);
 
 const gui = createGUI(ctx);
 gui.addHeader("Indexed").setPosition(10, 10);
-gui.addHeader("Unndexed").setPosition(W / 2 + 10, 10);
+gui.addHeader("Unindexed").setPosition(W / 2 + 10, 10);
 gui.addHeader("Indexed instanced").setPosition(10, H / 2 + 10);
 gui.addHeader("Unindexed instanced").setPosition(W / 2 + 10, H / 2 + 10);
 

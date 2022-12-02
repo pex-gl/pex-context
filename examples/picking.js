@@ -49,7 +49,7 @@ const colorTex = ctx.texture2D({ width: W, height: H });
 let depthTex = null;
 let depthRenderbuffer = null;
 let useDepthTexture = false;
-if (ctx.capabilities.depthTexture && useDepthTexture) {
+if (!ctx.capabilities.isWebGL2 && useDepthTexture) {
   depthTex = ctx.texture2D({
     width: W,
     height: H,
