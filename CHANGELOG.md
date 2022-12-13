@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [3.0.0-alpha.3](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.2...v3.0.0-alpha.3) (2022-12-13)
+
+
+### Bug Fixes
+
+* include textureHalfFloatLinear in webgl2 capabilities ([2d5c6b0](https://github.com/pex-gl/pex-context/commit/2d5c6b05ad1530f7cab0f981708c2e2c3b49f357)), closes [#129](https://github.com/pex-gl/pex-context/issues/129)
+* isWebGL2 named import ([347c6c1](https://github.com/pex-gl/pex-context/commit/347c6c1ffa286c921a89b3b64388d08da00bfd5b))
+
+
+### Features
+
+* add colorBufferFloat and colorBufferHalfFloat capacbilities ([b736415](https://github.com/pex-gl/pex-context/commit/b736415c71eadd07d08cd4bc688455e5721b0a9d))
+* add raw gl multisample fbo example ([8d0f221](https://github.com/pex-gl/pex-context/commit/8d0f221ff090249e268e9b9420ebdcad1d443369))
+* check renderbuffer float formats ([b41b2bd](https://github.com/pex-gl/pex-context/commit/b41b2bde10789c2ea785c233da3469a382efa13e)), closes [#122](https://github.com/pex-gl/pex-context/issues/122)
+* include webgl2 extensions enabled by default in capabilities ([a75dcb6](https://github.com/pex-gl/pex-context/commit/a75dcb6e8e2a3fcb42b7794db484ac5feb059bfc)), closes [#129](https://github.com/pex-gl/pex-context/issues/129)
+
+
+
 # [3.0.0-alpha.2](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.1...v3.0.0-alpha.2) (2022-09-20)
 
 
