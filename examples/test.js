@@ -25,6 +25,44 @@ console.assert(
   "Creating texture should be remembered in active state"
 );
 
+Object.keys(ctx.PixelFormat)
+  .filter((f) => !["Depth", "Depth16", "Depth24"].includes(f))
+  .forEach((pixelFormat) => {
+    ctx.texture2D({ width: 1, height: 1, pixelFormat: pixelFormat });
+
+    // Supported WebGLtypes
+    // prettier-ignore
+    if (
+      pixelFormat !== "DEPTH_COMPONENT32F" &&
+      (
+        // Is default supported format
+        [
+          "RGBA",
+          "RGB",
+          "LUMINANCE_ALPHA",
+          "LUMINANCE",
+          "ALPHA",
+        ].includes(pixelFormat) ||
+        // Float texture
+        (
+          ctxWebGL1.capabilities.textureFloat && // Has float extension
+          pixelFormat !== "RGB32F" && // RGB32F support not guaranteed by the extension
+          ctxWebGL1.TextureFormat[pixelFormat][0] && // Known texture format
+          ctxWebGL1.TextureFormat[pixelFormat][1] === ctxWebGL1.DataType.Float32 // Type is float
+        ) ||
+        // Half texture
+        (
+          ctxWebGL1.capabilities.textureHalfFloat && // Has float extension
+          pixelFormat !== "RGB16F" && // RGB16F support not guaranteed by the extension
+          ctxWebGL1.TextureFormat[pixelFormat][0] && // Known texture format
+          ctxWebGL1.TextureFormat[pixelFormat][1] === ctxWebGL1.DataType.Float16 // Type is half float
+        )
+      )
+    ) {
+      ctxWebGL1.texture2D({pixelFormat, width: 1, height: 1 });
+    }
+  });
+
 // update with array, should default to Uint8
 // const tex2 = ctx.texture2D({ data: [0, 0, 0, 0], width: 1, height: 1 })
 
@@ -231,3 +269,8 @@ ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.R32F });
 ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.RG32F });
 ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.RGBA32F });
 ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.R11F_G11F_B10F });
+// Support not guaranteed
+// ctxWebGL1.renderbuffer({ pixelFormat: ctxWebGL1.PixelFormat.RGB16F });
+// ctxWebGL1.renderbuffer({ pixelFormat: ctxWebGL1.PixelFormat.RGB32F });
+// ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.RGB16F });
+// ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.RGB32F });

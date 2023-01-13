@@ -30,6 +30,7 @@ function createRenderbuffer(ctx, opts) {
 const FLOAT_FORMATS_MAP = {
   EXT_color_buffer_half_float: ["RGB16F", "RGBA16F"],
   WEBGL_color_buffer_float: ["RGB32F", "RGBA32F"],
+  // WebGL2 only
   EXT_color_buffer_float: [
     "R16F",
     "RG16F",
@@ -48,22 +49,34 @@ function updateRenderbuffer(ctx, renderbuffer, opts) {
 
   const gl = ctx.gl;
 
+  let internalFormat = gl[renderbuffer.pixelFormat];
+
   if (FLOAT_FORMATS.includes(renderbuffer.pixelFormat)) {
-    const suportedFormats = FLOAT_FORMATS_EXTS.map(
-      (extension) =>
-        !!gl.getExtension(extension) && FLOAT_FORMATS_MAP[extension]
-    )
-      .flat()
-      // RGB32F and RGB16F are texture only
-      .filter((format) => format && !["RGB16F", "RGB32F"].includes(format));
+    const supportedExtension =
+      // Find supported extensions
+      FLOAT_FORMATS_EXTS.filter((extension) => !!gl.getExtension(extension))
+        // Get the first that supports the format
+        .find((extension) =>
+          FLOAT_FORMATS_MAP[extension].includes(renderbuffer.pixelFormat)
+        );
 
     console.assert(
-      suportedFormats.includes(renderbuffer.pixelFormat),
+      supportedExtension,
       `Unsupported float renderable format ${renderbuffer.pixelFormat}`
     );
+
+    // With EXT_color_buffer_float, types just become color-renderable
+    // With EXT_color_buffer_half_float and WEBGL_color_buffer_float,
+    // they come from the extension and need _EXT suffix
+    internalFormat = [
+      "EXT_color_buffer_half_float",
+      "WEBGL_color_buffer_float",
+    ].includes(supportedExtension)
+      ? gl.getExtension(supportedExtension)[`${renderbuffer.pixelFormat}_EXT`]
+      : gl[renderbuffer.pixelFormat];
   }
 
-  renderbuffer.format = gl[renderbuffer.pixelFormat];
+  renderbuffer.format = internalFormat;
 
   gl.bindRenderbuffer(renderbuffer.target, renderbuffer.handle);
   gl.renderbufferStorage(
