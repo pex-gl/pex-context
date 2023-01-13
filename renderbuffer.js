@@ -27,54 +27,21 @@ function createRenderbuffer(ctx, opts) {
   return renderbuffer;
 }
 
-const FLOAT_FORMATS_MAP = {
-  EXT_color_buffer_half_float: ["RGB16F", "RGBA16F"],
-  WEBGL_color_buffer_float: ["RGB32F", "RGBA32F"],
-  // WebGL2 only
-  EXT_color_buffer_float: [
-    "R16F",
-    "RG16F",
-    "RGBA16F",
-    "R32F",
-    "RG32F",
-    "RGBA32F",
-    "R11F_G11F_B10F",
-  ],
-};
-const FLOAT_FORMATS_EXTS = Object.keys(FLOAT_FORMATS_MAP);
-const FLOAT_FORMATS = Object.values(FLOAT_FORMATS_MAP).flat();
-
 function updateRenderbuffer(ctx, renderbuffer, opts) {
   Object.assign(renderbuffer, opts);
 
   const gl = ctx.gl;
 
-  let internalFormat = gl[renderbuffer.pixelFormat];
+  const internalFormat =
+    opts.internalFormat ||
+    (Object.keys(ctx.RenderbufferFloatFormat).includes(renderbuffer.pixelFormat)
+      ? ctx.RenderbufferFloatFormat[renderbuffer.pixelFormat]
+      : gl[renderbuffer.pixelFormat]);
 
-  if (FLOAT_FORMATS.includes(renderbuffer.pixelFormat)) {
-    const supportedExtension =
-      // Find supported extensions
-      FLOAT_FORMATS_EXTS.filter((extension) => !!gl.getExtension(extension))
-        // Get the first that supports the format
-        .find((extension) =>
-          FLOAT_FORMATS_MAP[extension].includes(renderbuffer.pixelFormat)
-        );
-
-    console.assert(
-      supportedExtension,
-      `Unsupported float renderable format ${renderbuffer.pixelFormat}`
-    );
-
-    // With EXT_color_buffer_float, types just become color-renderable
-    // With EXT_color_buffer_half_float and WEBGL_color_buffer_float,
-    // they come from the extension and need _EXT suffix
-    internalFormat = [
-      "EXT_color_buffer_half_float",
-      "WEBGL_color_buffer_float",
-    ].includes(supportedExtension)
-      ? gl.getExtension(supportedExtension)[`${renderbuffer.pixelFormat}_EXT`]
-      : gl[renderbuffer.pixelFormat];
-  }
+  console.assert(
+    internalFormat,
+    `Unsupported float renderable format ${renderbuffer.pixelFormat}`
+  );
 
   renderbuffer.format = internalFormat;
 

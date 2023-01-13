@@ -373,6 +373,26 @@ export const addEnums = (ctx) => {
     Depth24: "DEPTH_COMPONENT24",
   };
 
+  const extColorBufferFloat = !!gl.getExtension("EXT_color_buffer_float"); // WebGL2 only
+
+  /** @enum */
+  ctx.RenderbufferFloatFormat = {
+    // With EXT_color_buffer_float, types just become color-renderable
+    // With EXT_color_buffer_half_float and WEBGL_color_buffer_float,
+    // they come from the extension and need _EXT suffix
+    RGBA32F:
+      (extColorBufferFloat && gl.RGBA32F) ||
+      gl.getExtension("WEBGL_color_buffer_float").RGBA32F_EXT, // WebGL1 only
+    RGBA16F:
+      (extColorBufferFloat && gl.RGBA16F) ||
+      gl.getExtension("EXT_color_buffer_half_float").RGBA16F_EXT, // WebGL1/2
+    R16F: extColorBufferFloat && gl.R16F,
+    RG16F: extColorBufferFloat && gl.RG16F,
+    R32F: extColorBufferFloat && gl.R32F,
+    RG32F: extColorBufferFloat && gl.RG32F,
+    R11F_G11F_B10F: extColorBufferFloat && gl.R11F_G11F_B10F,
+  };
+
   /** @enum */
   ctx.Encoding = {
     Linear: 1,
