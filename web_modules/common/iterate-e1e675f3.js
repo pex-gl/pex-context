@@ -1,37 +1,4 @@
-import { g as functionUncurryThis, G as requireObjectCoercible, J as toIntegerOrInfinity, L as getBuiltIn, a as aCallable, B as anObject, l as functionCall, w as wellKnownSymbol, r as global_1, x as isCallable, f as fails, C as hasOwnProperty_1, E as createNonEnumerableProperty, _ as _export, a3 as iteratorsCore, Q as tryToString, q as lengthOfArrayLike, M as objectIsPrototypeOf } from './web.dom-collections.iterator-7ea8a356.js';
-import { t as toString_1, g as getIteratorDirect, k as asyncIteratorClose, e as anInstance, f as functionBindContext, a as getIteratorMethod, i as isArrayIteratorMethod, b as getIterator, l as iteratorClose } from './esnext.iterator.map-e3ab2956.js';
-
-var charAt = functionUncurryThis(''.charAt);
-var charCodeAt = functionUncurryThis(''.charCodeAt);
-var stringSlice = functionUncurryThis(''.slice);
-
-var createMethod = function (CONVERT_TO_STRING) {
-  return function ($this, pos) {
-    var S = toString_1(requireObjectCoercible($this));
-    var position = toIntegerOrInfinity(pos);
-    var size = S.length;
-    var first, second;
-    if (position < 0 || position >= size) return CONVERT_TO_STRING ? '' : undefined;
-    first = charCodeAt(S, position);
-    return first < 0xD800 || first > 0xDBFF || position + 1 === size
-      || (second = charCodeAt(S, position + 1)) < 0xDC00 || second > 0xDFFF
-        ? CONVERT_TO_STRING
-          ? charAt(S, position)
-          : first
-        : CONVERT_TO_STRING
-          ? stringSlice(S, position, position + 2)
-          : (first - 0xD800 << 10) + (second - 0xDC00) + 0x10000;
-  };
-};
-
-var stringMultibyte = {
-  // `String.prototype.codePointAt` method
-  // https://tc39.es/ecma262/#sec-string.prototype.codepointat
-  codeAt: createMethod(false),
-  // `String.prototype.at` method
-  // https://github.com/mathiasbynens/String.prototype.at
-  charAt: createMethod(true)
-};
+import { g as getIteratorDirect, b as getBuiltIn, a as aCallable, d as anObject, f as functionCall, e as asyncIteratorClose, i as isObject, o as objectIsPrototypeOf, w as wellKnownSymbol, h as global_1, j as isCallable, k as fails, l as hasOwnProperty_1, m as createNonEnumerableProperty, _ as _export, n as iteratorsCore, p as isNullOrUndefined, q as getMethod, r as classof, t as tryToString, s as functionBindContext, u as lengthOfArrayLike, v as iteratorClose } from './classof-b64a2315.js';
 
 var $TypeError = TypeError;
 var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF; // 2 ** 53 - 1 == 9007199254740991
@@ -51,7 +18,8 @@ var doesNotExceedSafeInteger = function (it) {
 
 
 
-var createMethod$1 = function (TYPE) {
+
+var createMethod = function (TYPE) {
   var IS_TO_ARRAY = TYPE == 0;
   var IS_FOR_EACH = TYPE == 1;
   var IS_EVERY = TYPE == 2;
@@ -61,7 +29,7 @@ var createMethod$1 = function (TYPE) {
     var Promise = getBuiltIn('Promise');
     var iterator = record.iterator;
     var next = record.next;
-    var index = 0;
+    var counter = 0;
     var MAPPING = fn !== undefined;
     if (MAPPING || !IS_TO_ARRAY) aCallable(fn);
 
@@ -72,36 +40,41 @@ var createMethod$1 = function (TYPE) {
 
       var loop = function () {
         try {
-          if (IS_TO_ARRAY && MAPPING) try {
-            doesNotExceedSafeInteger(index);
+          if (MAPPING) try {
+            doesNotExceedSafeInteger(counter);
           } catch (error5) { ifAbruptCloseAsyncIterator(error5); }
           Promise.resolve(anObject(functionCall(next, iterator))).then(function (step) {
             try {
               if (anObject(step).done) {
                 if (IS_TO_ARRAY) {
-                  target.length = index;
+                  target.length = counter;
                   resolve(target);
                 } else resolve(IS_SOME ? false : IS_EVERY || undefined);
               } else {
                 var value = step.value;
                 try {
                   if (MAPPING) {
-                    Promise.resolve(IS_TO_ARRAY ? fn(value, index) : fn(value)).then(function (result) {
+                    var result = fn(value, counter);
+
+                    var handler = function ($result) {
                       if (IS_FOR_EACH) {
                         loop();
                       } else if (IS_EVERY) {
-                        result ? loop() : asyncIteratorClose(iterator, resolve, false, reject);
+                        $result ? loop() : asyncIteratorClose(iterator, resolve, false, reject);
                       } else if (IS_TO_ARRAY) {
                         try {
-                          target[index++] = result;
+                          target[counter++] = $result;
                           loop();
                         } catch (error4) { ifAbruptCloseAsyncIterator(error4); }
                       } else {
-                        result ? asyncIteratorClose(iterator, resolve, IS_SOME || value, reject) : loop();
+                        $result ? asyncIteratorClose(iterator, resolve, IS_SOME || value, reject) : loop();
                       }
-                    }, ifAbruptCloseAsyncIterator);
+                    };
+
+                    if (isObject(result)) Promise.resolve(result).then(handler, ifAbruptCloseAsyncIterator);
+                    else handler(result);
                   } else {
-                    target[index++] = value;
+                    target[counter++] = value;
                     loop();
                   }
                 } catch (error3) { ifAbruptCloseAsyncIterator(error3); }
@@ -117,11 +90,18 @@ var createMethod$1 = function (TYPE) {
 };
 
 var asyncIteratorIteration = {
-  toArray: createMethod$1(0),
-  forEach: createMethod$1(1),
-  every: createMethod$1(2),
-  some: createMethod$1(3),
-  find: createMethod$1(4)
+  toArray: createMethod(0),
+  forEach: createMethod(1),
+  every: createMethod(2),
+  some: createMethod(3),
+  find: createMethod(4)
+};
+
+var $TypeError$1 = TypeError;
+
+var anInstance = function (it, Prototype) {
+  if (objectIsPrototypeOf(Prototype, it)) return it;
+  throw $TypeError$1('Incorrect invocation');
 };
 
 // https://github.com/tc39/proposal-iterator-helpers
@@ -164,7 +144,33 @@ _export({ global: true, constructor: true, forced: FORCED }, {
   Iterator: IteratorConstructor
 });
 
-var $TypeError$1 = TypeError;
+var iterators = {};
+
+var ITERATOR = wellKnownSymbol('iterator');
+var ArrayPrototype = Array.prototype;
+
+// check on default Array iterator
+var isArrayIteratorMethod = function (it) {
+  return it !== undefined && (iterators.Array === it || ArrayPrototype[ITERATOR] === it);
+};
+
+var ITERATOR$1 = wellKnownSymbol('iterator');
+
+var getIteratorMethod = function (it) {
+  if (!isNullOrUndefined(it)) return getMethod(it, ITERATOR$1)
+    || getMethod(it, '@@iterator')
+    || iterators[classof(it)];
+};
+
+var $TypeError$2 = TypeError;
+
+var getIterator = function (argument, usingIterator) {
+  var iteratorMethod = arguments.length < 2 ? getIteratorMethod(argument) : usingIterator;
+  if (aCallable(iteratorMethod)) return anObject(functionCall(iteratorMethod, argument));
+  throw $TypeError$2(tryToString(argument) + ' is not iterable');
+};
+
+var $TypeError$3 = TypeError;
 
 var Result = function (stopped, result) {
   this.stopped = stopped;
@@ -200,7 +206,7 @@ var iterate = function (iterable, unboundFunction, options) {
     iterator = iterable;
   } else {
     iterFn = getIteratorMethod(iterable);
-    if (!iterFn) throw $TypeError$1(tryToString(iterable) + ' is not iterable');
+    if (!iterFn) throw $TypeError$3(tryToString(iterable) + ' is not iterable');
     // optimisation for array iterators
     if (isArrayIteratorMethod(iterFn)) {
       for (index = 0, length = lengthOfArrayLike(iterable); length > index; index++) {
@@ -222,4 +228,4 @@ var iterate = function (iterable, unboundFunction, options) {
   } return new Result(false);
 };
 
-export { asyncIteratorIteration as a, iterate as i, stringMultibyte as s };
+export { asyncIteratorIteration as a, iterate as i };

@@ -1,11 +1,9 @@
-import { c as create, l as lookAt, s as set, i as invert, f as frustum, p as perspective$1, n as normalize, m as multMat4, a as sub, o as ortho, b as create$1, d as set$1, e as dot, g as add, h as scale, j as copy, k as distance, q as length, r as distance$1 } from './common/vec3-16c449b6.js';
-import './common/web.dom-collections.iterator-7ea8a356.js';
-import { c as clamp, t as toDegrees, a as toRadians, l as lerp$1 } from './common/utils-22518481.js';
+import { c as create, l as lookAt, s as set, i as invert, f as frustum, p as perspective$1, n as normalize, m as multMat4, a as sub, o as ortho, b as create$1, d as set$1, e as dot, g as add, h as scale, j as copy, k as distance, q as length, r as distance$1 } from './common/vec3-197fb173.js';
+import { c as clamp, t as toDegrees, a as toRadians, l as lerp$1 } from './common/utils-7e499548.js';
 
 /**
  * An interface for cameras to extend
  */
-
 class Camera {
   // Static getter to get different mat for each instances
   static get DEFAULT_OPTIONS() {
@@ -22,57 +20,51 @@ class Camera {
       view: null
     };
   }
+
   /**
    * Update the camera
    * @param {import("./types.js").CameraOptions} opts
    */
-
-
   set(opts) {
     Object.assign(this, opts);
-
     if (opts.position || opts.target || opts.up) {
       lookAt(this.viewMatrix, this.position, this.target, this.up);
       set(this.invViewMatrix, this.viewMatrix);
       invert(this.invViewMatrix);
     }
   }
-
 }
 
 /**
  * A class to create a perspective camera
  * @extends Camera
  */
-
 class PerspectiveCamera extends Camera {
   static get DEFAULT_OPTIONS() {
     return {
       fov: Math.PI / 3
     };
   }
+
   /**
    * Create an instance of PerspectiveCamera
    * @param {import("./types.js").CameraOptions & import("./types.js").PerspectiveCameraOptions} opts
    */
-
-
   constructor(opts = {}) {
     super();
-    this.set({ ...Camera.DEFAULT_OPTIONS,
+    this.set({
+      ...Camera.DEFAULT_OPTIONS,
       ...PerspectiveCamera.DEFAULT_OPTIONS,
       ...opts
     });
   }
+
   /**
    * Update the camera
    * @param {import("./types.js").CameraOptions & import("./types.js").PerspectiveCameraOptions} opts
    */
-
-
   set(opts) {
     super.set(opts);
-
     if (opts.fov || opts.aspect || opts.near || opts.far || opts.view) {
       if (this.view) {
         const aspectRatio = this.view.totalSize[0] / this.view.totalSize[1];
@@ -94,6 +86,7 @@ class PerspectiveCamera extends Camera {
       }
     }
   }
+
   /**
    * Create a picking ray in view (camera) coordinates
    * @param {number} x mouse x
@@ -102,8 +95,6 @@ class PerspectiveCamera extends Camera {
    * @param {number} windowHeight
    * @returns {import("pex-geom").ray}
    */
-
-
   getViewRay(x, y, windowWidth, windowHeight) {
     if (this.view) {
       x += this.view.offset[0];
@@ -111,16 +102,17 @@ class PerspectiveCamera extends Camera {
       windowWidth = this.view.totalSize[0];
       windowHeight = this.view.totalSize[1];
     }
-
     let nx = 2 * x / windowWidth - 1;
     let ny = 1 - 2 * y / windowHeight;
     const hNear = 2 * Math.tan(this.fov / 2) * this.near;
     const wNear = hNear * this.aspect;
     nx *= wNear * 0.5;
-    ny *= hNear * 0.5; // [origin, direction]
+    ny *= hNear * 0.5;
 
+    // [origin, direction]
     return [[0, 0, 0], normalize([nx, ny, -this.near])];
   }
+
   /**
    * Create a picking ray in world coordinates
    * @param {number} x
@@ -129,27 +121,24 @@ class PerspectiveCamera extends Camera {
    * @param {number} windowHeight
    * @returns {import("pex-geom").ray}
    */
-
-
   getWorldRay(x, y, windowWidth, windowHeight) {
     let ray = this.getViewRay(x, y, windowWidth, windowHeight);
     const origin = ray[0];
     const direction = ray[1];
-    multMat4(origin, this.invViewMatrix); // this is correct as origin is [0, 0, 0] so direction is also a point
+    multMat4(origin, this.invViewMatrix);
+    // this is correct as origin is [0, 0, 0] so direction is also a point
+    multMat4(direction, this.invViewMatrix);
 
-    multMat4(direction, this.invViewMatrix); // TODO: is this necessary?
-
+    // TODO: is this necessary?
     normalize(sub(direction, origin));
     return ray;
   }
-
 }
 
 /**
  * A class to create an orthographic camera
  * @extends Camera
  */
-
 class OrthographicCamera extends Camera {
   static get DEFAULT_OPTIONS() {
     return {
@@ -160,28 +149,26 @@ class OrthographicCamera extends Camera {
       zoom: 1
     };
   }
+
   /**
    * Create an instance of PerspectiveCamera
    * @param {import("./types.js").CameraOptions & import("./types.js").OrthographicCameraOptions} opts
    */
-
-
   constructor(opts = {}) {
     super();
-    this.set({ ...Camera.DEFAULT_OPTIONS,
+    this.set({
+      ...Camera.DEFAULT_OPTIONS,
       ...OrthographicCamera.DEFAULT_OPTIONS,
       ...opts
     });
   }
+
   /**
    * Update the camera
    * @param {import("./types.js").CameraOptions & import("./types.js").OrthographicCameraOptions} opts
    */
-
-
   set(opts) {
     super.set(opts);
-
     if (opts.left || opts.right || opts.bottom || opts.top || opts.zoom || opts.near || opts.far || opts.view) {
       const dx = (this.right - this.left) / (2 / this.zoom);
       const dy = (this.top - this.bottom) / (2 / this.zoom);
@@ -191,7 +178,6 @@ class OrthographicCamera extends Camera {
       let right = cx + dx;
       let top = cy + dy;
       let bottom = cy - dy;
-
       if (this.view) {
         const zoomW = 1 / this.zoom / (this.view.size[0] / this.view.totalSize[0]);
         const zoomH = 1 / this.zoom / (this.view.size[1] / this.view.totalSize[1]);
@@ -202,43 +188,42 @@ class OrthographicCamera extends Camera {
         top -= scaleH * (this.view.offset[1] / zoomH);
         bottom = top - scaleH * (this.view.size[1] / zoomH);
       }
-
       ortho(this.projectionMatrix, left, right, bottom, top, this.near, this.far);
     }
   }
-
   getViewRay(x, y, windowWidth, windowHeight) {
     if (this.view) {
       x += this.view.offset[0];
       y += this.view.offset[1];
       windowWidth = this.view.totalSize[0];
       windowHeight = this.view.totalSize[1];
-    } // [origin, direction]
+    }
 
-
+    // [origin, direction]
     return [[0, 0, 0], normalize([x * (this.right - this.left) / this.zoom / windowWidth, (1 - y) * (this.top - this.bottom) / this.zoom / windowHeight, -this.near])];
   }
-
 }
+
+/** @module plane */
 
 /**
  * Enum for different side values
  * @readonly
  * @enum {number}
  */
-
 const Side = Object.freeze({
   OnPlane: 0,
   Same: -1,
   Opposite: 1
 });
 
+/** @module ray */
+
 /**
  * Enum for different intersections values
  * @readonly
  * @enum {number}
  */
-
 const Intersections = Object.freeze({
   Intersect: 1,
   NoIntersect: 0,
@@ -249,6 +234,7 @@ const Intersections = Object.freeze({
 const TEMP_0 = create$1();
 const TEMP_1 = create$1();
 const TEMP_2 = create$1();
+
 /**
  * Determines if a ray intersect a plane and set intersection point
  * @see {@link https://www.cs.princeton.edu/courses/archive/fall00/cs426/lectures/raycast/sld017.htm}
@@ -257,7 +243,6 @@ const TEMP_2 = create$1();
  * @param {import("pex-math/types/types").vec3} out
  * @returns {number}
  */
-
 function hitTestPlane([origin, direction], [point, normal], out = create$1()) {
   set$1(TEMP_0, origin);
   set$1(TEMP_1, direction);
@@ -273,17 +258,14 @@ function hitTestPlane([origin, direction], [point, normal], out = create$1()) {
 function lerp(v0, v1, t) {
   return v0 * (1 - t) + v1 * t;
 }
-
 var lerp_1 = lerp;
 
 var PI = Math.PI;
 var TWO_PI = Math.PI * 2;
-
 function interpolateAngle(fromAngle, toAngle, t) {
   fromAngle = (fromAngle + TWO_PI) % TWO_PI;
   toAngle = (toAngle + TWO_PI) % TWO_PI;
   var diff = Math.abs(fromAngle - toAngle);
-
   if (diff < PI) {
     return lerp_1(fromAngle, toAngle, t);
   } else {
@@ -296,7 +278,6 @@ function interpolateAngle(fromAngle, toAngle, t) {
     }
   }
 }
-
 var interpolateAngle_1 = interpolateAngle;
 
 function latLonToXyz(lat, lon, out) {
@@ -308,7 +289,6 @@ function latLonToXyz(lat, lon, out) {
   out[2] = Math.sin(theta) * Math.cos(phi);
   return out;
 }
-
 var latlonToXyz = latLonToXyz;
 
 function xyzToLatLon(normalizedPosition, out) {
@@ -317,7 +297,6 @@ function xyzToLatLon(normalizedPosition, out) {
   out[1] = -Math.atan2(normalizedPosition[2], normalizedPosition[0]) / Math.PI * 180;
   return out;
 }
-
 var xyzToLatlon = xyzToLatLon;
 
 var rootPosition = {
@@ -325,14 +304,11 @@ var rootPosition = {
   top: 0
 };
 var mouseEventOffset_1 = mouseEventOffset;
-
 function mouseEventOffset(ev, target, out) {
   target = target || ev.currentTarget || ev.srcElement;
-
   if (!Array.isArray(out)) {
     out = [0, 0];
   }
-
   var cx = ev.clientX || 0;
   var cy = ev.clientY || 0;
   var rect = getBoundingClientOffset(target);
@@ -340,7 +316,6 @@ function mouseEventOffset(ev, target, out) {
   out[1] = cy - rect.top;
   return out;
 }
-
 function getBoundingClientOffset(element) {
   if (element === window || element === document || element === document.body) {
     return rootPosition;
@@ -352,7 +327,6 @@ function getBoundingClientOffset(element) {
 /**
  * Camera controls to orbit around a target
  */
-
 class OrbiterControls {
   static get DEFAULT_OPTIONS() {
     return {
@@ -373,28 +347,25 @@ class OrbiterControls {
       autoUpdate: true
     };
   }
-
   get domElement() {
     return this.element === document ? this.element.body : this.element;
   }
+
   /**
    * Create an instance of OrbiterControls
    * @param {import("./types.js").OrbiterControlsOptions} opts
    */
-
-
   constructor(opts) {
     // Internals
     // Set initially by .set
     this.lat = null; // Y
-
     this.lon = null; // XZ
-
     this.currentLat = null;
     this.currentLon = null;
     this.distance = null;
-    this.currentDistance = null; // Updated by user interaction
+    this.currentDistance = null;
 
+    // Updated by user interaction
     this.panning = false;
     this.dragging = false;
     this.zooming = false;
@@ -407,22 +378,22 @@ class OrbiterControls {
     this.clickPosPlane = [0, 0, 0];
     this.dragPos = [0, 0, 0];
     this.dragPosWorld = [0, 0, 0];
-    this.dragPosPlane = [0, 0, 0]; // TODO: add ability to set lat/lng instead of position/target
+    this.dragPosPlane = [0, 0, 0];
 
-    this.set({ ...OrbiterControls.DEFAULT_OPTIONS,
+    // TODO: add ability to set lat/lng instead of position/target
+    this.set({
+      ...OrbiterControls.DEFAULT_OPTIONS,
       ...opts
     });
     this.setup();
   }
+
   /**
    * Update the control
    * @param {import("./types.js").OrbiterOptions} opts
    */
-
-
   set(opts) {
     Object.assign(this, opts);
-
     if (opts.camera) {
       const latLon = xyzToLatlon(normalize(sub(copy(opts.camera.position), opts.camera.target)));
       const distance$1 = opts.distance || distance(opts.camera.position, opts.camera.target);
@@ -433,7 +404,6 @@ class OrbiterControls {
       this.distance = distance$1;
       this.currentDistance = this.distance;
     }
-
     if (Object.getOwnPropertyDescriptor(opts, "autoUpdate")) {
       if (this.autoUpdate) {
         const self = this;
@@ -446,24 +416,23 @@ class OrbiterControls {
       }
     }
   }
-
   updateCamera() {
     // instad of rotating the object we want to move camera around it
     if (!this.camera) return;
     const position = this.camera.position;
     const target = this.camera.target;
     this.lat = clamp(this.lat, this.minLat, this.maxLat);
-
     if (this.minLon !== -Infinity && this.maxLon !== Infinity) {
       this.lon = clamp(this.lon, this.minLon, this.maxLon) % 360;
     }
-
     this.currentLat = toDegrees(interpolateAngle_1((toRadians(this.currentLat) + 2 * Math.PI) % (2 * Math.PI), (toRadians(this.lat) + 2 * Math.PI) % (2 * Math.PI), this.easing));
     this.currentLon += (this.lon - this.currentLon) * this.easing;
-    this.currentDistance = lerp$1(this.currentDistance, this.distance, this.easing); // Set position from lat/lon
+    this.currentDistance = lerp$1(this.currentDistance, this.distance, this.easing);
 
-    latlonToXyz(this.currentLat, this.currentLon, position); // Move position according to distance and target
+    // Set position from lat/lon
+    latlonToXyz(this.currentLat, this.currentLon, position);
 
+    // Move position according to distance and target
     scale(position, this.currentDistance);
     add(position, target);
     if (this.camera.zoom) this.camera.set({
@@ -473,33 +442,28 @@ class OrbiterControls {
       position
     });
   }
-
   updateWindowSize() {
     const width = this.domElement.clientWidth || this.domElement.innerWidth;
     const height = this.domElement.clientHeight || this.domElement.innerHeight;
     if (width !== this.width) this.width = width;
     if (height !== this.height) this.height = height;
   }
-
   handleDragStart(position) {
     this.dragging = true;
     this.dragPos = position;
   }
-
   handlePanZoomStart(touch0, touch1) {
     this.dragging = false;
-
     if (this.zoom && touch1) {
       this.zooming = true;
       this.zoomTouchDistance = distance$1(touch1, touch0);
     }
-
     const camera = this.camera;
-
     if (this.pan && camera) {
       this.panning = true;
-      this.updateWindowSize(); // TODO: use dragPos?
+      this.updateWindowSize();
 
+      // TODO: use dragPos?
       const clickPosWindow = touch1 ? [(touch0[0] + touch1[0]) * 0.5, (touch0[1] + touch1[1]) * 0.5] : touch0;
       set$1(this.clickTarget, camera.target);
       const targetInViewSpace = multMat4(copy(this.clickTarget), camera.viewMatrix);
@@ -507,7 +471,6 @@ class OrbiterControls {
       hitTestPlane(camera.getViewRay(clickPosWindow[0], clickPosWindow[1], this.width, this.height), this.panPlane, this.clickPosPlane);
     }
   }
-
   handleDragMove(position) {
     const dx = position[0] - this.dragPos[0];
     const dy = position[1] - this.dragPos[1];
@@ -515,16 +478,13 @@ class OrbiterControls {
     this.lon -= dx / this.dragSlowdown;
     this.dragPos = position;
   }
-
   handlePanZoomMove(touch0, touch1) {
     if (this.zoom && touch1) {
       const distance = distance$1(touch1, touch0);
       this.handleZoom(this.zoomTouchDistance - distance);
       this.zoomTouchDistance = distance;
     }
-
     const camera = this.camera;
-
     if (this.pan && camera && this.panPlane) {
       const dragPosWindow = touch1 ? [(touch0[0] + touch1[0]) * 0.5, (touch0[1] + touch1[1]) * 0.5] : touch0;
       hitTestPlane(camera.getViewRay(dragPosWindow[0], dragPosWindow[1], this.width, this.height), this.panPlane, this.dragPosPlane);
@@ -537,24 +497,20 @@ class OrbiterControls {
       });
     }
   }
-
   handleZoom(dy) {
     this.distance *= 1 + dy / this.zoomSlowdown;
     this.distance = clamp(this.distance, this.minDistance, this.maxDistance);
   }
-
   handleEnd() {
     this.dragging = false;
     this.panning = false;
     this.zooming = false;
     this.panPlane = null;
   }
-
   setup() {
     this.onPointerDown = event => {
       const pan = event.ctrlKey || event.metaKey || event.shiftKey || event.touches && event.touches.length === 2;
       const touch0 = mouseEventOffset_1(event.touches ? event.touches[0] : event, this.domElement);
-
       if (this.drag && !pan) {
         this.handleDragStart(touch0);
       } else if ((this.pan || this.zoom) && pan) {
@@ -562,10 +518,8 @@ class OrbiterControls {
         this.handlePanZoomStart(touch0, touch1);
       }
     };
-
     this.onPointerMove = event => {
       const touch0 = mouseEventOffset_1(event.touches ? event.touches[0] : event, this.domElement);
-
       if (this.dragging) {
         this.handleDragMove(touch0);
       } else if (this.panning || this.zooming) {
@@ -574,27 +528,22 @@ class OrbiterControls {
         this.handlePanZoomMove(touch0, touch1);
       }
     };
-
     this.onPointerUp = () => {
       this.handleEnd();
     };
-
     this.onTouchStart = event => {
       event.preventDefault();
       if (event.touches.length <= 2) this.onPointerDown(event);
     };
-
     this.onTouchMove = event => {
       !!event.cancelable && event.preventDefault();
       if (event.touches.length <= 2) this.onPointerMove(event);
     };
-
     this.onWheel = event => {
       if (!this.zoom) return;
       event.preventDefault();
       this.handleZoom(event.deltaY);
     };
-
     this.element.addEventListener("pointerdown", this.onPointerDown);
     this.element.addEventListener("wheel", this.onWheel, {
       passive: false
@@ -603,11 +552,10 @@ class OrbiterControls {
     document.addEventListener("pointerup", this.onPointerUp);
     this.domElement.style.touchAction = "none";
   }
+
   /**
    * Remove all event listeners
    */
-
-
   dispose() {
     if (this.rafHandle) cancelAnimationFrame(this.rafHandle);
     this.element.removeEventListener("pointerdown", this.onPointerDown);
@@ -615,33 +563,32 @@ class OrbiterControls {
     document.removeEventListener("pointermove", this.onPointerMove);
     document.removeEventListener("pointerup", this.onPointerUp);
   }
-
 }
 
 /**
  * Re-export classes and factory functions
  * @module index
  */
+
 /**
  * Factory function for perspective camera
  * @param {import("./types.js").CameraOptions & import("./types.js").PerspectiveCameraOptions} opts
  * @returns {PerspectiveCamera}
  */
-
 const perspective = opts => new PerspectiveCamera(opts);
+
 /**
  * Factory function for orthographic camera
  * @param {import("./types.js").CameraOptions & import("./types.js").OrthographicCameraOptions} opts
  * @returns {OrthographicCamera}
  */
-
 const orthographic = opts => new OrthographicCamera(opts);
+
 /**
  * Factory function for orbiter controls
  * @param {import("./types.js").OrbiterControlsOptions} opts
  * @returns {OrbiterControls}
  */
-
 const orbiter = opts => new OrbiterControls(opts);
 
 export { orbiter, orthographic, perspective };

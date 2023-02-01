@@ -1,7 +1,8 @@
-import { _ as _export, a as aCallable, B as anObject, l as functionCall } from './web.dom-collections.iterator-7ea8a356.js';
-import { g as getIteratorDirect, m as asyncIteratorCreateProxy, k as asyncIteratorClose, n as iteratorCreateProxy, c as callWithSafeIterationClosing } from './esnext.iterator.map-e3ab2956.js';
+import { _ as _export, g as getIteratorDirect, a as aCallable, Q as asyncIteratorCreateProxy, d as anObject, f as functionCall, R as createIterResultObject, i as isObject, e as asyncIteratorClose, S as iteratorCreateProxy, T as callWithSafeIterationClosing } from './classof-b64a2315.js';
 
 // https://github.com/tc39/proposal-iterator-helpers
+
+
 
 
 
@@ -31,13 +32,18 @@ var AsyncIteratorProxy = asyncIteratorCreateProxy(function (Promise) {
           try {
             if (anObject(step).done) {
               state.done = true;
-              resolve({ done: true, value: undefined });
+              resolve(createIterResultObject(undefined, true));
             } else {
               var value = step.value;
               try {
-                Promise.resolve(filterer(value)).then(function (selected) {
-                  selected ? resolve({ done: false, value: value }) : loop();
-                }, ifAbruptCloseAsyncIterator);
+                var result = filterer(value, state.counter++);
+
+                var handler = function (selected) {
+                  selected ? resolve(createIterResultObject(value, false)) : loop();
+                };
+
+                if (isObject(result)) Promise.resolve(result).then(handler, ifAbruptCloseAsyncIterator);
+                else handler(result);
               } catch (error3) { ifAbruptCloseAsyncIterator(error3); }
             }
           } catch (error2) { doneAndReject(error2); }
@@ -76,7 +82,7 @@ var IteratorProxy = iteratorCreateProxy(function () {
     done = this.done = !!result.done;
     if (done) return;
     value = result.value;
-    if (callWithSafeIterationClosing(iterator, filterer, value)) return value;
+    if (callWithSafeIterationClosing(iterator, filterer, [value, this.counter++], true)) return value;
   }
 });
 

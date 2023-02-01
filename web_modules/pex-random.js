@@ -1,10 +1,35 @@
-import './common/es.error.cause-c4c3fd35.js';
-import { U as createCommonjsModule, c as commonjsGlobal, a5 as getDefaultExportFromNamespaceIfNotNamed } from './common/web.dom-collections.iterator-7ea8a356.js';
-import './common/esnext.iterator.map-e3ab2956.js';
-import { t as typedArrayConstructor } from './common/esnext.typed-array.with-1c0553db.js';
-import './common/array-sort-2272a817.js';
+import './common/es.error.cause-80fb3656.js';
+import { U as createCommonjsModule, c as commonjsGlobal, V as getDefaultExportFromNamespaceIfNotNamed } from './common/classof-b64a2315.js';
+import './common/esnext.typed-array.with-8b639300.js';
+
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+
+  return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+    return typeof obj;
+  } : function (obj) {
+    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+  }, _typeof(obj);
+}
+
+function _toPrimitive(input, hint) {
+  if (_typeof(input) !== "object" || input === null) return input;
+  var prim = input[Symbol.toPrimitive];
+  if (prim !== undefined) {
+    var res = prim.call(input, hint || "default");
+    if (_typeof(res) !== "object") return res;
+    throw new TypeError("@@toPrimitive must return a primitive value.");
+  }
+  return (hint === "string" ? String : Number)(input);
+}
+
+function _toPropertyKey(arg) {
+  var key = _toPrimitive(arg, "string");
+  return _typeof(key) === "symbol" ? key : String(key);
+}
 
 function _defineProperty(obj, key, value) {
+  key = _toPropertyKey(key);
   if (key in obj) {
     Object.defineProperty(obj, key, {
       value: value,
@@ -15,7 +40,6 @@ function _defineProperty(obj, key, value) {
   } else {
     obj[key] = value;
   }
-
   return obj;
 }
 
@@ -24,6 +48,7 @@ var alea = createCommonjsModule(function (module) {
   // http://baagoe.com/en/RandomMusings/javascript/
   // https://github.com/nquinlan/better-random-numbers-for-javascript-mirror
   // Original work is under MIT license -
+
   // Copyright (C) 2010 by Johannes Baagøe <baagoe@baagoe.org>
   //
   // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -43,45 +68,37 @@ var alea = createCommonjsModule(function (module) {
   // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
   // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   // THE SOFTWARE.
+
   (function (global, module, define) {
     function Alea(seed) {
       var me = this,
-          mash = Mash();
-
+        mash = Mash();
       me.next = function () {
         var t = 2091639 * me.s0 + me.c * 2.3283064365386963e-10; // 2^-32
-
         me.s0 = me.s1;
         me.s1 = me.s2;
         return me.s2 = t - (me.c = t | 0);
-      }; // Apply the seeding algorithm from Baagoe.
+      };
 
-
+      // Apply the seeding algorithm from Baagoe.
       me.c = 1;
       me.s0 = mash(' ');
       me.s1 = mash(' ');
       me.s2 = mash(' ');
       me.s0 -= mash(seed);
-
       if (me.s0 < 0) {
         me.s0 += 1;
       }
-
       me.s1 -= mash(seed);
-
       if (me.s1 < 0) {
         me.s1 += 1;
       }
-
       me.s2 -= mash(seed);
-
       if (me.s2 < 0) {
         me.s2 += 1;
       }
-
       mash = null;
     }
-
     function copy(f, t) {
       t.c = f.c;
       t.s0 = f.s0;
@@ -89,39 +106,30 @@ var alea = createCommonjsModule(function (module) {
       t.s2 = f.s2;
       return t;
     }
-
     function impl(seed, opts) {
       var xg = new Alea(seed),
-          state = opts && opts.state,
-          prng = xg.next;
-
+        state = opts && opts.state,
+        prng = xg.next;
       prng.int32 = function () {
         return xg.next() * 0x100000000 | 0;
       };
-
       prng.double = function () {
         return prng() + (prng() * 0x200000 | 0) * 1.1102230246251565e-16; // 2^-53
       };
 
       prng.quick = prng;
-
       if (state) {
         if (typeof state == 'object') copy(state, xg);
-
         prng.state = function () {
           return copy(xg, {});
         };
       }
-
       return prng;
     }
-
     function Mash() {
       var n = 0xefc8249d;
-
       var mash = function (data) {
         data = String(data);
-
         for (var i = 0; i < data.length; i++) {
           n += data.charCodeAt(i);
           var h = 0.02519603282416938 * n;
@@ -138,7 +146,6 @@ var alea = createCommonjsModule(function (module) {
 
       return mash;
     }
-
     if (module && module.exports) {
       module.exports = impl;
     } else if (define && define.amd) {
@@ -148,7 +155,8 @@ var alea = createCommonjsModule(function (module) {
     } else {
       this.alea = impl;
     }
-  })(commonjsGlobal,  module, // present in node.js
+  })(commonjsGlobal,  module,
+  // present in node.js
   typeof undefined == 'function'  // present with an AMD loader
   );
 });
@@ -156,15 +164,17 @@ var alea = createCommonjsModule(function (module) {
 var xor128 = createCommonjsModule(function (module) {
   // A Javascript implementaion of the "xor128" prng algorithm by
   // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
+
   (function (global, module, define) {
     function XorGen(seed) {
       var me = this,
-          strseed = '';
+        strseed = '';
       me.x = 0;
       me.y = 0;
       me.z = 0;
-      me.w = 0; // Set up generator function.
+      me.w = 0;
 
+      // Set up generator function.
       me.next = function () {
         var t = me.x ^ me.x << 11;
         me.x = me.y;
@@ -172,22 +182,20 @@ var xor128 = createCommonjsModule(function (module) {
         me.z = me.w;
         return me.w ^= me.w >>> 19 ^ t ^ t >>> 8;
       };
-
       if (seed === (seed | 0)) {
         // Integer seed.
         me.x = seed;
       } else {
         // String seed.
         strseed += seed;
-      } // Mix in string seed, then discard an initial batch of 64 values.
+      }
 
-
+      // Mix in string seed, then discard an initial batch of 64 values.
       for (var k = 0; k < strseed.length + 64; k++) {
         me.x ^= strseed.charCodeAt(k) | 0;
         me.next();
       }
     }
-
     function copy(f, t) {
       t.x = f.x;
       t.y = f.y;
@@ -195,38 +203,30 @@ var xor128 = createCommonjsModule(function (module) {
       t.w = f.w;
       return t;
     }
-
     function impl(seed, opts) {
       var xg = new XorGen(seed),
-          state = opts && opts.state,
-          prng = function () {
-        return (xg.next() >>> 0) / 0x100000000;
-      };
-
+        state = opts && opts.state,
+        prng = function () {
+          return (xg.next() >>> 0) / 0x100000000;
+        };
       prng.double = function () {
         do {
           var top = xg.next() >>> 11,
-              bot = (xg.next() >>> 0) / 0x100000000,
-              result = (top + bot) / (1 << 21);
+            bot = (xg.next() >>> 0) / 0x100000000,
+            result = (top + bot) / (1 << 21);
         } while (result === 0);
-
         return result;
       };
-
       prng.int32 = xg.next;
       prng.quick = prng;
-
       if (state) {
         if (typeof state == 'object') copy(state, xg);
-
         prng.state = function () {
           return copy(xg, {});
         };
       }
-
       return prng;
     }
-
     if (module && module.exports) {
       module.exports = impl;
     } else if (define && define.amd) {
@@ -236,7 +236,8 @@ var xor128 = createCommonjsModule(function (module) {
     } else {
       this.xor128 = impl;
     }
-  })(commonjsGlobal,  module, // present in node.js
+  })(commonjsGlobal,  module,
+  // present in node.js
   typeof undefined == 'function'  // present with an AMD loader
   );
 });
@@ -244,11 +245,13 @@ var xor128 = createCommonjsModule(function (module) {
 var xorwow = createCommonjsModule(function (module) {
   // A Javascript implementaion of the "xorwow" prng algorithm by
   // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
+
   (function (global, module, define) {
     function XorGen(seed) {
       var me = this,
-          strseed = ''; // Set up generator function.
+        strseed = '';
 
+      // Set up generator function.
       me.next = function () {
         var t = me.x ^ me.x >>> 2;
         me.x = me.y;
@@ -257,33 +260,28 @@ var xorwow = createCommonjsModule(function (module) {
         me.w = me.v;
         return (me.d = me.d + 362437 | 0) + (me.v = me.v ^ me.v << 4 ^ (t ^ t << 1)) | 0;
       };
-
       me.x = 0;
       me.y = 0;
       me.z = 0;
       me.w = 0;
       me.v = 0;
-
       if (seed === (seed | 0)) {
         // Integer seed.
         me.x = seed;
       } else {
         // String seed.
         strseed += seed;
-      } // Mix in string seed, then discard an initial batch of 64 values.
+      }
 
-
+      // Mix in string seed, then discard an initial batch of 64 values.
       for (var k = 0; k < strseed.length + 64; k++) {
         me.x ^= strseed.charCodeAt(k) | 0;
-
         if (k == strseed.length) {
           me.d = me.x << 10 ^ me.x >>> 4;
         }
-
         me.next();
       }
     }
-
     function copy(f, t) {
       t.x = f.x;
       t.y = f.y;
@@ -293,38 +291,30 @@ var xorwow = createCommonjsModule(function (module) {
       t.d = f.d;
       return t;
     }
-
     function impl(seed, opts) {
       var xg = new XorGen(seed),
-          state = opts && opts.state,
-          prng = function () {
-        return (xg.next() >>> 0) / 0x100000000;
-      };
-
+        state = opts && opts.state,
+        prng = function () {
+          return (xg.next() >>> 0) / 0x100000000;
+        };
       prng.double = function () {
         do {
           var top = xg.next() >>> 11,
-              bot = (xg.next() >>> 0) / 0x100000000,
-              result = (top + bot) / (1 << 21);
+            bot = (xg.next() >>> 0) / 0x100000000,
+            result = (top + bot) / (1 << 21);
         } while (result === 0);
-
         return result;
       };
-
       prng.int32 = xg.next;
       prng.quick = prng;
-
       if (state) {
         if (typeof state == 'object') copy(state, xg);
-
         prng.state = function () {
           return copy(xg, {});
         };
       }
-
       return prng;
     }
-
     if (module && module.exports) {
       module.exports = impl;
     } else if (define && define.amd) {
@@ -334,7 +324,8 @@ var xorwow = createCommonjsModule(function (module) {
     } else {
       this.xorwow = impl;
     }
-  })(commonjsGlobal,  module, // present in node.js
+  })(commonjsGlobal,  module,
+  // present in node.js
   typeof undefined == 'function'  // present with an AMD loader
   );
 });
@@ -344,16 +335,18 @@ var xorshift7 = createCommonjsModule(function (module) {
   // François Panneton and Pierre L'ecuyer:
   // "On the Xorgshift Random Number Generators"
   // http://saluc.engr.uconn.edu/refs/crypto/rng/panneton05onthexorshift.pdf
+
   (function (global, module, define) {
     function XorGen(seed) {
-      var me = this; // Set up generator function.
+      var me = this;
 
+      // Set up generator function.
       me.next = function () {
         // Update xor generator.
         var X = me.x,
-            i = me.i,
-            t,
-            v;
+          i = me.i,
+          t,
+          v;
         t = X[i];
         t ^= t >>> 7;
         v = t ^ t << 24;
@@ -370,79 +363,63 @@ var xorshift7 = createCommonjsModule(function (module) {
         me.i = i + 1 & 7;
         return v;
       };
-
       function init(me, seed) {
         var j,
-            X = [];
-
+          X = [];
         if (seed === (seed | 0)) {
           // Seed state array using a 32-bit integer.
           X[0] = seed;
         } else {
           // Seed state using a string.
           seed = '' + seed;
-
           for (j = 0; j < seed.length; ++j) {
             X[j & 7] = X[j & 7] << 15 ^ seed.charCodeAt(j) + X[j + 1 & 7] << 13;
           }
-        } // Enforce an array length of 8, not all zeroes.
-
-
+        }
+        // Enforce an array length of 8, not all zeroes.
         while (X.length < 8) X.push(0);
-
         for (j = 0; j < 8 && X[j] === 0; ++j);
-
         if (j == 8) X[7] = -1;
         me.x = X;
-        me.i = 0; // Discard an initial 256 values.
+        me.i = 0;
 
+        // Discard an initial 256 values.
         for (j = 256; j > 0; --j) {
           me.next();
         }
       }
-
       init(me, seed);
     }
-
     function copy(f, t) {
       t.x = f.x.slice();
       t.i = f.i;
       return t;
     }
-
     function impl(seed, opts) {
       if (seed == null) seed = +new Date();
-
       var xg = new XorGen(seed),
-          state = opts && opts.state,
-          prng = function () {
-        return (xg.next() >>> 0) / 0x100000000;
-      };
-
+        state = opts && opts.state,
+        prng = function () {
+          return (xg.next() >>> 0) / 0x100000000;
+        };
       prng.double = function () {
         do {
           var top = xg.next() >>> 11,
-              bot = (xg.next() >>> 0) / 0x100000000,
-              result = (top + bot) / (1 << 21);
+            bot = (xg.next() >>> 0) / 0x100000000,
+            result = (top + bot) / (1 << 21);
         } while (result === 0);
-
         return result;
       };
-
       prng.int32 = xg.next;
       prng.quick = prng;
-
       if (state) {
         if (state.x) copy(state, xg);
-
         prng.state = function () {
           return copy(xg, {});
         };
       }
-
       return prng;
     }
-
     if (module && module.exports) {
       module.exports = impl;
     } else if (define && define.amd) {
@@ -452,7 +429,8 @@ var xorshift7 = createCommonjsModule(function (module) {
     } else {
       this.xorshift7 = impl;
     }
-  })(commonjsGlobal,  module, // present in node.js
+  })(commonjsGlobal,  module,
+  // present in node.js
   typeof undefined == 'function'  // present with an AMD loader
   );
 });
@@ -482,41 +460,41 @@ var xor4096 = createCommonjsModule(function (module) {
   //
   // On Chrome, this prng benchmarks about 2.1 times slower than
   // Javascript's built-in Math.random().
+
   (function (global, module, define) {
     function XorGen(seed) {
-      var me = this; // Set up generator function.
+      var me = this;
 
+      // Set up generator function.
       me.next = function () {
         var w = me.w,
-            X = me.X,
-            i = me.i,
-            t,
-            v; // Update Weyl generator.
-
-        me.w = w = w + 0x61c88647 | 0; // Update xor generator.
-
+          X = me.X,
+          i = me.i,
+          t,
+          v;
+        // Update Weyl generator.
+        me.w = w = w + 0x61c88647 | 0;
+        // Update xor generator.
         v = X[i + 34 & 127];
         t = X[i = i + 1 & 127];
         v ^= v << 13;
         t ^= t << 17;
         v ^= v >>> 15;
-        t ^= t >>> 12; // Update Xor generator array state.
-
+        t ^= t >>> 12;
+        // Update Xor generator array state.
         v = X[i] = v ^ t;
-        me.i = i; // Result is the combination.
-
+        me.i = i;
+        // Result is the combination.
         return v + (w ^ w >>> 16) | 0;
       };
-
       function init(me, seed) {
         var t,
-            v,
-            i,
-            j,
-            w,
-            X = [],
-            limit = 128;
-
+          v,
+          i,
+          j,
+          w,
+          X = [],
+          limit = 128;
         if (seed === (seed | 0)) {
           // Numeric seeds initialize v, which is used to generates X.
           v = seed;
@@ -526,38 +504,31 @@ var xor4096 = createCommonjsModule(function (module) {
           seed = seed + '\0';
           v = 0;
           limit = Math.max(limit, seed.length);
-        } // Initialize circular array and weyl value.
-
-
+        }
+        // Initialize circular array and weyl value.
         for (i = 0, j = -32; j < limit; ++j) {
           // Put the unicode characters into the array, and shuffle them.
-          if (seed) v ^= seed.charCodeAt((j + 32) % seed.length); // After 32 shuffles, take v as the starting w value.
-
+          if (seed) v ^= seed.charCodeAt((j + 32) % seed.length);
+          // After 32 shuffles, take v as the starting w value.
           if (j === 0) w = v;
           v ^= v << 10;
           v ^= v >>> 15;
           v ^= v << 4;
           v ^= v >>> 13;
-
           if (j >= 0) {
             w = w + 0x61c88647 | 0; // Weyl.
-
             t = X[j & 127] ^= v + w; // Combine xor and weyl to init array.
-
             i = 0 == t ? i + 1 : 0; // Count zeroes.
           }
-        } // We have detected all zeroes; make the key nonzero.
-
-
+        }
+        // We have detected all zeroes; make the key nonzero.
         if (i >= 128) {
           X[(seed && seed.length || 0) & 127] = -1;
-        } // Run the generator 512 times to further mix the state before using it.
+        }
+        // Run the generator 512 times to further mix the state before using it.
         // Factoring this as a function slows the main generator, so it is just
         // unrolled here.  The weyl generator is not advanced while warming up.
-
-
         i = 127;
-
         for (j = 4 * 128; j > 0; --j) {
           v = X[i + 34 & 127];
           t = X[i = i + 1 & 127];
@@ -566,57 +537,45 @@ var xor4096 = createCommonjsModule(function (module) {
           v ^= v >>> 15;
           t ^= t >>> 12;
           X[i] = v ^ t;
-        } // Storing state as object members is faster than using closure variables.
-
-
+        }
+        // Storing state as object members is faster than using closure variables.
         me.w = w;
         me.X = X;
         me.i = i;
       }
-
       init(me, seed);
     }
-
     function copy(f, t) {
       t.i = f.i;
       t.w = f.w;
       t.X = f.X.slice();
       return t;
     }
-
     function impl(seed, opts) {
       if (seed == null) seed = +new Date();
-
       var xg = new XorGen(seed),
-          state = opts && opts.state,
-          prng = function () {
-        return (xg.next() >>> 0) / 0x100000000;
-      };
-
+        state = opts && opts.state,
+        prng = function () {
+          return (xg.next() >>> 0) / 0x100000000;
+        };
       prng.double = function () {
         do {
           var top = xg.next() >>> 11,
-              bot = (xg.next() >>> 0) / 0x100000000,
-              result = (top + bot) / (1 << 21);
+            bot = (xg.next() >>> 0) / 0x100000000,
+            result = (top + bot) / (1 << 21);
         } while (result === 0);
-
         return result;
       };
-
       prng.int32 = xg.next;
       prng.quick = prng;
-
       if (state) {
         if (state.X) copy(state, xg);
-
         prng.state = function () {
           return copy(xg, {});
         };
       }
-
       return prng;
     }
-
     if (module && module.exports) {
       module.exports = impl;
     } else if (define && define.amd) {
@@ -626,8 +585,10 @@ var xor4096 = createCommonjsModule(function (module) {
     } else {
       this.xor4096 = impl;
     }
-  })(commonjsGlobal, // window object or global
-   module, // present in node.js
+  })(commonjsGlobal,
+  // window object or global
+   module,
+  // present in node.js
   typeof undefined == 'function'  // present with an AMD loader
   );
 });
@@ -636,16 +597,18 @@ var tychei = createCommonjsModule(function (module) {
   // A Javascript implementaion of the "Tyche-i" prng algorithm by
   // Samuel Neves and Filipe Araujo.
   // See https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
+
   (function (global, module, define) {
     function XorGen(seed) {
       var me = this,
-          strseed = ''; // Set up generator function.
+        strseed = '';
 
+      // Set up generator function.
       me.next = function () {
         var b = me.b,
-            c = me.c,
-            d = me.d,
-            a = me.a;
+          c = me.c,
+          d = me.d,
+          a = me.a;
         b = b << 25 ^ b >>> 7 ^ c;
         c = c - d | 0;
         d = d << 24 ^ d >>> 8 ^ a;
@@ -655,6 +618,7 @@ var tychei = createCommonjsModule(function (module) {
         me.d = d << 16 ^ c >>> 16 ^ a;
         return me.a = a - b | 0;
       };
+
       /* The following is non-inverted tyche, which has better internal
        * bit diffusion, but which is about 25% slower than tyche-i in JS.
       me.next = function() {
@@ -671,12 +635,10 @@ var tychei = createCommonjsModule(function (module) {
       }
       */
 
-
       me.a = 0;
       me.b = 0;
       me.c = 2654435769 | 0;
       me.d = 1367130551;
-
       if (seed === Math.floor(seed)) {
         // Integer seed.
         me.a = seed / 0x100000000 | 0;
@@ -684,15 +646,14 @@ var tychei = createCommonjsModule(function (module) {
       } else {
         // String seed.
         strseed += seed;
-      } // Mix in string seed, then discard an initial batch of 64 values.
+      }
 
-
+      // Mix in string seed, then discard an initial batch of 64 values.
       for (var k = 0; k < strseed.length + 20; k++) {
         me.b ^= strseed.charCodeAt(k) | 0;
         me.next();
       }
     }
-
     function copy(f, t) {
       t.a = f.a;
       t.b = f.b;
@@ -700,38 +661,30 @@ var tychei = createCommonjsModule(function (module) {
       t.d = f.d;
       return t;
     }
-
     function impl(seed, opts) {
       var xg = new XorGen(seed),
-          state = opts && opts.state,
-          prng = function () {
-        return (xg.next() >>> 0) / 0x100000000;
-      };
-
+        state = opts && opts.state,
+        prng = function () {
+          return (xg.next() >>> 0) / 0x100000000;
+        };
       prng.double = function () {
         do {
           var top = xg.next() >>> 11,
-              bot = (xg.next() >>> 0) / 0x100000000,
-              result = (top + bot) / (1 << 21);
+            bot = (xg.next() >>> 0) / 0x100000000,
+            result = (top + bot) / (1 << 21);
         } while (result === 0);
-
         return result;
       };
-
       prng.int32 = xg.next;
       prng.quick = prng;
-
       if (state) {
         if (typeof state == 'object') copy(state, xg);
-
         prng.state = function () {
           return copy(xg, {});
         };
       }
-
       return prng;
     }
-
     if (module && module.exports) {
       module.exports = impl;
     } else if (define && define.amd) {
@@ -741,7 +694,8 @@ var tychei = createCommonjsModule(function (module) {
     } else {
       this.tychei = impl;
     }
-  })(commonjsGlobal,  module, // present in node.js
+  })(commonjsGlobal,  module,
+  // present in node.js
   typeof undefined == 'function'  // present with an AMD loader
   );
 });
@@ -779,61 +733,61 @@ var seedrandom = createCommonjsModule(function (module) {
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   
   */
+
   (function (global, pool, math) {
     //
     // The following constants are related to IEEE 754 limits.
     //
+
     var width = 256,
-        // each RC4 output is 0 <= x < 256
-    chunks = 6,
-        // at least six RC4 outputs for each double
-    digits = 52,
-        // there are 52 significant digits in a double
-    rngname = 'random',
-        // rngname: name for Math.random and Math.seedrandom
-    startdenom = math.pow(width, chunks),
-        significance = math.pow(2, digits),
-        overflow = significance * 2,
-        mask = width - 1,
-        nodecrypto; // node.js crypto module, initialized at the bottom.
+      // each RC4 output is 0 <= x < 256
+      chunks = 6,
+      // at least six RC4 outputs for each double
+      digits = 52,
+      // there are 52 significant digits in a double
+      rngname = 'random',
+      // rngname: name for Math.random and Math.seedrandom
+      startdenom = math.pow(width, chunks),
+      significance = math.pow(2, digits),
+      overflow = significance * 2,
+      mask = width - 1,
+      nodecrypto; // node.js crypto module, initialized at the bottom.
+
     //
     // seedrandom()
     // This is the seedrandom function described above.
     //
-
     function seedrandom(seed, options, callback) {
       var key = [];
       options = options == true ? {
         entropy: true
-      } : options || {}; // Flatten the seed string or build one from local entropy if needed.
+      } : options || {};
 
-      var shortseed = mixkey(flatten(options.entropy ? [seed, tostring(pool)] : seed == null ? autoseed() : seed, 3), key); // Use the seed to initialize an ARC4 generator.
+      // Flatten the seed string or build one from local entropy if needed.
+      var shortseed = mixkey(flatten(options.entropy ? [seed, tostring(pool)] : seed == null ? autoseed() : seed, 3), key);
 
-      var arc4 = new ARC4(key); // This function returns a random double in [0, 1) that contains
+      // Use the seed to initialize an ARC4 generator.
+      var arc4 = new ARC4(key);
+
+      // This function returns a random double in [0, 1) that contains
       // randomness in every bit of the mantissa of the IEEE 754 value.
-
       var prng = function () {
         var n = arc4.g(chunks),
-            // Start with a numerator n < 2 ^ 48
-        d = startdenom,
-            //   and denominator d = 2 ^ 48.
-        x = 0; //   and no 'extra last byte'.
-
+          // Start with a numerator n < 2 ^ 48
+          d = startdenom,
+          //   and denominator d = 2 ^ 48.
+          x = 0; //   and no 'extra last byte'.
         while (n < significance) {
           // Fill up all significant digits by
           n = (n + x) * width; //   shifting numerator and
-
           d *= width; //   denominator and generating a
-
           x = arc4.g(1); //   new least-significant-byte.
         }
 
         while (n >= overflow) {
           // To avoid rounding up, before adding
           n /= 2; //   last byte, shift everything
-
           d /= 2; //   right using integer math until
-
           x >>>= 1; //   we have exactly the desired bits.
         }
 
@@ -843,38 +797,41 @@ var seedrandom = createCommonjsModule(function (module) {
       prng.int32 = function () {
         return arc4.g(4) | 0;
       };
-
       prng.quick = function () {
         return arc4.g(4) / 0x100000000;
       };
+      prng.double = prng;
 
-      prng.double = prng; // Mix the randomness into accumulated entropy.
+      // Mix the randomness into accumulated entropy.
+      mixkey(tostring(arc4.S), pool);
 
-      mixkey(tostring(arc4.S), pool); // Calling convention: what to return as a function of prng, seed, is_math.
-
+      // Calling convention: what to return as a function of prng, seed, is_math.
       return (options.pass || callback || function (prng, seed, is_math_call, state) {
         if (state) {
           // Load the arc4 state from the given state if it has an S array.
           if (state.S) {
             copy(state, arc4);
-          } // Only provide the .state method if requested via options.state.
-
-
+          }
+          // Only provide the .state method if requested via options.state.
           prng.state = function () {
             return copy(arc4, {});
           };
-        } // If called as a method of Math (Math.seedrandom()), mutate
+        }
+
+        // If called as a method of Math (Math.seedrandom()), mutate
         // Math.random because that is how seedrandom.js has worked since v1.0.
-
-
         if (is_math_call) {
           math[rngname] = prng;
           return seed;
-        } // Otherwise, it is a newer calling convention, so return the
+        }
+
+        // Otherwise, it is a newer calling convention, so return the
         // prng directly.
         else return prng;
       })(prng, shortseed, 'global' in options ? options.global : this == math, options.state);
-    } //
+    }
+
+    //
     // ARC4
     //
     // An ARC4 implementation.  The constructor takes a key in the form of
@@ -884,71 +841,68 @@ var seedrandom = createCommonjsModule(function (module) {
     // the next (count) outputs from ARC4.  Its return value is a number x
     // that is in the range 0 <= x < (width ^ count).
     //
-
-
     function ARC4(key) {
       var t,
-          keylen = key.length,
-          me = this,
-          i = 0,
-          j = me.i = me.j = 0,
-          s = me.S = []; // The empty key [] is treated as [0].
+        keylen = key.length,
+        me = this,
+        i = 0,
+        j = me.i = me.j = 0,
+        s = me.S = [];
 
+      // The empty key [] is treated as [0].
       if (!keylen) {
         key = [keylen++];
-      } // Set up S using the standard key scheduling algorithm.
+      }
 
-
+      // Set up S using the standard key scheduling algorithm.
       while (i < width) {
         s[i] = i++;
       }
-
       for (i = 0; i < width; i++) {
         s[i] = s[j = mask & j + key[i % keylen] + (t = s[i])];
         s[j] = t;
-      } // The "g" method returns the next (count) outputs as one number.
+      }
 
-
+      // The "g" method returns the next (count) outputs as one number.
       (me.g = function (count) {
         // Using instance members instead of closure state nearly doubles speed.
         var t,
-            r = 0,
-            i = me.i,
-            j = me.j,
-            s = me.S;
-
+          r = 0,
+          i = me.i,
+          j = me.j,
+          s = me.S;
         while (count--) {
           t = s[i = mask & i + 1];
           r = r * width + s[mask & (s[i] = s[j = mask & j + t]) + (s[j] = t)];
         }
-
         me.i = i;
         me.j = j;
-        return r; // For robust unpredictability, the function call below automatically
+        return r;
+        // For robust unpredictability, the function call below automatically
         // discards an initial batch of values.  This is called RC4-drop[256].
         // See http://google.com/search?q=rsa+fluhrer+response&btnI
       })(width);
-    } //
+    }
+
+    //
     // copy()
     // Copies internal state of ARC4 to or from a plain object.
     //
-
-
     function copy(f, t) {
       t.i = f.i;
       t.j = f.j;
       t.S = f.S.slice();
       return t;
     }
+
+    //
     // flatten()
     // Converts an object tree to nested arrays of strings.
     //
-
     function flatten(obj, depth) {
       var result = [],
-          typ = typeof obj,
-          prop;
-
+        typ = typeof obj,
+        prop;
       if (depth && typ == 'object') {
         for (prop in obj) {
           try {
@@ -956,36 +910,32 @@ var seedrandom = createCommonjsModule(function (module) {
           } catch (e) {}
         }
       }
-
       return result.length ? result : typ == 'string' ? obj : obj + '\0';
-    } //
+    }
+
+    //
     // mixkey()
     // Mixes a string seed into a key that is an array of integers, and
     // returns a shortened string seed that is equivalent to the result key.
     //
-
-
     function mixkey(seed, key) {
       var stringseed = seed + '',
-          smear,
-          j = 0;
-
+        smear,
+        j = 0;
       while (j < stringseed.length) {
         key[mask & j] = mask & (smear ^= key[mask & j] * 19) + stringseed.charCodeAt(j++);
       }
-
       return tostring(key);
-    } //
+    }
+
+    //
     // autoseed()
     // Returns an object for autoseeding, using window.crypto and Node crypto
     // module if available.
     //
-
-
     function autoseed() {
       try {
         var out;
-
         if (nodecrypto && (out = nodecrypto.randomBytes)) {
           // The use of 'out' to remember randomBytes makes tight minified code.
           out = out(width);
@@ -993,53 +943,57 @@ var seedrandom = createCommonjsModule(function (module) {
           out = new Uint8Array(width);
           (global.crypto || global.msCrypto).getRandomValues(out);
         }
-
         return tostring(out);
       } catch (e) {
         var browser = global.navigator,
-            plugins = browser && browser.plugins;
+          plugins = browser && browser.plugins;
         return [+new Date(), global, plugins, global.screen, tostring(pool)];
       }
-    } //
+    }
+
+    //
     // tostring()
     // Converts an array of charcodes to a string
     //
-
-
     function tostring(a) {
       return String.fromCharCode.apply(0, a);
-    } //
+    }
+
+    //
     // When seedrandom.js is loaded, we immediately mix a few bits
     // from the built-in RNG into the entropy pool.  Because we do
     // not want to interfere with deterministic PRNG state later,
     // seedrandom will not call math.random on its own again after
     // initialization.
     //
+    mixkey(math.random(), pool);
 
-
-    mixkey(math.random(), pool); //
+    //
     // Nodejs and AMD support: export the implementation as a module using
     // either convention.
     //
-
     if ( module.exports) {
-      module.exports = seedrandom; // When in node.js, try using crypto package for autoseeding.
-
+      module.exports = seedrandom;
+      // When in node.js, try using crypto package for autoseeding.
       try {
         nodecrypto = require$$0;
       } catch (ex) {}
     } else {
       // When included as a plain script, set up Math.seedrandom global.
       math['seed' + rngname] = seedrandom;
-    } // End anonymous scope, and pass initial values.
+    }
 
-  })( // global: `self` in browsers (including strict mode and web workers),
+    // End anonymous scope, and pass initial values.
+  })(
+  // global: `self` in browsers (including strict mode and web workers),
   // otherwise `this` in Node and other environments
-  typeof self !== 'undefined' ? self : commonjsGlobal, [], // pool: entropy pool starts empty
+  typeof self !== 'undefined' ? self : commonjsGlobal, [],
+  // pool: entropy pool starts empty
   Math // math: package containing random, pow, and seedrandom
   );
 });
 
+// A library of seedable RNGs implemented in Javascript.
 //
 // Usage:
 //
@@ -1047,21 +1001,26 @@ var seedrandom = createCommonjsModule(function (module) {
 // var random = seedrandom(1); // or any seed.
 // var x = random();       // 0 <= x < 1.  Every bit is random.
 // var x = random.quick(); // 0 <= x < 1.  32 bits of randomness.
+
 // alea, a 53-bit multiply-with-carry generator by Johannes Baagøe.
 // Period: ~2^116
 // Reported to pass all BigCrush tests.
+
 // xor128, a pure xor-shift generator by George Marsaglia.
 // Period: 2^128-1.
 // Reported to fail: MatrixRank and LinearComp.
+
 // xorwow, George Marsaglia's 160-bit xor-shift combined plus weyl.
 // Period: 2^192-2^32
 // Reported to fail: CollisionOver, SimpPoker, and LinearComp.
+
 // xorshift7, by François Panneton and Pierre L'ecuyer, takes
 // a different approach: it adds robustness by allowing more shifts
 // than Marsaglia's original three.  It is a 7-shift generator
 // with 256 bits, that passes BigCrush with no systmatic failures.
 // Period 2^256-1.
 // No systematic BigCrush failures reported.
+
 // xor4096, by Richard Brent, is a 4096-bit xor-shift with a
 // very long period that also adds a Weyl generator. It also passes
 // BigCrush with no systematic failures.  Its long period may
@@ -1069,11 +1028,13 @@ var seedrandom = createCommonjsModule(function (module) {
 // collisions.
 // Period: 2^4128-2^32.
 // No systematic BigCrush failures reported.
+
 // Tyche-i, by Samuel Neves and Filipe Araujo, is a bit-shifting random
 // number generator derived from ChaCha, a modern stream cipher.
 // https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
 // Period: ~2^127
 // No systematic BigCrush failures reported.
+
 // The original ARC4-based prng included in this library.
 // Period: ~2^1600
 
@@ -1084,14 +1045,6 @@ seedrandom.xorshift7 = xorshift7;
 seedrandom.xor4096 = xor4096;
 seedrandom.tychei = tychei;
 var seedrandom$1 = seedrandom;
-
-// `Float64Array` constructor
-// https://tc39.es/ecma262/#sec-typedarray-objects
-typedArrayConstructor('Float64', function (init) {
-  return function Float64Array(data, byteOffset, length) {
-    return init(this, data, byteOffset, length);
-  };
-});
 
 /*
  * A fast javascript implementation of simplex noise by Jonas Wagner
@@ -1128,51 +1081,44 @@ const G2 = /*#__PURE__*/(3.0 - Math.sqrt(3.0)) / 6.0;
 const F3 = 1.0 / 3.0;
 const G3 = 1.0 / 6.0;
 const F4 = /*#__PURE__*/(Math.sqrt(5.0) - 1.0) / 4.0;
-const G4 = /*#__PURE__*/(5.0 - Math.sqrt(5.0)) / 20.0; // I'm really not sure why this | 0 (basically a coercion to int)
+const G4 = /*#__PURE__*/(5.0 - Math.sqrt(5.0)) / 20.0;
+// I'm really not sure why this | 0 (basically a coercion to int)
 // is making this faster but I get ~5 million ops/sec more on the
 // benchmarks across the board or a ~10% speedup.
-
 const fastFloor = x => Math.floor(x) | 0;
-
-const grad2 = /*#__PURE__*/new Float64Array([1, 1, -1, 1, 1, -1, -1, -1, 1, 0, -1, 0, 1, 0, -1, 0, 0, 1, 0, -1, 0, 1, 0, -1]); // double seems to be faster than single or int's
+const grad2 = /*#__PURE__*/new Float64Array([1, 1, -1, 1, 1, -1, -1, -1, 1, 0, -1, 0, 1, 0, -1, 0, 0, 1, 0, -1, 0, 1, 0, -1]);
+// double seems to be faster than single or int's
 // probably because most operations are in double precision
-
-const grad3 = /*#__PURE__*/new Float64Array([1, 1, 0, -1, 1, 0, 1, -1, 0, -1, -1, 0, 1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, -1, 0, 1, 1, 0, -1, 1, 0, 1, -1, 0, -1, -1]); // double is a bit quicker here as well
-
+const grad3 = /*#__PURE__*/new Float64Array([1, 1, 0, -1, 1, 0, 1, -1, 0, -1, -1, 0, 1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, -1, 0, 1, 1, 0, -1, 1, 0, 1, -1, 0, -1, -1]);
+// double is a bit quicker here as well
 const grad4 = /*#__PURE__*/new Float64Array([0, 1, 1, 1, 0, 1, 1, -1, 0, 1, -1, 1, 0, 1, -1, -1, 0, -1, 1, 1, 0, -1, 1, -1, 0, -1, -1, 1, 0, -1, -1, -1, 1, 0, 1, 1, 1, 0, 1, -1, 1, 0, -1, 1, 1, 0, -1, -1, -1, 0, 1, 1, -1, 0, 1, -1, -1, 0, -1, 1, -1, 0, -1, -1, 1, 1, 0, 1, 1, 1, 0, -1, 1, -1, 0, 1, 1, -1, 0, -1, -1, 1, 0, 1, -1, 1, 0, -1, -1, -1, 0, 1, -1, -1, 0, -1, 1, 1, 1, 0, 1, 1, -1, 0, 1, -1, 1, 0, 1, -1, -1, 0, -1, 1, 1, 0, -1, 1, -1, 0, -1, -1, 1, 0, -1, -1, -1, 0]);
 /**
  * Creates a 2D noise function
  * @param random the random function that will be used to build the permutation table
  * @returns {NoiseFunction2D}
  */
-
 function createNoise2D(random = Math.random) {
-  const perm = buildPermutationTable(random); // precalculating this yields a little ~3% performance improvement.
-
+  const perm = buildPermutationTable(random);
+  // precalculating this yields a little ~3% performance improvement.
   const permGrad2x = new Float64Array(perm).map(v => grad2[v % 12 * 2]);
   const permGrad2y = new Float64Array(perm).map(v => grad2[v % 12 * 2 + 1]);
   return function noise2D(x, y) {
     // if(!isFinite(x) || !isFinite(y)) return 0;
     let n0 = 0; // Noise contributions from the three corners
-
     let n1 = 0;
-    let n2 = 0; // Skew the input space to determine which simplex cell we're in
-
+    let n2 = 0;
+    // Skew the input space to determine which simplex cell we're in
     const s = (x + y) * F2; // Hairy factor for 2D
-
     const i = fastFloor(x + s);
     const j = fastFloor(y + s);
     const t = (i + j) * G2;
     const X0 = i - t; // Unskew the cell origin back to (x,y) space
-
     const Y0 = j - t;
     const x0 = x - X0; // The x,y distances from the cell origin
-
-    const y0 = y - Y0; // For the 2D case, the simplex shape is an equilateral triangle.
+    const y0 = y - Y0;
+    // For the 2D case, the simplex shape is an equilateral triangle.
     // Determine which simplex we are in.
-
     let i1, j1; // Offsets for second (middle) corner of simplex in (i,j) coords
-
     if (x0 > y0) {
       i1 = 1;
       j1 = 0;
@@ -1184,53 +1130,43 @@ function createNoise2D(random = Math.random) {
     // A step of (1,0) in (i,j) means a step of (1-c,-c) in (x,y), and
     // a step of (0,1) in (i,j) means a step of (-c,1-c) in (x,y), where
     // c = (3-sqrt(3))/6
-
-
     const x1 = x0 - i1 + G2; // Offsets for middle corner in (x,y) unskewed coords
-
     const y1 = y0 - j1 + G2;
     const x2 = x0 - 1.0 + 2.0 * G2; // Offsets for last corner in (x,y) unskewed coords
-
-    const y2 = y0 - 1.0 + 2.0 * G2; // Work out the hashed gradient indices of the three simplex corners
-
+    const y2 = y0 - 1.0 + 2.0 * G2;
+    // Work out the hashed gradient indices of the three simplex corners
     const ii = i & 255;
-    const jj = j & 255; // Calculate the contribution from the three corners
-
+    const jj = j & 255;
+    // Calculate the contribution from the three corners
     let t0 = 0.5 - x0 * x0 - y0 * y0;
-
     if (t0 >= 0) {
       const gi0 = ii + perm[jj];
       const g0x = permGrad2x[gi0];
       const g0y = permGrad2y[gi0];
-      t0 *= t0; // n0 = t0 * t0 * (grad2[gi0] * x0 + grad2[gi0 + 1] * y0); // (x,y) of grad3 used for 2D gradient
-
+      t0 *= t0;
+      // n0 = t0 * t0 * (grad2[gi0] * x0 + grad2[gi0 + 1] * y0); // (x,y) of grad3 used for 2D gradient
       n0 = t0 * t0 * (g0x * x0 + g0y * y0);
     }
-
     let t1 = 0.5 - x1 * x1 - y1 * y1;
-
     if (t1 >= 0) {
       const gi1 = ii + i1 + perm[jj + j1];
       const g1x = permGrad2x[gi1];
       const g1y = permGrad2y[gi1];
-      t1 *= t1; // n1 = t1 * t1 * (grad2[gi1] * x1 + grad2[gi1 + 1] * y1);
-
+      t1 *= t1;
+      // n1 = t1 * t1 * (grad2[gi1] * x1 + grad2[gi1 + 1] * y1);
       n1 = t1 * t1 * (g1x * x1 + g1y * y1);
     }
-
     let t2 = 0.5 - x2 * x2 - y2 * y2;
-
     if (t2 >= 0) {
       const gi2 = ii + 1 + perm[jj + 1];
       const g2x = permGrad2x[gi2];
       const g2y = permGrad2y[gi2];
-      t2 *= t2; // n2 = t2 * t2 * (grad2[gi2] * x2 + grad2[gi2 + 1] * y2);
-
+      t2 *= t2;
+      // n2 = t2 * t2 * (grad2[gi2] * x2 + grad2[gi2 + 1] * y2);
       n2 = t2 * t2 * (g2x * x2 + g2y * y2);
-    } // Add contributions from each corner to get the final noise value.
+    }
+    // Add contributions from each corner to get the final noise value.
     // The result is scaled to return values in the interval [-1,1].
-
-
     return 70.0 * (n0 + n1 + n2);
   };
 }
@@ -1239,37 +1175,30 @@ function createNoise2D(random = Math.random) {
  * @param random the random function that will be used to build the permutation table
  * @returns {NoiseFunction3D}
  */
-
 function createNoise3D(random = Math.random) {
-  const perm = buildPermutationTable(random); // precalculating these seems to yield a speedup of over 15%
-
+  const perm = buildPermutationTable(random);
+  // precalculating these seems to yield a speedup of over 15%
   const permGrad3x = new Float64Array(perm).map(v => grad3[v % 12 * 3]);
   const permGrad3y = new Float64Array(perm).map(v => grad3[v % 12 * 3 + 1]);
   const permGrad3z = new Float64Array(perm).map(v => grad3[v % 12 * 3 + 2]);
   return function noise3D(x, y, z) {
     let n0, n1, n2, n3; // Noise contributions from the four corners
     // Skew the input space to determine which simplex cell we're in
-
     const s = (x + y + z) * F3; // Very nice and simple skew factor for 3D
-
     const i = fastFloor(x + s);
     const j = fastFloor(y + s);
     const k = fastFloor(z + s);
     const t = (i + j + k) * G3;
     const X0 = i - t; // Unskew the cell origin back to (x,y,z) space
-
     const Y0 = j - t;
     const Z0 = k - t;
     const x0 = x - X0; // The x,y,z distances from the cell origin
-
     const y0 = y - Y0;
-    const z0 = z - Z0; // For the 3D case, the simplex shape is a slightly irregular tetrahedron.
+    const z0 = z - Z0;
+    // For the 3D case, the simplex shape is a slightly irregular tetrahedron.
     // Determine which simplex we are in.
-
     let i1, j1, k1; // Offsets for second corner of simplex in (i,j,k) coords
-
     let i2, j2, k2; // Offsets for third corner of simplex in (i,j,k) coords
-
     if (x0 >= y0) {
       if (y0 >= z0) {
         i1 = 1;
@@ -1295,7 +1224,6 @@ function createNoise3D(random = Math.random) {
         j2 = 0;
         k2 = 1;
       } // Z X Y order
-
     } else {
       // x0<y0
       if (y0 < z0) {
@@ -1322,30 +1250,25 @@ function createNoise3D(random = Math.random) {
         j2 = 1;
         k2 = 0;
       } // Y X Z order
-
-    } // A step of (1,0,0) in (i,j,k) means a step of (1-c,-c,-c) in (x,y,z),
+    }
+    // A step of (1,0,0) in (i,j,k) means a step of (1-c,-c,-c) in (x,y,z),
     // a step of (0,1,0) in (i,j,k) means a step of (-c,1-c,-c) in (x,y,z), and
     // a step of (0,0,1) in (i,j,k) means a step of (-c,-c,1-c) in (x,y,z), where
     // c = 1/6.
-
-
     const x1 = x0 - i1 + G3; // Offsets for second corner in (x,y,z) coords
-
     const y1 = y0 - j1 + G3;
     const z1 = z0 - k1 + G3;
     const x2 = x0 - i2 + 2.0 * G3; // Offsets for third corner in (x,y,z) coords
-
     const y2 = y0 - j2 + 2.0 * G3;
     const z2 = z0 - k2 + 2.0 * G3;
     const x3 = x0 - 1.0 + 3.0 * G3; // Offsets for last corner in (x,y,z) coords
-
     const y3 = y0 - 1.0 + 3.0 * G3;
-    const z3 = z0 - 1.0 + 3.0 * G3; // Work out the hashed gradient indices of the four simplex corners
-
+    const z3 = z0 - 1.0 + 3.0 * G3;
+    // Work out the hashed gradient indices of the four simplex corners
     const ii = i & 255;
     const jj = j & 255;
-    const kk = k & 255; // Calculate the contribution from the four corners
-
+    const kk = k & 255;
+    // Calculate the contribution from the four corners
     let t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0;
     if (t0 < 0) n0 = 0.0;else {
       const gi0 = ii + perm[jj + perm[kk]];
@@ -1369,9 +1292,9 @@ function createNoise3D(random = Math.random) {
       const gi3 = ii + 1 + perm[jj + 1 + perm[kk + 1]];
       t3 *= t3;
       n3 = t3 * t3 * (permGrad3x[gi3] * x3 + permGrad3y[gi3] * y3 + permGrad3z[gi3] * z3);
-    } // Add contributions from each corner to get the final noise value.
+    }
+    // Add contributions from each corner to get the final noise value.
     // The result is scaled to stay just inside [-1,1]
-
     return 32.0 * (n0 + n1 + n2 + n3);
   };
 }
@@ -1380,10 +1303,9 @@ function createNoise3D(random = Math.random) {
  * @param random the random function that will be used to build the permutation table
  * @returns {NoiseFunction3D}
  */
-
 function createNoise4D(random = Math.random) {
-  const perm = buildPermutationTable(random); // precalculating these leads to a ~10% speedup
-
+  const perm = buildPermutationTable(random);
+  // precalculating these leads to a ~10% speedup
   const permGrad4x = new Float64Array(perm).map(v => grad4[v % 32 * 4]);
   const permGrad4y = new Float64Array(perm).map(v => grad4[v % 32 * 4 + 1]);
   const permGrad4z = new Float64Array(perm).map(v => grad4[v % 32 * 4 + 2]);
@@ -1391,30 +1313,25 @@ function createNoise4D(random = Math.random) {
   return function noise4D(x, y, z, w) {
     let n0, n1, n2, n3, n4; // Noise contributions from the five corners
     // Skew the (x,y,z,w) space to determine which cell of 24 simplices we're in
-
     const s = (x + y + z + w) * F4; // Factor for 4D skewing
-
     const i = fastFloor(x + s);
     const j = fastFloor(y + s);
     const k = fastFloor(z + s);
     const l = fastFloor(w + s);
     const t = (i + j + k + l) * G4; // Factor for 4D unskewing
-
     const X0 = i - t; // Unskew the cell origin back to (x,y,z,w) space
-
     const Y0 = j - t;
     const Z0 = k - t;
     const W0 = l - t;
     const x0 = x - X0; // The x,y,z,w distances from the cell origin
-
     const y0 = y - Y0;
     const z0 = z - Z0;
-    const w0 = w - W0; // For the 4D case, the simplex is a 4D shape I won't even try to describe.
+    const w0 = w - W0;
+    // For the 4D case, the simplex is a 4D shape I won't even try to describe.
     // To find out which of the 24 possible simplices we're in, we need to
     // determine the magnitude ordering of x0, y0, z0 and w0.
     // Six pair-wise comparisons are performed between each possible pair
     // of the four coordinates, and the results are used to rank the numbers.
-
     let rankx = 0;
     let ranky = 0;
     let rankz = 0;
@@ -1424,7 +1341,8 @@ function createNoise4D(random = Math.random) {
     if (x0 > w0) rankx++;else rankw++;
     if (y0 > z0) ranky++;else rankz++;
     if (y0 > w0) ranky++;else rankw++;
-    if (z0 > w0) rankz++;else rankw++; // simplex[c] is a 4-vector with the numbers 0, 1, 2 and 3 in some order.
+    if (z0 > w0) rankz++;else rankw++;
+    // simplex[c] is a 4-vector with the numbers 0, 1, 2 and 3 in some order.
     // Many values of c will never occur, since e.g. x>y>z>w makes x<z, y<w and x<w
     // impossible. Only the 24 indices which have non-zero entries make any sense.
     // We use a thresholding to set the coordinates in turn from the largest magnitude.
@@ -1432,48 +1350,43 @@ function createNoise4D(random = Math.random) {
     // Rank 2 denotes the second largest coordinate.
     // Rank 1 denotes the second smallest coordinate.
     // The integer offsets for the second simplex corner
-
     const i1 = rankx >= 3 ? 1 : 0;
     const j1 = ranky >= 3 ? 1 : 0;
     const k1 = rankz >= 3 ? 1 : 0;
-    const l1 = rankw >= 3 ? 1 : 0; // The integer offsets for the third simplex corner
-
+    const l1 = rankw >= 3 ? 1 : 0;
+    // The integer offsets for the third simplex corner
     const i2 = rankx >= 2 ? 1 : 0;
     const j2 = ranky >= 2 ? 1 : 0;
     const k2 = rankz >= 2 ? 1 : 0;
-    const l2 = rankw >= 2 ? 1 : 0; // The integer offsets for the fourth simplex corner
-
+    const l2 = rankw >= 2 ? 1 : 0;
+    // The integer offsets for the fourth simplex corner
     const i3 = rankx >= 1 ? 1 : 0;
     const j3 = ranky >= 1 ? 1 : 0;
     const k3 = rankz >= 1 ? 1 : 0;
-    const l3 = rankw >= 1 ? 1 : 0; // The fifth corner has all coordinate offsets = 1, so no need to compute that.
-
+    const l3 = rankw >= 1 ? 1 : 0;
+    // The fifth corner has all coordinate offsets = 1, so no need to compute that.
     const x1 = x0 - i1 + G4; // Offsets for second corner in (x,y,z,w) coords
-
     const y1 = y0 - j1 + G4;
     const z1 = z0 - k1 + G4;
     const w1 = w0 - l1 + G4;
     const x2 = x0 - i2 + 2.0 * G4; // Offsets for third corner in (x,y,z,w) coords
-
     const y2 = y0 - j2 + 2.0 * G4;
     const z2 = z0 - k2 + 2.0 * G4;
     const w2 = w0 - l2 + 2.0 * G4;
     const x3 = x0 - i3 + 3.0 * G4; // Offsets for fourth corner in (x,y,z,w) coords
-
     const y3 = y0 - j3 + 3.0 * G4;
     const z3 = z0 - k3 + 3.0 * G4;
     const w3 = w0 - l3 + 3.0 * G4;
     const x4 = x0 - 1.0 + 4.0 * G4; // Offsets for last corner in (x,y,z,w) coords
-
     const y4 = y0 - 1.0 + 4.0 * G4;
     const z4 = z0 - 1.0 + 4.0 * G4;
-    const w4 = w0 - 1.0 + 4.0 * G4; // Work out the hashed gradient indices of the five simplex corners
-
+    const w4 = w0 - 1.0 + 4.0 * G4;
+    // Work out the hashed gradient indices of the five simplex corners
     const ii = i & 255;
     const jj = j & 255;
     const kk = k & 255;
-    const ll = l & 255; // Calculate the contribution from the five corners
-
+    const ll = l & 255;
+    // Calculate the contribution from the five corners
     let t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0 - w0 * w0;
     if (t0 < 0) n0 = 0.0;else {
       const gi0 = ii + perm[jj + perm[kk + perm[ll]]];
@@ -1503,8 +1416,8 @@ function createNoise4D(random = Math.random) {
       const gi4 = ii + 1 + perm[jj + 1 + perm[kk + 1 + perm[ll + 1]]];
       t4 *= t4;
       n4 = t4 * t4 * (permGrad4x[gi4] * x4 + permGrad4y[gi4] * y4 + permGrad4z[gi4] * z4 + permGrad4w[gi4] * w4);
-    } // Sum up and scale the result to cover the range [-1,1]
-
+    }
+    // Sum up and scale the result to cover the range [-1,1]
     return 27.0 * (n0 + n1 + n2 + n3 + n4);
   };
 }
@@ -1514,40 +1427,31 @@ function createNoise4D(random = Math.random) {
  * Do not rely on this export.
  * @private
  */
-
 function buildPermutationTable(random) {
   const tableSize = 512;
   const p = new Uint8Array(tableSize);
-
   for (let i = 0; i < tableSize / 2; i++) {
     p[i] = i;
   }
-
   for (let i = 0; i < tableSize / 2 - 1; i++) {
     const r = i + ~~(random() * (256 - i));
     const aux = p[i];
     p[i] = p[r];
     p[r] = aux;
   }
-
   for (let i = 256; i < tableSize; i++) {
     p[i] = p[i - 256];
   }
-
   return p;
 }
 
 function _classStaticPrivateFieldSpecSet(receiver, classConstructor, descriptor, value) { _classCheckPrivateStaticAccess(receiver, classConstructor); _classCheckPrivateStaticFieldDescriptor(descriptor, "set"); _classApplyDescriptorSet(receiver, descriptor, value); return value; }
-
 function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
-
 function _classStaticPrivateFieldSpecGet(receiver, classConstructor, descriptor) { _classCheckPrivateStaticAccess(receiver, classConstructor); _classCheckPrivateStaticFieldDescriptor(descriptor, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
-
 function _classCheckPrivateStaticFieldDescriptor(descriptor, action) { if (descriptor === undefined) { throw new TypeError("attempted to " + action + " private static field before its declaration"); } }
-
 function _classCheckPrivateStaticAccess(receiver, classConstructor) { if (receiver !== classConstructor) { throw new TypeError("Private static access of wrong provenance"); } }
-
 function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
 /**
  * @typedef FBMOptions
  * @property {number} [octaves=8]
@@ -1574,18 +1478,16 @@ class Random {
    */
   constructor(_seed = Random.NOW + _classStaticPrivateFieldSpecGet(Random, Random, _instanceCount)) {
     var _Random$instanceCount, _Random$instanceCount2;
-
     _defineProperty(this, "create", seed => new Random(seed));
-
     this.seed(_seed);
     _classStaticPrivateFieldSpecSet(Random, Random, _instanceCount, (_Random$instanceCount = _classStaticPrivateFieldSpecGet(Random, Random, _instanceCount), _Random$instanceCount2 = _Random$instanceCount++, _Random$instanceCount)), _Random$instanceCount2;
   }
+
   /**
    * Create an instance of Random.
    * @param {string|number} [seed] If omitted, the global PRNG seed will be used and incremented for each local PRNG.
    * @returns {Random}
    */
-
 
   /**
    * Set the seed for the random number generator
@@ -1599,6 +1501,7 @@ class Random {
       noise4D: createNoise4D(this.rng)
     };
   }
+
   /**
    * Get a float between min and max. Defaults to:
    * - `0 <= x < 1` if no argument supplied
@@ -1607,8 +1510,6 @@ class Random {
    * @param {number} [max]
    * @returns {number}
    */
-
-
   float(min, max) {
     if (arguments.length == 0) {
       min = 0;
@@ -1617,9 +1518,9 @@ class Random {
       max = min;
       min = 0;
     }
-
     return min + (max - min) * this.rng();
   }
+
   /**
    * Get an int between min and max. Defaults to:
    * - `0 <= x < Number.MAX_SAFE_INTEGER` if no argument supplied
@@ -1628,8 +1529,6 @@ class Random {
    * @param {number} [max]
    * @returns {number}
    */
-
-
   int(min, max) {
     if (arguments.length == 0) {
       min = 0;
@@ -1638,16 +1537,14 @@ class Random {
       max = min;
       min = 0;
     }
-
     return Math.floor(this.float(min, max));
   }
+
   /**
    * Get a vec2 included in a radius
    * @param {number} [r=1] radius
    * @returns {import("pex-math").vec2}
    */
-
-
   vec2(r = 1) {
     const x = 2 * this.rng() - 1;
     const y = 2 * this.rng() - 1;
@@ -1655,13 +1552,12 @@ class Random {
     const len = Math.sqrt(x * x + y * y);
     return [rr * x / len, rr * y / len];
   }
+
   /**
    * Get a vec3 included in a radius
    * @param {number} [r=1] radius
    * @returns {import("pex-math").vec3}
    */
-
-
   vec3(r = 1) {
     const x = 2 * this.rng() - 1;
     const y = 2 * this.rng() - 1;
@@ -1670,57 +1566,53 @@ class Random {
     const len = Math.sqrt(x * x + y * y + z * z);
     return [rr * x / len, rr * y / len, rr * z / len];
   }
+
   /**
    * Get a vec2 included in a rectangle
    * @param {number} rect rectangle
    * @returns {import("pex-math").vec2}
    */
-
-
   vec2InRect(rect) {
     return [rect[0][0] + this.rng() * (rect[1][0] - rect[0][0]), rect[0][1] + this.rng() * (rect[1][1] - rect[0][1])];
   }
+
   /**
    * Get a vec3 included in a rectangle bbox
    * @param {number} bbox rectangle bbox
    * @returns {import("pex-math").vec3}
    */
-
-
   vec3InAABB(bbox) {
     return [bbox[0][0] + this.rng() * (bbox[1][0] - bbox[0][0]), bbox[0][1] + this.rng() * (bbox[1][1] - bbox[0][1]), bbox[0][2] + this.rng() * (bbox[1][2] - bbox[0][2])];
   }
+
   /**
    * Returns a chance of an event occuring according to a given probability between 0 and 1.
    * @param {number} [probability=0.5] Float between 0 and 1.
    * @returns {boolean}
    */
-
-
   chance(probability = 0.5) {
     return this.rng() <= probability;
   }
+
   /**
    * Gets a random element from a list
    * @param {Array} list
    * @returns {*}
    */
-
-
   element(list) {
     return list[Math.floor(this.rng() * list.length)];
   }
+
   /**
    * Samples the noise field in 2 dimensions
    * @param {number} x
    * @param {number} y
    * @returns {number} in the interval [-1, 1]
    */
-
-
   noise2(x, y) {
     return this.simplex.noise2D(x, y);
   }
+
   /**
    * Samples the noise field in 3 dimensions
    * @param {number} x
@@ -1728,11 +1620,10 @@ class Random {
    * @param {number} z
    * @returns {number} in the interval [-1, 1]
    */
-
-
   noise3(x, y, z) {
     return this.simplex.noise3D(x, y, z);
   }
+
   /**
    * Samples the noise field in 4 dimensions
    * @param {number} x
@@ -1741,19 +1632,16 @@ class Random {
    * @param {number} w
    * @returns {number} in the interval [-1, 1]
    */
-
-
   noise4(x, y, z, w) {
     return this.simplex.noise4D(x, y, z, w);
   }
+
   /**
    * Fractional Brownian motion (also called fractal Brownian motion) noise. Default to 1/f noise with 8 octaves.
    * @param {FBMOptions} options
    * @param  {...number} d x, y, z?, w?
    * @returns {number} in the interval [-1, 1]
    */
-
-
   fbm({
     octaves = 8,
     lacunarity = 2,
@@ -1763,18 +1651,16 @@ class Random {
     noise
   }, ...d) {
     let value = 0;
-    noise || (noise = this[`noise${d.length}`].bind(this));
-
+    noise ||= this[`noise${d.length}`].bind(this);
     for (let i = 0; i < octaves; i++) {
       value += noise(...d.map(n => n * frequency)) * amplitude;
       frequency *= lacunarity;
       amplitude *= gain;
     }
-
     return value;
   }
-
 }
+
 /**
  * @module pex-random
  *
@@ -1785,15 +1671,11 @@ class Random {
  * - Call `random.create()` to create a local instance of Random with a separate unpredictable PRNG.
  * - Call `random.create("seed")` to create a local instance of Random with a separate predictable PRNG: all other calls to `random.float()` will derive from the new seeded state.
  */
-
-
 var _instanceCount = {
   writable: true,
   value: 0
 };
-
 _defineProperty(Random, "NOW", performance.now());
-
 var index = new Random();
 
 export default index;

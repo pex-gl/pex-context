@@ -1,5 +1,49 @@
-import { o as objectDefineProperty, K as objectSetPrototypeOf, x as isCallable, y as isObject, E as createNonEnumerableProperty, g as functionUncurryThis, f as fails, A as createPropertyDescriptor, L as getBuiltIn, C as hasOwnProperty_1, M as objectIsPrototypeOf, N as copyConstructorProperties, k as descriptors, r as global_1, _ as _export } from './web.dom-collections.iterator-7ea8a356.js';
-import { t as toString_1, j as functionApply } from './esnext.iterator.map-e3ab2956.js';
+import { x as functionBindNative, j as isCallable, y as functionUncurryThis, d as anObject, z as objectDefineProperty, i as isObject, r as classof, m as createNonEnumerableProperty, k as fails, A as createPropertyDescriptor, b as getBuiltIn, l as hasOwnProperty_1, o as objectIsPrototypeOf, B as copyConstructorProperties, C as descriptors, h as global_1, _ as _export } from './classof-b64a2315.js';
+
+var FunctionPrototype = Function.prototype;
+var apply = FunctionPrototype.apply;
+var call = FunctionPrototype.call;
+
+// eslint-disable-next-line es/no-reflect -- safe
+var functionApply = typeof Reflect == 'object' && Reflect.apply || (functionBindNative ? call.bind(apply) : function () {
+  return call.apply(apply, arguments);
+});
+
+var $String = String;
+var $TypeError = TypeError;
+
+var aPossiblePrototype = function (argument) {
+  if (typeof argument == 'object' || isCallable(argument)) return argument;
+  throw $TypeError("Can't set " + $String(argument) + ' as a prototype');
+};
+
+/* eslint-disable no-proto -- safe */
+
+
+
+
+// `Object.setPrototypeOf` method
+// https://tc39.es/ecma262/#sec-object.setprototypeof
+// Works with __proto__ only. Old v8 can't work with null proto objects.
+// eslint-disable-next-line es/no-object-setprototypeof -- safe
+var objectSetPrototypeOf = Object.setPrototypeOf || ('__proto__' in {} ? function () {
+  var CORRECT_SETTER = false;
+  var test = {};
+  var setter;
+  try {
+    // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+    setter = functionUncurryThis(Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').set);
+    setter(test, []);
+    CORRECT_SETTER = test instanceof Array;
+  } catch (error) { /* empty */ }
+  return function setPrototypeOf(O, proto) {
+    anObject(O);
+    aPossiblePrototype(proto);
+    if (CORRECT_SETTER) setter(O, proto);
+    else O.__proto__ = proto;
+    return O;
+  };
+}() : undefined);
 
 var defineProperty = objectDefineProperty.f;
 
@@ -26,6 +70,13 @@ var inheritIfRequired = function ($this, dummy, Wrapper) {
   return $this;
 };
 
+var $String$1 = String;
+
+var toString_1 = function (argument) {
+  if (classof(argument) === 'Symbol') throw TypeError('Cannot convert a Symbol value to a string');
+  return $String$1(argument);
+};
+
 var normalizeStringArgument = function (argument, $default) {
   return argument === undefined ? arguments.length < 2 ? '' : $default : toString_1(argument);
 };
@@ -45,7 +96,7 @@ var TEST = (function (arg) { return String($Error(arg).stack); })('zxcasd');
 var V8_OR_CHAKRA_STACK_ENTRY = /\n\s*at [^:]*:[^\n]*/;
 var IS_V8_OR_CHAKRA_STACK = V8_OR_CHAKRA_STACK_ENTRY.test(TEST);
 
-var clearErrorStack = function (stack, dropEntries) {
+var errorStackClear = function (stack, dropEntries) {
   if (IS_V8_OR_CHAKRA_STACK && typeof stack == 'string' && !$Error.prepareStackTrace) {
     while (dropEntries--) stack = replace(stack, V8_OR_CHAKRA_STACK_ENTRY, '');
   } return stack;
@@ -54,7 +105,7 @@ var clearErrorStack = function (stack, dropEntries) {
 var errorStackInstallable = !fails(function () {
   var error = Error('a');
   if (!('stack' in error)) return true;
-  // eslint-disable-next-line es-x/no-object-defineproperty -- safe
+  // eslint-disable-next-line es/no-object-defineproperty -- safe
   Object.defineProperty(error, 'stack', createPropertyDescriptor(1, 7));
   return error.stack !== 7;
 });
@@ -81,7 +132,7 @@ var wrapErrorConstructorWithCause = function (FULL_NAME, wrapper, FORCED, IS_AGG
     var message = normalizeStringArgument(IS_AGGREGATE_ERROR ? b : a, undefined);
     var result = IS_AGGREGATE_ERROR ? new OriginalError(a) : new OriginalError();
     if (message !== undefined) createNonEnumerableProperty(result, 'message', message);
-    if (errorStackInstallable) createNonEnumerableProperty(result, 'stack', clearErrorStack(result.stack, 2));
+    if (errorStackInstallable) createNonEnumerableProperty(result, 'stack', errorStackClear(result.stack, 2));
     if (this && objectIsPrototypeOf(OriginalErrorPrototype, this)) inheritIfRequired(result, this, WrappedError);
     if (arguments.length > OPTIONS_POSITION) installErrorCause(result, arguments[OPTIONS_POSITION]);
     return result;
@@ -167,4 +218,4 @@ exportWebAssemblyErrorCauseWrapper('RuntimeError', function (init) {
   return function RuntimeError(message) { return functionApply(init, this, arguments); };
 });
 
-export { inheritIfRequired as i };
+export { objectSetPrototypeOf as o };

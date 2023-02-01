@@ -1,7 +1,5 @@
-import './es.string.replace-a4fa4326.js';
-import { g as getIteratorDirect } from './esnext.iterator.map-e3ab2956.js';
-import { _ as _export } from './web.dom-collections.iterator-7ea8a356.js';
-import { a as asyncIteratorIteration, i as iterate } from './iterate-b9a2a58a.js';
+import { _ as _export, g as getIteratorDirect, a as aCallable } from './classof-b64a2315.js';
+import { a as asyncIteratorIteration, i as iterate } from './iterate-e1e675f3.js';
 
 // https://github.com/tc39/proposal-iterator-helpers
 
@@ -18,9 +16,15 @@ _export({ target: 'AsyncIterator', proto: true, real: true, forced: true }, {
 
 
 
+
 _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
   forEach: function forEach(fn) {
-    iterate(getIteratorDirect(this), fn, { IS_RECORD: true });
+    var record = getIteratorDirect(this);
+    var counter = 0;
+    aCallable(fn);
+    iterate(record, function (value) {
+      fn(value, counter++);
+    }, { IS_RECORD: true });
   }
 });
 
@@ -34,7 +38,6 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
 /**
  * @private
  */
-
 function oklabToLinearSrgb(color, L, a, b) {
   const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
   const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
@@ -44,10 +47,10 @@ function oklabToLinearSrgb(color, L, a, b) {
   color[2] = -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s;
   return color;
 }
+
 /**
  * @private
  */
-
 function linearSrgbToOklab(color, lr, lg, lb) {
   const l = Math.cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb);
   const m = Math.cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb);
@@ -57,6 +60,7 @@ function linearSrgbToOklab(color, lr, lg, lb) {
   color[2] = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
   return color;
 }
+
 /**
  * Updates a color based on Oklab values and alpha.
  * @param {import("./color.js").color} color
@@ -66,7 +70,6 @@ function linearSrgbToOklab(color, lr, lg, lb) {
  * @param {number} [α]
  * @return {import("./color.js").color}
  */
-
 function fromOklab(color, L, a, b, α) {
   oklabToLinearSrgb(color, L, a, b);
   color[0] = fromLinear(color[0]);
@@ -74,13 +77,13 @@ function fromOklab(color, L, a, b, α) {
   color[2] = fromLinear(color[2]);
   return setAlpha(color, α);
 }
+
 /**
  * Returns an Oklab representation of a given color.
  * @param {import("./color.js").color} color
  * @param {Array} out
  * @return {oklab}
  */
-
 function toOklab([r, g, b, a], out = []) {
   linearSrgbToOklab(out, toLinear(r), toLinear(g), toLinear(b));
   return setAlpha(out, a);
@@ -90,28 +93,29 @@ const setAlpha = (color, a) => {
   if (a !== undefined) color[3] = a;
   return color;
 };
+
 /**
  * Convert component from linear value
  * @param {number} c
  * @returns {number}
  */
-
 const fromLinear = c => c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055;
+
 /**
  * Convert component to linear value
  * @param {number} c
  * @returns {number}
  */
-
 const toLinear = c => c > 0.04045 ? ((c + 0.055) / 1.055) ** 2.4 : c / 12.92;
 const floorArray = (color, precision = 5) => {
   const p = 10 ** precision;
   color.forEach((n, i) => color[i] = Math.floor((n + Number.EPSILON) * p) / p);
   return color;
 };
-const TMP = [0, 0, 0]; // HSLuv
-// https://github.com/hsluv/hsluv/tree/master/haxe/src/hsluv
+const TMP = [0, 0, 0];
 
+// HSLuv
+// https://github.com/hsluv/hsluv/tree/master/haxe/src/hsluv
 const L_EPSILON = 1e-10;
 const m = [[3.240969941904521, -1.537383177570093, -0.498610760293], [-0.96924363628087, 1.87596750150772, 0.041555057407175], [0.055630079696993, -0.20397695888897, 1.056971514242878]];
 const minv = [[0.41239079926595, 0.35758433938387, 0.18048078840183], [0.21263900587151, 0.71516867876775, 0.072192315360733], [0.019330818715591, 0.11919477979462, 0.95053215224966]];
@@ -119,16 +123,12 @@ const REF_U = 0.19783000664283;
 const REF_V = 0.46831999493879;
 const KAPPA = 9.032962962;
 const EPSILON = 0.000088564516;
-
 const yToL = Y => Y <= EPSILON ? Y * KAPPA : 1.16 * Y ** (1 / 3) - 0.16;
-
 const lToY = L => L <= 0.08 ? L / KAPPA : ((L + 0.16) / 1.16) ** 3;
-
 const xyzToLuv = ([X, Y, Z]) => {
   const divider = X + 15 * Y + 3 * Z;
   let varU = 4 * X;
   let varV = 9 * Y;
-
   if (divider !== 0) {
     varU /= divider;
     varV /= divider;
@@ -136,7 +136,6 @@ const xyzToLuv = ([X, Y, Z]) => {
     varU = NaN;
     varV = NaN;
   }
-
   const L = yToL(Y);
   if (L === 0) return [0, 0, 0];
   return [L, 13 * L * (varU - REF_U), 13 * L * (varV - REF_V)];
@@ -152,34 +151,31 @@ const luvToXyz = ([L, U, V]) => {
 const luvToLch = ([L, U, V]) => {
   const C = Math.sqrt(U * U + V * V);
   let H;
-
   if (C < L_EPSILON) {
     H = 0;
   } else {
     H = Math.atan2(V, U) / (2 * Math.PI);
     if (H < 0) H = 1 + H;
   }
-
   return [L, C, H];
 };
 const lchToLuv = ([L, C, H]) => {
   const Hrad = H * 2 * Math.PI;
   return [L, Math.cos(Hrad) * C, Math.sin(Hrad) * C];
-}; // TODO: normalize
+};
 
+// TODO: normalize
 const getBounds = L => {
   const result = [];
   const sub1 = (L + 16) ** 3 / 1560896;
   const sub2 = sub1 > EPSILON ? sub1 : L / KAPPA;
   let _g = 0;
-
   while (_g < 3) {
     const c = _g++;
     const m1 = m[c][0];
     const m2 = m[c][1];
     const m3 = m[c][2];
     let _g1 = 0;
-
     while (_g1 < 2) {
       const t = _g1++;
       const top1 = (284517 * m1 - 94839 * m3) * sub2;
@@ -191,11 +187,11 @@ const getBounds = L => {
       });
     }
   }
-
   return result;
-}; // Okhsl/Okhsv
-// https://github.com/bottosson/bottosson.github.io/blob/master/misc/colorpicker/colorconversion.js
+};
 
+// Okhsl/Okhsv
+// https://github.com/bottosson/bottosson.github.io/blob/master/misc/colorpicker/colorconversion.js
 const k1 = 0.206;
 const k2 = 0.03;
 const k3 = (1 + k1) / (1 + k2);
@@ -205,10 +201,8 @@ function toe(x) {
 function toeInv(x) {
   return (x * x + k1 * x) / (k3 * (x + k2));
 }
-
 function computeMaxSaturation(a, b) {
   let k0, k1, k2, k3, k4, wl, wm, ws;
-
   if (-1.88170328 * a - 0.80936493 * b > 1) {
     k0 = 1.19086277;
     k1 = 1.76576728;
@@ -237,7 +231,6 @@ function computeMaxSaturation(a, b) {
     wm = -0.7034186147;
     ws = 1.707614701;
   }
-
   let S = k0 + k1 * a + k2 * b + k3 * a * a + k4 * a * b;
   const kl = 0.3963377774 * a + 0.2158037573 * b;
   const km = -0.1055613458 * a - 0.0638541728 * b;
@@ -260,7 +253,6 @@ function computeMaxSaturation(a, b) {
   S = S - f * f1 / (f1 * f1 - 0.5 * f * f2);
   return S;
 }
-
 function findCusp(a, b) {
   const sCusp = computeMaxSaturation(a, b);
   oklabToLinearSrgb(TMP, 1, sCusp * a, sCusp * b);
@@ -306,7 +298,6 @@ var utils = /*#__PURE__*/Object.freeze({
 function fromHex(color, hex) {
   hex = hex.replace(/^#/, "");
   let a = 1;
-
   if (hex.length === 8) {
     a = parseInt(hex.slice(6, 8), 16) / 255;
     hex = hex.slice(0, 6);
@@ -314,11 +305,9 @@ function fromHex(color, hex) {
     a = parseInt(hex.slice(3, 4).repeat(2), 16) / 255;
     hex = hex.slice(0, 3);
   }
-
   if (hex.length === 3) {
     hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
   }
-
   const num = parseInt(hex, 16);
   color[0] = (num >> 16 & 255) / 255;
   color[1] = (num >> 8 & 255) / 255;
@@ -326,13 +315,13 @@ function fromHex(color, hex) {
   if (color[3] !== undefined) color[3] = a;
   return color;
 }
+
 /**
  * Returns a hexadecimal string representation of a given color.
  * @param {import("./color.js").color} color
  * @param {boolean} alpha Handle alpha
  * @return {hex}
  */
-
 function toHex(color, alpha = true) {
   const c = color.map(val => Math.round(val * 255));
   return `#${(c[2] | c[1] << 8 | c[0] << 16 | 1 << 24).toString(16).slice(1).toUpperCase()}${alpha && color[3] !== undefined && color[3] !== 1 ? (c[3] | 1 << 8).toString(16).slice(1) : ""}`;
@@ -353,6 +342,7 @@ function hue2rgb(p, q, t) {
   if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
   return p;
 }
+
 /**
  * Updates a color based on HSL values and alpha.
  * @param {import("./color.js").color} color
@@ -362,8 +352,6 @@ function hue2rgb(p, q, t) {
  * @param {number} [a]
  * @return {import("./color.js").color}
  */
-
-
 function fromHSL(color, h, s, l, a) {
   if (s === 0) {
     color[0] = color[1] = color[2] = l; // achromatic
@@ -374,44 +362,37 @@ function fromHSL(color, h, s, l, a) {
     color[1] = hue2rgb(p, q, h);
     color[2] = hue2rgb(p, q, h - 1 / 3);
   }
-
   return setAlpha(color, a);
 }
+
 /**
  * Returns a HSL representation of a given color.
  * @param {import("./color.js").color} color
  * @param {Array} out
  * @return {hsl}
  */
-
 function toHSL([r, g, b, a], out = []) {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   out[2] = (max + min) / 2;
-
   if (max === min) {
     out[0] = out[1] = 0; // achromatic
   } else {
     const d = max - min;
     out[1] = out[2] > 0.5 ? d / (2 - max - min) : d / (max + min);
-
     switch (max) {
       case r:
         out[0] = (g - b) / d + (g < b ? 6 : 0);
         break;
-
       case g:
         out[0] = (b - r) / d + 2;
         break;
-
       case b:
         out[0] = (r - g) / d + 4;
         break;
     }
-
     out[0] /= 6;
   }
-
   return setAlpha(out, a);
 }
 

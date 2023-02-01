@@ -1,18 +1,14 @@
-import './common/es.error.cause-c4c3fd35.js';
-import { B as anObject, a as aCallable, l as functionCall, _ as _export } from './common/web.dom-collections.iterator-7ea8a356.js';
-import { v as toHex, b as toHSL, a as fromHSL } from './common/hsl-82b53c22.js';
-import './common/iterate-b9a2a58a.js';
-import './common/esnext.iterator.filter-5ef67ce8.js';
-import './common/esnext.iterator.map-e3ab2956.js';
-import { m as map, c as clamp } from './common/utils-22518481.js';
-import './common/es.array.includes-ee97dfa9.js';
-import './common/es.string.replace-a4fa4326.js';
+import './common/es.error.cause-80fb3656.js';
+import { v as toHex, b as toHSL, a as fromHSL } from './common/hsl-5dfe9087.js';
+import './common/iterate-e1e675f3.js';
+import './common/esnext.iterator.filter-c3958098.js';
+import { d as anObject, a as aCallable, f as functionCall, _ as _export } from './common/classof-b64a2315.js';
+import { m as map, c as clamp } from './common/utils-7e499548.js';
 
 function _classApplyDescriptorGet(receiver, descriptor) {
   if (descriptor.get) {
     return descriptor.get.call(receiver);
   }
-
   return descriptor.value;
 }
 
@@ -20,7 +16,6 @@ function _classExtractFieldDescriptor(receiver, privateMap, action) {
   if (!privateMap.has(receiver)) {
     throw new TypeError("attempted to " + action + " private field on non-instance");
   }
-
   return privateMap.get(receiver);
 }
 
@@ -36,7 +31,6 @@ function _classApplyDescriptorSet(receiver, descriptor, value) {
     if (!descriptor.writable) {
       throw new TypeError("attempted to set read only private field");
     }
-
     descriptor.value = value;
   }
 }
@@ -92,24 +86,26 @@ _export({ target: 'WeakMap', proto: true, real: true, forced: true }, {
   emplace: mapEmplace
 });
 
+/** @module plane */
+
 /**
  * Enum for different side values
  * @readonly
  * @enum {number}
  */
-
 const Side = Object.freeze({
   OnPlane: 0,
   Same: -1,
   Opposite: 1
 });
 
+/** @module ray */
+
 /**
  * Enum for different intersections values
  * @readonly
  * @enum {number}
  */
-
 const Intersections = Object.freeze({
   Intersect: 1,
   NoIntersect: 0,
@@ -118,31 +114,32 @@ const Intersections = Object.freeze({
   TriangleDegenerate: -2
 });
 
+/** @module rect */
+
 /**
  * Returns the width of a rectangle.
  * @param {import("./types.js").rect} a
  * @returns {number}
  */
-
 function width(a) {
   return a[1][0] - a[0][0];
 }
+
 /**
  * Returns the height of a rectangle.
  * @param {import("./types.js").rect} a
  * @returns {number}
  */
-
 function height(a) {
   return a[1][1] - a[0][1];
 }
+
 /**
  * Checks if a point is inside a rectangle.
  * @param {import("./types.js").rect} a
  * @param {import("pex-math/types/types").vec2} p
  * @returns {boolean}
  */
-
 function containsPoint(a, [x, y]) {
   return x >= a[0][0] && x <= a[1][0] && y >= a[0][1] && y <= a[1][1];
 }
@@ -154,7 +151,6 @@ function rectSet4(a, x, y, w, h) {
   a[1][1] = y + h;
   return a;
 }
-
 function makePaletteImage(item, w, img) {
   const canvas = document.createElement("canvas");
   canvas.width = w;
@@ -166,7 +162,6 @@ function makePaletteImage(item, w, img) {
   item.options.paletteImage.aspectRatio = canvas.height / canvas.width;
   item.dirty = true;
 }
-
 class CanvasRenderer {
   constructor({
     width,
@@ -182,7 +177,6 @@ class CanvasRenderer {
     this.ctx = this.canvas.getContext("2d");
     this.dirty = true;
   }
-
   draw(items) {
     this.dirty = false;
     const {
@@ -228,12 +222,10 @@ class CanvasRenderer {
       const y = dy + padding;
       const width = w - padding * 2;
       ctx.fillRect(x, y, width, tabHeight);
-
       if (!tab.current) {
         ctx.fillStyle = this.theme.background;
         ctx.fillRect(x, dy + tabHeight + padding / 2, width, padding / 2);
       }
-
       ctx.fillStyle = tab.current ? this.theme.tabColorActive : this.theme.tabColor;
       ctx.fillText(tab.title, x + textPadding, y + tabHeight / 2 + fontCapOffset);
       rectSet4(tab.activeArea, x, y, width, tabHeight);
@@ -243,20 +235,17 @@ class CanvasRenderer {
     let maxWidth = 0;
     let maxHeight = 0;
     let needInitialDy = true;
-
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (Number.isFinite(item.x)) dx = item.x;
       if (Number.isFinite(item.y)) dy = item.y;
       let eh = itemHeight;
       if (item.type === "tab") continue;
-
       if (tabs.length > 0) {
         const prevTabs = items.filter(({
           type
         }, index) => index < i && type === "tab");
         const parentTab = prevTabs[prevTabs.length - 1];
-
         if (parentTab && !parentTab.current) {
           continue;
         } else {
@@ -265,14 +254,13 @@ class CanvasRenderer {
             dy += tabHeight;
           }
         }
-
         needInitialDy = false;
       }
-
       const x = dx + padding;
       const width = w - padding * 2;
-      const textY = titleHeight / 2 + fontCapOffset; // Compute item height
+      const textY = titleHeight / 2 + fontCapOffset;
 
+      // Compute item height
       if (item.type === "column") {
         dx = leftOffset + columnIndex * (w + gap);
         dy = defaultDy;
@@ -290,7 +278,6 @@ class CanvasRenderer {
         const numSliders = item.options.alpha ? 4 : 3;
         const sliderGap = item.options.paletteImage ? 0 : 1;
         eh = titleHeight + numSliders * sliderHeight + (numSliders - sliderGap) * padding;
-
         if (item.options.paletteImage) {
           eh += width * item.options.paletteImage.aspectRatio;
         }
@@ -317,17 +304,17 @@ class CanvasRenderer {
       } else if (item.type === "label") {
         eh = item.title.split("\n").length * titleHeight;
       }
+      const needsPadding = !["column", "label"].includes(item.type);
 
-      const needsPadding = !["column", "label"].includes(item.type); // Draw background
-
+      // Draw background
       if (item.type === "separator") {
         eh /= 2;
       } else {
         ctx.fillStyle = this.theme.background;
         ctx.fillRect(dx, dy, w, eh + (needsPadding ? padding : 0));
-      } // Draw item
+      }
 
-
+      // Draw item
       if (item.type === "slider") {
         const y = dy + titleHeight;
         const height = eh - titleHeight;
@@ -345,7 +332,6 @@ class CanvasRenderer {
         const numSliders = isColor ? item.options.alpha ? 4 : 3 : item.getValue().length;
         ctx.fillStyle = this.theme.color;
         ctx.fillText(`${item.title}: ${item.getStrValue()}`, x + textPadding, dy + textY);
-
         for (let j = 0; j < numSliders; j++) {
           const sliderY = y + j * (sliderHeight + padding);
           ctx.fillStyle = this.theme.input;
@@ -353,33 +339,25 @@ class CanvasRenderer {
           ctx.fillStyle = this.theme.accent;
           ctx.fillRect(x, sliderY, width * item.getNormalizedValue(j), sliderHeight);
         }
-
         if (isColor) {
-          var _item$options;
-
           const sqSize = titleHeight * 0.6;
           ctx.fillStyle = toHex(item.contextObject[item.attributeName]);
           ctx.fillRect(dx + w - sqSize - padding, dy + titleHeight * 0.2, sqSize, sqSize);
-
-          if ((_item$options = item.options) !== null && _item$options !== void 0 && _item$options.palette && !item.options.paletteImage) {
+          if (item.options?.palette && !item.options.paletteImage) {
             if (item.options.palette.width) {
               makePaletteImage(item, w, item.options.palette);
             } else {
               const img = new Image();
-
               img.onload = () => {
                 makePaletteImage(item, w, img);
               };
-
               img.src = item.options.palette;
             }
           }
-
           if (item.options.paletteImage) {
             ctx.drawImage(item.options.paletteImage, x, y + (sliderHeight + padding) * numSliders, width, width * item.options.paletteImage.aspectRatio);
           }
         }
-
         rectSet4(item.activeArea, x, y, width, height);
       } else if (item.type === "button") {
         const y = dy + padding;
@@ -402,7 +380,6 @@ class CanvasRenderer {
         const height = item.items.length * itemHeight + (item.items.length - 1) * 2 * padding;
         ctx.fillStyle = this.theme.color;
         ctx.fillText(item.title, x + textPadding, dy + textY);
-
         for (let j = 0; j < item.items.length; j++) {
           const i = item.items[j];
           const radioY = j * (itemHeight + padding * 2);
@@ -411,20 +388,17 @@ class CanvasRenderer {
           ctx.fillStyle = this.theme.color;
           ctx.fillText(i.name, x + itemHeight + textPadding * 2, titleHeight + radioY + dy + itemHeight / 2 + fontCapOffset);
         }
-
         rectSet4(item.activeArea, x, y, itemHeight, height);
       } else if (item.type === "texturelist") {
         const y = dy + titleHeight;
         ctx.fillStyle = this.theme.color;
         ctx.fillText(item.title, x + textPadding, dy + textY);
-
         for (let j = 0; j < item.items.length; j++) {
           const col = j % item.itemsPerRow;
           const row = Math.floor(j / item.itemsPerRow);
           const itemX = x + col * cellSize;
           const itemY = dy + titleHeight + row * cellSize;
           let shrink = 0;
-
           if (item.items[j].value === item.contextObject[item.attributeName]) {
             ctx.fillStyle = "none";
             ctx.strokeStyle = this.theme.accent;
@@ -433,14 +407,11 @@ class CanvasRenderer {
             ctx.lineWidth = 1;
             shrink = padding;
           }
-
           if (!item.items[j].activeArea) {
             item.items[j].activeArea = [[0, 0], [0, 0]];
           }
-
           rectSet4(item.items[j].activeArea, itemX + shrink, itemY + shrink, cellSize - 1 - 2 * shrink, cellSize - 1 - 2 * shrink);
         }
-
         rectSet4(item.activeArea, x, y, width, cellSize * numRows);
       } else if (item.type === "texture2D") {
         const y = dy + titleHeight;
@@ -468,30 +439,21 @@ class CanvasRenderer {
         ctx.fillRect(x, y, item.activeArea[1][0] - item.activeArea[0][0], item.activeArea[1][1] - item.activeArea[0][1]);
         ctx.fillStyle = this.theme.color;
         ctx.fillText(item.contextObject[item.attributeName], x + textPadding * 2, y + buttonHeight / 2 + fontCapOffset);
-
         if (item.focus) {
           ctx.strokeStyle = this.theme.accent;
           ctx.strokeRect(item.activeArea[0][0] - 0.5, item.activeArea[0][1] - 0.5, item.activeArea[1][0] - item.activeArea[0][0], item.activeArea[1][1] - item.activeArea[0][1]);
         }
-
         rectSet4(item.activeArea, x, y, width, height);
       } else if (item.type === "graph") {
         const y = dy + titleHeight;
         const height = eh - titleHeight;
         if (item.values.length > width) item.values.shift();
-
         if (item.values.length) {
-          var _item$options$max;
-
-          item.max = (_item$options$max = item.options.max) !== null && _item$options$max !== void 0 ? _item$options$max : Math.max(...item.values);
+          item.max = item.options.max ?? Math.max(...item.values);
         }
-
         if (item.values.length) {
-          var _item$options$min;
-
-          item.min = (_item$options$min = item.options.min) !== null && _item$options$min !== void 0 ? _item$options$min : Math.min(...item.values);
+          item.min = item.options.min ?? Math.min(...item.values);
         }
-
         ctx.fillStyle = this.theme.graphBackground;
         ctx.fillRect(x, y, width, height);
         ctx.strokeStyle = this.theme.background;
@@ -510,24 +472,19 @@ class CanvasRenderer {
         ctx.font = `${fontSize * 0.5}px ${fontFamily}`;
         ctx.textAlign = "right";
         const textX = x + width - padding;
-
         if (item.max !== undefined) {
           ctx.fillText(item.max, textX, y + padding * 2.5);
         }
-
         if (item.min !== undefined) {
           ctx.fillText(item.min, textX, y + height - padding * 2.5);
         }
-
         ctx.restore();
         ctx.strokeStyle = this.theme.color;
         ctx.beginPath();
-
         for (let j = 0; j < item.values.length; j++) {
           const v = map(item.values[j], item.min, item.max, 0, 1);
           ctx[j === 0 ? "moveTo" : "lineTo"](x + j, y + height - v * (height - padding * 2) - padding);
         }
-
         ctx.stroke();
         ctx.fillText(`${item.title}: ${item.values[item.values.length - 1] || ""}`, x + textPadding, dy + textY);
       } else if (item.type === "stats") {
@@ -539,7 +496,6 @@ class CanvasRenderer {
       } else if (item.type === "label") {
         ctx.fillStyle = this.theme.color;
         const lines = item.title.split("\n");
-
         for (let i = 0; i < lines.length; i++) {
           ctx.fillText(lines[i], x + textPadding, dy + textY + titleHeight * i);
         }
@@ -547,69 +503,52 @@ class CanvasRenderer {
         ctx.fillStyle = this.theme.color;
         ctx.fillText(item.title, x + textPadding, dy + textY);
       }
-
       dy += eh + (needsPadding ? padding : 0) + gap;
       maxWidth = Math.max(maxWidth, dx + w + leftOffset);
       maxHeight = Math.max(maxHeight, dy + topOffset);
     }
-
     this.afterDraw();
     ctx.restore();
     maxWidth = Math.max(maxWidth, tabs.length * (w + gap));
-
     if (maxWidth && maxHeight) {
       maxWidth = maxWidth * this.pixelRatio | 0;
       maxHeight = maxHeight * this.pixelRatio | 0;
-
       if (this.canvas.width !== maxWidth) {
         this.canvas.width = maxWidth;
         this.dirty = true;
       }
-
       if (this.canvas.height !== maxHeight) {
         this.canvas.height = maxHeight;
         this.dirty = true;
       }
-
       if (this.dirty) {
         this.draw(items);
       }
     }
   }
-
   afterDraw() {}
-
   getTexture() {
     return this.canvas;
   }
-
   dispose() {
     this.canvas.remove();
   }
-
 }
 
 function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
-
 function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
-
 var _ctx = /*#__PURE__*/new WeakMap();
-
 class PexContextRenderer extends CanvasRenderer {
   constructor(opts) {
     super(opts);
-
     _classPrivateFieldInitSpec(this, _ctx, {
       writable: true,
       value: void 0
     });
-
     const {
       ctx
     } = opts;
-
     _classPrivateFieldSet(this, _ctx, ctx);
-
     this.rendererTexture = ctx.texture2D({
       width: opts[0],
       height: opts[1],
@@ -617,11 +556,9 @@ class PexContextRenderer extends CanvasRenderer {
       encoding: ctx.Encoding.SRGB
     });
   }
-
   draw(items) {
     super.draw(items);
   }
-
   afterDraw() {
     _classPrivateFieldGet(this, _ctx).update(this.rendererTexture, {
       data: this.canvas,
@@ -630,36 +567,29 @@ class PexContextRenderer extends CanvasRenderer {
       flipY: true
     });
   }
-
   getTexture() {
     return this.rendererTexture;
   }
-
   dispose() {
     super.dispose();
-
     _classPrivateFieldGet(this, _ctx).dispose(this.rendererTexture);
   }
-
 }
 
 class DebugRenderer extends CanvasRenderer {
   constructor(opts) {
     super(opts);
   }
-
   draw(items) {
     this.items = items;
     super.draw(items);
   }
-
   afterDraw() {
     this.items.forEach(item => {
       this.ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
       this.ctx.strokeRect(item.activeArea[0][0], item.activeArea[0][1], width(item.activeArea), height(item.activeArea));
     });
   }
-
 }
 
 var index = /*#__PURE__*/Object.freeze({
@@ -673,16 +603,13 @@ class GUIControl {
   constructor(options) {
     Object.assign(this, options);
   }
-
   setPosition(x, y) {
     this.x = x;
     this.y = y;
   }
-
   getNormalizedValue(idx) {
     if (!this.contextObject) return 0;
     let val = this.contextObject[this.attributeName];
-
     if (this.options && this.options.min !== undefined && this.options.max !== undefined) {
       if (this.type === "multislider") {
         val = (val[idx] - this.options.min) / (this.options.max - this.options.min);
@@ -696,26 +623,20 @@ class GUIControl {
         val = (val - this.options.min) / (this.options.max - this.options.min);
       }
     }
-
     return val;
   }
-
   setNormalizedValue(val, idx) {
     if (!this.contextObject) return;
-
     if (this.options && this.options.min !== undefined && this.options.max !== undefined) {
       if (this.type === "multislider") {
         const a = this.contextObject[this.attributeName];
-
         if (idx >= a.length) {
           return;
         }
-
         a[idx] = this.options.min + val * (this.options.max - this.options.min);
         val = a;
       } else if (this.type === "color") {
         const c = this.contextObject[this.attributeName];
-
         if (idx === 3) {
           c[3] = val;
         } else {
@@ -725,24 +646,19 @@ class GUIControl {
           if (idx === 2) hsl[2] = val;
           fromHSL(c, ...hsl);
         }
-
         val = c;
       } else {
         val = this.options.min + val * (this.options.max - this.options.min);
       }
-
       if (this.options && this.options.step) {
         val = val - val % this.options.step;
       }
     }
-
     this.contextObject[this.attributeName] = val;
   }
-
   getSerializedValue() {
     return this.contextObject ? this.contextObject[this.attributeName] : "";
   }
-
   setSerializedValue(value) {
     if (this.type === "slider") {
       this.contextObject[this.attributeName] = value;
@@ -759,7 +675,6 @@ class GUIControl {
       this.contextObject[this.attributeName] = value;
     }
   }
-
   getValue() {
     if (this.type === "slider") {
       return this.contextObject[this.attributeName];
@@ -773,17 +688,14 @@ class GUIControl {
       return 0;
     }
   }
-
   getStrValue() {
     if (this.type === "slider") {
       const str = `${this.contextObject[this.attributeName]}`;
       let dotPos = str.indexOf(".") + 1;
       if (dotPos === 0) return `${str}.0`;
-
       while (str.charAt(dotPos) === "0") {
         dotPos++;
       }
-
       return str.substr(0, dotPos + 2);
     } else if (this.type === "color") {
       return this.options.alpha ? "HSLA" : "HSL";
@@ -793,7 +705,6 @@ class GUIControl {
       return "";
     }
   }
-
 }
 
 var DEFAULT_THEME = {
@@ -823,8 +734,7 @@ var DEFAULT_THEME = {
   graphBackground: "rgba(50, 50, 50, 1)"
 };
 
-var VERT = /* glsl */
-`
+var VERT = /* glsl */`
 attribute vec2 aPosition;
 attribute vec2 aTexCoord0;
 
@@ -847,8 +757,7 @@ void main() {
   gl_Position = vec4(pos, 0.0, 1.0);
 }`;
 
-var GAMMA = /* glsl */
-`
+var GAMMA = /* glsl */`
 const float gamma = 2.2;
 
 // Linear
@@ -886,8 +795,7 @@ vec4 toGamma(vec4 v) {
 }
 `;
 
-var RGBM = /* glsl */
-`
+var RGBM = /* glsl */`
 vec3 decodeRGBM (vec4 rgbm) {
   vec3 r = rgbm.rgb * (7.0 * rgbm.a);
   return r * r;
@@ -904,8 +812,7 @@ vec4 encodeRGBM (vec3 rgb_0) {
 }
 `;
 
-var DECODE_ENCODE = /* glsl */
-`
+var DECODE_ENCODE = /* glsl */`
 #define LINEAR 1
 #define GAMMA 2
 #define SRGB 3
@@ -928,8 +835,7 @@ vec4 encode(vec4 pixel, int encoding) {
 }
 `;
 
-var TEXTURE_CUBE_FRAG = /* glsl */
-`#version 100
+var TEXTURE_CUBE_FRAG = /* glsl */`#version 100
 precision highp float;
 
 ${GAMMA}
@@ -963,8 +869,7 @@ void main() {
   gl_FragColor = encode(color, 2); // to gamma
 }`;
 
-var TEXTURE_2D_FRAG = /* glsl */
-`#version 100
+var TEXTURE_2D_FRAG = /* glsl */`#version 100
 precision highp float;
 
 ${GAMMA}
@@ -986,8 +891,8 @@ void main() {
 }`;
 
 function _classPrivateFieldInitSpec$1(obj, privateMap, value) { _checkPrivateRedeclaration$1(obj, privateMap); privateMap.set(obj, value); }
-
 function _checkPrivateRedeclaration$1(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+
 /**
  * @typedef {Object} GUIControlOptions
  * @property {number} [min=0]
@@ -999,7 +904,6 @@ function _checkPrivateRedeclaration$1(obj, privateCollection) { if (privateColle
  * @property {boolean} [flipY] Flip texture 2D vertically.
  * @property {number} [level] Level of detail for cube textures.
  */
-
 /**
  * @typedef {Object} GUIOptions
  * @property {boolean} [pixelRatio=window.devicePixelRatio]
@@ -1009,37 +913,30 @@ function _checkPrivateRedeclaration$1(obj, privateCollection) { if (privateColle
  */
 
 const isArrayLike = value => Array.isArray(value) || ArrayBuffer.isView(value);
+
 /**
  * GUI controls for PEX.
  * @property {boolean} [enabled=true] Enable/disable pointer interaction and drawing.
  */
-
-
 var _pixelRatio = /*#__PURE__*/new WeakMap();
-
 var _scale = /*#__PURE__*/new WeakMap();
-
 class GUI {
   get size() {
     return this.ctx.gl ? [this.ctx.gl.drawingBufferWidth, this.ctx.gl.drawingBufferHeight] : [this.ctx.canvas.width, this.ctx.canvas.height];
   }
-
   get canvas() {
     return this.ctx.gl ? this.ctx.gl.canvas : this.ctx.canvas;
   }
-
   set pixelRatio(ratio) {
     if (this.renderer) this.renderer.pixelRatio = ratio;
-
     _classPrivateFieldSet(this, _pixelRatio, ratio);
   }
+
   /**
    * Creates an instance of GUI.
    * @param {import("pex-context").ctx | CanvasRenderingContext2D} ctx
    * @param {GUIOptions} opts
    */
-
-
   constructor(ctx, {
     pixelRatio = devicePixelRatio,
     theme = {},
@@ -1051,23 +948,18 @@ class GUI {
       writable: true,
       value: void 0
     });
-
     _classPrivateFieldInitSpec$1(this, _scale, {
       writable: true,
       value: void 0
     });
-
     this.ctx = ctx;
-
     _classPrivateFieldSet(this, _pixelRatio, pixelRatio);
-
-    this.theme = { ...DEFAULT_THEME,
+    this.theme = {
+      ...DEFAULT_THEME,
       ...theme
     };
     this.scale = scale;
-
     _classPrivateFieldSet(this, _scale, scale);
-
     this.responsive = responsive;
     this.enabled = true;
     const [W, H] = this.size;
@@ -1075,8 +967,9 @@ class GUI {
     this.x = 0;
     this.y = 0;
     this.mousePos = [0, 0];
-    this.items = []; // Create renderer
+    this.items = [];
 
+    // Create renderer
     const isPexContext = this.ctx.gl;
     const [rendererWidth, rendererHeight] = [W / 3, H / 3];
     this.renderer = renderer || new (isPexContext ? PexContextRenderer : CanvasRenderer)({
@@ -1086,7 +979,6 @@ class GUI {
       pixelRatio: _classPrivateFieldGet(this, _pixelRatio),
       theme: this.theme
     });
-
     if (isPexContext) {
       const attributes = {
         aPosition: {
@@ -1131,7 +1023,6 @@ class GUI {
           uFlipEnvMap: 1
         }
       };
-
       this.drawTexture2d = ({
         texture,
         rect,
@@ -1148,7 +1039,6 @@ class GUI {
           }
         });
       };
-
       this.drawTextureCube = ({
         texture,
         rect,
@@ -1184,40 +1074,35 @@ class GUI {
         ctx.restore();
       };
     }
-
     this.canvas.addEventListener("pointerdown", this.onPointerDown.bind(this));
     this.canvas.addEventListener("pointermove", this.onPointerMove.bind(this));
     this.canvas.addEventListener("pointerup", this.onPointerUp.bind(this));
     window.addEventListener("keydown", this.onKeyDown.bind(this));
-  } // Helpers
+  }
 
-
+  // Helpers
   setControlValue(value) {
     if (isArrayLike(value)) {
       value.forEach((v, index) => this.activeControl.contextObject[this.activeControl.attributeName][index] = value[index]);
     } else {
       this.activeControl.contextObject[this.activeControl.attributeName] = value;
     }
-
     if (this.activeControl.onChange) {
       this.activeControl.onChange(this.activeControl.contextObject[this.activeControl.attributeName]);
     }
   }
-
   getImageColor({
     data,
     width
   }, x, y) {
     return [data[(x + y * width) * 4 + 0] / 255, data[(x + y * width) * 4 + 1] / 255, data[(x + y * width) * 4 + 2] / 255];
   }
-
   checkPalette(image, aa, aaWidth, aaHeight, mx, my) {
     const iw = image.width;
     const ih = image.height;
     let y = my - aa[0][1];
     const renderedImageHeight = aaWidth * image.aspectRatio;
     const imageStartY = aaHeight - renderedImageHeight;
-
     if (y > imageStartY && isNaN(this.activeControl.clickedSlider)) {
       const u = (mx - aa[0][0]) / aaWidth;
       const v = (y - imageStartY) / renderedImageHeight;
@@ -1230,13 +1115,12 @@ class GUI {
         clicked: true
       };
     }
-
     return {
       imageStartY
     };
-  } // Event handlers
+  }
 
-
+  // Event handlers
   onPointerDown(event) {
     if (!this.enabled) return;
     this.items.forEach(item => {
@@ -1248,26 +1132,21 @@ class GUI {
     this.activeControl = null;
     this.mousePos[0] = event.offsetX - this.x;
     this.mousePos[1] = event.offsetY - this.y;
-
     for (let i = 0; i < this.items.length; i++) {
       const prevTabs = this.items.filter(({
         type
       }, index) => index < i && type === "tab");
       const parentTab = prevTabs[prevTabs.length - 1];
-
       if (parentTab && !parentTab.current && this.items[i].type !== "tab") {
         continue;
       }
-
       const aa = this.getScaledActiveArea(this.items[i].activeArea);
-
       if (containsPoint(aa, this.mousePos)) {
         this.activeControl = this.items[i];
         this.activeControl.active = true;
         this.activeControl.dirty = true;
         const aaWidth = width(aa);
         const aaHeight = height(aa);
-
         if (this.activeControl.type === "button") {
           if (this.activeControl.onClick) this.activeControl.onClick();
         } else if (this.activeControl.type === "tab") {
@@ -1277,11 +1156,9 @@ class GUI {
         } else if (this.activeControl.type === "radiolist") {
           const hitY = this.mousePos[1] - aa[0][1];
           const hitItemIndex = Math.floor(this.activeControl.items.length * hitY / aaHeight);
-
           if (hitItemIndex < 0 || hitItemIndex >= this.activeControl.items.length) {
             continue;
           }
-
           this.setControlValue(this.activeControl.items[hitItemIndex].value);
         } else if (this.activeControl.type === "texturelist") {
           let clickedItem = null;
@@ -1295,7 +1172,6 @@ class GUI {
         } else if (this.activeControl.type === "color") {
           if (this.activeControl.options.palette) {
             const paletteResult = this.checkPalette(this.activeControl.options.paletteImage, aa, aaWidth, aaHeight, this.mousePos[0], this.mousePos[1]);
-
             if (paletteResult.clicked) {
               this.activeControl.clickedPalette = true;
               continue;
@@ -1304,19 +1180,16 @@ class GUI {
         } else if (this.activeControl.type === "text") {
           this.activeControl.focus = true;
         }
-
         event.stopPropagation();
         this.onPointerMove(event);
         break;
       }
     }
   }
-
   onPointerMove(event) {
     if (!this.enabled) return;
     const mx = event.offsetX - this.x;
     const my = event.offsetY - this.y;
-
     if (this.activeControl) {
       const aa = this.getScaledActiveArea(this.activeControl.activeArea);
       let value = 0;
@@ -1324,7 +1197,6 @@ class GUI {
       const isSlider = this.activeControl.type === "slider";
       const isMultiSlider = this.activeControl.type === "multislider";
       const isColor = this.activeControl.type === "color";
-
       if (isSlider || isMultiSlider || isColor) {
         const aaWidth = width(aa);
         const aaHeight = height(aa);
@@ -1332,48 +1204,38 @@ class GUI {
         value = clamp(value, 0, 1);
         let slidersHeight = aaHeight;
         const numSliders = isMultiSlider ? this.activeControl.getValue().length : this.activeControl.options.alpha ? 4 : 3;
-
         if (isColor) {
           if (this.activeControl.options.palette) {
             const paletteResult = this.checkPalette(this.activeControl.options.paletteImage, aa, aaWidth, aaHeight, mx, my);
             slidersHeight = paletteResult.imageStartY;
-
             if (paletteResult.clicked) {
               this.activeControl.dirty = true;
               event.stopPropagation();
               return;
             }
           }
-
           if (this.activeControl.clickedPalette) {
             event.stopPropagation();
             return;
           }
         }
-
         if (isMultiSlider || isColor) {
           index = Math.floor(numSliders * (my - aa[0][1]) / slidersHeight);
-
           if (!isNaN(this.activeControl.clickedSlider)) {
             index = this.activeControl.clickedSlider;
           } else {
             this.activeControl.clickedSlider = index;
           }
         }
-
         this.activeControl.setNormalizedValue(value, index);
-
         if (this.activeControl.onChange) {
           this.activeControl.onChange(this.activeControl.contextObject[this.activeControl.attributeName]);
         }
-
         this.activeControl.dirty = true;
       }
-
       event.stopPropagation();
     }
   }
-
   onPointerUp() {
     if (this.activeControl) {
       this.activeControl.active = false;
@@ -1383,46 +1245,39 @@ class GUI {
       this.activeControl = null;
     }
   }
-
   onKeyDown(event) {
     const focusedItem = this.items.filter(({
       type,
       focus
     }) => type === "text" && focus)[0];
     if (!focusedItem) return;
-
     switch (event.key) {
       case "Backspace":
         {
           const str = focusedItem.contextObject[focusedItem.attributeName];
           focusedItem.contextObject[focusedItem.attributeName] = str.substr(0, Math.max(0, str.length - 1));
           focusedItem.dirty = true;
-
           if (focusedItem.onChange) {
             focusedItem.onChange(focusedItem.contextObject[focusedItem.attributeName]);
           }
-
           event.stopImmediatePropagation();
           event.preventDefault();
           break;
         }
     }
-
     const c = event.key.charCodeAt(0);
-
     if (event.key.length === 1 && c >= 32 && c <= 126) {
       focusedItem.contextObject[focusedItem.attributeName] += event.key;
       focusedItem.dirty = true;
-
       if (focusedItem.onChange) {
         focusedItem.onChange(focusedItem.contextObject[focusedItem.attributeName]);
       }
-
       event.stopImmediatePropagation();
       event.preventDefault();
     }
-  } // Public API
+  }
 
+  // Public API
   /**
    * Add a tab control.
    * @param {string} title
@@ -1432,8 +1287,6 @@ class GUI {
    * @param {Function} onChange
    * @returns {GUIControl}
    */
-
-
   addTab(title, contextObject, attributeName, options = {}, onChange) {
     const gui = this;
     const tab = new GUIControl({
@@ -1447,33 +1300,28 @@ class GUI {
       attributeName,
       options,
       onChange,
-
       setActive() {
         gui.items.filter(({
           type
         }) => type === "tab").forEach(item => item.current = item === this);
         let prevValue = null;
-
         if (contextObject) {
           prevValue = contextObject[attributeName];
           contextObject[attributeName] = this.value;
         }
-
         if (this.onChange) this.onChange(prevValue, this.value);
       }
-
     });
     this.items.push(tab);
     return tab;
   }
+
   /**
    * Add a column control with a header.
    * @param {string} title
    * @param {number} [width=this.theme.columnWidth]
    * @returns {GUIControl}
    */
-
-
   addColumn(title, width = this.theme.columnWidth) {
     const column = new GUIControl({
       width,
@@ -1486,45 +1334,39 @@ class GUI {
       title,
       dirty: true,
       activeArea: [[0, 0], [0, 0]],
-
       setTitle(title) {
         this.title = title;
         this.dirty = true;
       }
-
     });
     this.items.push(ctrl);
     return column;
   }
+
   /**
    * Add a header control.
    * @param {string} title
    * @returns {GUIControl}
    */
-
-
   addHeader(title) {
     const ctrl = new GUIControl({
       type: "header",
       title,
       dirty: true,
       activeArea: [[0, 0], [0, 0]],
-
       setTitle(title) {
         this.title = title;
         this.dirty = true;
       }
-
     });
     this.items.push(ctrl);
     return ctrl;
   }
+
   /**
    * Add some breathing space between controls.
    * @returns {GUIControl}
    */
-
-
   addSeparator() {
     const ctrl = new GUIControl({
       type: "separator",
@@ -1534,6 +1376,7 @@ class GUI {
     this.items.push(ctrl);
     return ctrl;
   }
+
   /**
    * Add a text label. Can be multiple line.
    * @param {string} title
@@ -1544,24 +1387,21 @@ class GUI {
    * gui.addLabel("Multiline\nLabel");
    * ```
    */
-
-
   addLabel(title) {
     const ctrl = new GUIControl({
       type: "label",
       title,
       dirty: true,
       activeArea: [[0, 0], [0, 0]],
-
       setTitle(title) {
         this.title = title;
         this.dirty = true;
       }
-
     });
     this.items.push(ctrl);
     return ctrl;
   }
+
   /**
    * Add a generic parameter control.
    * @param {string} title
@@ -1595,21 +1435,15 @@ class GUI {
    * gui.addParam("Texture Cube", State, "textureCube");
    * ```
    */
-
-
   addParam(title, contextObject, attributeName, options = {}, onChange) {
-    var _options;
-
     let ctrl = null;
-    (_options = options) !== null && _options !== void 0 ? _options : options = {};
+    options ??= {};
     if (options.min === undefined) options.min = 0;
-    if (options.max === undefined) options.max = 1; // Check for class property
-
+    if (options.max === undefined) options.max = 1;
+    // Check for class property
     const isPexContextParam = hasOwnProperty.call(contextObject[attributeName], "class");
-
     if (isPexContextParam && contextObject[attributeName].class === "texture") {
       const texture = contextObject[attributeName];
-
       if (texture.target === this.ctx.gl.TEXTURE_CUBE_MAP) {
         ctrl = new GUIControl({
           type: "textureCube",
@@ -1635,7 +1469,6 @@ class GUI {
           dirty: true
         });
       }
-
       this.items.push(ctrl);
       return ctrl;
     } else if (contextObject[attributeName] === false || contextObject[attributeName] === true) {
@@ -1705,6 +1538,7 @@ class GUI {
       return ctrl;
     }
   }
+
   /**
    * Add a clickable button.
    * @param {string} title
@@ -1718,8 +1552,6 @@ class GUI {
    * });
    * ```
    */
-
-
   addButton(title, onClick) {
     const ctrl = new GUIControl({
       type: "button",
@@ -1732,6 +1564,7 @@ class GUI {
     this.items.push(ctrl);
     return ctrl;
   }
+
   /**
    * Add a radio list with options.
    * @param {string} title
@@ -1754,8 +1587,6 @@ class GUI {
    * );
    * ```
    */
-
-
   addRadioList(title, contextObject, attributeName, items, onChange) {
     const ctrl = new GUIControl({
       type: "radiolist",
@@ -1770,6 +1601,7 @@ class GUI {
     this.items.push(ctrl);
     return ctrl;
   }
+
   /**
    * Add a texture visualiser and selector for multiple textures (from pex-context) or images.
    * @param {string} title
@@ -1785,8 +1617,6 @@ class GUI {
    * gui.addTexture2DList("List", State, "currentTexture", textures.map((texture, value) = > ({ texture, value })));
    * ```
    */
-
-
   addTexture2DList(title, contextObject, attributeName, items, itemsPerRow, onChange) {
     const ctrl = new GUIControl({
       type: "texturelist",
@@ -1802,6 +1632,7 @@ class GUI {
     this.items.push(ctrl);
     return ctrl;
   }
+
   /**
    * Add a texture (from pex-context) or image visualiser.
    * Notes: texture cannot be updated once created.
@@ -1815,8 +1646,6 @@ class GUI {
    * gui.addTexture2D("Single", image);
    * ```
    */
-
-
   addTexture2D(title, texture, options) {
     const ctrl = new GUIControl({
       type: "texture2D",
@@ -1829,6 +1658,7 @@ class GUI {
     this.items.push(ctrl);
     return ctrl;
   }
+
   /**
    * Add a cube texture visualiser (from pex-context).
    * Notes: texture cannot be updated once created.
@@ -1842,8 +1672,6 @@ class GUI {
    * gui.addTextureCube("Cube", State.cubeTexture, { level: 2 });
    * ```
    */
-
-
   addTextureCube(title, texture, options) {
     const ctrl = new GUIControl({
       type: "textureCube",
@@ -1858,6 +1686,7 @@ class GUI {
     this.items.push(ctrl);
     return ctrl;
   }
+
   /**
    * Add a XY graph visualiser from the control values.
    * @param {string} title
@@ -1878,8 +1707,6 @@ class GUI {
    * });
    * ```
    */
-
-
   addGraph(title, options) {
     const ctrl = new GUIControl({
       type: "graph",
@@ -1893,12 +1720,11 @@ class GUI {
     this.items.push(ctrl);
     return ctrl;
   }
+
   /**
    * Add a FPS counter. Need "gui.draw()" to be called on frame.
    * @returns {GUIControl}
    */
-
-
   addFPSMeeter() {
     const ctrl = this.addGraph("FPS", {
       time: {
@@ -1907,12 +1733,10 @@ class GUI {
         fps: 0,
         fpsTime: 0,
         fpsFrames: 0,
-
         update(now) {
           const delta = now - this.now;
           this.now = now;
           this.frames++;
-
           if (this.fpsTime > 1000) {
             this.fps = Math.floor(this.fpsFrames / (this.fpsTime / 1000) * 10) / 10;
             this.fpsTime = 0;
@@ -1922,29 +1746,24 @@ class GUI {
             this.fpsFrames++;
           }
         }
-
       },
       interval: 1000,
       min: 0,
-
       update(item, now) {
         item.options.time.update(now);
       },
-
       redraw(item) {
         item.values.push(Math.floor(item.options.time.fps));
       }
-
     });
     return ctrl;
   }
+
   /**
    * Add an updatable object stats visualiser.
    * @param {Object} [options] An object with an update() function to update control.stats.
    * @returns {GUIControl}
    */
-
-
   addStats(options) {
     const ctrl = new GUIControl({
       type: "stats",
@@ -1956,18 +1775,15 @@ class GUI {
       prev: 0,
       options: options || {
         update(item) {
-          var _item$ctx;
-
-          Object.assign(item.stats, Object.fromEntries(Object.entries(((_item$ctx = item.ctx) === null || _item$ctx === void 0 ? void 0 : _item$ctx.stats) || {}).map(([k, v]) => [k, `${v.alive} / ${v.total}`])));
+          Object.assign(item.stats, Object.fromEntries(Object.entries(item.ctx?.stats || {}).map(([k, v]) => [k, `${v.alive} / ${v.total}`])));
         }
-
       }
     });
     this.items.push(ctrl);
     return ctrl;
-  } // Update
+  }
 
-
+  // Update
   isAnyItemDirty(items) {
     let dirty = false;
     items.forEach(item => {
@@ -1978,121 +1794,95 @@ class GUI {
     });
     return dirty;
   }
-
   getScaledActiveArea(activeArea) {
     return activeArea.map(a => a.map(b => b * _classPrivateFieldGet(this, _scale)));
   }
-
   update() {
     const now = performance.now();
-
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i];
-
       if (item.type === "graph" || item.type === "stats") {
-        var _item$options$update, _item$options;
-
-        (_item$options$update = (_item$options = item.options).update) === null || _item$options$update === void 0 ? void 0 : _item$options$update.call(_item$options, item, now);
+        item.options.update?.(item, now);
         const dt = now - item.prev;
-
         if (dt > (item.options.interval || 2000)) {
-          var _item$options$redraw, _item$options2;
-
           item.prev = now;
-          (_item$options$redraw = (_item$options2 = item.options).redraw) === null || _item$options$redraw === void 0 ? void 0 : _item$options$redraw.call(_item$options2, item);
+          item.options.redraw?.(item);
           item.dirty = true;
         }
       }
     }
-  } // Draw
+  }
 
-
+  // Draw
   getScale() {
     return this.canvas.height / this.canvas.clientHeight;
   }
+
   /**
    * Renders the GUI. Should be called at the end of the frame.
    */
-
-
   draw() {
     if (!this.enabled || this.items.length === 0) return;
     this.update();
     const [W, H] = this.size;
     let resized = false;
-
     if (W !== this.viewport[2] || H !== this.viewport[3]) {
       this.viewport[2] = W;
       this.viewport[3] = H;
       resized = true;
     }
-
     const texture = this.renderer.getTexture();
     const canvasScale = this.getScale();
     const rendererWidth = texture.width / this.renderer.pixelRatio;
     const rendererHeight = texture.height / this.renderer.pixelRatio;
-
     if (this.isAnyItemDirty(this.items) || resized || this.renderer.dirty) {
       this.renderer.draw(this.items);
-
       if (this.responsive) {
         _classPrivateFieldSet(this, _scale, Math.min(Math.min(this.canvas.clientWidth / rendererWidth, this.canvas.clientHeight / rendererHeight), this.scale));
       } else {
         _classPrivateFieldSet(this, _scale, this.scale);
       }
     }
-
     this.drawTexture2d({
       texture,
       rect: [0, 0, canvasScale * _classPrivateFieldGet(this, _scale) * rendererWidth || 2, canvasScale * _classPrivateFieldGet(this, _scale) * rendererHeight || 2]
     });
     this.drawTextures();
   }
-
   drawTextures() {
     const items = this.items;
     const tabs = items.filter(({
       type
     }) => type === "tab");
-
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i];
-
       if (tabs.length > 0) {
         const prevTabs = items.filter(({
           type
         }, index) => index < i && type === "tab");
         const parentTab = prevTabs[prevTabs.length - 1];
-
         if (parentTab && !parentTab.current) {
           continue;
         }
       }
-
       const scale = _classPrivateFieldGet(this, _scale) * this.getScale();
       let bounds = [];
-
       const drawTexture = ({
         activeArea,
         texture
       }) => {
-        var _item$options3;
-
         // we are trying to match flipped gui texture which 0,0 starts at the top with window coords that have 0,0 at the bottom
         bounds = [activeArea[0][0] * scale, activeArea[1][1] * scale, activeArea[1][0] * scale, activeArea[0][1] * scale];
-        const flipY = (_item$options3 = item.options) === null || _item$options3 === void 0 ? void 0 : _item$options3.flipY;
-
+        const flipY = item.options?.flipY;
         if (texture.flipY) {
           [bounds[1], bounds[3]] = [bounds[3], bounds[1]];
         }
-
         this.drawTexture2d({
           texture,
           rect: bounds,
           flipY
         });
       };
-
       if (item.type === "texture2D") {
         drawTexture(item);
       } else if (item.type === "texturelist") {
@@ -2108,21 +1898,19 @@ class GUI {
       }
     }
   }
+
   /**
    * Retrieve a serialized value of the current GUI's state.
    * @returns {Object}
    */
-
-
   serialize() {
     return Object.fromEntries(this.items.map(item => [item.title, item.getSerializedValue()]));
   }
+
   /**
    * Deserialize a previously serialized data state GUI's state.
    * @param {Object} data
    */
-
-
   deserialize(data) {
     this.items.forEach(item => {
       if (data[item.title] !== undefined) {
@@ -2131,35 +1919,29 @@ class GUI {
       }
     });
   }
+
   /**
    * Remove events listeners, empty list of controls and dispose of the gui's resources.
    */
-
-
   dispose() {
     this.canvas.removeEventListener("pointerdown", this.onPointerDown);
     this.canvas.removeEventListener("pointermove", this.onPointerMove);
     this.canvas.removeEventListener("pointerup", this.onPointerUp);
     window.removeEventListener("keydown", this.onKeyDown);
-
     for (let i = 0; i < this.items.length; i++) {
-      var _this$items$i$dispose, _this$items$i;
-
-      (_this$items$i$dispose = (_this$items$i = this.items[i]).dispose) === null || _this$items$i$dispose === void 0 ? void 0 : _this$items$i$dispose.call(_this$items$i);
+      this.items[i].dispose?.();
     }
-
     this.items = [];
     this.renderer.dispose();
   }
-
 }
+
 /**
  * Factory function for creating a GUI
  * @param {import("pex-context").ctx | CanvasRenderingContext2D} ctx
  * @param {GUIOptions} opts
  * @returns {GUI}
  */
-
 var index$1 = ((ctx, opts) => new GUI(ctx, opts));
 
 export default index$1;

@@ -1,5 +1,3 @@
-import './common/web.dom-collections.iterator-7ea8a356.js';
-
 /**
  * Context fallbacks map
  * @constant
@@ -11,6 +9,7 @@ const FALLBACKS = {
   webgl2: ["webgl", "experimental-webgl"],
   webgpu: []
 };
+
 /**
  * @typedef {Object} Options Options for context creation. All optional.
  * @property {number} [width=window.innerWidth] Request an initial canvas width.
@@ -27,7 +26,6 @@ const FALLBACKS = {
  * @param {Options} [opts={}]
  * @returns {RenderingContext}
  */
-
 function createRenderingContext(opts = {}) {
   // Get options and set defaults
   const {
@@ -38,10 +36,10 @@ function createRenderingContext(opts = {}) {
     type = "webgl",
     element = document.body,
     ...contextAttributes
-  } = { ...opts
+  } = {
+    ...opts
   };
   const canvas = opts.canvas || document.createElement("canvas");
-
   if (!opts.canvas) {
     if (fullscreen) {
       const meta = document.createElement("meta");
@@ -49,7 +47,6 @@ function createRenderingContext(opts = {}) {
       meta.setAttribute("content", "width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=0.0");
       document.head.appendChild(meta);
     }
-
     const appendCanvas = () => {
       if (fullscreen) {
         Object.assign(document.body.style, {
@@ -58,10 +55,8 @@ function createRenderingContext(opts = {}) {
           backgroundColor: "#000"
         });
       }
-
       element.appendChild(canvas);
     };
-
     if (pixelRatio !== 1) {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
@@ -71,16 +66,13 @@ function createRenderingContext(opts = {}) {
       canvas.width = width * pixelRatio;
       canvas.height = height * pixelRatio;
     }
-
     if (document.body) {
       appendCanvas();
     } else {
       document.addEventListener("DOMContentLoaded", appendCanvas);
     }
   }
-
   const contexts = [type, ...(FALLBACKS[type] || [])];
-
   for (let i = 0; i < contexts.length; i++) {
     try {
       const context = canvas.getContext(contexts[i], contextAttributes);
@@ -91,7 +83,6 @@ function createRenderingContext(opts = {}) {
       console.warn(`pex-gl: ${contexts[i]} failed ⚠`, error);
     }
   }
-
   console.error(`pex-gl: ${type} failed ✖`);
   return null;
 }
