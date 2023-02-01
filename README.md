@@ -174,6 +174,7 @@ Please note those props are read only. To set new values or upload new data to G
   - [.Filter](#ctx.Filter)
   - [.TextureFormat](#ctx.TextureFormat)
   - [.PixelFormat](#ctx.PixelFormat)
+  - [.RenderbufferFloatFormat](#ctx.RenderbufferFloatFormat)
   - [.Encoding](#ctx.Encoding)
   - [.Primitive](#ctx.Primitive)
   - [.Usage](#ctx.Usage)
@@ -395,6 +396,23 @@ Mapping of [ctx.TextureFormat](#ctx.TextureFormat) keys to their string values a
 | Depth   | <code>DEPTH_COMPONENT16</code> |
 | Depth16 | <code>DEPTH_COMPONENT16</code> |
 | Depth24 | <code>DEPTH_COMPONENT24</code> |
+
+<a name="ctx.RenderbufferFloatFormat"></a>
+
+### ctx.RenderbufferFloatFormat
+
+**Kind**: static enum of [<code>ctx</code>](#ctx)
+**Properties**
+
+| Name           | Default       |
+| -------------- | ------------- |
+| RGBA32F        | <code></code> |
+| RGBA16F        | <code></code> |
+| R16F           | <code></code> |
+| RG16F          | <code></code> |
+| R32F           | <code></code> |
+| RG32F          | <code></code> |
+| R11F_G11F_B10F | <code></code> |
 
 <a name="ctx.Encoding"></a>
 

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [3.0.0-alpha.4](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.3...v3.0.0-alpha.4) (2023-02-01)
+
+
+### Bug Fixes
+
+* only use RGB[A]16F and RGB[A]32F from extensions in renderbuffer ([588bfed](https://github.com/pex-gl/pex-context/commit/588bfedde7e9515e79e005bec9798731d52913a0)), closes [#122](https://github.com/pex-gl/pex-context/issues/122)
+
+
+### Features
+
+* **main:** add ctx.RenderbufferFloatFormat ([c4cb7c1](https://github.com/pex-gl/pex-context/commit/c4cb7c12db7da7385064259792af723c39dad91e)), closes [#122](https://github.com/pex-gl/pex-context/issues/122)
+
+
+
 # [3.0.0-alpha.3](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.2...v3.0.0-alpha.3) (2022-12-13)
 
 
