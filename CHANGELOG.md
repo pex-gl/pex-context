@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [3.0.0-alpha.5](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.4...v3.0.0-alpha.5) (2023-02-02)
+
+
+### Reverts
+
+* Revert "feat: use cmd.instances to check for instancing" ([2662872](https://github.com/pex-gl/pex-context/commit/266287217840a46adf19df79746455c943bd2c54))
+
+
+
 # [3.0.0-alpha.4](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.3...v3.0.0-alpha.4) (2023-02-01)
 
 
