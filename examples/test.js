@@ -11,7 +11,9 @@ import { es300Fragment } from "./utils.js";
 const ctx = createContext();
 const ctxWebGL1 = createContext({ type: "webgl", width: 2, height: 2 });
 
-// Texture
+/**
+ * Texture
+ */
 const tex = ctx.texture2D({
   data: new Uint8Array([0, 0, 0, 0]),
   width: 1,
@@ -66,8 +68,11 @@ Object.keys(ctx.PixelFormat)
 // update with array, should default to Uint8
 // const tex2 = ctx.texture2D({ data: [0, 0, 0, 0], width: 1, height: 1 })
 
-// Buffers
-const vertexBuffers = {
+/**
+ * Buffers
+ */
+// Defaults
+const vertexBufferDefault = {
   aFlatArray: ctx.vertexBuffer([0, 1, 2, 3, 4, 5]),
   aElementArray: ctx.vertexBuffer([
     [0, 1, 2],
@@ -84,18 +89,165 @@ const vertexBuffers = {
   aDataTypedArray: ctx.vertexBuffer({
     data: new Float32Array([0, 1, 2, 3, 4, 5]),
   }),
+  aTypedArrayBuffer: ctx.vertexBuffer(
+    new Float32Array([0, 1, 2, 3, 4, 5]).buffer
+  ),
+  aDataTypedArrayBuffer: ctx.vertexBuffer({
+    data: new Float32Array([0, 1, 2, 3, 4, 5]).buffer,
+  }),
 };
-
-Object.values(vertexBuffers).forEach(({ target }, i) => {
+Object.values(vertexBufferDefault).forEach((buffer, i) => {
   console.assert(
-    target === ctx.gl.ARRAY_BUFFER,
-    `VertexBuffer ${i} type is wrong ${target} != ${ctx.gl.ARRAY_BUFFER}`
+    buffer.length === 6,
+    `${i} - Invalid vertex buffer length: ${buffer.length}`
+  );
+  console.assert(
+    buffer.type === ctx.DataType.Float32,
+    `${i} - Invalid vertex buffer data type: ${buffer.type}`
+  );
+  console.assert(
+    buffer.target === ctx.gl.ARRAY_BUFFER,
+    `${i} - Invalid vertex buffer target: ${buffer.target} != ${ctx.gl.ARRAY_BUFFER}`
   );
 });
 
-// VAO
+const indexBuffers = {
+  aFlatArray: ctx.indexBuffer([0, 1, 2, 3, 4, 5]),
+  aElementArray: ctx.indexBuffer([
+    [0, 1, 2],
+    [3, 4, 5],
+  ]),
+  aTypedArray: ctx.indexBuffer(new Uint16Array([0, 1, 2, 3, 4, 5])),
+  aDataArray: ctx.indexBuffer({ data: [0, 1, 2, 3, 4, 5] }),
+  aDataElementArray: ctx.indexBuffer({
+    data: [
+      [0, 1, 2],
+      [3, 4, 5],
+    ],
+  }),
+  aDataTypedArray: ctx.indexBuffer({
+    data: new Uint16Array([0, 1, 2, 3, 4, 5]),
+  }),
+  aTypedArrayBuffer: ctx.indexBuffer(
+    new Uint16Array([0, 1, 2, 3, 4, 5]).buffer
+  ),
+  aDataTypedArrayBuffer: ctx.indexBuffer({
+    data: new Uint16Array([0, 1, 2, 3, 4, 5]).buffer,
+  }),
+};
+Object.values(indexBuffers).forEach((buffer, i) => {
+  console.assert(
+    buffer.length === 6,
+    `${i} - Invalid index buffer length: ${buffer.length}`
+  );
+  console.assert(
+    buffer.type === ctx.DataType.Uint16,
+    `${i} - Invalid index buffer data type: ${buffer.type}`
+  );
+  console.assert(
+    buffer.target === ctx.gl.ELEMENT_ARRAY_BUFFER,
+    `${i} - Invalid index buffer target: ${buffer.target} != ${ctx.gl.ELEMENT_ARRAY_BUFFER}`
+  );
+});
+
+// Buffer type
+const indexBuffersTypes = {
+  [ctx.DataType.Float32]: ctx.indexBuffer(new Float32Array([0, 1, 2, 3, 4, 5])), // TODO: is that allowed?
+  [ctx.DataType.Int8]: ctx.indexBuffer(new Int8Array([0, 1, 2, 3, 4, 5])),
+  [ctx.DataType.Uint8]: ctx.indexBuffer(new Uint8Array([0, 1, 2, 3, 4, 5])),
+  [ctx.DataType.Uint16]: ctx.indexBuffer(new Uint16Array([0, 1, 2, 3, 4, 5])),
+  [ctx.DataType.Uint32]: ctx.indexBuffer(new Uint32Array([0, 1, 2, 3, 4, 5])),
+};
+Object.entries(indexBuffersTypes).forEach(([type, buffer], i) => {
+  console.assert(
+    buffer.type === parseInt(type),
+    `${i} - Invalid index buffer data type: ${buffer.type}`
+  );
+});
+const indexBuffersTypeOption = {
+  [ctx.DataType.Float32]: ctx.indexBuffer({
+    data: [0, 1, 2, 3, 4, 5],
+    type: ctx.DataType.Float32,
+  }),
+  [ctx.DataType.Int8]: ctx.indexBuffer({
+    data: [0, 1, 2, 3, 4, 5],
+    type: ctx.DataType.Int8,
+  }),
+  [ctx.DataType.Uint8]: ctx.indexBuffer({
+    data: [0, 1, 2, 3, 4, 5],
+    type: ctx.DataType.Uint8,
+  }),
+  [ctx.DataType.Uint16]: ctx.indexBuffer({
+    data: [0, 1, 2, 3, 4, 5],
+    type: ctx.DataType.Uint16,
+  }),
+  [ctx.DataType.Uint32]: ctx.indexBuffer({
+    data: [0, 1, 2, 3, 4, 5],
+    type: ctx.DataType.Uint32,
+  }),
+
+  // typed array constructor has priority
+  [ctx.DataType.Float32]: ctx.indexBuffer({
+    data: new Float32Array([0, 1, 2, 3, 4, 5]),
+    type: ctx.DataType.Uint32,
+  }),
+  [ctx.DataType.Int8]: ctx.indexBuffer({
+    data: new Int8Array([0, 1, 2, 3, 4, 5]),
+    type: ctx.DataType.Uint32,
+  }),
+  [ctx.DataType.Uint8]: ctx.indexBuffer({
+    data: new Uint8Array([0, 1, 2, 3, 4, 5]),
+    type: ctx.DataType.Uint32,
+  }),
+  [ctx.DataType.Uint16]: ctx.indexBuffer({
+    data: new Uint16Array([0, 1, 2, 3, 4, 5]),
+    type: ctx.DataType.Uint32,
+  }),
+  [ctx.DataType.Uint32]: ctx.indexBuffer({
+    data: new Uint32Array([0, 1, 2, 3, 4, 5]),
+    type: ctx.DataType.Uint16,
+  }),
+
+  // ArrayBuffer as data type
+  [ctx.DataType.Float32]: ctx.indexBuffer({
+    data: new Float32Array([0, 1, 2, 3, 4, 5]).buffer,
+    type: ctx.DataType.Float32,
+  }),
+  [ctx.DataType.Int8]: ctx.indexBuffer({
+    data: new Int8Array([0, 1, 2, 3, 4, 5]).buffer,
+    type: ctx.DataType.Int8,
+  }),
+  [ctx.DataType.Uint8]: ctx.indexBuffer({
+    data: new Uint8Array([0, 1, 2, 3, 4, 5]).buffer,
+    type: ctx.DataType.Uint8,
+  }),
+  [ctx.DataType.Uint16]: ctx.indexBuffer({
+    data: new Uint16Array([0, 1, 2, 3, 4, 5]).buffer,
+    type: ctx.DataType.Uint16,
+  }),
+  [ctx.DataType.Uint32]: ctx.indexBuffer({
+    data: new Uint32Array([0, 1, 2, 3, 4, 5]).buffer,
+    type: ctx.DataType.Uint32,
+  }),
+
+  // ArrayBuffer as data type override type
+  [ctx.DataType.Uint32]: ctx.indexBuffer({
+    data: new Uint16Array([0, 1, 2, 3, 4, 5]).buffer,
+    type: ctx.DataType.Uint32,
+  }),
+};
+Object.entries(indexBuffersTypeOption).forEach(([type, buffer], i) => {
+  console.assert(
+    buffer.type === parseInt(type),
+    `${i} - Invalid index buffer data type: ${buffer.type}`
+  );
+});
+
+/**
+ * VAO
+ */
 const vertexLayout = Object.fromEntries(
-  Object.entries(vertexBuffers).map(([key], index) => [
+  Object.entries(vertexBufferDefault).map(([key], index) => [
     key,
     { location: index, type: "vec3" },
   ])
@@ -103,10 +255,12 @@ const vertexLayout = Object.fromEntries(
 
 ctx.vertexArray({
   vertexLayout,
-  attributes: vertexBuffers,
+  attributes: vertexBufferDefault,
 });
 
-// Pipeline
+/**
+ * PIPELINE
+ */
 const pipeline = ctx.pipeline({
   vert: /* glsl */ `
     attribute vec3 aPosition0;
@@ -146,7 +300,9 @@ console.assert(
   "Using texture should be remembered in active state"
 );
 
-// Uniforms
+/**
+ * UNIFORMS
+ */
 ctx.submit({
   pass: ctx.pass({
     clearColor: [0.2, 0.2, 0.2, 1],
@@ -258,7 +414,10 @@ ctx.submit({
   },
 });
 
-// Renderbuffer
+/**
+ * RENDERBUFFER
+ */
+
 ctxWebGL1.renderbuffer({ pixelFormat: ctxWebGL1.PixelFormat.RGBA16F });
 ctxWebGL1.renderbuffer({ pixelFormat: ctxWebGL1.PixelFormat.RGBA32F });
 ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.RGBA16F });
