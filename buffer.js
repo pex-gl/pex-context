@@ -10,7 +10,7 @@ import { checkProps } from "./utils.js";
  */
 
 const allowedProps = [
-  "target",
+  "target", // Note: only at creation
   "data",
   "usage",
   "type",
@@ -49,15 +49,14 @@ function updateBuffer(ctx, buffer, opts) {
 
   const gl = ctx.gl;
   let data = opts.data || opts;
-  let type = opts.type || buffer.type;
+  let type = opts.type;
   let offset = opts.offset || 0;
 
   if (Array.isArray(data)) {
     if (!type) {
-      if (opts.target === gl.ARRAY_BUFFER) {
+      if (buffer.target === gl.ARRAY_BUFFER) {
         type = ctx.DataType.Float32;
-      }
-      if (opts.target === gl.ELEMENT_ARRAY_BUFFER) {
+      } else if (buffer.target === gl.ELEMENT_ARRAY_BUFFER) {
         type = ctx.DataType.Uint16;
       }
     }
@@ -99,10 +98,9 @@ function updateBuffer(ctx, buffer, opts) {
   } else if (data instanceof ArrayBuffer) {
     // assuming type was provided
     if (!type) {
-      if (opts.target === gl.ARRAY_BUFFER) {
+      if (buffer.target === gl.ARRAY_BUFFER) {
         type = ctx.DataType.Float32;
-      }
-      if (opts.target === gl.ELEMENT_ARRAY_BUFFER) {
+      } else if (buffer.target === gl.ELEMENT_ARRAY_BUFFER) {
         type = ctx.DataType.Uint16;
       }
     }
