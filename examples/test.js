@@ -243,6 +243,35 @@ Object.entries(indexBuffersTypeOption).forEach(([type, buffer], i) => {
   );
 });
 
+const bufferUpdateToTypedArray = ctx.vertexBuffer([0, 1, 2, 3, 4, 5]);
+ctx.update(bufferUpdateToTypedArray, { data: [0, 1, 2, 3, 4, 5] });
+console.assert(
+  bufferUpdateToTypedArray.type === ctx.DataType.Float32,
+  `Invalid vertex buffer data type: ${bufferUpdateToTypedArray.type}`
+);
+ctx.update(bufferUpdateToTypedArray, {
+  data: new Uint16Array([0, 1, 2, 3, 4, 5]),
+});
+console.assert(
+  bufferUpdateToTypedArray.type === ctx.DataType.Uint16,
+  `Invalid vertex buffer data type: ${bufferUpdateToTypedArray.type}`
+);
+const bufferUpdateToArrayOfArrays = ctx.vertexBuffer(
+  new Uint16Array([0, 1, 2, 3, 4, 5])
+);
+ctx.update(bufferUpdateToArrayOfArrays, {
+  data: new Uint16Array([0, 1, 2, 3, 4, 5]),
+});
+console.assert(
+  bufferUpdateToArrayOfArrays.type === ctx.DataType.Uint16,
+  `Invalid vertex buffer data type: ${bufferUpdateToArrayOfArrays.type}`
+);
+ctx.update(bufferUpdateToArrayOfArrays, { data: [0, 1, 2, 3, 4, 5] });
+console.assert(
+  bufferUpdateToArrayOfArrays.type === ctx.DataType.Float32,
+  `Invalid vertex buffer data type: ${bufferUpdateToArrayOfArrays.type}`
+);
+
 /**
  * VAO
  */
