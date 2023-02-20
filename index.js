@@ -1094,17 +1094,39 @@ function createContext(options = {}) {
         if (instanced) {
           if (cmd.multi && ctx.capabilities.multiDraw) {
             const ext = gl.getExtension("WEBGL_multi_draw");
-            ext.multiDrawElementsInstancedWEBGL(
-              primitive,
-              cmd.multi.counts,
-              cmd.multi.countsOffset || 0,
-              type,
-              cmd.multi.offsets,
-              cmd.multi.offsetsOffset || 0,
-              cmd.multi.instanceCounts,
-              cmd.multi.instanceCountsOffset || 0,
-              cmd.multi.counts.length
-            );
+
+            if (cmd.multi.baseVertices && cmd.multi.baseInstances) {
+              const baseVertexBaseInstanceExt = gl.getExtension(
+                "WEBGL_multi_draw_instanced_base_vertex_base_instance"
+              );
+              baseVertexBaseInstanceExt.multiDrawElementsInstancedBaseVertexBaseInstanceWEBGL(
+                primitive,
+                cmd.multi.counts,
+                cmd.multi.countsOffset || 0,
+                type,
+                cmd.multi.offsets,
+                cmd.multi.offsetsOffset || 0,
+                cmd.multi.instanceCounts,
+                cmd.multi.instanceCountsOffset || 0,
+                cmd.multi.baseVertices,
+                cmd.multi.baseVerticesOffset || 0,
+                cmd.multi.baseInstances,
+                cmd.multi.baseInstancesOffset || 0,
+                cmd.multi.counts.length
+              );
+            } else {
+              ext.multiDrawElementsInstancedWEBGL(
+                primitive,
+                cmd.multi.counts,
+                cmd.multi.countsOffset || 0,
+                type,
+                cmd.multi.offsets,
+                cmd.multi.offsetsOffset || 0,
+                cmd.multi.instanceCounts,
+                cmd.multi.instanceCountsOffset || 0,
+                cmd.multi.counts.length
+              );
+            }
           } else {
             gl.drawElementsInstanced(
               primitive,
