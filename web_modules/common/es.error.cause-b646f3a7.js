@@ -1,4 +1,4 @@
-import { x as functionBindNative, j as isCallable, y as functionUncurryThis, d as anObject, z as objectDefineProperty, i as isObject, r as classof, m as createNonEnumerableProperty, k as fails, A as createPropertyDescriptor, b as getBuiltIn, l as hasOwnProperty_1, o as objectIsPrototypeOf, B as copyConstructorProperties, C as descriptors, h as global_1, _ as _export } from './classof-b64a2315.js';
+import { x as functionBindNative, y as functionUncurryThis, a as aCallable, j as isCallable, d as anObject, z as objectDefineProperty, i as isObject, r as classof, m as createNonEnumerableProperty, k as fails, A as createPropertyDescriptor, b as getBuiltIn, l as hasOwnProperty_1, o as objectIsPrototypeOf, B as copyConstructorProperties, C as descriptors, h as global_1, _ as _export } from './classof-6bb7363a.js';
 
 var FunctionPrototype = Function.prototype;
 var apply = FunctionPrototype.apply;
@@ -8,6 +8,13 @@ var call = FunctionPrototype.call;
 var functionApply = typeof Reflect == 'object' && Reflect.apply || (functionBindNative ? call.bind(apply) : function () {
   return call.apply(apply, arguments);
 });
+
+var functionUncurryThisAccessor = function (object, key, method) {
+  try {
+    // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+    return functionUncurryThis(aCallable(Object.getOwnPropertyDescriptor(object, key)[method]));
+  } catch (error) { /* empty */ }
+};
 
 var $String = String;
 var $TypeError = TypeError;
@@ -31,8 +38,7 @@ var objectSetPrototypeOf = Object.setPrototypeOf || ('__proto__' in {} ? functio
   var test = {};
   var setter;
   try {
-    // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
-    setter = functionUncurryThis(Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').set);
+    setter = functionUncurryThisAccessor(Object.prototype, '__proto__', 'set');
     setter(test, []);
     CORRECT_SETTER = test instanceof Array;
   } catch (error) { /* empty */ }
@@ -93,6 +99,7 @@ var $Error = Error;
 var replace = functionUncurryThis(''.replace);
 
 var TEST = (function (arg) { return String($Error(arg).stack); })('zxcasd');
+// eslint-disable-next-line redos/no-vulnerable -- safe
 var V8_OR_CHAKRA_STACK_ENTRY = /\n\s*at [^:]*:[^\n]*/;
 var IS_V8_OR_CHAKRA_STACK = V8_OR_CHAKRA_STACK_ENTRY.test(TEST);
 
@@ -109,6 +116,16 @@ var errorStackInstallable = !fails(function () {
   Object.defineProperty(error, 'stack', createPropertyDescriptor(1, 7));
   return error.stack !== 7;
 });
+
+// non-standard V8
+var captureStackTrace = Error.captureStackTrace;
+
+var errorStackInstall = function (error, C, stack, dropEntries) {
+  if (errorStackInstallable) {
+    if (captureStackTrace) captureStackTrace(error, C);
+    else createNonEnumerableProperty(error, 'stack', errorStackClear(stack, dropEntries));
+  }
+};
 
 var wrapErrorConstructorWithCause = function (FULL_NAME, wrapper, FORCED, IS_AGGREGATE_ERROR) {
   var STACK_TRACE_LIMIT = 'stackTraceLimit';
@@ -132,7 +149,7 @@ var wrapErrorConstructorWithCause = function (FULL_NAME, wrapper, FORCED, IS_AGG
     var message = normalizeStringArgument(IS_AGGREGATE_ERROR ? b : a, undefined);
     var result = IS_AGGREGATE_ERROR ? new OriginalError(a) : new OriginalError();
     if (message !== undefined) createNonEnumerableProperty(result, 'message', message);
-    if (errorStackInstallable) createNonEnumerableProperty(result, 'stack', errorStackClear(result.stack, 2));
+    errorStackInstall(result, WrappedError, result.stack, 2);
     if (this && objectIsPrototypeOf(OriginalErrorPrototype, this)) inheritIfRequired(result, this, WrappedError);
     if (arguments.length > OPTIONS_POSITION) installErrorCause(result, arguments[OPTIONS_POSITION]);
     return result;
@@ -186,6 +203,7 @@ var exportWebAssemblyErrorCauseWrapper = function (ERROR_NAME, wrapper) {
   }
 };
 
+// https://tc39.es/ecma262/#sec-nativeerror
 // https://github.com/tc39/proposal-error-cause
 exportGlobalErrorCauseWrapper('Error', function (init) {
   return function Error(message) { return functionApply(init, this, arguments); };

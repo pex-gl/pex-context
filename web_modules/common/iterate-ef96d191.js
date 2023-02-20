@@ -1,4 +1,4 @@
-import { g as getIteratorDirect, b as getBuiltIn, a as aCallable, d as anObject, f as functionCall, e as asyncIteratorClose, i as isObject, o as objectIsPrototypeOf, w as wellKnownSymbol, h as global_1, j as isCallable, k as fails, l as hasOwnProperty_1, m as createNonEnumerableProperty, _ as _export, n as iteratorsCore, p as isNullOrUndefined, q as getMethod, r as classof, t as tryToString, s as functionBindContext, u as lengthOfArrayLike, v as iteratorClose } from './classof-b64a2315.js';
+import { g as getIteratorDirect, b as getBuiltIn, a as aCallable, d as anObject, f as functionCall, e as asyncIteratorClose, i as isObject, o as objectIsPrototypeOf, w as wellKnownSymbol, h as global_1, j as isCallable, k as fails, l as hasOwnProperty_1, m as createNonEnumerableProperty, _ as _export, n as iteratorsCore, p as isNullOrUndefined, q as getMethod, r as classof, t as tryToString, s as functionBindContext, u as lengthOfArrayLike, v as iteratorClose } from './classof-6bb7363a.js';
 
 var $TypeError = TypeError;
 var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF; // 2 ** 53 - 1 == 9007199254740991
@@ -104,15 +104,6 @@ var anInstance = function (it, Prototype) {
   throw $TypeError$1('Incorrect invocation');
 };
 
-// https://github.com/tc39/proposal-iterator-helpers
-
-
-
-
-
-
-
-
 var IteratorPrototype = iteratorsCore.IteratorPrototype;
 
 
@@ -140,6 +131,8 @@ if (FORCED || !hasOwnProperty_1(IteratorPrototype, 'constructor') || IteratorPro
 
 IteratorConstructor.prototype = IteratorPrototype;
 
+// `Iterator` constructor
+// https://github.com/tc39/proposal-iterator-helpers
 _export({ global: true, constructor: true, forced: FORCED }, {
   Iterator: IteratorConstructor
 });

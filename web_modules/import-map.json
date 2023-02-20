@@ -12,6 +12,7 @@
     "pex-io": "./pex-io.js",
     "pex-math": "./pex-math.js",
     "pex-random": "./pex-random.js",
-    "primitive-geometry": "./primitive-geometry.js"
+    "primitive-geometry": "./primitive-geometry.js",
+    "typed-array-concat": "./typed-array-concat.js"
   }
 }

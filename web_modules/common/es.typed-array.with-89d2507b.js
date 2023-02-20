@@ -1,16 +1,14 @@
-import { h as global_1, D as objectGetPrototypeOf, w as wellKnownSymbol, E as uid, r as classof, j as isCallable, C as descriptors, l as hasOwnProperty_1, i as isObject, m as createNonEnumerableProperty, z as objectDefineProperty, F as internalState, o as objectIsPrototypeOf, t as tryToString, G as defineBuiltIn, u as lengthOfArrayLike, H as toIntegerOrInfinity, I as toObject, J as indexedObject, s as functionBindContext, K as classofRaw, b as getBuiltIn, y as functionUncurryThis, k as fails, L as inspectSource, p as isNullOrUndefined, d as anObject, M as objectCreate, N as toPropertyKey, a as aCallable, O as toPrimitive, P as toAbsoluteIndex } from './classof-b64a2315.js';
-import { o as objectSetPrototypeOf } from './es.error.cause-80fb3656.js';
+import { z as objectDefineProperty, D as makeBuiltIn_1, h as global_1, E as objectGetPrototypeOf, w as wellKnownSymbol, F as uid, r as classof, j as isCallable, C as descriptors, l as hasOwnProperty_1, m as createNonEnumerableProperty, G as internalState, i as isObject, o as objectIsPrototypeOf, t as tryToString, H as defineBuiltIn, u as lengthOfArrayLike, I as toIntegerOrInfinity, J as toObject, K as indexedObject, s as functionBindContext, L as classofRaw, b as getBuiltIn, y as functionUncurryThis, k as fails, M as inspectSource, p as isNullOrUndefined, d as anObject, N as objectCreate, O as toPropertyKey, a as aCallable, P as toPrimitive, Q as toAbsoluteIndex, f as functionCall } from './classof-6bb7363a.js';
+import { o as objectSetPrototypeOf } from './es.error.cause-b646f3a7.js';
 
 // eslint-disable-next-line es/no-typed-arrays -- safe
 var arrayBufferBasicDetection = typeof ArrayBuffer != 'undefined' && typeof DataView != 'undefined';
 
-var defineProperty = objectDefineProperty.f;
-
-
-
-
-
-
+var defineBuiltInAccessor = function (target, name, descriptor) {
+  if (descriptor.get) makeBuiltIn_1(descriptor.get, name, { getter: true });
+  if (descriptor.set) makeBuiltIn_1(descriptor.set, name, { setter: true });
+  return objectDefineProperty.f(target, name, descriptor);
+};
 
 var enforceInternalState = internalState.enforce;
 var getInternalState = internalState.get;
@@ -162,9 +160,12 @@ if (NATIVE_ARRAY_BUFFER_VIEWS && objectGetPrototypeOf(Uint8ClampedArrayPrototype
 
 if (descriptors && !hasOwnProperty_1(TypedArrayPrototype, TO_STRING_TAG)) {
   TYPED_ARRAY_TAG_REQUIRED = true;
-  defineProperty(TypedArrayPrototype, TO_STRING_TAG, { get: function () {
-    return isObject(this) ? this[TYPED_ARRAY_TAG] : undefined;
-  } });
+  defineBuiltInAccessor(TypedArrayPrototype, TO_STRING_TAG, {
+    configurable: true,
+    get: function () {
+      return isObject(this) ? this[TYPED_ARRAY_TAG] : undefined;
+    }
+  });
   for (NAME in TypedArrayConstructorsList) if (global_1[NAME]) {
     createNonEnumerableProperty(global_1[NAME], TYPED_ARRAY_TAG, NAME);
   }
@@ -522,10 +523,9 @@ exportTypedArrayMethod$7('toSorted', function toSorted(compareFn) {
   return sort(A, compareFn);
 });
 
-var slice = functionUncurryThis(''.slice);
-
 var isBigIntArray = function (it) {
-  return slice(classof(it), 0, 3) === 'Big';
+  var klass = classof(it);
+  return klass == 'BigInt64Array' || klass == 'BigUint64Array';
 };
 
 var $TypeError$1 = TypeError;
@@ -607,11 +607,43 @@ exportTypedArrayMethod$8('toSpliced', function toSpliced(start, deleteCount /* ,
   return A;
 }, !PROPER_ORDER);
 
-var Map = getBuiltIn('Map');
+// eslint-disable-next-line es/no-map -- safe
 var MapPrototype = Map.prototype;
-var mapForEach = functionUncurryThis(MapPrototype.forEach);
-var mapHas = functionUncurryThis(MapPrototype.has);
-var mapSet = functionUncurryThis(MapPrototype.set);
+
+var mapHelpers = {
+  // eslint-disable-next-line es/no-map -- safe
+  Map: Map,
+  set: functionUncurryThis(MapPrototype.set),
+  get: functionUncurryThis(MapPrototype.get),
+  has: functionUncurryThis(MapPrototype.has),
+  remove: functionUncurryThis(MapPrototype['delete']),
+  proto: MapPrototype
+};
+
+var iterateSimple = function (iterator, fn, $next) {
+  var next = $next || iterator.next;
+  var step, result;
+  while (!(step = functionCall(next, iterator)).done) {
+    result = fn(step.value);
+    if (result !== undefined) return result;
+  }
+};
+
+var Map$1 = mapHelpers.Map;
+var MapPrototype$1 = mapHelpers.proto;
+var forEach = functionUncurryThis(MapPrototype$1.forEach);
+var entries = functionUncurryThis(MapPrototype$1.entries);
+var next = entries(new Map$1()).next;
+
+var mapIterate = function (map, fn, interruptible) {
+  return interruptible ? iterateSimple(entries(map), function (entry) {
+    return fn(entry[1], entry[0]);
+  }, next) : forEach(map, fn);
+};
+
+var Map$2 = mapHelpers.Map;
+var mapHas = mapHelpers.has;
+var mapSet = mapHelpers.set;
 var push$2 = functionUncurryThis([].push);
 
 // `Array.prototype.uniqueBy` method
@@ -619,8 +651,8 @@ var push$2 = functionUncurryThis([].push);
 var arrayUniqueBy = function uniqueBy(resolver) {
   var that = toObject(this);
   var length = lengthOfArrayLike(that);
-  var result = arraySpeciesCreate(that, 0);
-  var map = new Map();
+  var result = [];
+  var map = new Map$2();
   var resolverFunction = !isNullOrUndefined(resolver) ? aCallable(resolver) : function (value) {
     return value;
   };
@@ -630,20 +662,22 @@ var arrayUniqueBy = function uniqueBy(resolver) {
     key = resolverFunction(item);
     if (!mapHas(map, key)) mapSet(map, key, item);
   }
-  mapForEach(map, function (value) {
+  mapIterate(map, function (value) {
     push$2(result, value);
   });
   return result;
 };
 
 var aTypedArray$9 = arrayBufferViewCore.aTypedArray;
+var getTypedArrayConstructor$5 = arrayBufferViewCore.getTypedArrayConstructor;
 var exportTypedArrayMethod$9 = arrayBufferViewCore.exportTypedArrayMethod;
 var arrayUniqueBy$1 = functionUncurryThis(arrayUniqueBy);
 
 // `%TypedArray%.prototype.uniqueBy` method
 // https://github.com/tc39/proposal-array-unique
 exportTypedArrayMethod$9('uniqueBy', function uniqueBy(resolver) {
-  return typedArrayFromSpeciesAndList(this, arrayUniqueBy$1(aTypedArray$9(this), resolver));
+  aTypedArray$9(this);
+  return arrayFromConstructorAndList(getTypedArrayConstructor$5(this), arrayUniqueBy$1(this, resolver));
 }, true);
 
 var $RangeError = RangeError;
@@ -662,12 +696,12 @@ var arrayWith = function (O, C, index, value) {
 };
 
 var aTypedArray$a = arrayBufferViewCore.aTypedArray;
-var getTypedArrayConstructor$5 = arrayBufferViewCore.getTypedArrayConstructor;
+var getTypedArrayConstructor$6 = arrayBufferViewCore.getTypedArrayConstructor;
 var exportTypedArrayMethod$a = arrayBufferViewCore.exportTypedArrayMethod;
 
 var PROPER_ORDER$1 = !!function () {
   try {
-    // eslint-disable-next-line no-throw-literal, es/no-typed-arrays -- required for testing
+    // eslint-disable-next-line no-throw-literal, es/no-typed-arrays, es/no-array-prototype-with -- required for testing
     new Int8Array(1)['with'](2, { valueOf: function () { throw 8; } });
   } catch (error) {
     // some early implementations, like WebKit, does not follow the final semantic
@@ -682,5 +716,5 @@ exportTypedArrayMethod$a('with', { 'with': function (index, value) {
   var O = aTypedArray$a(this);
   var relativeIndex = toIntegerOrInfinity(index);
   var actualValue = isBigIntArray(O) ? toBigInt(value) : +value;
-  return arrayWith(O, getTypedArrayConstructor$5(O), relativeIndex, actualValue);
+  return arrayWith(O, getTypedArrayConstructor$6(O), relativeIndex, actualValue);
 } }['with'], !PROPER_ORDER$1);

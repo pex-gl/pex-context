@@ -50,7 +50,8 @@
     "pex-io": "^3.0.0-alpha.0",
     "pex-math": "^4.0.0-alpha.2",
     "pex-random": "^2.0.0-alpha.1",
-    "primitive-geometry": "^2.9.1"
+    "primitive-geometry": "^2.9.1",
+    "typed-array-concat": "^3.0.0"
   },
   "engines": {
     "node": ">=16.0.0",
