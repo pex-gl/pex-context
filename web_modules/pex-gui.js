@@ -1,9 +1,12 @@
-import './common/es.error.cause-b646f3a7.js';
-import { v as toHex, b as toHSL, a as fromHSL } from './common/hsl-c3231461.js';
-import './common/iterate-ef96d191.js';
-import './common/esnext.iterator.filter-a4563c48.js';
-import { y as functionUncurryThis, _ as _export } from './common/classof-6bb7363a.js';
+import './common/es.error.cause-0747567f.js';
+import { v as toHex, b as toHSL, a as fromHSL } from './common/hsl-d415d8ba.js';
+import './common/iterate-54b5a051.js';
+import './common/esnext.iterator.filter-81df7261.js';
+import { _ as _export } from './common/classof-a3d4c9bc.js';
+import { c as collectionDeleteAll, m as mapEmplace } from './common/map-emplace-0ed8f736.js';
 import { m as map, c as clamp } from './common/utils-7e499548.js';
+import './common/object-set-prototype-of-eadd3696.js';
+import './common/async-iterator-iteration-026ee04a.js';
 
 function _classApplyDescriptorGet(receiver, descriptor) {
   if (descriptor.get) {
@@ -41,63 +44,16 @@ function _classPrivateFieldSet(receiver, privateMap, value) {
   return value;
 }
 
-// eslint-disable-next-line es/no-weak-map -- safe
-var WeakMapPrototype = WeakMap.prototype;
-
-var weakMapHelpers = {
-  // eslint-disable-next-line es/no-weak-map -- safe
-  WeakMap: WeakMap,
-  set: functionUncurryThis(WeakMapPrototype.set),
-  get: functionUncurryThis(WeakMapPrototype.get),
-  has: functionUncurryThis(WeakMapPrototype.has),
-  remove: functionUncurryThis(WeakMapPrototype['delete'])
-};
-
-var has = weakMapHelpers.has;
-
-// Perform ? RequireInternalSlot(M, [[WeakMapData]])
-var aWeakMap = function (it) {
-  has(it);
-  return it;
-};
-
-var remove = weakMapHelpers.remove;
-
 // `WeakMap.prototype.deleteAll` method
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'WeakMap', proto: true, real: true, forced: true }, {
-  deleteAll: function deleteAll(/* ...elements */) {
-    var collection = aWeakMap(this);
-    var allDeleted = true;
-    var wasDeleted;
-    for (var k = 0, len = arguments.length; k < len; k++) {
-      wasDeleted = remove(collection, arguments[k]);
-      allDeleted = allDeleted && wasDeleted;
-    } return !!allDeleted;
-  }
+  deleteAll: collectionDeleteAll
 });
-
-var get = weakMapHelpers.get;
-var has$1 = weakMapHelpers.has;
-var set = weakMapHelpers.set;
 
 // `WeakMap.prototype.emplace` method
 // https://github.com/tc39/proposal-upsert
 _export({ target: 'WeakMap', proto: true, real: true, forced: true }, {
-  emplace: function emplace(key, handler) {
-    var map = aWeakMap(this);
-    var value, inserted;
-    if (has$1(map, key)) {
-      value = get(map, key);
-      if ('update' in handler) {
-        value = handler.update(value, key, map);
-        set(map, key, value);
-      } return value;
-    }
-    inserted = handler.insert(key, map);
-    set(map, key, inserted);
-    return inserted;
-  }
+  emplace: mapEmplace
 });
 
 /** @module plane */

@@ -1,4 +1,5 @@
-import { x as functionBindNative, y as functionUncurryThis, a as aCallable, j as isCallable, d as anObject, z as objectDefineProperty, i as isObject, r as classof, m as createNonEnumerableProperty, k as fails, A as createPropertyDescriptor, b as getBuiltIn, l as hasOwnProperty_1, o as objectIsPrototypeOf, B as copyConstructorProperties, C as descriptors, h as global_1, _ as _export } from './classof-6bb7363a.js';
+import { s as functionBindNative, u as objectDefineProperty, i as isCallable, v as isObject, l as classof, d as createNonEnumerableProperty, x as functionUncurryThis, f as fails, y as createPropertyDescriptor, z as getBuiltIn, h as hasOwnProperty_1, o as objectIsPrototypeOf, A as copyConstructorProperties, B as descriptors, b as global_1, _ as _export } from './classof-a3d4c9bc.js';
+import { o as objectSetPrototypeOf } from './object-set-prototype-of-eadd3696.js';
 
 var FunctionPrototype = Function.prototype;
 var apply = FunctionPrototype.apply;
@@ -8,48 +9,6 @@ var call = FunctionPrototype.call;
 var functionApply = typeof Reflect == 'object' && Reflect.apply || (functionBindNative ? call.bind(apply) : function () {
   return call.apply(apply, arguments);
 });
-
-var functionUncurryThisAccessor = function (object, key, method) {
-  try {
-    // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
-    return functionUncurryThis(aCallable(Object.getOwnPropertyDescriptor(object, key)[method]));
-  } catch (error) { /* empty */ }
-};
-
-var $String = String;
-var $TypeError = TypeError;
-
-var aPossiblePrototype = function (argument) {
-  if (typeof argument == 'object' || isCallable(argument)) return argument;
-  throw $TypeError("Can't set " + $String(argument) + ' as a prototype');
-};
-
-/* eslint-disable no-proto -- safe */
-
-
-
-
-// `Object.setPrototypeOf` method
-// https://tc39.es/ecma262/#sec-object.setprototypeof
-// Works with __proto__ only. Old v8 can't work with null proto objects.
-// eslint-disable-next-line es/no-object-setprototypeof -- safe
-var objectSetPrototypeOf = Object.setPrototypeOf || ('__proto__' in {} ? function () {
-  var CORRECT_SETTER = false;
-  var test = {};
-  var setter;
-  try {
-    setter = functionUncurryThisAccessor(Object.prototype, '__proto__', 'set');
-    setter(test, []);
-    CORRECT_SETTER = test instanceof Array;
-  } catch (error) { /* empty */ }
-  return function setPrototypeOf(O, proto) {
-    anObject(O);
-    aPossiblePrototype(proto);
-    if (CORRECT_SETTER) setter(O, proto);
-    else O.__proto__ = proto;
-    return O;
-  };
-}() : undefined);
 
 var defineProperty = objectDefineProperty.f;
 
@@ -76,11 +35,11 @@ var inheritIfRequired = function ($this, dummy, Wrapper) {
   return $this;
 };
 
-var $String$1 = String;
+var $String = String;
 
 var toString_1 = function (argument) {
   if (classof(argument) === 'Symbol') throw TypeError('Cannot convert a Symbol value to a string');
-  return $String$1(argument);
+  return $String(argument);
 };
 
 var normalizeStringArgument = function (argument, $default) {
@@ -99,7 +58,6 @@ var $Error = Error;
 var replace = functionUncurryThis(''.replace);
 
 var TEST = (function (arg) { return String($Error(arg).stack); })('zxcasd');
-// eslint-disable-next-line redos/no-vulnerable -- safe
 var V8_OR_CHAKRA_STACK_ENTRY = /\n\s*at [^:]*:[^\n]*/;
 var IS_V8_OR_CHAKRA_STACK = V8_OR_CHAKRA_STACK_ENTRY.test(TEST);
 
@@ -116,16 +74,6 @@ var errorStackInstallable = !fails(function () {
   Object.defineProperty(error, 'stack', createPropertyDescriptor(1, 7));
   return error.stack !== 7;
 });
-
-// non-standard V8
-var captureStackTrace = Error.captureStackTrace;
-
-var errorStackInstall = function (error, C, stack, dropEntries) {
-  if (errorStackInstallable) {
-    if (captureStackTrace) captureStackTrace(error, C);
-    else createNonEnumerableProperty(error, 'stack', errorStackClear(stack, dropEntries));
-  }
-};
 
 var wrapErrorConstructorWithCause = function (FULL_NAME, wrapper, FORCED, IS_AGGREGATE_ERROR) {
   var STACK_TRACE_LIMIT = 'stackTraceLimit';
@@ -149,7 +97,7 @@ var wrapErrorConstructorWithCause = function (FULL_NAME, wrapper, FORCED, IS_AGG
     var message = normalizeStringArgument(IS_AGGREGATE_ERROR ? b : a, undefined);
     var result = IS_AGGREGATE_ERROR ? new OriginalError(a) : new OriginalError();
     if (message !== undefined) createNonEnumerableProperty(result, 'message', message);
-    errorStackInstall(result, WrappedError, result.stack, 2);
+    if (errorStackInstallable) createNonEnumerableProperty(result, 'stack', errorStackClear(result.stack, 2));
     if (this && objectIsPrototypeOf(OriginalErrorPrototype, this)) inheritIfRequired(result, this, WrappedError);
     if (arguments.length > OPTIONS_POSITION) installErrorCause(result, arguments[OPTIONS_POSITION]);
     return result;
@@ -203,7 +151,6 @@ var exportWebAssemblyErrorCauseWrapper = function (ERROR_NAME, wrapper) {
   }
 };
 
-// https://tc39.es/ecma262/#sec-nativeerror
 // https://github.com/tc39/proposal-error-cause
 exportGlobalErrorCauseWrapper('Error', function (init) {
   return function Error(message) { return functionApply(init, this, arguments); };
@@ -235,5 +182,3 @@ exportWebAssemblyErrorCauseWrapper('LinkError', function (init) {
 exportWebAssemblyErrorCauseWrapper('RuntimeError', function (init) {
   return function RuntimeError(message) { return functionApply(init, this, arguments); };
 });
-
-export { objectSetPrototypeOf as o };

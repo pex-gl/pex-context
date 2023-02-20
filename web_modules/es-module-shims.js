@@ -1,28 +1,34 @@
-import { _ as _export, g as getIteratorDirect, a as aCallable, c as commonjsGlobal } from './common/classof-6bb7363a.js';
-import { a as asyncIteratorIteration, i as iterate } from './common/iterate-ef96d191.js';
-import './common/es.error.cause-b646f3a7.js';
-import './common/es.typed-array.with-89d2507b.js';
-import './common/esnext.iterator.filter-a4563c48.js';
+import { _ as _export, g as getIteratorDirect, a as aCallable, c as commonjsGlobal } from './common/classof-a3d4c9bc.js';
+import { a as asyncIteratorIteration } from './common/async-iterator-iteration-026ee04a.js';
+import { i as iterate } from './common/iterate-54b5a051.js';
+import './common/es.error.cause-0747567f.js';
+import './common/esnext.typed-array.with-b6f846b8.js';
+import './common/esnext.iterator.filter-81df7261.js';
+import './common/object-set-prototype-of-eadd3696.js';
+
+// https://github.com/tc39/proposal-iterator-helpers
 
 var $some = asyncIteratorIteration.some;
 
-// `AsyncIterator.prototype.some` method
-// https://github.com/tc39/proposal-async-iterator-helpers
-_export({ target: 'AsyncIterator', proto: true, real: true }, {
-  some: function some(predicate) {
-    return $some(this, predicate);
+_export({ target: 'AsyncIterator', proto: true, real: true, forced: true }, {
+  some: function some(fn) {
+    return $some(this, fn);
   }
 });
 
-// `Iterator.prototype.some` method
 // https://github.com/tc39/proposal-iterator-helpers
-_export({ target: 'Iterator', proto: true, real: true }, {
-  some: function some(predicate) {
+
+
+
+
+
+_export({ target: 'Iterator', proto: true, real: true, forced: true }, {
+  some: function some(fn) {
     var record = getIteratorDirect(this);
     var counter = 0;
-    aCallable(predicate);
+    aCallable(fn);
     return iterate(record, function (value, stop) {
-      if (predicate(value, counter++)) return stop();
+      if (fn(value, counter++)) return stop();
     }, { IS_RECORD: true, INTERRUPTED: true }).stopped;
   }
 });

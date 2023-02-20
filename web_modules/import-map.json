@@ -4,6 +4,7 @@
     "bunny": "./bunny.js",
     "es-module-shims": "./es-module-shims.js",
     "geom-center-and-normalize": "./geom-center-and-normalize.js",
+    "geom-merge": "./geom-merge.js",
     "normals": "./normals.js",
     "pex-cam": "./pex-cam.js",
     "pex-color": "./pex-color.js",

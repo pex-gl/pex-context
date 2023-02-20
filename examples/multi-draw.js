@@ -3,7 +3,8 @@ import createContext from "../index.js";
 
 import { perspective as createCamera, orbiter as createOrbiter } from "pex-cam";
 
-import { cube, sphere } from "primitive-geometry";
+import { cube, sphere, torus } from "primitive-geometry";
+import merge from "geom-merge";
 import typedArrayConcat from "typed-array-concat";
 
 import basicFrag from "./shaders/basic.frag.js";
@@ -15,35 +16,50 @@ const ctx = createContext({
 
 const CellsConstructor = Uint32Array;
 
-const cubeGeometry = cube();
-cubeGeometry.positions = cubeGeometry.positions.map((value, i) =>
-  i % 3 === 0 ? value + 0.75 : value
-);
-cubeGeometry.cells = new CellsConstructor(cubeGeometry.cells);
 const sphereGeometry = sphere();
 sphereGeometry.positions = sphereGeometry.positions.map((value, i) =>
   i % 3 === 0 ? value - 0.75 : value
 );
-cubeGeometry.cells = new CellsConstructor(cubeGeometry.cells);
+const cubeGeometry = cube();
+// const cubeGeometry = sphere();
+cubeGeometry.positions = cubeGeometry.positions.map((value, i) =>
+  i % 3 === 0 ? value + 0.75 : value
+);
+const torusGeometry = torus();
+torusGeometry.positions = torusGeometry.positions.map((value, i) =>
+  i % 3 === 1 ? value - 0.75 : value
+);
+let geom;
+const geometries = [sphereGeometry, cubeGeometry, torusGeometry];
+geom = merge(geometries);
 
-const geom = {
-  positions: typedArrayConcat(
-    Float32Array,
-    cubeGeometry.positions,
-    sphereGeometry.positions
-  ),
-  normals: typedArrayConcat(
-    Float32Array,
-    cubeGeometry.normals,
-    sphereGeometry.normals
-  ),
-  uvs: typedArrayConcat(Float32Array, cubeGeometry.uvs, sphereGeometry.uvs),
-  cells: typedArrayConcat(
-    CellsConstructor,
-    cubeGeometry.cells,
-    sphereGeometry.cells
-  ),
-};
+// geom = {
+//   positions: typedArrayConcat(
+//     Float32Array,
+//     ...geometries.map((g) => g.positions)
+//   ),
+//   normals: typedArrayConcat(Float32Array, ...geometries.map((g) => g.normals)),
+//   uvs: typedArrayConcat(Float32Array, ...geometries.map((g) => g.uvs)),
+//   cells: typedArrayConcat(
+//     CellsConstructor,
+//     sphereGeometry.cells,
+//     cubeGeometry.cells.map(
+//       (i) =>
+//         i +
+//         sphereGeometry.positions.length / 3 +
+//         cubeGeometry.positions.length / 3
+//     ),
+//     torusGeometry.cells.map(
+//       (i) =>
+//         i +
+//         sphereGeometry.positions.length / 3 +
+//         cubeGeometry.positions.length / 3
+//     )
+//   ),
+// };
+// geom = torusGeometry;
+
+geom.cells = new CellsConstructor(geom.cells);
 console.log(geom);
 
 const camera = createCamera({
@@ -60,16 +76,33 @@ const clearCmd = {
 
 const extensionDefine = `#extension GL_ANGLE_multi_draw: require`;
 
-const count = (cubeGeometry.cells.length + sphereGeometry.cells.length) / 3;
-const counts = new Int32Array(count).fill(3);
-const offsets = new Int32Array(count).map(
-  (_, i) => i * 3 * CellsConstructor.BYTES_PER_ELEMENT
-);
+const counts = new Int32Array([
+  sphereGeometry.cells.length,
+  cubeGeometry.cells.length,
+  torusGeometry.cells.length,
+]);
+
+const offsets = new Int32Array([
+  0,
+  sphereGeometry.cells.length * CellsConstructor.BYTES_PER_ELEMENT,
+  (sphereGeometry.cells.length + cubeGeometry.cells.length) *
+    CellsConstructor.BYTES_PER_ELEMENT,
+]);
 
 const drawCmd = {
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: `${extensionDefine}\n${basicVert}`,
+    vert: `${extensionDefine}\n${basicVert.replace(
+      "vColor = vec4(aNormal * 0.5 + 0.5, 1.0);",
+      `if (gl_DrawID == 0) {
+        vColor = vec4(1, 0, 0, 1);
+      } else if (gl_DrawID == 1) {
+        vColor = vec4(0, 1, 0, 1);
+      } else {
+        vColor = vec4(float(gl_DrawID)/5.0, 0, 1, 1);
+      }
+      `
+    )}`,
     frag: `${extensionDefine}\n${basicFrag}`,
   }),
   attributes: {
