@@ -4,6 +4,7 @@
     "bunny": "./bunny.js",
     "es-module-shims": "./es-module-shims.js",
     "geom-center-and-normalize": "./geom-center-and-normalize.js",
+    "geom-merge": "./geom-merge.js",
     "normals": "./normals.js",
     "pex-cam": "./pex-cam.js",
     "pex-color": "./pex-color.js",
@@ -12,6 +13,7 @@
     "pex-io": "./pex-io.js",
     "pex-math": "./pex-math.js",
     "pex-random": "./pex-random.js",
-    "primitive-geometry": "./primitive-geometry.js"
+    "primitive-geometry": "./primitive-geometry.js",
+    "typed-array-concat": "./typed-array-concat.js"
   }
 }

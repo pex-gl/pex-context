@@ -1,4 +1,5 @@
-import { x as functionBindNative, j as isCallable, y as functionUncurryThis, d as anObject, z as objectDefineProperty, i as isObject, r as classof, m as createNonEnumerableProperty, k as fails, A as createPropertyDescriptor, b as getBuiltIn, l as hasOwnProperty_1, o as objectIsPrototypeOf, B as copyConstructorProperties, C as descriptors, h as global_1, _ as _export } from './classof-b64a2315.js';
+import { s as functionBindNative, u as objectDefineProperty, i as isCallable, v as isObject, l as classof, d as createNonEnumerableProperty, x as functionUncurryThis, f as fails, y as createPropertyDescriptor, z as getBuiltIn, h as hasOwnProperty_1, o as objectIsPrototypeOf, A as copyConstructorProperties, B as descriptors, b as global_1, _ as _export } from './classof-a3d4c9bc.js';
+import { o as objectSetPrototypeOf } from './object-set-prototype-of-eadd3696.js';
 
 var FunctionPrototype = Function.prototype;
 var apply = FunctionPrototype.apply;
@@ -8,42 +9,6 @@ var call = FunctionPrototype.call;
 var functionApply = typeof Reflect == 'object' && Reflect.apply || (functionBindNative ? call.bind(apply) : function () {
   return call.apply(apply, arguments);
 });
-
-var $String = String;
-var $TypeError = TypeError;
-
-var aPossiblePrototype = function (argument) {
-  if (typeof argument == 'object' || isCallable(argument)) return argument;
-  throw $TypeError("Can't set " + $String(argument) + ' as a prototype');
-};
-
-/* eslint-disable no-proto -- safe */
-
-
-
-
-// `Object.setPrototypeOf` method
-// https://tc39.es/ecma262/#sec-object.setprototypeof
-// Works with __proto__ only. Old v8 can't work with null proto objects.
-// eslint-disable-next-line es/no-object-setprototypeof -- safe
-var objectSetPrototypeOf = Object.setPrototypeOf || ('__proto__' in {} ? function () {
-  var CORRECT_SETTER = false;
-  var test = {};
-  var setter;
-  try {
-    // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
-    setter = functionUncurryThis(Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').set);
-    setter(test, []);
-    CORRECT_SETTER = test instanceof Array;
-  } catch (error) { /* empty */ }
-  return function setPrototypeOf(O, proto) {
-    anObject(O);
-    aPossiblePrototype(proto);
-    if (CORRECT_SETTER) setter(O, proto);
-    else O.__proto__ = proto;
-    return O;
-  };
-}() : undefined);
 
 var defineProperty = objectDefineProperty.f;
 
@@ -70,11 +35,11 @@ var inheritIfRequired = function ($this, dummy, Wrapper) {
   return $this;
 };
 
-var $String$1 = String;
+var $String = String;
 
 var toString_1 = function (argument) {
   if (classof(argument) === 'Symbol') throw TypeError('Cannot convert a Symbol value to a string');
-  return $String$1(argument);
+  return $String(argument);
 };
 
 var normalizeStringArgument = function (argument, $default) {
@@ -217,5 +182,3 @@ exportWebAssemblyErrorCauseWrapper('LinkError', function (init) {
 exportWebAssemblyErrorCauseWrapper('RuntimeError', function (init) {
   return function RuntimeError(message) { return functionApply(init, this, arguments); };
 });
-
-export { objectSetPrototypeOf as o };

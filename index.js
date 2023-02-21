@@ -98,6 +98,7 @@ function createContext(options = {}) {
         ? !!gl.getExtension("EXT_color_buffer_float")
         : !!gl.getExtension("WEBGL_color_buffer_float"),
       colorBufferHalfFloat: !!gl.getExtension("EXT_color_buffer_half_float"),
+      multiDraw: !!gl.getExtension("WEBGL_multi_draw"),
     },
     /**
      * Getter for `gl.drawingBufferWidth`
@@ -1091,22 +1092,103 @@ function createContext(options = {}) {
           this.state.indexBuffer.type;
 
         if (instanced) {
-          gl.drawElementsInstanced(
-            primitive,
-            count,
-            type,
-            offset,
-            cmd.instances
-          );
+          if (cmd.multiDraw && ctx.capabilities.multiDraw) {
+            const ext = gl.getExtension("WEBGL_multi_draw");
+
+            if (cmd.multiDraw.baseVertices && cmd.multiDraw.baseInstances) {
+              const baseVertexBaseInstanceExt = gl.getExtension(
+                "WEBGL_multi_draw_instanced_base_vertex_base_instance"
+              );
+              if (!baseVertexBaseInstanceExt) {
+                throw new Error(
+                  "WEBGL_multi_draw_instanced_base_vertex_base_instance not supported"
+                );
+              }
+              baseVertexBaseInstanceExt.multiDrawElementsInstancedBaseVertexBaseInstanceWEBGL(
+                primitive,
+                cmd.multiDraw.counts,
+                cmd.multiDraw.countsOffset || 0,
+                type,
+                cmd.multiDraw.offsets,
+                cmd.multiDraw.offsetsOffset || 0,
+                cmd.multiDraw.instanceCounts,
+                cmd.multiDraw.instanceCountsOffset || 0,
+                cmd.multiDraw.baseVertices,
+                cmd.multiDraw.baseVerticesOffset || 0,
+                cmd.multiDraw.baseInstances,
+                cmd.multiDraw.baseInstancesOffset || 0,
+                cmd.multiDraw.counts.length
+              );
+            } else {
+              ext.multiDrawElementsInstancedWEBGL(
+                primitive,
+                cmd.multiDraw.counts,
+                cmd.multiDraw.countsOffset || 0,
+                type,
+                cmd.multiDraw.offsets,
+                cmd.multiDraw.offsetsOffset || 0,
+                cmd.multiDraw.instanceCounts,
+                cmd.multiDraw.instanceCountsOffset || 0,
+                cmd.multiDraw.counts.length
+              );
+            }
+          } else {
+            gl.drawElementsInstanced(
+              primitive,
+              count,
+              type,
+              offset,
+              cmd.instances
+            );
+          }
         } else {
-          gl.drawElements(primitive, count, type, offset);
+          if (cmd.multiDraw && ctx.capabilities.multiDraw) {
+            const ext = gl.getExtension("WEBGL_multi_draw");
+            ext.multiDrawElementsWEBGL(
+              primitive,
+              cmd.multiDraw.counts,
+              cmd.multiDraw.countsOffset || 0,
+              type,
+              cmd.multiDraw.offsets,
+              cmd.multiDraw.offsetsOffset || 0,
+              cmd.multiDraw.counts.length
+            );
+          } else {
+            gl.drawElements(primitive, count, type, offset);
+          }
         }
       } else if (cmd.count) {
         const first = 0;
         if (instanced) {
-          gl.drawArraysInstanced(primitive, first, cmd.count, cmd.instances);
+          if (cmd.multiDraw && ctx.capabilities.multiDraw) {
+            const ext = gl.getExtension("WEBGL_multi_draw");
+            ext.multiDrawArraysInstancedWEBGL(
+              primitive,
+              cmd.multiDraw.firsts,
+              cmd.multiDraw.firstsOffset || 0,
+              cmd.multiDraw.counts,
+              cmd.multiDraw.countsOffset || 0,
+              cmd.multiDraw.instanceCounts,
+              cmd.multiDraw.instanceCountsOffset || 0,
+              cmd.multiDraw.firsts.length
+            );
+          } else {
+            gl.drawArraysInstanced(primitive, first, cmd.count, cmd.instances);
+          }
         } else {
-          gl.drawArrays(primitive, first, cmd.count);
+          if (cmd.multiDraw && ctx.capabilities.multiDraw) {
+            const ext = gl.getExtension("WEBGL_multi_draw");
+            ext.multiDrawArraysWEBGL(
+              primitive,
+              cmd.multiDraw.firsts,
+              cmd.multiDraw.firstsOffset || 0,
+              cmd.multiDraw.counts,
+              cmd.multiDraw.countsOffset || 0,
+              cmd.multiDraw.firsts.length
+            );
+          } else {
+            gl.drawArrays(primitive, first, cmd.count);
+          }
         }
       } else {
         throw new Error("Vertex arrays requires elements or count to draw");

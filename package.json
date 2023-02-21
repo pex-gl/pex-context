@@ -43,6 +43,7 @@
     "bunny": "^1.0.1",
     "es-module-shims": "^1.6.3",
     "geom-center-and-normalize": "^1.0.3",
+    "geom-merge": "^2.0.0",
     "normals": "^1.1.0",
     "pex-cam": "^3.0.0-alpha.1",
     "pex-color": "^2.0.0-alpha.2",
@@ -50,7 +51,8 @@
     "pex-io": "^3.0.0-alpha.0",
     "pex-math": "^4.0.0-alpha.2",
     "pex-random": "^2.0.0-alpha.1",
-    "primitive-geometry": "^2.9.1"
+    "primitive-geometry": "^2.9.1",
+    "typed-array-concat": "^3.0.0"
   },
   "engines": {
     "node": ">=16.0.0",

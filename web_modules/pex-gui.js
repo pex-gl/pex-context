@@ -1,9 +1,12 @@
-import './common/es.error.cause-80fb3656.js';
-import { v as toHex, b as toHSL, a as fromHSL } from './common/hsl-5dfe9087.js';
-import './common/iterate-e1e675f3.js';
-import './common/esnext.iterator.filter-c3958098.js';
-import { d as anObject, a as aCallable, f as functionCall, _ as _export } from './common/classof-b64a2315.js';
+import './common/es.error.cause-0747567f.js';
+import { v as toHex, b as toHSL, a as fromHSL } from './common/hsl-d415d8ba.js';
+import './common/iterate-54b5a051.js';
+import './common/esnext.iterator.filter-81df7261.js';
+import { _ as _export } from './common/classof-a3d4c9bc.js';
+import { c as collectionDeleteAll, m as mapEmplace } from './common/map-emplace-0ed8f736.js';
 import { m as map, c as clamp } from './common/utils-7e499548.js';
+import './common/object-set-prototype-of-eadd3696.js';
+import './common/async-iterator-iteration-026ee04a.js';
 
 function _classApplyDescriptorGet(receiver, descriptor) {
   if (descriptor.get) {
@@ -41,44 +44,11 @@ function _classPrivateFieldSet(receiver, privateMap, value) {
   return value;
 }
 
-// https://github.com/tc39/collection-methods
-var collectionDeleteAll = function deleteAll(/* ...elements */) {
-  var collection = anObject(this);
-  var remover = aCallable(collection['delete']);
-  var allDeleted = true;
-  var wasDeleted;
-  for (var k = 0, len = arguments.length; k < len; k++) {
-    wasDeleted = functionCall(remover, collection, arguments[k]);
-    allDeleted = allDeleted && wasDeleted;
-  }
-  return !!allDeleted;
-};
-
 // `WeakMap.prototype.deleteAll` method
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'WeakMap', proto: true, real: true, forced: true }, {
   deleteAll: collectionDeleteAll
 });
-
-// `Map.prototype.emplace` method
-// https://github.com/thumbsupep/proposal-upsert
-var mapEmplace = function emplace(key, handler) {
-  var map = anObject(this);
-  var get = aCallable(map.get);
-  var has = aCallable(map.has);
-  var set = aCallable(map.set);
-  var value, inserted;
-  if (functionCall(has, map, key)) {
-    value = functionCall(get, map, key);
-    if ('update' in handler) {
-      value = handler.update(value, key, map);
-      functionCall(set, map, key, value);
-    } return value;
-  }
-  inserted = handler.insert(key, map);
-  functionCall(set, map, key, inserted);
-  return inserted;
-};
 
 // `WeakMap.prototype.emplace` method
 // https://github.com/tc39/proposal-upsert

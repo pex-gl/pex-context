@@ -14,6 +14,8 @@
     "image",
     "instancing",
     "msaa",
+    "multi-draw",
+    "multi-draw-instanced",
     "picking",
     "primitives",
     "project",
