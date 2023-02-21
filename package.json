@@ -36,7 +36,6 @@
     "release:alpha": "snowdev release --prerelease alpha"
   },
   "dependencies": {
-    "geom-merge": "^2.0.0",
     "pex-gl": "^3.0.0-alpha.0"
   },
   "devDependencies": {
@@ -44,6 +43,7 @@
     "bunny": "^1.0.1",
     "es-module-shims": "^1.6.3",
     "geom-center-and-normalize": "^1.0.3",
+    "geom-merge": "^2.0.0",
     "normals": "^1.1.0",
     "pex-cam": "^3.0.0-alpha.1",
     "pex-color": "^2.0.0-alpha.2",
