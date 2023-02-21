@@ -5,27 +5,33 @@ import createContext from "../index.js";
 import { perspective as createCamera, orbiter as createOrbiter } from "pex-cam";
 
 import { cube, sphere, torus } from "primitive-geometry";
-import merge from "geom-merge";
 import typedArrayConcat from "typed-array-concat";
 
 import basicVert from "./shaders/basic-instanced-position.vert.js";
 import basicFrag from "./shaders/basic.frag.js";
+import merge from "geom-merge";
 
 const ctx = createContext({
   pixelRatio: devicePixelRatio,
 });
 
-const CellsConstructor = Uint32Array;
+const CellsConstructor = Uint16Array;
 
-const sphereGeometry = sphere({ radius: 0.1 });
-const cubeGeometry = cube({ sx: 0.1, sy: 0.25, sz: 0.1 });
-const torusGeometry = torus({ radius: 0.1, minorRadius: 0.03 });
-let geom;
+const sphereGeometry = sphere({ radius: 0.2 });
+const cubeGeometry = cube({ sx: 0.3 });
+const torusGeometry = torus({ radius: 0.2, minorRadius: 0.05 });
 const geometries = [sphereGeometry, cubeGeometry, torusGeometry];
-geom = merge(geometries);
 
-geom.cells = new CellsConstructor(geom.cells);
-console.log(geom);
+let geom = {
+  positions: typedArrayConcat(
+    Float32Array,
+    ...geometries.map((g) => g.positions)
+  ),
+  normals: typedArrayConcat(Float32Array, ...geometries.map((g) => g.normals)),
+  uvs: typedArrayConcat(Float32Array, ...geometries.map((g) => g.uvs)),
+  cells: typedArrayConcat(CellsConstructor, ...geometries.map((g) => g.cells)),
+};
+// geom = merge(geometries);
 
 const camera = createCamera({
   position: [0, 0, 7],
@@ -41,60 +47,46 @@ const clearCmd = {
 
 const extensionDefine = `#extension GL_ANGLE_multi_draw: require`;
 
-const counts = new Int32Array([
-  sphereGeometry.cells.length,
-  cubeGeometry.cells.length,
-  torusGeometry.cells.length,
-]);
+const counts = new Int32Array(geometries.length);
+const offsets = new Int32Array(geometries.length);
+const baseVertices = new Int32Array(geometries.length);
+const baseInstances = new Int32Array(geometries.length);
+const instanceCounts = new Int32Array([3, 6, 9]);
 
-const offsets = new Int32Array([
-  0,
-  sphereGeometry.cells.length * CellsConstructor.BYTES_PER_ELEMENT,
-  (sphereGeometry.cells.length + cubeGeometry.cells.length) *
-    CellsConstructor.BYTES_PER_ELEMENT,
-]);
+const instancePositions = [];
 
-function randomFloat(r = 1) {
-  return (Math.random() * 2 - 1) * r;
-}
-const instancedOffsets = [];
-const baseVertices = [];
-const baseInstances = [];
-const numShapes = 3;
-const N = 3;
-const instanceCounts = new Int32Array([N, N * 2, N * 3]);
-
-let base = 0;
-let vertexCountPerShape = [
-  sphereGeometry.cells.length / 3,
-  torusGeometry.cells.length / 3,
-  cubeGeometry.cells.length / 3,
-];
-
-let totalVertexCount = 0;
-for (let i = 0; i < numShapes; i++) {
+for (let i = 0; i < geometries.length; i++) {
   const numInstancesPerShape = instanceCounts[i];
   for (let j = 0; j < numInstancesPerShape; j++) {
-    const offset = [j - 4, i, 0];
-    instancedOffsets.push(offset);
+    instancePositions.push([j - 4, i, 0]);
   }
-  totalVertexCount += numInstancesPerShape * vertexCountPerShape[i];
-  baseVertices.push(0);
-  baseInstances.push(base);
-  base += numInstancesPerShape;
+
+  counts[i] = geometries[i].cells.length;
+
+  if (i > 0) {
+    offsets[i] =
+      offsets[i - 1] +
+      geometries[i - 1].cells.length * CellsConstructor.BYTES_PER_ELEMENT;
+
+    // baseVertices[i] = 0 //when using geom-merge
+    baseVertices[i] =
+      baseVertices[i - 1] + geometries[i - 1].positions.length / 3;
+
+    baseInstances[i] = baseInstances[i - 1] + instanceCounts[i - 1];
+  }
 }
 
 const drawCmd = {
   pipeline: ctx.pipeline({
     depthTest: true,
     vert: `${extensionDefine}\n${basicVert.replace(
-      "vColor = vec4(aNormal * 0.5 + 0.5, 1.0);",
-      `if (gl_DrawID == 0) {
+      /*glsl*/ `vColor = vec4(aNormal * 0.5 + 0.5, 1.0);`,
+      /*glsl*/ `if (gl_DrawID == 0) {
         vColor = vec4(1, 0, 0, 1);
       } else if (gl_DrawID == 1) {
         vColor = vec4(0, 1, 0, 1);
       } else {
-        vColor = vec4(float(gl_DrawID)/5.0, 0.0, 1.0, 1.0);
+        vColor = vec4(0.0, 0.0, 1.0, 1.0);
       }
       `
     )}`,
@@ -105,12 +97,12 @@ const drawCmd = {
     aNormal: ctx.vertexBuffer(geom.normals),
     aTexCoord: ctx.vertexBuffer(geom.uvs),
     aOffset: {
-      buffer: ctx.vertexBuffer(new Float32Array(instancedOffsets.flat())),
+      buffer: ctx.vertexBuffer(instancePositions),
       divisor: 1,
     },
   },
   indices: ctx.indexBuffer(geom.cells),
-  multi: {
+  multiDraw: {
     counts,
     offsets,
     instanceCounts,
