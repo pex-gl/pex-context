@@ -1,5 +1,3 @@
-//Requires: WEBGL_multi_draw
-//Requires: WEBGL_multi_draw_instanced_base_vertex_base_instance
 import createContext from "../index.js";
 
 import { perspective as createCamera, orbiter as createOrbiter } from "pex-cam";
@@ -11,6 +9,12 @@ import basicFrag from "./shaders/basic.frag.js";
 // import merge from "geom-merge";
 
 const ctx = createContext({ pixelRatio: devicePixelRatio });
+
+if (!ctx.capabilities.multiDrawInstancedBase) {
+  const message = `Unsupported extension "WEBGL_multi_draw_instanced_base_vertex_base_instance"`;
+  document.body.textContent = message;
+  throw new Error(message);
+}
 
 const CellsConstructor = Uint16Array;
 
@@ -114,8 +118,8 @@ void main () {
     counts,
     offsets,
     instanceCounts,
-    baseVertices: baseVertices,
-    baseInstances: baseInstances,
+    baseVertices,
+    baseInstances,
   },
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
