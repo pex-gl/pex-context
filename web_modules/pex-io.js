@@ -1,32 +1,28 @@
-import './common/es.error.cause-0747567f.js';
-import { _ as _export, g as getIteratorDirect, a as aCallable } from './common/classof-a3d4c9bc.js';
-import { a as asyncIteratorIteration } from './common/async-iterator-iteration-026ee04a.js';
-import { i as iterate } from './common/iterate-54b5a051.js';
-import './common/object-set-prototype-of-eadd3696.js';
-
-// https://github.com/tc39/proposal-iterator-helpers
+import './common/es.error.cause-d475e2dc.js';
+import { _ as _export, g as getIteratorDirect, a as aCallable } from './common/classof-f879816f.js';
+import { a as asyncIteratorIteration } from './common/async-iterator-iteration-3872d331.js';
+import { i as iterate } from './common/iterate-9e24f8ec.js';
+import './common/object-set-prototype-of-4460a095.js';
 
 var $find = asyncIteratorIteration.find;
 
-_export({ target: 'AsyncIterator', proto: true, real: true, forced: true }, {
-  find: function find(fn) {
-    return $find(this, fn);
+// `AsyncIterator.prototype.find` method
+// https://github.com/tc39/proposal-async-iterator-helpers
+_export({ target: 'AsyncIterator', proto: true, real: true }, {
+  find: function find(predicate) {
+    return $find(this, predicate);
   }
 });
 
+// `Iterator.prototype.find` method
 // https://github.com/tc39/proposal-iterator-helpers
-
-
-
-
-
-_export({ target: 'Iterator', proto: true, real: true, forced: true }, {
-  find: function find(fn) {
+_export({ target: 'Iterator', proto: true, real: true }, {
+  find: function find(predicate) {
     var record = getIteratorDirect(this);
     var counter = 0;
-    aCallable(fn);
+    aCallable(predicate);
     return iterate(record, function (value, stop) {
-      if (fn(value, counter++)) return stop(value);
+      if (predicate(value, counter++)) return stop(value);
     }, { IS_RECORD: true, INTERRUPTED: true }).result;
   }
 });

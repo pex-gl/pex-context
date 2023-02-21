@@ -1,24 +1,15 @@
-import { z as getBuiltIn, _ as _export, g as getIteratorDirect, a as aCallable, m as anObject, n as functionCall, v as isObject, R as asyncIteratorClose, p as functionBindContext, w as wellKnownSymbol, L as objectCreate, u as objectDefineProperty } from './common/classof-a3d4c9bc.js';
-import { i as iterate } from './common/iterate-54b5a051.js';
+import { z as getBuiltIn, _ as _export, g as getIteratorDirect, a as aCallable, m as anObject, n as functionCall, v as isObject, S as asyncIteratorClose, p as functionBindContext, w as wellKnownSymbol, M as objectCreate, u as objectDefineProperty } from './common/classof-f879816f.js';
+import { i as iterate } from './common/iterate-9e24f8ec.js';
 import typedArrayConcat from './typed-array-concat.js';
-import { c as collectionDeleteAll, m as mapEmplace } from './common/map-emplace-0ed8f736.js';
-import { s as speciesConstructor, a as arrayIterationFromLast } from './common/esnext.typed-array.with-b6f846b8.js';
-import './common/object-set-prototype-of-eadd3696.js';
-
-// https://github.com/tc39/proposal-iterator-helpers
-
-
-
-
-
-
-
-
+import { m as mapHelpers, a as mapIterate, b as arrayIterationFromLast } from './common/es.typed-array.with-e94c18e3.js';
+import './common/object-set-prototype-of-4460a095.js';
 
 var Promise = getBuiltIn('Promise');
 var $TypeError = TypeError;
 
-_export({ target: 'AsyncIterator', proto: true, real: true, forced: true }, {
+// `AsyncIterator.prototype.reduce` method
+// https://github.com/tc39/proposal-async-iterator-helpers
+_export({ target: 'AsyncIterator', proto: true, real: true }, {
   reduce: function reduce(reducer /* , initialValue */) {
     var record = getIteratorDirect(this);
     var iterator = record.iterator;
@@ -68,15 +59,11 @@ _export({ target: 'AsyncIterator', proto: true, real: true, forced: true }, {
   }
 });
 
-// https://github.com/tc39/proposal-iterator-helpers
-
-
-
-
-
 var $TypeError$1 = TypeError;
 
-_export({ target: 'Iterator', proto: true, real: true, forced: true }, {
+// `Iterator.prototype.reduce` method
+// https://github.com/tc39/proposal-iterator-helpers
+_export({ target: 'Iterator', proto: true, real: true }, {
   reduce: function reduce(reducer /* , initialValue */) {
     var record = getIteratorDirect(this);
     aCallable(reducer);
@@ -97,48 +84,78 @@ _export({ target: 'Iterator', proto: true, real: true, forced: true }, {
   }
 });
 
+var has = mapHelpers.has;
+
+// Perform ? RequireInternalSlot(M, [[MapData]])
+var aMap = function (it) {
+  has(it);
+  return it;
+};
+
+var remove = mapHelpers.remove;
+
 // `Map.prototype.deleteAll` method
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'Map', proto: true, real: true, forced: true }, {
-  deleteAll: collectionDeleteAll
+  deleteAll: function deleteAll(/* ...elements */) {
+    var collection = aMap(this);
+    var allDeleted = true;
+    var wasDeleted;
+    for (var k = 0, len = arguments.length; k < len; k++) {
+      wasDeleted = remove(collection, arguments[k]);
+      allDeleted = allDeleted && wasDeleted;
+    } return !!allDeleted;
+  }
 });
+
+var get = mapHelpers.get;
+var has$1 = mapHelpers.has;
+var set = mapHelpers.set;
 
 // `Map.prototype.emplace` method
-// https://github.com/thumbsupep/proposal-upsert
+// https://github.com/tc39/proposal-upsert
 _export({ target: 'Map', proto: true, real: true, forced: true }, {
-  emplace: mapEmplace
+  emplace: function emplace(key, handler) {
+    var map = aMap(this);
+    var value, inserted;
+    if (has$1(map, key)) {
+      value = get(map, key);
+      if ('update' in handler) {
+        value = handler.update(value, key, map);
+        set(map, key, value);
+      } return value;
+    }
+    inserted = handler.insert(key, map);
+    set(map, key, inserted);
+    return inserted;
+  }
 });
-
-var getMapIterator = function (it) {
-  // eslint-disable-next-line es/no-map -- safe
-  return functionCall(Map.prototype.entries, it);
-};
 
 // `Map.prototype.every` method
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'Map', proto: true, real: true, forced: true }, {
   every: function every(callbackfn /* , thisArg */) {
-    var map = anObject(this);
-    var iterator = getMapIterator(map);
+    var map = aMap(this);
     var boundFunction = functionBindContext(callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-    return !iterate(iterator, function (key, value, stop) {
-      if (!boundFunction(value, key, map)) return stop();
-    }, { AS_ENTRIES: true, IS_ITERATOR: true, INTERRUPTED: true }).stopped;
+    return mapIterate(map, function (value, key) {
+      if (!boundFunction(value, key, map)) return false;
+    }, true) !== false;
   }
 });
+
+var Map$1 = mapHelpers.Map;
+var set$1 = mapHelpers.set;
 
 // `Map.prototype.filter` method
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'Map', proto: true, real: true, forced: true }, {
   filter: function filter(callbackfn /* , thisArg */) {
-    var map = anObject(this);
-    var iterator = getMapIterator(map);
+    var map = aMap(this);
     var boundFunction = functionBindContext(callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-    var newMap = new (speciesConstructor(map, getBuiltIn('Map')))();
-    var setter = aCallable(newMap.set);
-    iterate(iterator, function (key, value) {
-      if (boundFunction(value, key, map)) functionCall(setter, newMap, key, value);
-    }, { AS_ENTRIES: true, IS_ITERATOR: true });
+    var newMap = new Map$1();
+    mapIterate(map, function (value, key) {
+      if (boundFunction(value, key, map)) set$1(newMap, key, value);
+    });
     return newMap;
   }
 });
@@ -147,12 +164,12 @@ _export({ target: 'Map', proto: true, real: true, forced: true }, {
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'Map', proto: true, real: true, forced: true }, {
   find: function find(callbackfn /* , thisArg */) {
-    var map = anObject(this);
-    var iterator = getMapIterator(map);
+    var map = aMap(this);
     var boundFunction = functionBindContext(callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-    return iterate(iterator, function (key, value, stop) {
-      if (boundFunction(value, key, map)) return stop(value);
-    }, { AS_ENTRIES: true, IS_ITERATOR: true, INTERRUPTED: true }).result;
+    var result = mapIterate(map, function (value, key) {
+      if (boundFunction(value, key, map)) return { value: value };
+    }, true);
+    return result && result.value;
   }
 });
 
@@ -160,12 +177,12 @@ _export({ target: 'Map', proto: true, real: true, forced: true }, {
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'Map', proto: true, real: true, forced: true }, {
   findKey: function findKey(callbackfn /* , thisArg */) {
-    var map = anObject(this);
-    var iterator = getMapIterator(map);
+    var map = aMap(this);
     var boundFunction = functionBindContext(callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-    return iterate(iterator, function (key, value, stop) {
-      if (boundFunction(value, key, map)) return stop(key);
-    }, { AS_ENTRIES: true, IS_ITERATOR: true, INTERRUPTED: true }).result;
+    var result = mapIterate(map, function (value, key) {
+      if (boundFunction(value, key, map)) return { key: key };
+    }, true);
+    return result && result.key;
   }
 });
 
@@ -180,9 +197,9 @@ var sameValueZero = function (x, y) {
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'Map', proto: true, real: true, forced: true }, {
   includes: function includes(searchElement) {
-    return iterate(getMapIterator(anObject(this)), function (key, value, stop) {
-      if (sameValueZero(value, searchElement)) return stop();
-    }, { AS_ENTRIES: true, IS_ITERATOR: true, INTERRUPTED: true }).stopped;
+    return mapIterate(aMap(this), function (value) {
+      if (sameValueZero(value, searchElement)) return true;
+    }, true) === true;
   }
 });
 
@@ -190,55 +207,61 @@ _export({ target: 'Map', proto: true, real: true, forced: true }, {
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'Map', proto: true, real: true, forced: true }, {
   keyOf: function keyOf(searchElement) {
-    return iterate(getMapIterator(anObject(this)), function (key, value, stop) {
-      if (value === searchElement) return stop(key);
-    }, { AS_ENTRIES: true, IS_ITERATOR: true, INTERRUPTED: true }).result;
+    var result = mapIterate(aMap(this), function (value, key) {
+      if (value === searchElement) return { key: key };
+    }, true);
+    return result && result.key;
   }
 });
+
+var Map$2 = mapHelpers.Map;
+var set$2 = mapHelpers.set;
 
 // `Map.prototype.mapKeys` method
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'Map', proto: true, real: true, forced: true }, {
   mapKeys: function mapKeys(callbackfn /* , thisArg */) {
-    var map = anObject(this);
-    var iterator = getMapIterator(map);
+    var map = aMap(this);
     var boundFunction = functionBindContext(callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-    var newMap = new (speciesConstructor(map, getBuiltIn('Map')))();
-    var setter = aCallable(newMap.set);
-    iterate(iterator, function (key, value) {
-      functionCall(setter, newMap, boundFunction(value, key, map), value);
-    }, { AS_ENTRIES: true, IS_ITERATOR: true });
+    var newMap = new Map$2();
+    mapIterate(map, function (value, key) {
+      set$2(newMap, boundFunction(value, key, map), value);
+    });
     return newMap;
   }
 });
+
+var Map$3 = mapHelpers.Map;
+var set$3 = mapHelpers.set;
 
 // `Map.prototype.mapValues` method
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'Map', proto: true, real: true, forced: true }, {
   mapValues: function mapValues(callbackfn /* , thisArg */) {
-    var map = anObject(this);
-    var iterator = getMapIterator(map);
+    var map = aMap(this);
     var boundFunction = functionBindContext(callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-    var newMap = new (speciesConstructor(map, getBuiltIn('Map')))();
-    var setter = aCallable(newMap.set);
-    iterate(iterator, function (key, value) {
-      functionCall(setter, newMap, key, boundFunction(value, key, map));
-    }, { AS_ENTRIES: true, IS_ITERATOR: true });
+    var newMap = new Map$3();
+    mapIterate(map, function (value, key) {
+      set$3(newMap, key, boundFunction(value, key, map));
+    });
     return newMap;
   }
 });
+
+var set$4 = mapHelpers.set;
 
 // `Map.prototype.merge` method
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'Map', proto: true, real: true, arity: 1, forced: true }, {
   // eslint-disable-next-line no-unused-vars -- required for `.length`
   merge: function merge(iterable /* ...iterables */) {
-    var map = anObject(this);
-    var setter = aCallable(map.set);
+    var map = aMap(this);
     var argumentsLength = arguments.length;
     var i = 0;
     while (i < argumentsLength) {
-      iterate(arguments[i++], setter, { that: map, AS_ENTRIES: true });
+      iterate(arguments[i++], function (key, value) {
+        set$4(map, key, value);
+      }, { AS_ENTRIES: true });
     }
     return map;
   }
@@ -250,55 +273,53 @@ var $TypeError$2 = TypeError;
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'Map', proto: true, real: true, forced: true }, {
   reduce: function reduce(callbackfn /* , initialValue */) {
-    var map = anObject(this);
-    var iterator = getMapIterator(map);
+    var map = aMap(this);
     var noInitial = arguments.length < 2;
     var accumulator = noInitial ? undefined : arguments[1];
     aCallable(callbackfn);
-    iterate(iterator, function (key, value) {
+    mapIterate(map, function (value, key) {
       if (noInitial) {
         noInitial = false;
         accumulator = value;
       } else {
         accumulator = callbackfn(accumulator, value, key, map);
       }
-    }, { AS_ENTRIES: true, IS_ITERATOR: true });
+    });
     if (noInitial) throw $TypeError$2('Reduce of empty map with no initial value');
     return accumulator;
   }
 });
 
-// `Set.prototype.some` method
+// `Map.prototype.some` method
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'Map', proto: true, real: true, forced: true }, {
   some: function some(callbackfn /* , thisArg */) {
-    var map = anObject(this);
-    var iterator = getMapIterator(map);
+    var map = aMap(this);
     var boundFunction = functionBindContext(callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-    return iterate(iterator, function (key, value, stop) {
-      if (boundFunction(value, key, map)) return stop();
-    }, { AS_ENTRIES: true, IS_ITERATOR: true, INTERRUPTED: true }).stopped;
+    return mapIterate(map, function (value, key) {
+      if (boundFunction(value, key, map)) return true;
+    }, true) === true;
   }
 });
 
 var $TypeError$3 = TypeError;
+var get$1 = mapHelpers.get;
+var has$2 = mapHelpers.has;
+var set$5 = mapHelpers.set;
 
-// `Set.prototype.update` method
+// `Map.prototype.update` method
 // https://github.com/tc39/proposal-collection-methods
 _export({ target: 'Map', proto: true, real: true, forced: true }, {
   update: function update(key, callback /* , thunk */) {
-    var map = anObject(this);
-    var get = aCallable(map.get);
-    var has = aCallable(map.has);
-    var set = aCallable(map.set);
+    var map = aMap(this);
     var length = arguments.length;
     aCallable(callback);
-    var isPresentInMap = functionCall(has, map, key);
+    var isPresentInMap = has$2(map, key);
     if (!isPresentInMap && length < 3) {
       throw $TypeError$3('Updating absent value');
     }
-    var value = isPresentInMap ? functionCall(get, map, key) : aCallable(length > 2 ? arguments[2] : undefined)(key, map);
-    functionCall(set, map, key, callback(value, key, map));
+    var value = isPresentInMap ? get$1(map, key) : aCallable(length > 2 ? arguments[2] : undefined)(key, map);
+    set$5(map, key, callback(value, key, map));
     return map;
   }
 });

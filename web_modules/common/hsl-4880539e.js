@@ -1,24 +1,20 @@
-import { _ as _export, g as getIteratorDirect, a as aCallable } from './classof-a3d4c9bc.js';
-import { a as asyncIteratorIteration } from './async-iterator-iteration-026ee04a.js';
-import { i as iterate } from './iterate-54b5a051.js';
-
-// https://github.com/tc39/proposal-iterator-helpers
+import { _ as _export, g as getIteratorDirect, a as aCallable } from './classof-f879816f.js';
+import { a as asyncIteratorIteration } from './async-iterator-iteration-3872d331.js';
+import { i as iterate } from './iterate-9e24f8ec.js';
 
 var $forEach = asyncIteratorIteration.forEach;
 
-_export({ target: 'AsyncIterator', proto: true, real: true, forced: true }, {
+// `AsyncIterator.prototype.forEach` method
+// https://github.com/tc39/proposal-async-iterator-helpers
+_export({ target: 'AsyncIterator', proto: true, real: true }, {
   forEach: function forEach(fn) {
     return $forEach(this, fn);
   }
 });
 
+// `Iterator.prototype.forEach` method
 // https://github.com/tc39/proposal-iterator-helpers
-
-
-
-
-
-_export({ target: 'Iterator', proto: true, real: true, forced: true }, {
+_export({ target: 'Iterator', proto: true, real: true }, {
   forEach: function forEach(fn) {
     var record = getIteratorDirect(this);
     var counter = 0;

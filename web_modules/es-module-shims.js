@@ -1,34 +1,30 @@
-import { _ as _export, g as getIteratorDirect, a as aCallable, c as commonjsGlobal } from './common/classof-a3d4c9bc.js';
-import { a as asyncIteratorIteration } from './common/async-iterator-iteration-026ee04a.js';
-import { i as iterate } from './common/iterate-54b5a051.js';
-import './common/es.error.cause-0747567f.js';
-import './common/esnext.typed-array.with-b6f846b8.js';
-import './common/esnext.iterator.filter-81df7261.js';
-import './common/object-set-prototype-of-eadd3696.js';
-
-// https://github.com/tc39/proposal-iterator-helpers
+import { _ as _export, g as getIteratorDirect, a as aCallable, c as commonjsGlobal } from './common/classof-f879816f.js';
+import { a as asyncIteratorIteration } from './common/async-iterator-iteration-3872d331.js';
+import { i as iterate } from './common/iterate-9e24f8ec.js';
+import './common/es.error.cause-d475e2dc.js';
+import './common/es.typed-array.with-e94c18e3.js';
+import './common/esnext.iterator.filter-767449bc.js';
+import './common/object-set-prototype-of-4460a095.js';
 
 var $some = asyncIteratorIteration.some;
 
-_export({ target: 'AsyncIterator', proto: true, real: true, forced: true }, {
-  some: function some(fn) {
-    return $some(this, fn);
+// `AsyncIterator.prototype.some` method
+// https://github.com/tc39/proposal-async-iterator-helpers
+_export({ target: 'AsyncIterator', proto: true, real: true }, {
+  some: function some(predicate) {
+    return $some(this, predicate);
   }
 });
 
+// `Iterator.prototype.some` method
 // https://github.com/tc39/proposal-iterator-helpers
-
-
-
-
-
-_export({ target: 'Iterator', proto: true, real: true, forced: true }, {
-  some: function some(fn) {
+_export({ target: 'Iterator', proto: true, real: true }, {
+  some: function some(predicate) {
     var record = getIteratorDirect(this);
     var counter = 0;
-    aCallable(fn);
+    aCallable(predicate);
     return iterate(record, function (value, stop) {
-      if (fn(value, counter++)) return stop();
+      if (predicate(value, counter++)) return stop();
     }, { IS_RECORD: true, INTERRUPTED: true }).stopped;
   }
 });

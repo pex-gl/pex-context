@@ -1,5 +1,5 @@
-import { s as functionBindNative, u as objectDefineProperty, i as isCallable, v as isObject, l as classof, d as createNonEnumerableProperty, x as functionUncurryThis, f as fails, y as createPropertyDescriptor, z as getBuiltIn, h as hasOwnProperty_1, o as objectIsPrototypeOf, A as copyConstructorProperties, B as descriptors, b as global_1, _ as _export } from './classof-a3d4c9bc.js';
-import { o as objectSetPrototypeOf } from './object-set-prototype-of-eadd3696.js';
+import { s as functionBindNative, u as objectDefineProperty, i as isCallable, v as isObject, l as classof, d as createNonEnumerableProperty, x as functionUncurryThis, f as fails, y as createPropertyDescriptor, z as getBuiltIn, h as hasOwnProperty_1, o as objectIsPrototypeOf, A as copyConstructorProperties, B as descriptors, b as global_1, _ as _export } from './classof-f879816f.js';
+import { o as objectSetPrototypeOf } from './object-set-prototype-of-4460a095.js';
 
 var FunctionPrototype = Function.prototype;
 var apply = FunctionPrototype.apply;
@@ -58,6 +58,7 @@ var $Error = Error;
 var replace = functionUncurryThis(''.replace);
 
 var TEST = (function (arg) { return String($Error(arg).stack); })('zxcasd');
+// eslint-disable-next-line redos/no-vulnerable -- safe
 var V8_OR_CHAKRA_STACK_ENTRY = /\n\s*at [^:]*:[^\n]*/;
 var IS_V8_OR_CHAKRA_STACK = V8_OR_CHAKRA_STACK_ENTRY.test(TEST);
 
@@ -74,6 +75,16 @@ var errorStackInstallable = !fails(function () {
   Object.defineProperty(error, 'stack', createPropertyDescriptor(1, 7));
   return error.stack !== 7;
 });
+
+// non-standard V8
+var captureStackTrace = Error.captureStackTrace;
+
+var errorStackInstall = function (error, C, stack, dropEntries) {
+  if (errorStackInstallable) {
+    if (captureStackTrace) captureStackTrace(error, C);
+    else createNonEnumerableProperty(error, 'stack', errorStackClear(stack, dropEntries));
+  }
+};
 
 var wrapErrorConstructorWithCause = function (FULL_NAME, wrapper, FORCED, IS_AGGREGATE_ERROR) {
   var STACK_TRACE_LIMIT = 'stackTraceLimit';
@@ -97,7 +108,7 @@ var wrapErrorConstructorWithCause = function (FULL_NAME, wrapper, FORCED, IS_AGG
     var message = normalizeStringArgument(IS_AGGREGATE_ERROR ? b : a, undefined);
     var result = IS_AGGREGATE_ERROR ? new OriginalError(a) : new OriginalError();
     if (message !== undefined) createNonEnumerableProperty(result, 'message', message);
-    if (errorStackInstallable) createNonEnumerableProperty(result, 'stack', errorStackClear(result.stack, 2));
+    errorStackInstall(result, WrappedError, result.stack, 2);
     if (this && objectIsPrototypeOf(OriginalErrorPrototype, this)) inheritIfRequired(result, this, WrappedError);
     if (arguments.length > OPTIONS_POSITION) installErrorCause(result, arguments[OPTIONS_POSITION]);
     return result;
@@ -151,6 +162,7 @@ var exportWebAssemblyErrorCauseWrapper = function (ERROR_NAME, wrapper) {
   }
 };
 
+// https://tc39.es/ecma262/#sec-nativeerror
 // https://github.com/tc39/proposal-error-cause
 exportGlobalErrorCauseWrapper('Error', function (init) {
   return function Error(message) { return functionApply(init, this, arguments); };

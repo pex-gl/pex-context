@@ -1,9 +1,36 @@
-import './common/es.error.cause-0747567f.js';
-import { U as createCommonjsModule, c as commonjsGlobal, V as getDefaultExportFromNamespaceIfNotNamed } from './common/classof-a3d4c9bc.js';
-import './common/esnext.typed-array.with-b6f846b8.js';
-import './common/object-set-prototype-of-eadd3696.js';
+import './common/es.error.cause-d475e2dc.js';
+import { V as createCommonjsModule, c as commonjsGlobal, W as getDefaultExportFromNamespaceIfNotNamed } from './common/classof-f879816f.js';
+import './common/es.typed-array.with-e94c18e3.js';
+import './common/object-set-prototype-of-4460a095.js';
+
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+
+  return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+    return typeof obj;
+  } : function (obj) {
+    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+  }, _typeof(obj);
+}
+
+function _toPrimitive(input, hint) {
+  if (_typeof(input) !== "object" || input === null) return input;
+  var prim = input[Symbol.toPrimitive];
+  if (prim !== undefined) {
+    var res = prim.call(input, hint || "default");
+    if (_typeof(res) !== "object") return res;
+    throw new TypeError("@@toPrimitive must return a primitive value.");
+  }
+  return (hint === "string" ? String : Number)(input);
+}
+
+function _toPropertyKey(arg) {
+  var key = _toPrimitive(arg, "string");
+  return _typeof(key) === "symbol" ? key : String(key);
+}
 
 function _defineProperty(obj, key, value) {
+  key = _toPropertyKey(key);
   if (key in obj) {
     Object.defineProperty(obj, key, {
       value: value,

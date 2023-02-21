@@ -1,4 +1,4 @@
-import { o as objectIsPrototypeOf, w as wellKnownSymbol, b as global_1, i as isCallable, f as fails, h as hasOwnProperty_1, d as createNonEnumerableProperty, _ as _export, e as iteratorsCore, j as isNullOrUndefined, k as getMethod, l as classof, a as aCallable, m as anObject, n as functionCall, t as tryToString, p as functionBindContext, q as lengthOfArrayLike, r as iteratorClose } from './classof-a3d4c9bc.js';
+import { o as objectIsPrototypeOf, w as wellKnownSymbol, b as global_1, i as isCallable, f as fails, h as hasOwnProperty_1, d as createNonEnumerableProperty, _ as _export, e as iteratorsCore, j as isNullOrUndefined, k as getMethod, l as classof, a as aCallable, m as anObject, n as functionCall, t as tryToString, p as functionBindContext, q as lengthOfArrayLike, r as iteratorClose } from './classof-f879816f.js';
 
 var $TypeError = TypeError;
 
@@ -6,15 +6,6 @@ var anInstance = function (it, Prototype) {
   if (objectIsPrototypeOf(Prototype, it)) return it;
   throw $TypeError('Incorrect invocation');
 };
-
-// https://github.com/tc39/proposal-iterator-helpers
-
-
-
-
-
-
-
 
 var IteratorPrototype = iteratorsCore.IteratorPrototype;
 
@@ -43,6 +34,8 @@ if (FORCED || !hasOwnProperty_1(IteratorPrototype, 'constructor') || IteratorPro
 
 IteratorConstructor.prototype = IteratorPrototype;
 
+// `Iterator` constructor
+// https://github.com/tc39/proposal-iterator-helpers
 _export({ global: true, constructor: true, forced: FORCED }, {
   Iterator: IteratorConstructor
 });

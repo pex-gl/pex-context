@@ -1,8 +1,50 @@
+/**
+ * @module aabb
+ */
+
+/**
+ * @typedef {number[][]} aabb An axis-aligned bounding box defined by two min and max 3D points.
+ */
+
+/**
+ * Creates a new bounding box.
+ * @returns {aabb}
+ */
 function create() {
-  var min = [Infinity, Infinity, Infinity];
-  var max = [-Infinity, -Infinity, -Infinity];
-  return [min, max];
+  // [min, max]
+  return [[Infinity, Infinity, Infinity], [-Infinity, -Infinity, -Infinity]];
 }
+
+/**
+ * Reset a bounding box.
+ * @param {aabb} a
+ * @returns {rect}
+ */
+function empty(a) {
+  a[0][0] = Infinity;
+  a[0][1] = Infinity;
+  a[0][2] = Infinity;
+  a[1][0] = -Infinity;
+  a[1][1] = -Infinity;
+  a[1][2] = -Infinity;
+  return a;
+}
+
+/**
+ * Copies a bounding box.
+ * @param {aabb} a
+ * @returns {aabb}
+ */
+function copy(a) {
+  return [a[0].slice(), a[1].slice()];
+}
+
+/**
+ * Sets a bounding box to another.
+ * @param {aabb} a
+ * @param {aabb} b
+ * @returns {aabb}
+ */
 function set(a, b) {
   a[0][0] = b[0][0];
   a[0][1] = b[0][1];
@@ -10,48 +52,110 @@ function set(a, b) {
   a[1][0] = b[1][0];
   a[1][1] = b[1][1];
   a[1][2] = b[1][2];
-}
-function copy(b) {
-  var a = create();
-  set(a, b);
   return a;
 }
+
+/**
+ * Checks if a bounding box is empty.
+ * @param {aabb} aabb
+ * @returns {boolean}
+ */
+function isEmpty(a) {
+  return a[0][0] > a[1][0] || a[0][1] > a[1][1] || a[0][2] > a[1][2];
+}
+
+/**
+ * Creates a bounding box from a list of points.
+ * @param {import("pex-math").vec3[]} points
+ * @returns {aabb}
+ */
 function fromPoints(points) {
-  var aabb = create();
-  var min = aabb[0];
-  var max = aabb[1];
-  for (var i = 0, len = points.length; i < len; i++) {
-    var p = points[i];
-    min[0] = Math.min(min[0], p[0]);
-    min[1] = Math.min(min[1], p[1]);
-    min[2] = Math.min(min[2], p[2]);
-    max[0] = Math.max(max[0], p[0]);
-    max[1] = Math.max(max[1], p[1]);
-    max[2] = Math.max(max[2], p[2]);
-  }
-  return aabb;
+  return setPoints(create(), points);
 }
-function center(aabb, out) {
-  if (out === undefined) {
-    out = [0, 0, 0];
+
+/**
+ * Updates a bounding box from a list of points.
+ * @param {aabb} a
+ * @param {import("pex-math").vec3[]} points
+ * @returns {aabb}
+ */
+function setPoints(a, points) {
+  for (let i = 0; i < points.length; i++) {
+    includePoint(a, points[i]);
   }
-  out[0] = (aabb[0][0] + aabb[1][0]) / 2;
-  out[1] = (aabb[0][1] + aabb[1][1]) / 2;
-  out[2] = (aabb[0][2] + aabb[1][2]) / 2;
+  return a;
+}
+
+/**
+ * @private
+ */
+function setVec3(v = [], x, y, z) {
+  v[0] = x;
+  v[1] = y;
+  v[2] = z;
+  return v;
+}
+
+/**
+ * Returns a list of 8 points from a bounding box.
+ * @param {aabb} aabb
+ * @param {import("pex-math").vec3[]} points
+ * @returns {import("pex-math").vec3[]}
+ */
+function getPoints(a, points = []) {
+  points[0] = setVec3(points[0], a[0][0], a[0][1], a[0][2]);
+  points[1] = setVec3(points[1], a[1][0], a[0][1], a[0][2]);
+  points[2] = setVec3(points[2], a[1][0], a[0][1], a[1][2]);
+  points[3] = setVec3(points[3], a[0][0], a[0][1], a[1][2]);
+  points[4] = setVec3(points[4], a[0][0], a[1][1], a[0][2]);
+  points[5] = setVec3(points[5], a[1][0], a[1][1], a[0][2]);
+  points[6] = setVec3(points[6], a[1][0], a[1][1], a[1][2]);
+  points[7] = setVec3(points[7], a[0][0], a[1][1], a[1][2]);
+  return points;
+}
+
+/**
+ * Returns the center of a bounding box.
+ * @param {aabb} a
+ * @param {import("pex-math").vec3} out
+ * @returns {import("pex-math").vec3}
+ */
+function center(a, out = [0, 0, 0]) {
+  out[0] = (a[0][0] + a[1][0]) / 2;
+  out[1] = (a[0][1] + a[1][1]) / 2;
+  out[2] = (a[0][2] + a[1][2]) / 2;
   return out;
 }
-function size(aabb, out) {
-  if (out === undefined) {
-    out = [0, 0, 0];
-  }
-  out[0] = Math.abs(aabb[1][0] - aabb[0][0]);
-  out[1] = Math.abs(aabb[1][1] - aabb[0][1]);
-  out[2] = Math.abs(aabb[1][2] - aabb[0][2]);
+
+/**
+ * Returns the size of a bounding box.
+ * @param {aabb} a
+ * @param {import("pex-math").vec3} out
+ * @returns {import("pex-math").vec3}
+ */
+function size(a, out = [0, 0, 0]) {
+  out[0] = Math.abs(a[1][0] - a[0][0]);
+  out[1] = Math.abs(a[1][1] - a[0][1]);
+  out[2] = Math.abs(a[1][2] - a[0][2]);
   return out;
 }
-function isEmpty(aabb) {
-  return aabb[0][0] > aabb[1][0] || aabb[0][1] > aabb[1][1] || aabb[0][2] > aabb[1][2];
+
+/**
+ * Checks if a point is inside a bounding box.
+ * @param {bbox} a
+ * @param {import("pex-math").vec3} p
+ * @returns {boolean}
+ */
+function containsPoint(a, [x, y, z]) {
+  return x >= a[0][0] && x <= a[1][0] && y >= a[0][1] && y <= a[1][1] && z >= a[0][2] && z <= a[1][2];
 }
+
+/**
+ * Includes a bounding box in another.
+ * @param {aabb} a
+ * @param {aabb} b
+ * @returns {aabb}
+ */
 function includeAABB(a, b) {
   if (isEmpty(a)) {
     set(a, b);
@@ -65,6 +169,13 @@ function includeAABB(a, b) {
   }
   return a;
 }
+
+/**
+ * Includes a point in a bounding box.
+ * @param {aabb} a
+ * @param {import("pex-math").vec3} p
+ * @returns {import("pex-math").vec3}
+ */
 function includePoint(a, p) {
   a[0][0] = Math.min(a[0][0], p[0]);
   a[0][1] = Math.min(a[0][1], p[1]);
@@ -74,17 +185,23 @@ function includePoint(a, p) {
   a[1][2] = Math.max(a[1][2], p[2]);
   return a;
 }
-var aabb = {
+
+var aabb = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   create: create,
-  set: set,
+  empty: empty,
   copy: copy,
+  set: set,
+  isEmpty: isEmpty,
   fromPoints: fromPoints,
+  setPoints: setPoints,
+  getPoints: getPoints,
   center: center,
   size: size,
-  isEmpty: isEmpty,
+  containsPoint: containsPoint,
   includeAABB: includeAABB,
   includePoint: includePoint
-};
+});
 
 function create$1() {
   return [0, 0, 0];

@@ -1,4 +1,11 @@
-import { i as isCallable, x as functionUncurryThis, m as anObject } from './classof-a3d4c9bc.js';
+import { x as functionUncurryThis, a as aCallable, i as isCallable, m as anObject } from './classof-f879816f.js';
+
+var functionUncurryThisAccessor = function (object, key, method) {
+  try {
+    // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+    return functionUncurryThis(aCallable(Object.getOwnPropertyDescriptor(object, key)[method]));
+  } catch (error) { /* empty */ }
+};
 
 var $String = String;
 var $TypeError = TypeError;
@@ -22,8 +29,7 @@ var objectSetPrototypeOf = Object.setPrototypeOf || ('__proto__' in {} ? functio
   var test = {};
   var setter;
   try {
-    // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
-    setter = functionUncurryThis(Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').set);
+    setter = functionUncurryThisAccessor(Object.prototype, '__proto__', 'set');
     setter(test, []);
     CORRECT_SETTER = test instanceof Array;
   } catch (error) { /* empty */ }
