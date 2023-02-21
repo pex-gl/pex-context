@@ -14,7 +14,7 @@ const ctx = createContext({
   pixelRatio: devicePixelRatio,
 });
 
-const CellsConstructor = Uint32Array;
+const CellsConstructor = Uint16Array;
 
 const sphereGeometry = sphere();
 sphereGeometry.positions = sphereGeometry.positions.map((value, i) =>
@@ -32,35 +32,6 @@ torusGeometry.positions = torusGeometry.positions.map((value, i) =>
 let geom;
 const geometries = [sphereGeometry, cubeGeometry, torusGeometry];
 geom = merge(geometries);
-
-// geom = {
-//   positions: typedArrayConcat(
-//     Float32Array,
-//     ...geometries.map((g) => g.positions)
-//   ),
-//   normals: typedArrayConcat(Float32Array, ...geometries.map((g) => g.normals)),
-//   uvs: typedArrayConcat(Float32Array, ...geometries.map((g) => g.uvs)),
-//   cells: typedArrayConcat(
-//     CellsConstructor,
-//     sphereGeometry.cells,
-//     cubeGeometry.cells.map(
-//       (i) =>
-//         i +
-//         sphereGeometry.positions.length / 3 +
-//         cubeGeometry.positions.length / 3
-//     ),
-//     torusGeometry.cells.map(
-//       (i) =>
-//         i +
-//         sphereGeometry.positions.length / 3 +
-//         cubeGeometry.positions.length / 3
-//     )
-//   ),
-// };
-// geom = torusGeometry;
-
-geom.cells = new CellsConstructor(geom.cells);
-console.log(geom);
 
 const camera = createCamera({
   position: [0, 0, 3],
@@ -93,13 +64,13 @@ const drawCmd = {
   pipeline: ctx.pipeline({
     depthTest: true,
     vert: `${extensionDefine}\n${basicVert.replace(
-      "vColor = vec4(aNormal * 0.5 + 0.5, 1.0);",
-      `if (gl_DrawID == 0) {
+      /*glsl*/ `vColor = vec4(aNormal * 0.5 + 0.5, 1.0);`,
+      /*glsl*/ `if (gl_DrawID == 0) {
         vColor = vec4(1, 0, 0, 1);
       } else if (gl_DrawID == 1) {
         vColor = vec4(0, 1, 0, 1);
       } else {
-        vColor = vec4(float(gl_DrawID)/5.0, 0, 1, 1);
+        vColor = vec4(0.0, 0.0, 1.0, 1.0);
       }
       `
     )}`,
@@ -111,10 +82,9 @@ const drawCmd = {
     aTexCoord: ctx.vertexBuffer(geom.uvs),
   },
   indices: ctx.indexBuffer(geom.cells),
-  multi: {
+  multiDraw: {
     counts,
     offsets,
-    // offsetsOffset,
   },
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
