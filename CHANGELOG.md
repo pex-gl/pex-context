@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [3.0.0-alpha.7](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.6...v3.0.0-alpha.7) (2023-02-21)
+
+
+### Features
+
+* add support for multi draw ([3f4e61b](https://github.com/pex-gl/pex-context/commit/3f4e61b5689d6724e76ecf9e7b71bce46230a137))
+* add support for multidraw instanced with baseInstances ([775ff9e](https://github.com/pex-gl/pex-context/commit/775ff9ef6dc120a8c4272e767ed1aa9ae3386b62))
+
+
+
 # [3.0.0-alpha.6](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.5...v3.0.0-alpha.6) (2023-02-07)
 
 
