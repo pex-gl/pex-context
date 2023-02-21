@@ -7,13 +7,10 @@ import { perspective as createCamera, orbiter as createOrbiter } from "pex-cam";
 import { cube, sphere, torus } from "primitive-geometry";
 import typedArrayConcat from "typed-array-concat";
 
-import basicVert from "./shaders/basic-instanced-position.vert.js";
 import basicFrag from "./shaders/basic.frag.js";
-import merge from "geom-merge";
+// import merge from "geom-merge";
 
-const ctx = createContext({
-  pixelRatio: devicePixelRatio,
-});
+const ctx = createContext({ pixelRatio: devicePixelRatio });
 
 const CellsConstructor = Uint16Array;
 
@@ -45,8 +42,6 @@ const clearCmd = {
   }),
 };
 
-const extensionDefine = `#extension GL_ANGLE_multi_draw: require`;
-
 const counts = new Int32Array(geometries.length);
 const offsets = new Int32Array(geometries.length);
 const baseVertices = new Int32Array(geometries.length);
@@ -58,7 +53,7 @@ const instancePositions = [];
 for (let i = 0; i < geometries.length; i++) {
   const numInstancesPerShape = instanceCounts[i];
   for (let j = 0; j < numInstancesPerShape; j++) {
-    instancePositions.push([j - 4, i, 0]);
+    instancePositions.push([j - 4, i - (geometries.length - 1) / 2, 0]);
   }
 
   counts[i] = geometries[i].cells.length;
@@ -79,18 +74,31 @@ for (let i = 0; i < geometries.length; i++) {
 const drawCmd = {
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: `${extensionDefine}\n${basicVert.replace(
-      /*glsl*/ `vColor = vec4(aNormal * 0.5 + 0.5, 1.0);`,
-      /*glsl*/ `if (gl_DrawID == 0) {
-        vColor = vec4(1, 0, 0, 1);
-      } else if (gl_DrawID == 1) {
-        vColor = vec4(0, 1, 0, 1);
-      } else {
-        vColor = vec4(0.0, 0.0, 1.0, 1.0);
-      }
-      `
-    )}`,
-    frag: `${extensionDefine}\n${basicFrag}`,
+    vert: /* glsl */ `
+#extension GL_ANGLE_multi_draw: require
+
+attribute vec3 aPosition;
+attribute vec3 aOffset;
+
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
+
+varying vec4 vColor;
+
+void main () {
+  if (gl_DrawID == 0) {
+    vColor = vec4(1.0, 0.0, 0.0, 1.0);
+  } else if (gl_DrawID == 1) {
+    vColor = vec4(0.0, 1.0, 0.0, 1.0);
+  } else if (gl_DrawID == 2) {
+    vColor = vec4(0.0, 0.0, 1.0, 1.0);
+  } else {
+    vColor = vec4(1.0, 1.0, 0.0, 1.0);
+  }
+
+  gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition + aOffset, 1.0);
+}`,
+    frag: basicFrag,
   }),
   attributes: {
     aPosition: ctx.vertexBuffer(geom.positions),
