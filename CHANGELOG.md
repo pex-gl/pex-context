@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [3.0.0-alpha.8](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.7...v3.0.0-alpha.8) (2023-06-01)
+
+
+### Features
+
+* add capabilities.floatBlend EXT_float_blend ([8a47bd3](https://github.com/pex-gl/pex-context/commit/8a47bd3476eb8d4bcd83a190375f41b94ba56f8b))
+* add support for WEBGL_draw_instanced_base_vertex_base_instance and drawArrays for WEBGL_multi_draw_instanced_base_vertex_base_instance ([224ee99](https://github.com/pex-gl/pex-context/commit/224ee99aab1a75c559b359898367627408eb48b3)), closes [#133](https://github.com/pex-gl/pex-context/issues/133)
+
+
+
 # [3.0.0-alpha.7](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.6...v3.0.0-alpha.7) (2023-02-21)
 
 
