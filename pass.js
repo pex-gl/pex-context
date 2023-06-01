@@ -2,8 +2,8 @@ import { checkProps } from "./utils.js";
 
 /**
  * @typedef {import("./types.js").PexResource} PassOptions
- * @property {Texture2D[]|import("./framebuffer.js").Attachment[]} [color] render target
- * @property {Texture2D} [depth] render target
+ * @property {import("./types.js").PexTexture2D[]|import("./framebuffer.js").Attachment[]} [color] render target
+ * @property {import("./types.js").PexTexture2D} [depth] render target
  * @property {import("./types.js").Color} [clearColor]
  * @property {number} [clearDepth]
  */

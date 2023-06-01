@@ -2,9 +2,9 @@ import { enableVertexData } from "./utils.js";
 
 /**
  * @typedef {import("./types.js").PexResource} VertexArrayOptions
- * @property {Object} vertexLayout
- * @property {Object} [attributes]
- * @property {Object} [indices]
+ * @property {object} vertexLayout
+ * @property {object} [attributes]
+ * @property {object} [indices]
  */
 
 function createVertexArray(ctx, opts) {

@@ -110,6 +110,7 @@ function createContext(options = {}) {
     /**
      * Getter for `gl.drawingBufferWidth`
      * @memberof ctx
+     * @returns {number}
      */
     get width() {
       return gl.drawingBufferWidth;
@@ -117,6 +118,7 @@ function createContext(options = {}) {
     /**
      * Getter for `gl.drawingBufferHeight`
      * @memberof ctx
+     * @returns {number}
      */
     get height() {
       return gl.drawingBufferHeight;
@@ -330,7 +332,7 @@ function createContext(options = {}) {
      *
      * @memberof ctx
      * @param {import("./types.js").PexCommand} cmd
-     * @param {import("./types.js").PexCommand | import("./types.js").PexCommand[]} [optsBatchesOrSubCommand]
+     * @param {import("./types.js").PexCommand | import("./types.js").PexCommand[]} [batches]
      * @param {import("./types.js").PexCommand} [subCommand]
      */
     submit(cmd, batches, subCommand) {
@@ -525,7 +527,7 @@ function createContext(options = {}) {
     /**
      * Create a 2D Texture cube resource.
      * @memberof ctx
-     * @param {HTMLImageElement | import("./texture.js").TextureOptions} opts
+     * @param {import("./texture.js").TextureCubeOptions} opts
      * @returns {import("./types.js").PexResource}
      *
      * @example
@@ -673,7 +675,7 @@ function createContext(options = {}) {
      * Update a resource.
      * @memberof ctx
      * @param {import("./types.js").PexResource} resource
-     * @param {Object} opts
+     * @param {object} opts
      *
      * @example
      * ```js

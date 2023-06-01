@@ -2,7 +2,7 @@ import { checkProps } from "./utils.js";
 
 /**
  * @typedef {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement} TextureOptionsData
- * @property {Array|TypedArray} data
+ * @property {Array|import("./types.js").TypedArray} data
  * @property {number} width
  * @property {number} height
  */
@@ -13,7 +13,7 @@ import { checkProps } from "./utils.js";
 
 /**
  * @typedef {import("./types.js").PexResource} TextureOptions
- * @property {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | Array | TypedArray |TextureOptionsData | HTMLImageElement[] | TextureOptionsData[]} [data]
+ * @property {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | Array | import("./types.js").TypedArray |TextureOptionsData | HTMLImageElement[] | TextureOptionsData[]} [data]
  * @property {number} [width]
  * @property {number} [height]
  * @property {ctx.PixelFormat} [pixelFormat=ctx.PixelFormat.RGB8]
@@ -34,8 +34,9 @@ import { checkProps } from "./utils.js";
  */
 
 /**
- * @typedef {TextureCube} TextureCubeOptions
- * @property {HTMLImage[]|TypedArray[]} [data] 6 images, one for each face +X, -X, +Y, -Y, +Z, -Z
+ * @typedef {import("./types.js").PexResource} TextureCubeOptions
+ * @augments TextureOptions
+ * @property {HTMLImageElement[]|import("./types.js").TypedArray[]} [data] 6 images, one for each face +X, -X, +Y, -Y, +Z, -Z
  */
 
 const allowedProps = [

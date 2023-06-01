@@ -1,5 +1,5 @@
 /**
- * @typedef {Object} PexContextOptions
+ * @typedef {object} PexContextOptions
  * @property {WebGLRenderingContext | WebGL2RenderingContext} [gl=WebGL2RenderingContext]
  * @property {number} [width=window.innerWidth]
  * @property {number} [height=window.innerHeight]
@@ -9,27 +9,31 @@
  */
 
 /**
- * @typedef {Object} PexResource
+ * @typedef {object} PexResource
  * All resources are plain js object and once constructed their properties can be accessed directly.
  * Please note those props are read only. To set new values or upload new data to GPU see [updating resources]{@link context~update}.
  * @property {string} name
  */
 
 /**
- * @typedef {Object} PexCommand
+ * @typedef {object} PexTexture2D
+ */
+
+/**
+ * @typedef {object} PexCommand
  * @property {import("./pass.js").PassOptions} pass
  * @property {import("./pipeline.js").PipelineOptions} pipeline
- * @property {Object} attributes vertex attributes, map of `attibuteName: ctx.VertexBuffer`   or `attributeName: { buffer: VertexBuffer, offset: number, stride: number, divisor: number }`
- * @property {Object} indices indices, `ctx.IndexBuffer` or `{ buffer: IndexBuffer, offset: number, stride: number }`
+ * @property {object} attributes vertex attributes, map of `attibuteName: ctx.VertexBuffer`   or `attributeName: { buffer: VertexBuffer, offset: number, stride: number, divisor: number }`
+ * @property {object} indices indices, `ctx.IndexBuffer` or `{ buffer: IndexBuffer, offset: number, stride: number }`
  * @property {number} count number of vertices to draw
  * @property {number} instances number instances to draw
- * @property {Object} uniforms shader uniforms, map of `name: value`
+ * @property {object} uniforms shader uniforms, map of `name: value`
  * @property {Viewport} viewport drawing viewport bounds
  * @property {Viewport} scissor scissor test bounds
  */
 
 /**
- * @typedef {Object} PexContextSetOptions
+ * @typedef {object} PexContextSetOptions
  * @property {number} [width]
  * @property {number} [height]
  * @property {number} [pixelRatio]
@@ -40,6 +44,10 @@
  */
 /**
  * @typedef {number[]} Color [r, g, b, a]
+ */
+
+/**
+ * @typedef {(Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array|BigInt64Array|BigUint64Array)} TypedArray
  */
 
 export const addEnums = (ctx) => {
