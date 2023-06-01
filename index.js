@@ -98,6 +98,7 @@ function createContext(options = {}) {
         ? !!gl.getExtension("EXT_color_buffer_float")
         : !!gl.getExtension("WEBGL_color_buffer_float"),
       colorBufferHalfFloat: !!gl.getExtension("EXT_color_buffer_half_float"),
+      floatBlend: !!gl.getExtension("EXT_float_blend"),
       multiDraw: !!gl.getExtension("WEBGL_multi_draw"),
       drawInstancedBase: !!gl.getExtension(
         "WEBGL_draw_instanced_base_vertex_base_instance"
