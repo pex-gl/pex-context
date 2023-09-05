@@ -36,26 +36,28 @@
     "release:alpha": "snowdev release --prerelease alpha"
   },
   "dependencies": {
-    "pex-gl": "^3.0.0-alpha.0"
+    "pex-gl": "^3.0.1"
   },
   "devDependencies": {
     "baboon-image-uri": "^1.0.1",
     "bunny": "^1.0.1",
-    "es-module-shims": "^1.6.3",
-    "geom-center-and-normalize": "^1.0.3",
+    "es-module-shims": "^1.8.0",
+    "geom-center-and-normalize": "^2.0.0",
     "geom-merge": "^2.0.0",
+    "geom-normals": "^2.0.1",
+    "geom-split-vertices": "^2.0.1",
     "normals": "^1.1.0",
     "pex-cam": "^3.0.0-alpha.1",
-    "pex-color": "^2.0.0-alpha.2",
+    "pex-color": "^2.0.4",
     "pex-gui": "^3.0.0-alpha.2",
-    "pex-io": "^3.0.0-alpha.0",
+    "pex-io": "^3.0.1",
     "pex-math": "^4.0.0-alpha.2",
     "pex-random": "^2.0.0-alpha.1",
     "primitive-geometry": "^2.9.1",
     "typed-array-concat": "^3.0.0"
   },
   "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=7.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.6.0"
   }
 }

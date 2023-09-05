@@ -5,8 +5,8 @@ import random from "pex-random";
 import createGUI from "pex-gui";
 
 import { cube } from "primitive-geometry";
-
-import { computeNormals, splitVertices } from "./utils.js";
+import splitVertices from "geom-split-vertices";
+import computeNormals from "geom-normals";
 
 import basicVert from "./shaders/basic.vert.js";
 import basicFrag from "./shaders/basic.frag.js";
