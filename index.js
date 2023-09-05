@@ -1171,22 +1171,37 @@ function createContext(options = {}) {
             }
           }
         } else {
-          if (cmd.multiDraw && ctx.capabilities.multiDraw) {
-            const ext = gl.getExtension("WEBGL_multi_draw");
-            ext.multiDrawElementsWEBGL(
-              primitive,
-              cmd.multiDraw.counts,
-              cmd.multiDraw.countsOffset || 0,
-              type,
-              cmd.multiDraw.offsets,
-              cmd.multiDraw.offsetsOffset || 0,
-              cmd.multiDraw.counts.length
-            );
+          if (cmd.multiDraw) {
+            if (ctx.capabilities.multiDraw) {
+              const ext = gl.getExtension("WEBGL_multi_draw");
+              ext.multiDrawElementsWEBGL(
+                primitive,
+                cmd.multiDraw.counts,
+                cmd.multiDraw.countsOffset || 0,
+                type,
+                cmd.multiDraw.offsets,
+                cmd.multiDraw.offsetsOffset || 0,
+                cmd.multiDraw.drawCount || cmd.multiDraw.counts.length
+              );
+            } else {
+              const countsOffset = cmd.multiDraw.countsOffset || 0;
+              const offsetsOffset = cmd.multiDraw.offsetsOffset || 0;
+              const drawCount =
+                cmd.multiDraw.drawCount || cmd.multiDraw.counts.length;
+              for (let i = 0; i < drawCount; i++) {
+                gl.drawElements(
+                  primitive,
+                  cmd.multiDraw.counts[i + countsOffset],
+                  type,
+                  cmd.multiDraw.offsets[i + offsetsOffset]
+                );
+              }
+            }
           } else {
             gl.drawElements(primitive, count, type, offset);
           }
         }
-      } else if (cmd.count) {
+      } else if (cmd.count || cmd.multiDraw?.counts) {
         const first = 0;
         if (instanced) {
           if (cmd.multiDraw && ctx.capabilities.multiDraw) {
@@ -1248,16 +1263,31 @@ function createContext(options = {}) {
             }
           }
         } else {
-          if (cmd.multiDraw && ctx.capabilities.multiDraw) {
-            const ext = gl.getExtension("WEBGL_multi_draw");
-            ext.multiDrawArraysWEBGL(
-              primitive,
-              cmd.multiDraw.firsts,
-              cmd.multiDraw.firstsOffset || 0,
-              cmd.multiDraw.counts,
-              cmd.multiDraw.countsOffset || 0,
-              cmd.multiDraw.firsts.length
-            );
+          if (cmd.multiDraw) {
+            if (ctx.capabilities.multiDraw) {
+              // console.log(cmd.multiDraw);
+              const ext = gl.getExtension("WEBGL_multi_draw");
+              ext.multiDrawArraysWEBGL(
+                primitive,
+                cmd.multiDraw.firsts,
+                cmd.multiDraw.firstsOffset || 0,
+                cmd.multiDraw.counts,
+                cmd.multiDraw.countsOffset || 0,
+                cmd.multiDraw.drawCount || cmd.multiDraw.firsts.length
+              );
+            } else {
+              const firstsOffset = cmd.multiDraw.firstsOffset || 0;
+              const countsOffset = cmd.multiDraw.countsOffset || 0;
+              const drawCount =
+                cmd.multiDraw.drawCount || cmd.multiDraw.firsts.length;
+              for (let i = 0; i < drawCount; i++) {
+                gl.drawArrays(
+                  primitive,
+                  cmd.multiDraw.firsts[i + firstsOffset],
+                  cmd.multiDraw.counts[i + countsOffset]
+                );
+              }
+            }
           } else {
             gl.drawArrays(primitive, first, cmd.count);
           }
