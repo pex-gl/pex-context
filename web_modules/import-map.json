@@ -10,6 +10,7 @@
     "geom-merge": "./geom-merge.js",
     "geom-normals": "./geom-normals.js",
     "geom-split-vertices": "./geom-split-vertices.js",
+    "grid-cells": "./grid-cells.js",
     "normals": "./normals.js",
     "pex-cam": "./pex-cam.js",
     "pex-color": "./pex-color.js",

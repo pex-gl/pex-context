@@ -8,7 +8,7 @@ import splitVertices from "geom-split-vertices";
 
 import basicFrag from "./shaders/basic.frag.js";
 
-const ctx = (window.ctx = createContext({ pixelRatio: devicePixelRatio }));
+const ctx = createContext({ pixelRatio: devicePixelRatio });
 
 const camera = createCamera({
   position: [0, 0, 3],
@@ -26,10 +26,6 @@ const unindexed = true;
 
 // Create geometries
 const planeGeometry = plane();
-const planeGeometry2 = plane();
-planeGeometry2.positions = planeGeometry2.positions.map((value, i) =>
-  i % 3 === 0 ? value - 1.25 : value
-);
 const sphereGeometry = sphere();
 sphereGeometry.positions = sphereGeometry.positions.map((value, i) =>
   i % 3 === 0 ? value - 1.25 : value
@@ -96,13 +92,13 @@ varying vec4 vColor;
 void main () {
   #ifdef USE_MULTI_DRAW
     if (gl_DrawID == 0) {
-      vColor = vec4(1.0, 0.0, 0.0, 1.0);
+      vColor = vec4(1.0, 0.5, 0.5, 1.0);
     } else if (gl_DrawID == 1) {
-      vColor = vec4(0.0, 1.0, 0.0, 1.0);
+      vColor = vec4(0.5, 1.0, 0.5, 1.0);
     } else if (gl_DrawID == 2) {
-      vColor = vec4(0.0, 0.0, 1.0, 1.0);
+      vColor = vec4(0.5, 0.5, 1.0, 1.0);
     } else {
-      vColor = vec4(1.0, 1.0, 0.0, 1.0);
+      vColor = vec4(1.0, 1.0, 0.5, 1.0);
     }
   #else
     vColor = vec4(1.0, 1.0, 1.0, 1.0);

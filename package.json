@@ -46,6 +46,7 @@
     "geom-merge": "^2.0.0",
     "geom-normals": "^2.0.1",
     "geom-split-vertices": "^2.0.1",
+    "grid-cells": "^2.0.0",
     "normals": "^1.1.0",
     "pex-cam": "^3.0.0-alpha.1",
     "pex-color": "^2.0.4",
