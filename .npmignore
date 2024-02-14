@@ -1,7 +1,10 @@
-.DS_Store
-node_modules
+web_modules
 examples
-experiments
 docs
-design
-.tern-port
+coverage
+test
+.github
+screenshot.*
+index.html
+tsconfig.json
+.editorconfig

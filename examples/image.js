@@ -1,48 +1,35 @@
-const createContext = require('../')
-const loadImage = require('pex-io/loadImage')
-const raf = require('raf')
-const isBrowser = require('is-browser')
-const createCamera = require('pex-cam/perspective')
-const createOrbiter = require('pex-cam/orbiter')
-const createCube = require('primitive-cube')
-const mat4 = require('pex-math/mat4')
+import createContext from "../index.js";
 
-const ctx = createContext()
+import { loadImage } from "pex-io";
+import { perspective as createCamera, orbiter as createOrbiter } from "pex-cam";
+
+import { cube } from "primitive-geometry";
+
+import basicTexturedVert from "./shaders/textured.vert.js";
+
+const ctx = createContext({ debug: true });
 
 const camera = createCamera({
   fov: Math.PI / 4,
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
-  position: [2, 0.5, 2],
-  target: [0, 0, 0]
-})
+  position: [3, 3, 3],
+});
 
-createOrbiter({ camera: camera, distance: 5 })
+createOrbiter({ camera, element: ctx.gl.canvas });
 
-const ASSETS_DIR = isBrowser ? '/assets' : `${__dirname}/assets`
+const geom = cube();
 
-const cube = createCube(1)
+const img = await loadImage(
+  new URL("./assets/images/pex.png", import.meta.url)
+);
 
 const drawCmd = {
   pass: ctx.pass({
     clearColor: [0.2, 0.2, 0.2, 1],
-    clearDepth: 1
+    clearDepth: 1,
   }),
   pipeline: ctx.pipeline({
-    vert: /* glsl */ `
-      attribute vec3 aPosition;
-      attribute vec2 aTexCoord;
-
-      uniform mat4 uProjectionMatrix;
-      uniform mat4 uViewMatrix;
-      uniform mat4 uModelMatrix;
-
-      varying vec2 vTexCoord;
-
-      void main () {
-        gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aPosition, 1.0);
-        vTexCoord = aTexCoord;
-      }
-    `,
+    vert: basicTexturedVert,
     frag: /* glsl */ `
       precision highp float;
 
@@ -52,35 +39,31 @@ const drawCmd = {
         gl_FragColor = texture2D(uTexture, vTexCoord) * 0.7 + 0.3 * vec4(vTexCoord, 0.0, 1.0);
       }
     `,
-    depthTest: true
+    depthTest: true,
   }),
   attributes: {
-    aPosition: ctx.vertexBuffer(cube.positions),
-    aTexCoord: ctx.vertexBuffer(cube.uvs)
+    aPosition: ctx.vertexBuffer(geom.positions),
+    aTexCoord: ctx.vertexBuffer(geom.uvs),
   },
-  indices: ctx.indexBuffer(cube.cells),
+  indices: ctx.indexBuffer(geom.cells),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: mat4.create()
-  }
-}
+    uTexture: ctx.texture2D({
+      data: img.data || img,
+      width: img.width,
+      height: img.height,
+      flipY: true,
+      pixelFormat: ctx.PixelFormat.RGBA8,
+      encoding: ctx.Encoding.Linear,
+    }),
+  },
+};
 
-loadImage(ASSETS_DIR + '/images/pex.png', (err, img) => {
-  if (err) throw err
+ctx.frame(() => {
+  ctx.submit(drawCmd);
 
-  drawCmd.uniforms.uTexture = ctx.texture2D({
-    data: img.data || img,
-    width: img.width,
-    height: img.height,
-    flipY: true,
-    pixelFormat: ctx.PixelFormat.RGBA8,
-    encoding: ctx.Encoding.Linear
-  })
+  ctx.debug(false);
 
-  raf(function frame() {
-    ctx.submit(drawCmd)
-    window.dispatchEvent(new CustomEvent('pex-screenshot'))
-    raf(frame)
-  })
-})
+  window.dispatchEvent(new CustomEvent("pex-screenshot"));
+});

@@ -1,16 +1,26 @@
-const checkProps = require('./check-props')
-// const assert = require('assert')
+import { checkProps } from "./utils.js";
 
-const allowedProps = ['target']
+/**
+ * @typedef {import("./types.js").PexResource} QueryOptions
+ * @property {ctx.QueryTarget} [target=ctx.QueryTarget.TimeElapsed] query type
+ */
 
-function createQuery(ctx, opts) {
-  const gl = ctx.gl
-  opts = opts || {}
-  checkProps(allowedProps, opts)
+/**
+ * @typedef {QueryOptions} PexQuery
+ * @property {ctx.QueryState} [state=ctx.QueryState.Ready]
+ * @property {number} [result] result of the measurement
+ */
+
+const allowedProps = ["target"];
+
+function createQuery(ctx, opts = {}) {
+  checkProps(allowedProps, opts);
+
+  const gl = ctx.gl;
 
   const query = Object.assign(
     {
-      class: 'query',
+      class: "query",
       handle: gl.createQuery(),
       target: null,
       state: ctx.QueryState.Ready,
@@ -18,45 +28,47 @@ function createQuery(ctx, opts) {
       _begin: begin,
       _end: end,
       _available: available,
-      _dispose: function() {
-        gl.deleteQuery(this.handle)
-        this.handle = null
-      }
+      _dispose() {
+        gl.deleteQuery(this.handle);
+        this.handle = null;
+      },
     },
-    opts
-  )
+    opts,
+  );
 
   if (!query.target) {
-    query.target = ctx.QueryTarget.TimeElapsed
+    query.target = ctx.capabilities.disjointTimerQuery
+      ? ctx.QueryTarget.TimeElapsed
+      : ctx.QueryTarget.AnySamplesPassed;
   }
 
-  return query
+  return query;
 }
 
-function begin(ctx, q) {
-  if (q.state !== ctx.QueryState.Ready) return false
-  ctx.gl.beginQuery(q.target, q.handle)
-  q.state = ctx.QueryState.Active
-  q.result = null
-  return true
+function begin({ QueryState, gl }, q) {
+  if (q.state !== QueryState.Ready) return false;
+  gl.beginQuery(q.target, q.handle);
+  q.state = QueryState.Active;
+  q.result = null;
+  return true;
 }
 
-function end(ctx, q) {
-  if (q.state !== ctx.QueryState.Active) return false
-  ctx.gl.endQuery(q.target)
-  q.state = ctx.QueryState.Pending
-  return true
+function end({ QueryState, gl }, q) {
+  if (q.state !== QueryState.Active) return false;
+  gl.endQuery(q.target);
+  q.state = QueryState.Pending;
+  return true;
 }
 
-function available(ctx, q) {
-  var available = ctx.gl.getQueryObject(q.handle, ctx.gl.QUERY_RESULT_AVAILABLE)
+function available({ gl, QueryState }, q) {
+  const available = gl.getQueryParameter(q.handle, gl.QUERY_RESULT_AVAILABLE);
   if (available) {
-    q.result = ctx.gl.getQueryObject(q.handle, ctx.gl.QUERY_RESULT)
-    q.state = ctx.QueryState.Ready
-    return true
+    q.result = gl.getQueryParameter(q.handle, gl.QUERY_RESULT);
+    q.state = QueryState.Ready;
+    return true;
   } else {
-    return false
+    return false;
   }
 }
 
-module.exports = createQuery
+export default createQuery;
