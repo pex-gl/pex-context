@@ -10,6 +10,7 @@ import computeNormals from "geom-normals";
 import merge from "geom-merge";
 import gridCells from "grid-cells";
 
+import { viewportToCanvasPosition } from "./utils.js";
 import basicVert from "./shaders/basic.vert.js";
 import basicFrag from "./shaders/basic.frag.js";
 import basicInstancedPositionVert from "./shaders/basic-instanced-position.vert.js";
@@ -17,12 +18,10 @@ import basicInstancedPositionVert from "./shaders/basic-instanced-position.vert.
 const pixelRatio = devicePixelRatio;
 const ctx = (window.ctx = createContext({ pixelRatio, debug: true }));
 
-// const W = window.innerWidth;
-// const H = window.innerHeight;
+const gui = createGUI(ctx, { theme: { columnWidth: 260 } });
+
 const W = ctx.gl.drawingBufferWidth;
 const H = ctx.gl.drawingBufferHeight;
-
-const gui = createGUI(ctx, { theme: { columnWidth: 260 } });
 
 const nW = 2;
 const nH = 3;
@@ -185,11 +184,6 @@ const headers = {};
 
 const commandsEntries = Object.entries(commands);
 
-const viewportToCanvasPosition = (viewport) => [
-  viewport[0] / pixelRatio,
-  (H * (1 - viewport[1] / H - viewport[3] / H)) / pixelRatio,
-];
-
 ctx.frame(() => {
   ctx.submit(clearCmd);
 
@@ -198,7 +192,7 @@ ctx.frame(() => {
       const [header, options] = commandsEntries[index];
       headers[header] ||= gui.addHeader(header);
       headers[header].setPosition(
-        ...viewportToCanvasPosition(cell).map((n) => n + 10)
+        ...viewportToCanvasPosition(cell, H, pixelRatio).map((n) => n + 10)
       );
       ctx.submit(options.instances ? drawInstancedCmd : drawCmd, {
         viewport: cell,

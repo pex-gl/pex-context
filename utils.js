@@ -180,45 +180,57 @@ function drawElements(ctx, cmd, instanced, primitive) {
 
   // Instanced drawing
   if (instanced) {
-    if (cmd.multiDraw && ctx.capabilities.multiDraw) {
-      if (
-        cmd.multiDraw.baseVertices &&
-        cmd.multiDraw.baseInstances &&
-        ctx.capabilities.multiDrawInstancedBase
-      ) {
-        const ext = gl.getExtension(
-          "WEBGL_multi_draw_instanced_base_vertex_base_instance"
-        );
+    if (cmd.multiDraw) {
+      if (ctx.capabilities.multiDraw) {
+        // Multidraw elements instanced base
+        if (
+          ctx.capabilities.multiDrawInstancedBase &&
+          (cmd.multiDraw.baseVertices || cmd.multiDraw.baseInstances)
+        ) {
+          const ext = gl.getExtension(
+            "WEBGL_multi_draw_instanced_base_vertex_base_instance",
+          );
 
-        ext.multiDrawElementsInstancedBaseVertexBaseInstanceWEBGL(
-          primitive,
-          cmd.multiDraw.counts,
-          cmd.multiDraw.countsOffset || 0,
-          type,
-          cmd.multiDraw.offsets,
-          cmd.multiDraw.offsetsOffset || 0,
-          cmd.multiDraw.instanceCounts,
-          cmd.multiDraw.instanceCountsOffset || 0,
-          cmd.multiDraw.baseVertices,
-          cmd.multiDraw.baseVerticesOffset || 0,
-          cmd.multiDraw.baseInstances,
-          cmd.multiDraw.baseInstancesOffset || 0,
-          cmd.multiDraw.counts.length
-        );
+          ext.multiDrawElementsInstancedBaseVertexBaseInstanceWEBGL(
+            primitive,
+            cmd.multiDraw.counts,
+            cmd.multiDraw.countsOffset || 0,
+            type,
+            cmd.multiDraw.offsets,
+            cmd.multiDraw.offsetsOffset || 0,
+            cmd.multiDraw.instanceCounts,
+            cmd.multiDraw.instanceCountsOffset || 0,
+            cmd.multiDraw.baseVertices || [],
+            cmd.multiDraw.baseVerticesOffset || 0,
+            cmd.multiDraw.baseInstances || [],
+            cmd.multiDraw.baseInstancesOffset || 0,
+            cmd.multiDraw.drawCount || cmd.multiDraw.counts.length,
+          );
+        } else {
+          // Multidraw elements instanced (or multidraw base fallback with offset from enableVertexData)
+          const ext = gl.getExtension("WEBGL_multi_draw");
+
+          // TODO: fallback
+          if (cmd.multiDraw.baseVertices || cmd.multiDraw.baseInstances) {
+            console.error("Unsupported multiDrawInstancedBase. No fallback.");
+          }
+
+          ext.multiDrawElementsInstancedWEBGL(
+            primitive,
+            cmd.multiDraw.counts,
+            cmd.multiDraw.countsOffset || 0,
+            type,
+            cmd.multiDraw.offsets,
+            cmd.multiDraw.offsetsOffset || 0,
+            cmd.multiDraw.instanceCounts,
+            cmd.multiDraw.instanceCountsOffset || 0,
+            cmd.multiDraw.drawCount || cmd.multiDraw.counts.length,
+          );
+        }
       } else {
-        const ext = gl.getExtension("WEBGL_multi_draw");
-
-        ext.multiDrawElementsInstancedWEBGL(
-          primitive,
-          cmd.multiDraw.counts,
-          cmd.multiDraw.countsOffset || 0,
-          type,
-          cmd.multiDraw.offsets,
-          cmd.multiDraw.offsetsOffset || 0,
-          cmd.multiDraw.instanceCounts,
-          cmd.multiDraw.instanceCountsOffset || 0,
-          cmd.multiDraw.counts.length
-        );
+        // Multi draw elements instanced fallback
+        // TODO: fallback
+        console.error("Unsupported multidraw. No fallback.");
       }
     } else {
       // Non-multi drawing
@@ -240,7 +252,7 @@ function drawElements(ctx, cmd, instanced, primitive) {
           cmd.baseInstance || 0,
         );
       } else {
-        // Draw elements instanced (or base fallback from enableVertexData)
+        // Draw elements instanced (or base fallback with offset from enableVertexData)
         gl.drawElementsInstanced(primitive, count, type, offset, cmd.instances);
       }
     }
@@ -319,6 +331,7 @@ function drawArrays(ctx, cmd, instanced, primitive) {
         );
       }
     } else {
+      // Non-multi drawing
       if (
         ctx.capabilities.drawInstancedBase &&
         Number.isFinite(cmd.baseInstance)
@@ -345,8 +358,9 @@ function drawArrays(ctx, cmd, instanced, primitive) {
       }
     }
   } else {
+    // Non instanced drawing
     if (cmd.multiDraw) {
-      // Multidraw arrays with fallback
+      // Multidraw arrays
       if (ctx.capabilities.multiDraw) {
         const ext = gl.getExtension("WEBGL_multi_draw");
         ext.multiDrawArraysWEBGL(
@@ -358,6 +372,7 @@ function drawArrays(ctx, cmd, instanced, primitive) {
           cmd.multiDraw.drawCount || cmd.multiDraw.firsts.length,
         );
       } else {
+        // Multidraw arrays fallback
         const firstsOffset = cmd.multiDraw.firstsOffset || 0;
         const countsOffset = cmd.multiDraw.countsOffset || 0;
         const drawCount =

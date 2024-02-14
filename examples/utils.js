@@ -12,3 +12,8 @@ precision highp float;
 #define gl_FragColor gl_FragData[0]
 out vec4 FragData[${size}];
 ${shader}`;
+
+export const viewportToCanvasPosition = (viewport, H, pixelRatio) => [
+  viewport[0] / pixelRatio,
+  (H * (1 - viewport[1] / H - viewport[3] / H)) / pixelRatio,
+];
