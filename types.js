@@ -274,12 +274,12 @@ export const addEnums = (ctx) => {
 
   /**
    * @enum
-   *
+   * @private
    * @description
    * Mapping of format and type (with alternative types).
    */
   ctx.TextureFormat = {
-    // Unsized Internal Formats
+    // Unsized internal formats
     RGB: [gl.RGB, ctx.DataType.Uint8], // gl.UNSIGNED_SHORT_5_6_5
     RGBA: [gl.RGBA, ctx.DataType.Uint8], // gl.UNSIGNED_SHORT_4_4_4_4, gl.UNSIGNED_SHORT_5_5_5_1
     LUMINANCE_ALPHA: [gl.LUMINANCE_ALPHA, ctx.DataType.Uint8],
@@ -287,62 +287,44 @@ export const addEnums = (ctx) => {
     ALPHA: [gl.ALPHA, ctx.DataType.Uint8],
 
     // Sized internal formats
-    R8: [gl.RED, ctx.DataType.Uint8],
-    R8_SNORM: [gl.RED, ctx.DataType.Int8],
-    R16F: [gl.RED, ctx.DataType.Float16], // ctx.DataType.Float32
-    R32F: [gl.RED, ctx.DataType.Float32],
+    ...Object.fromEntries(
+      ["R", "RG", "RGB", "RGBA"].flatMap((format) =>
+        Object.entries({
+          8: "Uint8",
+          "8_SNORM": "Int8",
+          "16F": "Float16", // ctx.DataType.Float32
+          "32F": "Float32",
 
-    R8UI: [gl.RED_INTEGER, ctx.DataType.Uint8],
-    R8I: [gl.RED_INTEGER, ctx.DataType.Int8],
-    R16UI: [gl.RED_INTEGER, ctx.DataType.Uint16],
-    R16I: [gl.RED_INTEGER, ctx.DataType.Int16],
-    R32UI: [gl.RED_INTEGER, ctx.DataType.Uint32],
-    R32I: [gl.RED_INTEGER, ctx.DataType.Int32],
+          "8UI": "Uint8",
+          "8I": "Int8",
+          "16UI": "Uint16",
+          "16I": "Int16",
+          "32UI": "Uint32",
+          "32I": "Int32",
+        }).map(([type, DataType]) => [
+          [`${format}${type}`],
+          [
+            gl[
+              `${format === "R" ? "RED" : format}${type.endsWith("I") ? "_INTEGER" : ""}`
+            ],
+            ctx.DataType[DataType],
+          ],
+        ]),
+      ),
+    ),
 
-    RG8: [gl.RG, ctx.DataType.Uint8],
-    RG8_SNORM: [gl.RG, ctx.DataType.Int8],
-    RG16F: [gl.RG, ctx.DataType.Float16], // ctx.DataType.Float32
-    RG32F: [gl.RG, ctx.DataType.Float32],
-
-    RG8UI: [gl.RG_INTEGER, ctx.DataType.Uint8],
-    RG8I: [gl.RG_INTEGER, ctx.DataType.Int8],
-    RG16UI: [gl.RG_INTEGER, ctx.DataType.Uint16],
-    RG16I: [gl.RG_INTEGER, ctx.DataType.Int16],
-    RG32UI: [gl.RG_INTEGER, ctx.DataType.Uint32],
-    RG32I: [gl.RG_INTEGER, ctx.DataType.Int32],
-
-    RGB8: [gl.RGB, ctx.DataType.Uint8],
+    // Special
     SRGB8: [gl.RGB, ctx.DataType.Uint8],
     RGB565: [gl.RGB, gl.UNSIGNED_SHORT_5_6_5], // ctx.DataType.Uint8
-    RGB8_SNORM: [gl.RGB, ctx.DataType.Int8],
     R11F_G11F_B10F: [gl.RGB, gl.UNSIGNED_INT_10F_11F_11F_REV], // ctx.DataType.Float16, ctx.DataType.Float32
     RGB9_E5: [gl.RGB, gl.UNSIGNED_INT_5_9_9_9_REV], // ctx.DataType.Float16, ctx.DataType.Float32
-    RGB16F: [gl.RGB, ctx.DataType.Float16], // ctx.DataType.Float32
-    RGB32F: [gl.RGB, ctx.DataType.Float32],
 
-    RGB8UI: [gl.RGB_INTEGER, ctx.DataType.Uint8],
-    RGB8I: [gl.RGB_INTEGER, ctx.DataType.Int8],
-    RGB16UI: [gl.RGB_INTEGER, ctx.DataType.Uint16],
-    RGB16I: [gl.RGB_INTEGER, ctx.DataType.Int16],
-    RGB32UI: [gl.RGB_INTEGER, ctx.DataType.Uint32],
-    RGB32I: [gl.RGB_INTEGER, ctx.DataType.Int32],
-
-    RGBA8: [gl.RGBA, ctx.DataType.Uint8],
     SRGB8_ALPHA8: [gl.RGBA, ctx.DataType.Uint8],
-    RGBA8_SNORM: [gl.RGBA, ctx.DataType.Int8],
     RGB5_A1: [gl.RGBA, gl.UNSIGNED_SHORT_5_5_5_1], // ctx.DataType.Uint8, gl.UNSIGNED_INT_2_10_10_10_REV
     RGBA4: [gl.RGBA, gl.UNSIGNED_SHORT_4_4_4_4], // ctx.DataType.Uint8
     RGB10_A2: [gl.RGBA, gl.UNSIGNED_INT_2_10_10_10_REV],
-    RGBA16F: [gl.RGBA, ctx.DataType.Float16], // ctx.DataType.Float32
-    RGBA32F: [gl.RGBA, ctx.DataType.Float32],
 
-    RGBA8UI: [gl.RGBA_INTEGER, ctx.DataType.Uint8],
-    RGBA8I: [gl.RGBA_INTEGER, ctx.DataType.Int8],
     RGB10_A2UI: [gl.RGBA_INTEGER, gl.UNSIGNED_INT_2_10_10_10_REV],
-    RGBA16UI: [gl.RGBA_INTEGER, ctx.DataType.Uint16],
-    RGBA16I: [gl.RGBA_INTEGER, ctx.DataType.Int16],
-    RGBA32I: [gl.RGBA_INTEGER, ctx.DataType.Int32],
-    RGBA32UI: [gl.RGBA_INTEGER, ctx.DataType.Uint32],
 
     // Depth and stencil
     DEPTH_COMPONENT16: [gl.DEPTH_COMPONENT, ctx.DataType.Uint16], // ctx.DataType.Uint32
@@ -363,22 +345,34 @@ export const addEnums = (ctx) => {
     ctx.TextureFormat.R32FLegacy = [gl.ALPHA, ctx.DataType.Float32];
   }
 
+  const legacyPixelFormat = {
+    Depth: "DEPTH_COMPONENT16",
+    Depth16: "DEPTH_COMPONENT16",
+    Depth24: "DEPTH_COMPONENT24",
+  };
+
   /**
    * @enum
    * @description
    * Mapping of {@link #ctx.TextureFormat|ctx.TextureFormat} keys to their string values and legacy depth formats
+   *
+   * One of:
+   * - Unsized: RGB, RGBA, LUMINANCE_ALPHA, LUMINANCE, ALPHA
+   * - Sized 1 component: R8, R8_SNORM, R16F, R32F, R8UI, R8I, R16UI, R16I, R32UI, R32I
+   * - Sized 2 components: RG8, RG8_SNORM, RG16F, RG32F, RG8UI, RG8I, RG16UI, RG16I, RG32UI, RG32I
+   * - Sized 3 components: RGB8, RGB8_SNORM, RGB16F, RGB32F, RGB8UI, RGB8I, RGB16UI, RGB16I, RGB32UI, RGB32I
+   * - Sized 4 components: RGBA8, RGBA8_SNORM, RGBA16F, RGBA32F, RGBA8UI, RGBA8I, RGBA16UI, RGBA16I, RGBA32UI, RGBA32I
+   * - Sized special: SRGB8, RGB565, R11F_G11F_B10F, RGB9_E5, SRGB8_ALPHA8, RGB5_A1, RGBA4, RGB10_A2, RGB10_A2UI
+   * - Sized depth/stencil: DEPTH_COMPONENT16, DEPTH_COMPONENT24, DEPTH_COMPONENT32F, DEPTH24_STENCIL8, DEPTH32F_STENCIL8
    */
   ctx.PixelFormat = {
     ...Object.fromEntries(
       Object.keys(ctx.TextureFormat).map((internalFormat) => [
         internalFormat,
         internalFormat,
-      ])
+      ]),
     ),
-    // Legacy
-    Depth: "DEPTH_COMPONENT16",
-    Depth16: "DEPTH_COMPONENT16",
-    Depth24: "DEPTH_COMPONENT24",
+    ...legacyPixelFormat,
   };
 
   const extColorBufferFloat = !!gl.getExtension("EXT_color_buffer_float"); // WebGL2 only
