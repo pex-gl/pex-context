@@ -175,7 +175,7 @@ var utils = /*#__PURE__*/Object.freeze({
 });
 
 /**
- * @typedef {Object} BoxOptions
+ * @typedef {object} BoxOptions
  * @property {number} [sx=1]
  * @property {number} [sy=sx]
  * @property {number} [sz=sx]
@@ -199,7 +199,7 @@ var utils = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} CircleOptions
+ * @typedef {object} CircleOptions
  * @property {number} [radius=0.5]
  * @property {number} [segments=32]
  * @property {number} [theta=TAU]
@@ -212,12 +212,12 @@ var utils = /*#__PURE__*/Object.freeze({
  */ function circle(param) {
     let { radius =0.5 , segments =32 , theta =TAU , thetaOffset =0 , closed =false  } = param === void 0 ? {} : param;
     checkArguments(arguments);
-    const positions = new Float32Array(segments * 2);
+    const positions = new Float32Array(segments * 3);
     const cells = new (getCellsTypedArray(segments))((segments - (closed ? 0 : 1)) * 2);
     for(let i = 0; i < segments; i++){
         const t = i / segments * theta + thetaOffset;
-        positions[i * 2] = radius * Math.cos(t);
-        positions[i * 2 + 1] = radius * Math.sin(t);
+        positions[i * 3] = radius * Math.cos(t);
+        positions[i * 3 + 1] = radius * Math.sin(t);
         if (i > 0) {
             cells[(i - 1) * 2] = i - 1;
             cells[(i - 1) * 2 + 1] = i;
@@ -234,7 +234,7 @@ var utils = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} QuadOptions
+ * @typedef {object} QuadOptions
  * @property {number} [scale=0.5]
  */ /**
  * @alias module:quad
@@ -256,7 +256,7 @@ var utils = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} PlaneOptions
+ * @typedef {object} PlaneOptions
  * @property {number} [sx=1]
  * @property {number} [sy=sx]
  * @property {number} [nx=1]
@@ -285,7 +285,7 @@ var utils = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} RoundedCubeOptions
+ * @typedef {object} RoundedCubeOptions
  * @property {number} [sx=1]
  * @property {number} [sy=sx]
  * @property {number} [nx=1]
@@ -447,7 +447,7 @@ var utils = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} StadiumOptions
+ * @typedef {object} StadiumOptions
  * @property {number} [sx=1]
  * @property {number} [sy=sx]
  * @property {number} [nx=1]
@@ -659,7 +659,7 @@ var mappings = /*#__PURE__*/Object.freeze({
   cornerificTapered2: cornerificTapered2,
   elliptical: elliptical,
   fgSquircular: fgSquircular,
-  'lamé': lamé,
+  lamé: lamé,
   nonAxial2Pinch: nonAxial2Pinch,
   nonAxialHalfPinch: nonAxialHalfPinch,
   radial: radial,
@@ -673,7 +673,7 @@ var mappings = /*#__PURE__*/Object.freeze({
 });
 
 /**
- * @typedef {Object} EllipseOptions
+ * @typedef {object} EllipseOptions
  * @property {number} [sx=1]
  * @property {number} [sy=0.5]
  * @property {number} [radius=0.5]
@@ -685,7 +685,7 @@ var mappings = /*#__PURE__*/Object.freeze({
  */ /**
  * @alias module:ellipse
  * @param {EllipseOptions} [options={}]
- * @returns {import("../types.js").BasicSimplicialComplex}
+ * @returns {import("../types.js").SimplicialComplex}
  */ function ellipse(param) {
     let { sx =1 , sy =0.5 , radius =0.5 , segments =32 , innerSegments =16 , theta =TAU , thetaOffset =0 , mapping =elliptical , equation =(param)=>{
         let { rx , ry , cosTheta , sinTheta  } = param;
@@ -766,7 +766,7 @@ var mappings = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} DiscOptions
+ * @typedef {object} DiscOptions
  * @property {number} [radius=0.5]
  * @property {number} [segments=32]
  * @property {number} [innerSegments=16]
@@ -776,7 +776,7 @@ var mappings = /*#__PURE__*/Object.freeze({
  */ /**
  * @alias module:disc
  * @param {DiscOptions} [options={}]
- * @returns {import("../types.js").BasicSimplicialComplex}
+ * @returns {import("../types.js").SimplicialComplex}
  */ function disc(param) {
     let { radius =0.5 , segments =32 , innerSegments =16 , theta =TAU , thetaOffset =0 , mapping =concentric  } = param === void 0 ? {} : param;
     checkArguments(arguments);
@@ -793,7 +793,7 @@ var mappings = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} SuperellipseOptions
+ * @typedef {object} SuperellipseOptions
  * @property {number} [sx=1]
  * @property {number} [sy=0.5]
  * @property {number} [radius=0.5]
@@ -835,7 +835,7 @@ var mappings = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} SquircleOptions
+ * @typedef {object} SquircleOptions
  * @property {number} [sx=1]
  * @property {number} [sy=1]
  * @property {number} [radius=0.5]
@@ -900,7 +900,7 @@ var mappings = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} AnnulusOptions
+ * @typedef {object} AnnulusOptions
  * @property {number} [radius=0.5]
  * @property {number} [segments=32]
  * @property {number} [innerSegments=16]
@@ -911,7 +911,7 @@ var mappings = /*#__PURE__*/Object.freeze({
  */ /**
  * @alias module:annulus
  * @param {AnnulusOptions} [options={}]
- * @returns {import("../types.js").BasicSimplicialComplex}
+ * @returns {import("../types.js").SimplicialComplex}
  */ function annulus(param) {
     let { radius =0.5 , segments =32 , innerSegments =16 , theta =TAU , thetaOffset =0 , innerRadius =radius * 0.5 , mapping =concentric  } = param === void 0 ? {} : param;
     checkArguments(arguments);
@@ -968,7 +968,7 @@ var mappings = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} ReuleuxOptions
+ * @typedef {object} ReuleuxOptions
  * @property {number} [radius=0.5]
  * @property {number} [segments=32]
  * @property {number} [innerSegments=16]
@@ -981,7 +981,7 @@ var mappings = /*#__PURE__*/Object.freeze({
  *
  * @alias module:reuleux
  * @param {ReuleuxOptions} [options={}]
- * @returns {import("../types.js").BasicSimplicialComplex}
+ * @returns {import("../types.js").SimplicialComplex}
  */ function reuleux(param) {
     let { radius =0.5 , segments =32 , innerSegments =16 , theta =TAU , thetaOffset =0 , mapping =concentric , n =3  } = param === void 0 ? {} : param;
     checkArguments(arguments);
@@ -1007,7 +1007,7 @@ var mappings = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} CubeOptions
+ * @typedef {object} CubeOptions
  * @property {number} [sx=1]
  * @property {number} [sy=sx]
  * @property {number} [sz=sx]
@@ -1045,7 +1045,7 @@ var mappings = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} RoundedCubeOptions
+ * @typedef {object} RoundedCubeOptions
  * @property {number} [sx=1]
  * @property {number} [sy=sx]
  * @property {number} [sz=sx]
@@ -1319,12 +1319,12 @@ var mappings = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} EllipsoidOptions
+ * @typedef {object} EllipsoidOptions
  * @property {number} [radius=0.5]
  * @property {number} [nx=32]
  * @property {number} [ny=16]
  * @property {number} [rx=1]
- * @property {number} [rx=0.5]
+ * @property {number} [ry=0.5]
  * @property {number} [rz=ry]
  * @property {number} [theta=Math.PI]
  * @property {number} [thetaOffset=0]
@@ -1394,7 +1394,7 @@ var mappings = /*#__PURE__*/Object.freeze({
 }
 
 /**
- * @typedef {Object} SphereOptions
+ * @typedef {object} SphereOptions
  * @property {number} [radius=0.5]
  * @property {number} [nx=32]
  * @property {number} [ny=16]
@@ -1424,7 +1424,7 @@ var mappings = /*#__PURE__*/Object.freeze({
 
 const f = 0.5 + Math.sqrt(5) / 2;
 /**
- * @typedef {Object} IcosphereOptions
+ * @typedef {object} IcosphereOptions
  * @property {number} [radius=0.5]
  * @property {number} [subdivisions=2]
  */ /**
@@ -1577,7 +1577,7 @@ const f = 0.5 + Math.sqrt(5) / 2;
 }
 
 /**
- * @typedef {Object} CylinderOptions
+ * @typedef {object} CylinderOptions
  * @property {number} [height=1]
  * @property {number} [radius=0.25]
  * @property {number} [nx=16]
@@ -1706,7 +1706,7 @@ const f = 0.5 + Math.sqrt(5) / 2;
 }
 
 /**
- * @typedef {Object} ConeOptions
+ * @typedef {object} ConeOptions
  * @property {number} [height=1]
  * @property {number} [radius=0.25]
  * @property {number} [nx=16]
@@ -1735,7 +1735,7 @@ const f = 0.5 + Math.sqrt(5) / 2;
 }
 
 /**
- * @typedef {Object} CapsuleOptions
+ * @typedef {object} CapsuleOptions
  * @property {number} [height=0.5]
  * @property {number} [radius=0.25]
  * @property {number} [nx=16]
@@ -1809,7 +1809,7 @@ const f = 0.5 + Math.sqrt(5) / 2;
 }
 
 /**
- * @typedef {Object} TorusOptions
+ * @typedef {object} TorusOptions
  * @property {number} [radius=0.4]
  * @property {number} [segments=64]
  * @property {number} [minorRadius=0.1]
@@ -1880,7 +1880,7 @@ const f = 0.5 + Math.sqrt(5) / 2;
 }
 
 /**
- * @typedef {Object} TetrahedronOptions
+ * @typedef {object} TetrahedronOptions
  * @property {number} [radius=0.5]
  */ /**
  * @alias module:tetrahedron
@@ -1902,7 +1902,7 @@ const f = 0.5 + Math.sqrt(5) / 2;
 }
 
 /**
- * @typedef {Object} IcosahedronOptions
+ * @typedef {object} IcosahedronOptions
  * @property {number} [radius=0.5]
  */ /**
  * @alias module:icosahedron

@@ -71,7 +71,7 @@ function createPipeline(ctx, opts) {
         this.program = null;
       },
     },
-    opts
+    opts,
   );
 
   if (opts.vert && opts.frag) {
@@ -89,7 +89,7 @@ function createPipeline(ctx, opts) {
       (location) => {
         const attribute = attributesPerLocation[location];
         return [attribute.name, parseInt(location, 10), attribute.size];
-      }
+      },
     );
   }
 

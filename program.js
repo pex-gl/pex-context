@@ -32,7 +32,7 @@ function createProgram(ctx, opts) {
 
       if (!uniformMethod) {
         throw new Error(
-          `Invalid uniform type ${type} : ${ctx.getGLString(type)}`
+          `Invalid uniform type ${type} : ${ctx.getGLString(type)}`,
         );
       } else if (uniformMethod.includes("Matrix")) {
         gl[uniformMethod](location, false, value);
@@ -50,11 +50,11 @@ function createProgram(ctx, opts) {
 function updateProgram(ctx, program, { vert, frag, vertexLayout }) {
   console.assert(
     typeof vert === "string",
-    "Vertex shader source must be a string"
+    "Vertex shader source must be a string",
   );
   console.assert(
     typeof frag === "string",
-    "Fragment shader source must be a string"
+    "Fragment shader source must be a string",
   );
 
   const gl = ctx.gl;
@@ -97,7 +97,7 @@ function compileSource(ctx, type, src) {
       console.debug(NAMESPACE, `${shaderType} shader compilation failed`, src);
     }
     throw new Error(
-      `${shaderType} shader error: ${gl.getShaderInfoLog(shader)}`
+      `${shaderType} shader error: ${gl.getShaderInfoLog(shader)}`,
     );
   }
   return shader;
@@ -110,7 +110,7 @@ function updateUniforms(ctx, program) {
 
   const numUniforms = gl.getProgramParameter(
     program.handle,
-    gl.ACTIVE_UNIFORMS
+    gl.ACTIVE_UNIFORMS,
   );
   for (let i = 0; i < numUniforms; ++i) {
     const info = gl.getActiveUniform(program.handle, i);
@@ -120,7 +120,7 @@ function updateUniforms(ctx, program) {
 
     if (size === undefined) {
       throw new Error(
-        `Unknwon uniform type ${info.type} : ${ctx.getGLString(info.type)}`
+        `Unknwon uniform type ${info.type} : ${ctx.getGLString(info.type)}`,
       );
     }
 
@@ -152,7 +152,7 @@ function updateAttributes(ctx, program) {
 
   const numAttributes = gl.getProgramParameter(
     program.handle,
-    gl.ACTIVE_ATTRIBUTES
+    gl.ACTIVE_ATTRIBUTES,
   );
   for (let i = 0; i < numAttributes; ++i) {
     const info = gl.getActiveAttrib(program.handle, i);
@@ -161,7 +161,7 @@ function updateAttributes(ctx, program) {
 
     if (size === undefined) {
       throw new Error(
-        `Unknwon uniform type ${info.type} : ${ctx.getGLString(info.type)}`
+        `Unknwon uniform type ${info.type} : ${ctx.getGLString(info.type)}`,
       );
     }
     const attrib = {

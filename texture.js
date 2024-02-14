@@ -119,7 +119,7 @@ function updateTexture2D(ctx, texture, opts) {
   let aniso = opts.aniso || texture.aniso || 0;
   let premultiplyAlpha = orValue(
     opts.premultiplyAlpha,
-    orValue(texture.premultiplyAlpha, false)
+    orValue(texture.premultiplyAlpha, false),
   );
   let internalFormat = opts.internalFormat || texture.internalFormat;
   let type;
@@ -151,7 +151,7 @@ function updateTexture2D(ctx, texture, opts) {
         img instanceof HTMLVideoElement ||
         img instanceof HTMLCanvasElement ||
         img instanceof ImageBitmap,
-      "Texture2D.update opts has to be HTMLImageElement, HTMLVideoElement, HTMLCanvasElement or ImageBitmap"
+      "Texture2D.update opts has to be HTMLImageElement, HTMLVideoElement, HTMLCanvasElement or ImageBitmap",
     );
     width = img.width || img.videoHeight;
     height = img.height || img.videoHeight;
@@ -168,9 +168,9 @@ function updateTexture2D(ctx, texture, opts) {
       !data ||
         Array.isArray(opts.data) ||
         Object.values(ctx.DataTypeConstructor).some(
-          (TypedArray) => opts.data instanceof TypedArray
+          (TypedArray) => opts.data instanceof TypedArray,
         ),
-      "Texture2D.update opts.data has to be null, an Array or a TypedArray"
+      "Texture2D.update opts.data has to be null, an Array or a TypedArray",
     );
 
     // Handle pixel data with flags
@@ -180,7 +180,7 @@ function updateTexture2D(ctx, texture, opts) {
 
     console.assert(
       !data || (width !== undefined && height !== undefined),
-      "Texture2D.update opts.width and opts.height are required when providing opts.data"
+      "Texture2D.update opts.width and opts.height are required when providing opts.data",
     );
 
     // Get internalFormat (format the GPU use internally) from opts.internalFormat (mainly for compressed texture) or pixelFormat
@@ -219,7 +219,7 @@ function updateTexture2D(ctx, texture, opts) {
 
       console.assert(
         internalFormat,
-        `Texture2D.update Unknown internalFormat "${internalFormat}" for pixelFormat "${pixelFormat}".`
+        `Texture2D.update Unknown internalFormat "${internalFormat}" for pixelFormat "${pixelFormat}".`,
       );
     }
 
@@ -251,7 +251,7 @@ function updateTexture2D(ctx, texture, opts) {
             width,
             height,
             0,
-            levelData
+            levelData,
           );
         } else if (width && height) {
           gl.texImage2D(
@@ -263,7 +263,7 @@ function updateTexture2D(ctx, texture, opts) {
             0,
             format,
             type,
-            levelData
+            levelData,
           );
         }
       }
@@ -273,7 +273,7 @@ function updateTexture2D(ctx, texture, opts) {
     } else if (target === gl.TEXTURE_CUBE_MAP) {
       console.assert(
         !data || (Array.isArray(data) && data.length === 6),
-        "TextureCube requires data for 6 faces"
+        "TextureCube requires data for 6 faces",
       );
 
       // TODO: gl.compressedTexImage2D, manual mimaps
@@ -297,7 +297,7 @@ function updateTexture2D(ctx, texture, opts) {
             0,
             format,
             type,
-            faceData
+            faceData,
           );
         } else if (faceData && faceData.nodeName) {
           gl.texImage2D(
@@ -306,7 +306,7 @@ function updateTexture2D(ctx, texture, opts) {
             internalFormat,
             format,
             type,
-            faceData
+            faceData,
           );
         } else {
           gl.texImage2D(
@@ -318,7 +318,7 @@ function updateTexture2D(ctx, texture, opts) {
             0,
             format,
             type,
-            faceData
+            faceData,
           );
         }
         texture.width = width;
@@ -328,7 +328,7 @@ function updateTexture2D(ctx, texture, opts) {
   } else {
     // TODO: should i assert of throw new Error(msg)?
     throw new Error(
-      "Texture2D.update opts has to be a HTMLElement, ImageBitmap or Object"
+      "Texture2D.update opts has to be a HTMLElement, ImageBitmap or Object",
     );
   }
 
@@ -350,11 +350,11 @@ function updateTexture2D(ctx, texture, opts) {
   texture.type = type;
   texture.info = "";
   texture.info += Object.keys(ctx.PixelFormat).find(
-    (key) => ctx.PixelFormat[key] === pixelFormat
+    (key) => ctx.PixelFormat[key] === pixelFormat,
   );
   texture.info += "_";
   texture.info += Object.keys(ctx.Encoding).find(
-    (key) => ctx.Encoding[key] === encoding
+    (key) => ctx.Encoding[key] === encoding,
   );
 
   return texture;

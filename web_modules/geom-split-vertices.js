@@ -1,5 +1,5 @@
-import { e as copy } from './_chunks/vec3-81d013fb.js';
-import { s as set } from './_chunks/avec3-d7dfe38e.js';
+import { e as copy } from './_chunks/vec3-gPKdHyP-.js';
+import { s as set } from './_chunks/avec3-6LE-qZ7o.js';
 
 const faceSize = 3;
 function splitVertices(positions, cells) {

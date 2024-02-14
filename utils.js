@@ -47,10 +47,10 @@ function enableVertexData(ctx, vertexLayout, cmd, updateState) {
         "invalid command",
         cmd,
         "doesn't satisfy vertex layout",
-        vertexLayout
+        vertexLayout,
       );
       throw new Error(
-        `Command is missing attribute "${name}" at location ${location} with ${attrib}`
+        `Command is missing attribute "${name}" at location ${location} with ${attrib}`,
       );
     }
 
@@ -61,7 +61,7 @@ function enableVertexData(ctx, vertexLayout, cmd, updateState) {
 
     if (!buffer || !buffer.target) {
       throw new Error(
-        `Trying to draw arrays with invalid buffer for attribute : ${name}`
+        `Trying to draw arrays with invalid buffer for attribute : ${name}`,
       );
     }
 
@@ -87,7 +87,7 @@ function enableVertexData(ctx, vertexLayout, cmd, updateState) {
         attrib.type || buffer.type,
         attrib.normalized || false,
         attrib.stride || 64,
-        attrib.offset || 0
+        attrib.offset || 0,
       );
       gl.vertexAttribPointer(
         location + 1,
@@ -95,7 +95,7 @@ function enableVertexData(ctx, vertexLayout, cmd, updateState) {
         attrib.type || buffer.type,
         attrib.normalized || false,
         attrib.stride || 64,
-        attrib.offset || 16
+        attrib.offset || 16,
       );
       gl.vertexAttribPointer(
         location + 2,
@@ -103,7 +103,7 @@ function enableVertexData(ctx, vertexLayout, cmd, updateState) {
         attrib.type || buffer.type,
         attrib.normalized || false,
         attrib.stride || 64,
-        attrib.offset || 32
+        attrib.offset || 32,
       );
       gl.vertexAttribPointer(
         location + 3,
@@ -111,7 +111,7 @@ function enableVertexData(ctx, vertexLayout, cmd, updateState) {
         attrib.type || buffer.type,
         attrib.normalized || false,
         attrib.stride || 64,
-        attrib.offset || 48
+        attrib.offset || 48,
       );
       const divisor = attrib.divisor || 0;
       gl.vertexAttribDivisor(location + 0, divisor);
@@ -145,7 +145,7 @@ function enableVertexData(ctx, vertexLayout, cmd, updateState) {
         type,
         attrib.normalized || false,
         attrib.stride || 0,
-        offset
+        offset,
       );
       gl.vertexAttribDivisor(location, attrib.divisor || 0);
     }
@@ -178,6 +178,7 @@ function drawElements(ctx, cmd, instanced, primitive) {
     cmd.vertexArray?.indices?.offset ||
     ctx.state.indexBuffer.type;
 
+  // Instanced drawing
   if (instanced) {
     if (cmd.multiDraw && ctx.capabilities.multiDraw) {
       if (
@@ -220,13 +221,14 @@ function drawElements(ctx, cmd, instanced, primitive) {
         );
       }
     } else {
+      // Non-multi drawing
       if (
         ctx.capabilities.drawInstancedBase &&
         (Number.isFinite(cmd.baseVertex) || Number.isFinite(cmd.baseInstance))
       ) {
-        // Draw elements instanced
+        // Draw elements instanced base
         const ext = gl.getExtension(
-          "WEBGL_draw_instanced_base_vertex_base_instance"
+          "WEBGL_draw_instanced_base_vertex_base_instance",
         );
         ext.drawElementsInstancedBaseVertexBaseInstanceWEBGL(
           primitive,
@@ -235,17 +237,18 @@ function drawElements(ctx, cmd, instanced, primitive) {
           offset,
           cmd.instances,
           cmd.baseVertex || 0,
-          cmd.baseInstance || 0
+          cmd.baseInstance || 0,
         );
       } else {
-        // Draw elements instanced (or base vertex/instance fallback)
+        // Draw elements instanced (or base fallback from enableVertexData)
         gl.drawElementsInstanced(primitive, count, type, offset, cmd.instances);
       }
     }
   } else {
+    // Non instanced drawing
     if (cmd.multiDraw) {
-      // Multidraw elements with fallback
       if (ctx.capabilities.multiDraw) {
+        // Multidraw elements
         const ext = gl.getExtension("WEBGL_multi_draw");
         ext.multiDrawElementsWEBGL(
           primitive,
@@ -254,9 +257,10 @@ function drawElements(ctx, cmd, instanced, primitive) {
           type,
           cmd.multiDraw.offsets,
           cmd.multiDraw.offsetsOffset || 0,
-          cmd.multiDraw.drawCount || cmd.multiDraw.counts.length
+          cmd.multiDraw.drawCount || cmd.multiDraw.counts.length,
         );
       } else {
+        // Multidraw elements fallback
         const countsOffset = cmd.multiDraw.countsOffset || 0;
         const offsetsOffset = cmd.multiDraw.offsetsOffset || 0;
         const drawCount =
@@ -266,7 +270,7 @@ function drawElements(ctx, cmd, instanced, primitive) {
             primitive,
             cmd.multiDraw.counts[i + countsOffset],
             type,
-            cmd.multiDraw.offsets[i + offsetsOffset]
+            cmd.multiDraw.offsets[i + offsetsOffset],
           );
         }
       }
@@ -282,11 +286,11 @@ function drawArrays(ctx, cmd, instanced, primitive) {
   if (instanced) {
     if (cmd.multiDraw && ctx.capabilities.multiDraw) {
       if (
-        cmd.multiDraw.instanceCounts &&
+        cmd.multiDraw.baseInstances &&
         ctx.capabilities.multiDrawInstancedBase
       ) {
         const ext = gl.getExtension(
-          "WEBGL_multi_draw_instanced_base_vertex_base_instance"
+          "WEBGL_multi_draw_instanced_base_vertex_base_instance",
         );
 
         ext.multiDrawArraysInstancedBaseInstanceWEBGL(
@@ -299,7 +303,7 @@ function drawArrays(ctx, cmd, instanced, primitive) {
           cmd.multiDraw.instanceCountsOffset || 0,
           cmd.multiDraw.baseInstances,
           cmd.multiDraw.baseInstancesOffset || 0,
-          cmd.multiDraw.firsts.length
+          cmd.multiDraw.drawCount || cmd.multiDraw.firsts.length,
         );
       } else {
         const ext = gl.getExtension("WEBGL_multi_draw");
@@ -311,7 +315,7 @@ function drawArrays(ctx, cmd, instanced, primitive) {
           cmd.multiDraw.countsOffset || 0,
           cmd.multiDraw.instanceCounts,
           cmd.multiDraw.instanceCountsOffset || 0,
-          cmd.multiDraw.firsts.length
+          cmd.multiDraw.drawCount || cmd.multiDraw.firsts.length,
         );
       }
     } else {
@@ -321,14 +325,14 @@ function drawArrays(ctx, cmd, instanced, primitive) {
       ) {
         // Draw arrays instanced with base instance
         const ext = gl.getExtension(
-          "WEBGL_draw_instanced_base_vertex_base_instance"
+          "WEBGL_draw_instanced_base_vertex_base_instance",
         );
         ext.drawArraysInstancedBaseInstanceWEBGL(
           primitive,
           cmd.first || 0,
           cmd.count,
           cmd.instances,
-          cmd.baseInstance
+          cmd.baseInstance,
         );
       } else {
         // Draw arrays instanced (or base instance fallback)
@@ -336,7 +340,7 @@ function drawArrays(ctx, cmd, instanced, primitive) {
           primitive,
           cmd.first || 0,
           cmd.count,
-          cmd.instances
+          cmd.instances,
         );
       }
     }
@@ -351,7 +355,7 @@ function drawArrays(ctx, cmd, instanced, primitive) {
           cmd.multiDraw.firstsOffset || 0,
           cmd.multiDraw.counts,
           cmd.multiDraw.countsOffset || 0,
-          cmd.multiDraw.drawCount || cmd.multiDraw.firsts.length
+          cmd.multiDraw.drawCount || cmd.multiDraw.firsts.length,
         );
       } else {
         const firstsOffset = cmd.multiDraw.firstsOffset || 0;
@@ -362,7 +366,7 @@ function drawArrays(ctx, cmd, instanced, primitive) {
           gl.drawArrays(
             primitive,
             cmd.multiDraw.firsts[i + firstsOffset],
-            cmd.multiDraw.counts[i + countsOffset]
+            cmd.multiDraw.counts[i + countsOffset],
           );
         }
       }
@@ -374,7 +378,7 @@ function drawArrays(ctx, cmd, instanced, primitive) {
 }
 function draw(ctx, cmd) {
   const instanced = Object.values(
-    cmd.attributes || cmd.vertexArray.attributes
+    cmd.attributes || cmd.vertexArray.attributes,
   ).some((attrib) => attrib.divisor);
 
   const primitive = cmd.pipeline.primitive;

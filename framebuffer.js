@@ -73,7 +73,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
       gl.COLOR_ATTACHMENT0 + i,
       colorAttachment.target,
       colorAttachment.texture.handle,
-      colorAttachment.level
+      colorAttachment.level,
     );
   });
 
@@ -87,7 +87,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
       gl.COLOR_ATTACHMENT0 + i,
       gl.TEXTURE_2D,
       null,
-      0
+      0,
     );
   }
 
@@ -103,7 +103,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
         gl.FRAMEBUFFER,
         gl.DEPTH_ATTACHMENT,
         gl.RENDERBUFFER,
-        depthAttachment.texture.handle
+        depthAttachment.texture.handle,
       );
     } else {
       gl.framebufferTexture2D(
@@ -111,7 +111,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
         gl.DEPTH_ATTACHMENT,
         depthAttachment.texture.target,
         depthAttachment.texture.handle,
-        depthAttachment.level
+        depthAttachment.level,
       );
     }
   } else {
@@ -120,14 +120,14 @@ function updateFramebuffer(ctx, framebuffer, opts) {
       gl.FRAMEBUFFER,
       gl.DEPTH_ATTACHMENT,
       gl.RENDERBUFFER,
-      null
+      null,
     );
     gl.framebufferTexture2D(
       framebuffer.target,
       gl.DEPTH_ATTACHMENT,
       gl.TEXTURE_2D,
       null,
-      0
+      0,
     );
   }
 
@@ -135,7 +135,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
     const fboStatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     console.assert(
       fboStatus === gl.FRAMEBUFFER_COMPLETE,
-      `FBO incomplete ${ctx.getGLString(fboStatus)}`
+      `FBO incomplete ${ctx.getGLString(fboStatus)}`,
     );
   }
 

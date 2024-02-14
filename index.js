@@ -79,7 +79,7 @@ function createContext(options = {}) {
       maxColorAttachments: 1,
       maxTextureImageUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
       maxVertexTextureImageUnits: gl.getParameter(
-        gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS
+        gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS,
       ),
       maxVertexAttribs: gl.getParameter(gl.MAX_VERTEX_ATTRIBS),
       maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
@@ -92,7 +92,7 @@ function createContext(options = {}) {
       textureHalfFloatLinear:
         isWebGL2 || !!gl.getExtension("OES_texture_half_float_linear"),
       textureFilterAnisotropic: !!gl.getExtension(
-        "EXT_texture_filter_anisotropic"
+        "EXT_texture_filter_anisotropic",
       ),
       sRGB: isWebGL2 || !!gl.getExtension("EXT_sRGB"),
       disjointTimerQuery: !!(
@@ -107,10 +107,10 @@ function createContext(options = {}) {
       floatBlend: !!gl.getExtension("EXT_float_blend"),
       multiDraw: !!gl.getExtension("WEBGL_multi_draw"),
       drawInstancedBase: !!gl.getExtension(
-        "WEBGL_draw_instanced_base_vertex_base_instance"
+        "WEBGL_draw_instanced_base_vertex_base_instance",
       ),
       multiDrawInstancedBase: !!gl.getExtension(
-        "WEBGL_multi_draw_instanced_base_vertex_base_instance"
+        "WEBGL_multi_draw_instanced_base_vertex_base_instance",
       ),
     },
     /**
@@ -281,7 +281,7 @@ function createContext(options = {}) {
             this.queries = this.queries.filter((q) => !q._available(this, q));
           }
           requestAnimationFrame(frame.bind(this));
-        }.bind(this)
+        }.bind(this),
       );
     },
 
@@ -388,7 +388,7 @@ function createContext(options = {}) {
             ? `${prevFramebufferId} -> ${currFramebufferId}`
             : currFramebufferId,
           [...this.state.viewport],
-          this.state.scissor ? [...this.state.scissor] : "[]"
+          this.state.scissor ? [...this.state.scissor] : "[]",
         );
 
         cmdState.debugId = this.debugCommands.length;
@@ -436,7 +436,7 @@ function createContext(options = {}) {
         NAMESPACE,
         "pass",
         opts,
-        opts.color?.map(({ texture, info }) => texture?.info || info) || ""
+        opts.color?.map(({ texture, info }) => texture?.info || info) || "",
       );
       return this.resource(createPass(this, opts));
     },
@@ -646,7 +646,7 @@ function createContext(options = {}) {
     beginQuery(query) {
       console.assert(
         !this.activeQuery,
-        "Only one query can be active at the time"
+        "Only one query can be active at the time",
       );
       if (query._begin(this, query)) {
         this.activeQuery = query;
@@ -723,7 +723,7 @@ function createContext(options = {}) {
       if (this.debugMode) console.debug(NAMESPACE, "dispose", resource);
       console.assert(
         resource || arguments.length === 0,
-        "Trying to dispose undefined resource"
+        "Trying to dispose undefined resource",
       );
       if (resource) {
         if (!resource._dispose) {
@@ -732,7 +732,7 @@ function createContext(options = {}) {
         const idx = this.resources.indexOf(resource);
         console.assert(
           idx !== -1,
-          "Trying to dispose resource from another context"
+          "Trying to dispose resource from another context",
         );
         this.resources.splice(idx, 1);
         this.stats[resource.class].alive--;
@@ -801,7 +801,7 @@ function createContext(options = {}) {
               "change framebuffer",
               state.framebuffer,
               "->",
-              framebuffer
+              framebuffer,
             );
           }
           if (
@@ -848,7 +848,7 @@ function createContext(options = {}) {
           pass.clearColor[0],
           pass.clearColor[1],
           pass.clearColor[2],
-          pass.clearColor[3]
+          pass.clearColor[3],
         );
       }
 
@@ -906,7 +906,7 @@ function createContext(options = {}) {
           state.blendSrcRGBFactor,
           state.blendDstRGBFactor,
           state.blendSrcAlphaFactor,
-          state.blendDstAlphaFactor
+          state.blendDstAlphaFactor,
         );
       }
 
@@ -935,7 +935,7 @@ function createContext(options = {}) {
           pipeline.colorMask[0],
           pipeline.colorMask[1],
           pipeline.colorMask[2],
-          pipeline.colorMask[3]
+          pipeline.colorMask[3],
         );
       }
 
@@ -981,7 +981,7 @@ function createContext(options = {}) {
               NAMESPACE,
               "unknown uniform",
               name,
-              Object.keys(program.uniforms)
+              Object.keys(program.uniforms),
             );
           }
           for (let i = 0; i < value.length; i++) {
@@ -1017,7 +1017,7 @@ function createContext(options = {}) {
       if (this.debugMode && requiredUniforms.length > 0) {
         console.debug(NAMESPACE, "invalid command", cmd);
         throw new Error(
-          `Trying to draw with missing uniforms: ${requiredUniforms.join(", ")}`
+          `Trying to draw with missing uniforms: ${requiredUniforms.join(", ")}`,
         );
       }
       this.checkError();
@@ -1040,7 +1040,7 @@ function createContext(options = {}) {
             "Invalid vertex layout not matching the shader",
             vertexLayout,
             program.attributes,
-            cmd
+            cmd,
           );
           throw new Error("Invalid vertex layout not matching the shader");
         }
@@ -1060,11 +1060,11 @@ function createContext(options = {}) {
                 "invalid command",
                 cmd,
                 "vertex array doesn't satisfy vertex layout",
-                vertexLayout
+                vertexLayout,
               );
             }
             throw new Error(
-              `Command is missing attribute "${name}" at location ${location}`
+              `Command is missing attribute "${name}" at location ${location}`,
             );
           }
         }
@@ -1115,7 +1115,7 @@ function createContext(options = {}) {
             this.state.scissor[0],
             this.state.scissor[1],
             this.state.scissor[2],
-            this.state.scissor[3]
+            this.state.scissor[3],
           );
         }
       } else {
@@ -1135,7 +1135,7 @@ function createContext(options = {}) {
           this.state.viewport[0],
           this.state.viewport[1],
           this.state.viewport[2],
-          this.state.viewport[3]
+          this.state.viewport[3],
         );
       }
 

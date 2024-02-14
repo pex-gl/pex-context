@@ -1,5 +1,5 @@
-import { e as copy, s as sub$1, f as scale$1 } from './_chunks/vec3-81d013fb.js';
-import { a as sub, e as scale } from './_chunks/avec3-d7dfe38e.js';
+import { e as copy, s as sub$1, f as scale$1 } from './_chunks/vec3-gPKdHyP-.js';
+import { a as sub, e as scale } from './_chunks/avec3-6LE-qZ7o.js';
 
 /**
  * Creates a new bounding box.
@@ -25,9 +25,10 @@ import { a as sub, e as scale } from './_chunks/avec3-d7dfe38e.js';
  * @param {import("pex-math/types/types").vec3[] | import("pex-math/types/types").TypedArray} points
  * @returns {import("./types.js").aabb}
  */ function fromPoints(a, points) {
-    const isTypedArray = !Array.isArray(points);
-    for(let i = 0; i < points.length / (isTypedArray ? 3 : 1); i++){
-        if (isTypedArray) {
+    const isFlatArray = !points[0]?.length;
+    const l = points.length / (isFlatArray ? 3 : 1);
+    for(let i = 0; i < l; i++){
+        if (isFlatArray) {
             includePoint(a, points, i * 3);
         } else {
             includePoint(a, points[i]);

@@ -40,7 +40,7 @@ function updateRenderbuffer(ctx, renderbuffer, opts) {
 
   console.assert(
     internalFormat,
-    `Unsupported float renderable format ${renderbuffer.pixelFormat}`
+    `Unsupported float renderable format ${renderbuffer.pixelFormat}`,
   );
 
   renderbuffer.format = internalFormat;
@@ -50,7 +50,7 @@ function updateRenderbuffer(ctx, renderbuffer, opts) {
     renderbuffer.target,
     renderbuffer.format,
     renderbuffer.width,
-    renderbuffer.height
+    renderbuffer.height,
   );
   gl.bindRenderbuffer(renderbuffer.target, null);
 }

@@ -2,7 +2,7 @@ import createContext from "../index.js";
 
 import { vec3, mat4 } from "pex-math";
 import random from "pex-random";
-import { fromRGBBytes } from "pex-color";
+import { fromBytes } from "pex-color";
 import { perspective as createCamera, orbiter as createOrbiter } from "pex-cam";
 
 import { cube } from "primitive-geometry";
@@ -213,7 +213,7 @@ const onResize = () => {
     Math.PI / 4,
     W / H,
     0.1,
-    100
+    100,
   );
 };
 window.addEventListener("resize", onResize);
@@ -243,11 +243,11 @@ ctx.frame(() => {
         1,
         ctx.gl.RGBA,
         ctx.gl.UNSIGNED_BYTE,
-        pixels
+        pixels,
       );
     });
 
-    fromRGBBytes(hitColor, pixels);
+    fromBytes(hitColor, pixels);
     hitColor = colors.find((c) => vec3.distance(c, hitColor) < 1 / 255) ?? [
       0, 0, 0, 0,
     ];

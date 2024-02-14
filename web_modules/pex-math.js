@@ -1,10 +1,9 @@
-import { c as create$5, t as targetTo$1, a as create$6 } from './_chunks/vec2-e9025687.js';
-export { m as mat4, v as vec2 } from './_chunks/vec2-e9025687.js';
-import { c as cross, a as set$6, g as dot$2 } from './_chunks/vec3-81d013fb.js';
-export { v as vec3 } from './_chunks/vec3-81d013fb.js';
-export { f as avec3 } from './_chunks/avec3-d7dfe38e.js';
-import { E as EPSILON, c as clamp } from './_chunks/utils-1d861a03.js';
-export { u as utils } from './_chunks/utils-1d861a03.js';
+import { c as create$5, f as fromDirection$1, a as fromPointToPoint$1, b as create$6 } from './_chunks/vec2-rdnzgk4z.js';
+export { m as mat4, v as vec2 } from './_chunks/vec2-rdnzgk4z.js';
+export { v as vec3 } from './_chunks/vec3-gPKdHyP-.js';
+export { f as avec3 } from './_chunks/avec3-6LE-qZ7o.js';
+import { E as EPSILON, c as clamp } from './_chunks/utils-ccJtkgLk.js';
+export { u as utils } from './_chunks/utils-ccJtkgLk.js';
 
 /** @module mat2x3 */ /**
  * Returns a 2x3 identity matrix, a short form for a 3x3 matrix with the last row ignored.
@@ -1178,32 +1177,24 @@ const TEMP_MAT4 = create$6();
     return _fromMat39(a, m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]);
 }
 /**
- * Sets a quaternion to represent the shortest rotation from one vector to another.
+ * Sets a quaternion from a direction
+ * Note: we assume +Z facing models.
  * @param {import("./types.js").quat} a
- * @param {import("./types.js").vec3} v
- * @param {import("./types.js").vec3} w
- * @returns {import("./types.js").quat}
- */ const fromTo = (()=>{
-    let u = [];
-    return (a, v, w)=>{
-        u = cross(set$6(u, v), w);
-        a[0] = u[0];
-        a[1] = u[1];
-        a[2] = u[2];
-        a[3] = 1 + dot$2(v, w);
-        normalize(a);
-        return a;
-    };
-})();
-/**
- * Sets a quaternion from a vector to another.
- * @param {import("./types.js").quat} a
- * @param {import("./types.js").vec3} eye
- * @param {import("./types.js").vec3} target
+ * @param {import("./types.js").vec3} direction
  * @param {import("./types.js").vec3} [up=Y_UP]
  * @returns {import("./types.js").quat}
- */ function targetTo(a, eye, target, up) {
-    return fromMat4(a, targetTo$1(TEMP_MAT4, eye, target, up));
+ */ function fromDirection(a, direction, up) {
+    return fromMat4(a, fromDirection$1(TEMP_MAT4, direction, up));
+}
+/**
+ * Sets a quaternion from a point to another.
+ * @param {import("./types.js").quat} a
+ * @param {import("./types.js").vec3} from
+ * @param {import("./types.js").vec3} to
+ * @param {import("./types.js").vec3} [up=Y_UP]
+ * @returns {import("./types.js").quat}
+ */ function fromPointToPoint(a, from, to, up) {
+    return fromMat4(a, fromPointToPoint$1(TEMP_MAT4, from, to, up));
 }
 /**
  * Spherical linear interpolates between two quaternions.
@@ -1271,10 +1262,11 @@ var quat = /*#__PURE__*/Object.freeze({
   equals: equals,
   fromAxes: fromAxes,
   fromAxisAngle: fromAxisAngle,
+  fromDirection: fromDirection,
   fromEuler: fromEuler,
   fromMat3: fromMat3,
   fromMat4: fromMat4,
-  fromTo: fromTo,
+  fromPointToPoint: fromPointToPoint,
   identity: identity,
   invert: invert,
   length: length,
@@ -1282,7 +1274,6 @@ var quat = /*#__PURE__*/Object.freeze({
   normalize: normalize,
   set: set,
   slerp: slerp,
-  targetTo: targetTo,
   toString: toString
 });
 

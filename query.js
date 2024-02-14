@@ -33,7 +33,7 @@ function createQuery(ctx, opts = {}) {
         this.handle = null;
       },
     },
-    opts
+    opts,
   );
 
   if (!query.target) {

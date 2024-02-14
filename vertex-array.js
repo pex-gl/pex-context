@@ -43,7 +43,7 @@ function updateVertexArray(ctx, vertexArray, { vertexLayout }) {
       location,
       size ?? TYPE_TO_SIZE[type],
     ]),
-    vertexArray
+    vertexArray,
   );
 
   gl.bindVertexArray(null);

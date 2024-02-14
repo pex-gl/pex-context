@@ -24,7 +24,7 @@ function createBuffer(ctx, opts) {
   const gl = ctx.gl;
   console.assert(
     opts.target === gl.ARRAY_BUFFER || opts.target === gl.ELEMENT_ARRAY_BUFFER,
-    "Invalid buffer target"
+    "Invalid buffer target",
   );
 
   const buffer = {
@@ -127,6 +127,8 @@ function updateBuffer(ctx, buffer, opts) {
   } else {
     gl.bufferData(buffer.target, data, buffer.usage);
   }
+
+  buffer.info = ctx.DataTypeConstructor[type].name;
 }
 
 export default createBuffer;

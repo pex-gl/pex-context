@@ -1,5 +1,5 @@
-import { s as setAlpha, l as linearToSrgb, b as srgbToLinear, f as fromHSL, a as toHSL, m, c as minv, o as oklabToLinearSrgb, g as getStMax, T as TMP, d as toe, e as toeInv, h as findCusp, i as luvToXyz, j as luvToLch, x as xyzToLuv, k as lchToLuv, L as L_EPSILON, n as getBounds, p as floorArray } from './_chunks/hsl-5efaa82c.js';
-export { q as fromHex, t as toHex, u as utils } from './_chunks/hsl-5efaa82c.js';
+import { s as setAlpha, l as linearToSrgb, a as srgbToLinear, f as fromHSL, t as toHSL, m, b as minv, o as oklabToLinearSrgb, g as getStMax, T as TMP, c as toe, d as toeInv, e as findCusp, h as luvToXyz, i as luvToLch, x as xyzToLuv, j as lchToLuv, L as L_EPSILON, k as getBounds, n as floorArray } from './_chunks/hsl-6HQdvvr8.js';
+export { p as fromHex, q as toHex, u as utils } from './_chunks/hsl-6HQdvvr8.js';
 
 /**
  * @typedef {number[]} color An array of 3 (RGB) or 4 (A) values.
@@ -40,37 +40,36 @@ export { q as fromHex, t as toHex, u as utils } from './_chunks/hsl-5efaa82c.js'
     color[0] = color2[0];
     color[1] = color2[1];
     color[2] = color2[2];
-    if (color2[3] !== undefined) color[3] = color2[3];
-    return color;
+    return setAlpha(color, color2[3]);
 }
-
 /**
- * Updates a color based on r, g, b, a values.
+ * Updates a color based on r, g, b, [a] values.
  * @param {import("./color.js").color} color
  * @param {number} r
  * @param {number} g
  * @param {number} b
  * @param {number} [a]
  * @returns {import("./color.js").color}
- */ function fromRGB(color, r, g, b, a) {
+ */ function fromValues(color, r, g, b, a) {
     color[0] = r;
     color[1] = g;
     color[2] = b;
-    setAlpha(color, a);
-    return color;
+    return setAlpha(color, a);
 }
 /**
- * Returns a copy of a RGB color.
- * @param {import("./color.js").color} color
- * @param {Array} out
- * @returns {import("./color.js").color}
- */ function toRGB(param, out) {
-    let [r, g, b, a] = param;
+ * @deprecated Use "fromValues()".
+ * @ignore
+ */ function fromRGB(color, r, g, b, a) {
+    console.error(`"fromRGB()" deprecated. Use "fromValues()".`);
+    return fromValues(color, r, g, b, a);
+}
+/**
+ * @deprecated Use "set()".
+ * @ignore
+ */ function toRGB(color, out) {
     if (out === void 0) out = [];
-    out[0] = r;
-    out[1] = g;
-    out[2] = b;
-    return setAlpha(out, a);
+    console.error(`"toRGB()" deprecated. Use "set()".`);
+    return set(out, color);
 }
 
 /**
@@ -82,7 +81,7 @@ export { q as fromHex, t as toHex, u as utils } from './_chunks/hsl-5efaa82c.js'
  * @param {import("./color.js").color} color
  * @param {bytes} bytes
  * @returns {import("./color.js").color}
- */ function fromRGBBytes(color, param) {
+ */ function fromBytes(color, param) {
     let [r, g, b, a] = param;
     color[0] = r / 255;
     color[1] = g / 255;
@@ -95,13 +94,27 @@ export { q as fromHex, t as toHex, u as utils } from './_chunks/hsl-5efaa82c.js'
  * @param {import("./color.js").color} color
  * @param {Array} out
  * @returns {bytes}
- */ function toRGBBytes(color, out) {
+ */ function toBytes(color, out) {
     if (out === void 0) out = [];
     out[0] = Math.round(color[0] * 255);
     out[1] = Math.round(color[1] * 255);
     out[2] = Math.round(color[2] * 255);
     if (color[3] !== undefined) out[3] = Math.round(color[3] * 255);
     return out;
+}
+/**
+ * @deprecated Use "fromBytes()".
+ * @ignore
+ */ function fromRGBBytes(color, bytes) {
+    console.error(`"fromRGBBytes()" deprecated. Use "fromBytes()".`);
+    return fromBytes(color, bytes);
+}
+/**
+ * @deprecated Use "toBytes()".
+ * @ignore
+ */ function toRGBBytes(color, out) {
+    console.error(`"toRGBBytes()" deprecated. Use "toBytes()".`);
+    return toBytes(color, out);
 }
 
 /**
@@ -833,7 +846,7 @@ const lchToHpluv = (param)=>{
  * @returns {css}
  */ function toCSSRGB(color, precision) {
     if (precision === void 0) precision = 5;
-    toRGBBytes(color, TMP);
+    toBytes(color, TMP);
     if (precision !== undefined) floorArray(TMP, precision);
     const a = color[3] !== undefined ? `, ${color[3]}` : "";
     return `rgb${a ? "a" : ""}(${TMP.slice(0, 3).join(", ")}${a})`;
@@ -890,4 +903,4 @@ const lchToHpluv = (param)=>{
     return `hwb(${TMP[0]}% ${TMP[1]} ${TMP[2]}${color[3] !== undefined ? ` / ${color[3]}` : ""})`;
 }
 
-export { D50, D65, copy, create, fromHPLuv, fromHSL, fromHSLuv, fromHSV, fromHWB, fromLCHuv, fromLab, fromLinear, fromOkhsl, fromOkhsv, fromOklab, fromRGB, fromRGBBytes, fromXYZ, linearSrgbToOklab, set, toCSSHSL, toCSSHWB, toCSSLCH, toCSSLab, toCSSRGB, toHPLuv, toHSL, toHSLuv, toHSV, toHWB, toLCHuv, toLab, toLinear, toOkhsl, toOkhsv, toOklab, toRGB, toRGBBytes, toXYZ };
+export { D50, D65, copy, create, fromBytes, fromHPLuv, fromHSL, fromHSLuv, fromHSV, fromHWB, fromLCHuv, fromLab, fromLinear, fromOkhsl, fromOkhsv, fromOklab, fromRGB, fromRGBBytes, fromValues, fromXYZ, linearSrgbToOklab, set, toBytes, toCSSHSL, toCSSHWB, toCSSLCH, toCSSLab, toCSSRGB, toHPLuv, toHSL, toHSLuv, toHSV, toHWB, toLCHuv, toLab, toLinear, toOkhsl, toOkhsv, toOklab, toRGB, toRGBBytes, toXYZ };

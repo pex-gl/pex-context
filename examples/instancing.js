@@ -31,9 +31,7 @@ random.seed(0);
 
 for (let i = 0; i < NUM_BUNNIES; i++) {
   offsets.push(random.float(-2, 2), random.float(-1, 1), random.float(-2, 2));
-  rotations.push(
-    quat.fromTo(quat.create(), [0, 0, 1], vec3.normalize(random.vec3()))
-  );
+  rotations.push(random.quat());
   scales.push([0.15, 0.15, 0.15]);
   colors.push([
     random.float(0.1, 1.0),

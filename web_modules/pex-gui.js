@@ -1,5 +1,5 @@
-import { m as map, c as clamp } from './_chunks/utils-1d861a03.js';
-import { t as toHex, a as toHSL, f as fromHSL } from './_chunks/hsl-5efaa82c.js';
+import { m as map, c as clamp } from './_chunks/utils-ccJtkgLk.js';
+import { q as toHex, t as toHSL, f as fromHSL } from './_chunks/hsl-6HQdvvr8.js';
 
 /**
  * Returns the width of a rectangle.
@@ -472,7 +472,7 @@ class DebugRenderer extends CanvasRenderer {
     }
 }
 
-var index$1 = /*#__PURE__*/Object.freeze({
+var index = /*#__PURE__*/Object.freeze({
   __proto__: null,
   CanvasRenderer: CanvasRenderer,
   DebugRenderer: DebugRenderer,
@@ -781,7 +781,7 @@ function _class_private_field_loose_key(name) {
     return "__private_" + id++ + "_" + name;
 }
 /**
- * @typedef {Object} GUIControlOptions
+ * @typedef {object} GUIControlOptions
  * @property {number} [min=0]
  * @property {number} [max=0]
  * @property {"color"} [type] Interpret an array as color.
@@ -791,7 +791,7 @@ function _class_private_field_loose_key(name) {
  * @property {boolean} [flipY] Flip texture 2D vertically.
  * @property {number} [level] Level of detail for cube textures.
  */ /**
- * @typedef {Object} GUIOptions
+ * @typedef {object} GUIOptions
  * @property {boolean} [pixelRatio=window.devicePixelRatio]
  * @property {boolean} [theme={}] See [theme file]{@link https://github.com/pex-gl/pex-gui/blob/main/theme.js} for all options.
  * @property {number} [scale=1]
@@ -1020,7 +1020,7 @@ var _pixelRatio = /*#__PURE__*/ _class_private_field_loose_key("_pixelRatio"), _
     /**
    * Add a tab control.
    * @param {string} title
-   * @param {Object} contextObject
+   * @param {object} contextObject
    * @param {string} attributeName
    * @param {GUIControlOptions} [options={}]
    * @param {Function} onChange
@@ -1192,7 +1192,7 @@ var _pixelRatio = /*#__PURE__*/ _class_private_field_loose_key("_pixelRatio"), _
     /**
    * Add a generic parameter control.
    * @param {string} title
-   * @param {Object} contextObject
+   * @param {object} contextObject
    * @param {string} attributeName
    * @param {GUIControlOptions} [options={}]
    * @param {Function} onChange
@@ -1424,7 +1424,7 @@ var _pixelRatio = /*#__PURE__*/ _class_private_field_loose_key("_pixelRatio"), _
     /**
    * Add a radio list with options.
    * @param {string} title
-   * @param {Object} contextObject
+   * @param {object} contextObject
    * @param {string} attributeName
    * @param {Array.<{ name: string, value: number }>} items
    * @param {Function} onChange
@@ -1468,7 +1468,7 @@ var _pixelRatio = /*#__PURE__*/ _class_private_field_loose_key("_pixelRatio"), _
     /**
    * Add a texture visualiser and selector for multiple textures (from pex-context) or images.
    * @param {string} title
-   * @param {Object} contextObject
+   * @param {object} contextObject
    * @param {string} attributeName
    * @param {Array.<{ texture: import("pex-context").texture | CanvasImageSource, value: number}>} items
    * @param {number} [itemsPerRow=4]
@@ -1650,12 +1650,13 @@ var _pixelRatio = /*#__PURE__*/ _class_private_field_loose_key("_pixelRatio"), _
     }
     /**
    * Add an updatable object stats visualiser.
-   * @param {Object} [options] An object with an update() function to update control.stats.
+   * @param {string} title
+   * @param {object} [options] An object with an update() function to update control.stats.
    * @returns {GUIControl}
-   */ addStats(options) {
+   */ addStats(title, options) {
         const ctrl = new GUIControl({
             type: "stats",
-            title: "STATS",
+            title: title || "STATS",
             activeArea: [
                 [
                     0,
@@ -1817,7 +1818,7 @@ var _pixelRatio = /*#__PURE__*/ _class_private_field_loose_key("_pixelRatio"), _
     }
     /**
    * Retrieve a serialized value of the current GUI's state.
-   * @returns {Object}
+   * @returns {object}
    */ serialize() {
         return Object.fromEntries(this.items.map((item)=>[
                 item.title,
@@ -1826,7 +1827,7 @@ var _pixelRatio = /*#__PURE__*/ _class_private_field_loose_key("_pixelRatio"), _
     }
     /**
    * Deserialize a previously serialized data state GUI's state.
-   * @param {Object} data
+   * @param {object} data
    */ deserialize(data) {
         this.items.forEach((item)=>{
             if (data[item.title] !== undefined) {
@@ -2038,10 +2039,12 @@ var _pixelRatio = /*#__PURE__*/ _class_private_field_loose_key("_pixelRatio"), _
     }
 }
 /**
- * Factory function for creating a GUI
+ * @alias module:pex-gui
  * @param {import("pex-context").ctx | CanvasRenderingContext2D} ctx
  * @param {GUIOptions} opts
  * @returns {GUI}
- */ var index = ((ctx, opts)=>new GUI(ctx, opts));
+ */ function createGUI(ctx, opts) {
+    return new GUI(ctx, opts);
+}
 
-export { DEFAULT_THEME, index$1 as Renderers, index as default };
+export { DEFAULT_THEME, index as Renderers, createGUI as default };

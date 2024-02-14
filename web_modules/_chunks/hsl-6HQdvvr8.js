@@ -374,4 +374,4 @@ var utils = /*#__PURE__*/Object.freeze({
     return setAlpha(out, a);
 }
 
-export { L_EPSILON as L, TMP as T, toHSL as a, srgbToLinear as b, minv as c, toe as d, toeInv as e, fromHSL as f, getStMax as g, findCusp as h, luvToXyz as i, luvToLch as j, lchToLuv as k, linearToSrgb as l, m, getBounds as n, oklabToLinearSrgb as o, floorArray as p, fromHex as q, setAlpha as s, toHex as t, utils as u, xyzToLuv as x };
+export { L_EPSILON as L, TMP as T, srgbToLinear as a, minv as b, toe as c, toeInv as d, findCusp as e, fromHSL as f, getStMax as g, luvToXyz as h, luvToLch as i, lchToLuv as j, getBounds as k, linearToSrgb as l, m, floorArray as n, oklabToLinearSrgb as o, fromHex as p, toHex as q, setAlpha as s, toHSL as t, utils as u, xyzToLuv as x };

@@ -28,12 +28,12 @@ export default function polyfill(ctx) {
     } else {
       gl.drawBuffers = ext.drawBuffersWEBGL.bind(ext);
       capabilities.maxColorAttachments = gl.getParameter(
-        ext.MAX_COLOR_ATTACHMENTS_WEBGL
+        ext.MAX_COLOR_ATTACHMENTS_WEBGL,
       );
     }
   } else {
     capabilities.maxColorAttachments = gl.getParameter(
-      gl.MAX_COLOR_ATTACHMENTS
+      gl.MAX_COLOR_ATTACHMENTS,
     );
   }
 

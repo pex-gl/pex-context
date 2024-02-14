@@ -136,6 +136,8 @@ ctx.frame(() => {
 <dd></dd>
 <dt><a href="#TextureCubeOptions">TextureCubeOptions</a> : <code><a href="#PexResource">PexResource</a></code></dt>
 <dd></dd>
+<dt><a href="#VertexArrayOptions">VertexArrayOptions</a> : <code><a href="#PexResource">PexResource</a></code></dt>
+<dd></dd>
 <dt><a href="#PexContextOptions">PexContextOptions</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#PexResource">PexResource</a> : <code>object</code></dt>
@@ -156,8 +158,6 @@ Please note those props are read only. To set new values or upload new data to G
 </dd>
 <dt><a href="#TypedArray">TypedArray</a> : <code>Int8Array</code> | <code>Uint8Array</code> | <code>Uint8ClampedArray</code> | <code>Int16Array</code> | <code>Uint16Array</code> | <code>Int32Array</code> | <code>Uint32Array</code> | <code>Float32Array</code> | <code>Float64Array</code> | <code>BigInt64Array</code> | <code>BigUint64Array</code></dt>
 <dd></dd>
-<dt><a href="#VertexArrayOptions">VertexArrayOptions</a> : <code><a href="#PexResource">PexResource</a></code></dt>
-<dd></dd>
 </dl>
 
 <a name="ctx"></a>
@@ -176,7 +176,6 @@ Please note those props are read only. To set new values or upload new data to G
   - [.DepthFunc](#ctx.DepthFunc)
   - [.Face](#ctx.Face)
   - [.Filter](#ctx.Filter)
-  - [.TextureFormat](#ctx.TextureFormat)
   - [.PixelFormat](#ctx.PixelFormat)
   - [.RenderbufferFloatFormat](#ctx.RenderbufferFloatFormat)
   - [.Encoding](#ctx.Encoding)
@@ -315,92 +314,23 @@ Getter for `gl.drawingBufferHeight`
 | LinearMipmapNearest  | <code>gl.LINEAR_MIPMAP_NEAREST</code>  |
 | LinearMipmapLinear   | <code>gl.LINEAR_MIPMAP_LINEAR</code>   |
 
-<a name="ctx.TextureFormat"></a>
-
-### ctx.TextureFormat
-
-Mapping of format and type (with alternative types).
-
-**Kind**: static enum of [<code>ctx</code>](#ctx)
-**Properties**
-
-| Name               | Default                                                                                   |
-| ------------------ | ----------------------------------------------------------------------------------------- |
-| RGB                | <code>[&quot;gl.RGB&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                          |
-| RGBA               | <code>[&quot;gl.RGBA&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                         |
-| LUMINANCE_ALPHA    | <code>[&quot;gl.LUMINANCE_ALPHA&quot;,&quot;ctx.DataType.Uint8&quot;]</code>              |
-| LUMINANCE          | <code>[&quot;gl.LUMINANCE&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                    |
-| ALPHA              | <code>[&quot;gl.ALPHA&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                        |
-| R8                 | <code>[&quot;gl.RED&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                          |
-| R8_SNORM           | <code>[&quot;gl.RED&quot;,&quot;ctx.DataType.Int8&quot;]</code>                           |
-| R16F               | <code>[&quot;gl.RED&quot;,&quot;ctx.DataType.Float16&quot;]</code>                        |
-| R32F               | <code>[&quot;gl.RED&quot;,&quot;ctx.DataType.Float32&quot;]</code>                        |
-| R8UI               | <code>[&quot;gl.RED_INTEGER&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                  |
-| R8I                | <code>[&quot;gl.RED_INTEGER&quot;,&quot;ctx.DataType.Int8&quot;]</code>                   |
-| R16UI              | <code>[&quot;gl.RED_INTEGER&quot;,&quot;ctx.DataType.Uint16&quot;]</code>                 |
-| R16I               | <code>[&quot;gl.RED_INTEGER&quot;,&quot;ctx.DataType.Int16&quot;]</code>                  |
-| R32UI              | <code>[&quot;gl.RED_INTEGER&quot;,&quot;ctx.DataType.Uint32&quot;]</code>                 |
-| R32I               | <code>[&quot;gl.RED_INTEGER&quot;,&quot;ctx.DataType.Int32&quot;]</code>                  |
-| RG8                | <code>[&quot;gl.RG&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                           |
-| RG8_SNORM          | <code>[&quot;gl.RG&quot;,&quot;ctx.DataType.Int8&quot;]</code>                            |
-| RG16F              | <code>[&quot;gl.RG&quot;,&quot;ctx.DataType.Float16&quot;]</code>                         |
-| RG32F              | <code>[&quot;gl.RG&quot;,&quot;ctx.DataType.Float32&quot;]</code>                         |
-| RG8UI              | <code>[&quot;gl.RG_INTEGER&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                   |
-| RG8I               | <code>[&quot;gl.RG_INTEGER&quot;,&quot;ctx.DataType.Int8&quot;]</code>                    |
-| RG16UI             | <code>[&quot;gl.RG_INTEGER&quot;,&quot;ctx.DataType.Uint16&quot;]</code>                  |
-| RG16I              | <code>[&quot;gl.RG_INTEGER&quot;,&quot;ctx.DataType.Int16&quot;]</code>                   |
-| RG32UI             | <code>[&quot;gl.RG_INTEGER&quot;,&quot;ctx.DataType.Uint32&quot;]</code>                  |
-| RG32I              | <code>[&quot;gl.RG_INTEGER&quot;,&quot;ctx.DataType.Int32&quot;]</code>                   |
-| RGB8               | <code>[&quot;gl.RGB&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                          |
-| SRGB8              | <code>[&quot;gl.RGB&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                          |
-| RGB565             | <code>[&quot;gl.RGB&quot;,&quot;gl.UNSIGNED_SHORT_5_6_5&quot;]</code>                     |
-| RGB8_SNORM         | <code>[&quot;gl.RGB&quot;,&quot;ctx.DataType.Int8&quot;]</code>                           |
-| R11F_G11F_B10F     | <code>[&quot;gl.RGB&quot;,&quot;gl.UNSIGNED_INT_10F_11F_11F_REV&quot;]</code>             |
-| RGB9_E5            | <code>[&quot;gl.RGB&quot;,&quot;gl.UNSIGNED_INT_5_9_9_9_REV&quot;]</code>                 |
-| RGB16F             | <code>[&quot;gl.RGB&quot;,&quot;ctx.DataType.Float16&quot;]</code>                        |
-| RGB32F             | <code>[&quot;gl.RGB&quot;,&quot;ctx.DataType.Float32&quot;]</code>                        |
-| RGB8UI             | <code>[&quot;gl.RGB_INTEGER&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                  |
-| RGB8I              | <code>[&quot;gl.RGB_INTEGER&quot;,&quot;ctx.DataType.Int8&quot;]</code>                   |
-| RGB16UI            | <code>[&quot;gl.RGB_INTEGER&quot;,&quot;ctx.DataType.Uint16&quot;]</code>                 |
-| RGB16I             | <code>[&quot;gl.RGB_INTEGER&quot;,&quot;ctx.DataType.Int16&quot;]</code>                  |
-| RGB32UI            | <code>[&quot;gl.RGB_INTEGER&quot;,&quot;ctx.DataType.Uint32&quot;]</code>                 |
-| RGB32I             | <code>[&quot;gl.RGB_INTEGER&quot;,&quot;ctx.DataType.Int32&quot;]</code>                  |
-| RGBA8              | <code>[&quot;gl.RGBA&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                         |
-| SRGB8_ALPHA8       | <code>[&quot;gl.RGBA&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                         |
-| RGBA8_SNORM        | <code>[&quot;gl.RGBA&quot;,&quot;ctx.DataType.Int8&quot;]</code>                          |
-| RGB5_A1            | <code>[&quot;gl.RGBA&quot;,&quot;gl.UNSIGNED_SHORT_5_5_5_1&quot;]</code>                  |
-| RGBA4              | <code>[&quot;gl.RGBA&quot;,&quot;gl.UNSIGNED_SHORT_4_4_4_4&quot;]</code>                  |
-| RGB10_A2           | <code>[&quot;gl.RGBA&quot;,&quot;gl.UNSIGNED_INT_2_10_10_10_REV&quot;]</code>             |
-| RGBA16F            | <code>[&quot;gl.RGBA&quot;,&quot;ctx.DataType.Float16&quot;]</code>                       |
-| RGBA32F            | <code>[&quot;gl.RGBA&quot;,&quot;ctx.DataType.Float32&quot;]</code>                       |
-| RGBA8UI            | <code>[&quot;gl.RGBA_INTEGER&quot;,&quot;ctx.DataType.Uint8&quot;]</code>                 |
-| RGBA8I             | <code>[&quot;gl.RGBA_INTEGER&quot;,&quot;ctx.DataType.Int8&quot;]</code>                  |
-| RGB10_A2UI         | <code>[&quot;gl.RGBA_INTEGER&quot;,&quot;gl.UNSIGNED_INT_2_10_10_10_REV&quot;]</code>     |
-| RGBA16UI           | <code>[&quot;gl.RGBA_INTEGER&quot;,&quot;ctx.DataType.Uint16&quot;]</code>                |
-| RGBA16I            | <code>[&quot;gl.RGBA_INTEGER&quot;,&quot;ctx.DataType.Int16&quot;]</code>                 |
-| RGBA32I            | <code>[&quot;gl.RGBA_INTEGER&quot;,&quot;ctx.DataType.Int32&quot;]</code>                 |
-| RGBA32UI           | <code>[&quot;gl.RGBA_INTEGER&quot;,&quot;ctx.DataType.Uint32&quot;]</code>                |
-| DEPTH_COMPONENT16  | <code>[&quot;gl.DEPTH_COMPONENT&quot;,&quot;ctx.DataType.Uint16&quot;]</code>             |
-| DEPTH_COMPONENT24  | <code>[&quot;gl.DEPTH_COMPONENT&quot;,&quot;ctx.DataType.Uint32&quot;]</code>             |
-| DEPTH_COMPONENT32F | <code>[&quot;gl.DEPTH_COMPONENT&quot;,&quot;ctx.DataType.Float32&quot;]</code>            |
-| DEPTH24_STENCIL8   | <code>[&quot;gl.DEPTH_STENCIL&quot;,&quot;gl.UNSIGNED_INT_24_8&quot;]</code>              |
-| DEPTH32F_STENCIL8  | <code>[&quot;gl.DEPTH_STENCIL&quot;,&quot;gl.FLOAT_32_UNSIGNED_INT_24_8_REV&quot;]</code> |
-
 <a name="ctx.PixelFormat"></a>
 
 ### ctx.PixelFormat
 
 Mapping of [ctx.TextureFormat](#ctx.TextureFormat) keys to their string values and legacy depth formats
 
+One of:
+
+- Unsized: RGB, RGBA, LUMINANCE_ALPHA, LUMINANCE, ALPHA
+- Sized 1 component: R8, R8_SNORM, R16F, R32F, R8UI, R8I, R16UI, R16I, R32UI, R32I
+- Sized 2 components: RG8, RG8_SNORM, RG16F, RG32F, RG8UI, RG8I, RG16UI, RG16I, RG32UI, RG32I
+- Sized 3 components: RGB8, RGB8_SNORM, RGB16F, RGB32F, RGB8UI, RGB8I, RGB16UI, RGB16I, RGB32UI, RGB32I
+- Sized 4 components: RGBA8, RGBA8_SNORM, RGBA16F, RGBA32F, RGBA8UI, RGBA8I, RGBA16UI, RGBA16I, RGBA32UI, RGBA32I
+- Sized special: SRGB8, RGB565, R11F_G11F_B10F, RGB9_E5, SRGB8_ALPHA8, RGB5_A1, RGBA4, RGB10_A2, RGB10_A2UI
+- Sized depth/stencil: DEPTH_COMPONENT16, DEPTH_COMPONENT24, DEPTH_COMPONENT32F, DEPTH24_STENCIL8, DEPTH32F_STENCIL8
+
 **Kind**: static enum of [<code>ctx</code>](#ctx)
-**Properties**
-
-| Name    | Default                        |
-| ------- | ------------------------------ |
-| Depth   | <code>DEPTH_COMPONENT16</code> |
-| Depth16 | <code>DEPTH_COMPONENT16</code> |
-| Depth24 | <code>DEPTH_COMPONENT24</code> |
-
 <a name="ctx.RenderbufferFloatFormat"></a>
 
 ### ctx.RenderbufferFloatFormat
@@ -1063,7 +993,7 @@ Create a context object
 | [width]            | <code>number</code>                                                                                                                                                                                                                                                                                                                               |                                                  |                                                                                                                              |
 | [height]           | <code>number</code>                                                                                                                                                                                                                                                                                                                               |                                                  |                                                                                                                              |
 | [pixelFormat]      | [<code>PixelFormat</code>](#ctx.PixelFormat)                                                                                                                                                                                                                                                                                                      | <code>ctx.PixelFormat.RGB8</code>                |                                                                                                                              |
-| [internalFormat]   | [<code>TextureFormat</code>](#ctx.TextureFormat)                                                                                                                                                                                                                                                                                                  | <code>ctx.TextureFormat.RGBA</code>              |                                                                                                                              |
+| [internalFormat]   | <code>ctx.TextureFormat</code>                                                                                                                                                                                                                                                                                                                    | <code>ctx.TextureFormat.RGBA</code>              |                                                                                                                              |
 | [type]             | <code>ctx.DataType</code>                                                                                                                                                                                                                                                                                                                         | <code>ctx.TextureFormat[opts.pixelFormat]</code> |                                                                                                                              |
 | [encoding]         | [<code>Encoding</code>](#ctx.Encoding)                                                                                                                                                                                                                                                                                                            | <code>ctx.Encoding.Linear</code>                 |                                                                                                                              |
 | [wrapS]            | [<code>Wrap</code>](#ctx.Wrap)                                                                                                                                                                                                                                                                                                                    | <code>ctx.Wrap.ClampToEdge</code>                |                                                                                                                              |
@@ -1089,6 +1019,19 @@ Create a context object
 | Name   | Type                                                                                                | Description                                        |
 | ------ | --------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
 | [data] | <code>Array.&lt;HTMLImageElement&gt;</code> \| [<code>Array.&lt;TypedArray&gt;</code>](#TypedArray) | 6 images, one for each face +X, -X, +Y, -Y, +Z, -Z |
+
+<a name="VertexArrayOptions"></a>
+
+## VertexArrayOptions : [<code>PexResource</code>](#PexResource)
+
+**Kind**: global typedef
+**Properties**
+
+| Name         | Type                |
+| ------------ | ------------------- |
+| vertexLayout | <code>object</code> |
+| [attributes] | <code>object</code> |
+| [indices]    | <code>object</code> |
 
 <a name="PexContextOptions"></a>
 
@@ -1176,18 +1119,6 @@ Please note those props are read only. To set new values or upload new data to G
 ## TypedArray : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
 
 **Kind**: global typedef
-<a name="VertexArrayOptions"></a>
-
-## VertexArrayOptions : [<code>PexResource</code>](#PexResource)
-
-**Kind**: global typedef
-**Properties**
-
-| Name         | Type                |
-| ------------ | ------------------- |
-| vertexLayout | <code>object</code> |
-| [attributes] | <code>object</code> |
-| [indices]    | <code>object</code> |
 
 <!-- api-end -->
 

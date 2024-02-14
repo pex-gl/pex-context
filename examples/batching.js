@@ -29,13 +29,7 @@ for (let i = 0; i < NUM_BUNNIES; i++) {
     random.float(-1, 1),
     random.float(-2, 2),
   ]);
-  mat4.mult(
-    m,
-    mat4.fromQuat(
-      mat4.create(),
-      quat.fromTo(quat.create(), [0, 0, 1], vec3.normalize(random.vec3()))
-    )
-  );
+  mat4.mult(m, mat4.fromQuat(mat4.create(), random.quat()));
   mat4.scale(m, [0.15, 0.15, 0.15]);
 
   shadowBatches.push({

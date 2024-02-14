@@ -44,8 +44,17 @@
  * @param {number} outStart
  * @param {number} outEnd
  * @returns {number}
- */ function map(n, inStart, inEnd, outStart, outEnd) {
+ */ function remap(n, inStart, inEnd, outStart, outEnd) {
     return outStart + (outEnd - outStart) * (n - inStart) / (inEnd - inStart);
+}
+/**
+ * @deprecated Use "remap()"
+ * @ignore
+ */ function map() {
+    for(var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++){
+        args[_key] = arguments[_key];
+    }
+    return remap(...args);
 }
 /**
  * Transforms degrees into radians.
@@ -101,6 +110,7 @@ var utils = /*#__PURE__*/Object.freeze({
   map: map,
   nextPowerOfTwo: nextPowerOfTwo,
   prevPowerOfTwo: prevPowerOfTwo,
+  remap: remap,
   smoothstep: smoothstep,
   toDegrees: toDegrees,
   toRadians: toRadians

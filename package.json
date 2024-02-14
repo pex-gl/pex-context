@@ -41,7 +41,7 @@
   "devDependencies": {
     "baboon-image-uri": "^1.0.1",
     "bunny": "^1.0.1",
-    "es-module-shims": "^1.8.0",
+    "es-module-shims": "^1.8.2",
     "geom-center-and-normalize": "^2.0.0",
     "geom-merge": "^2.0.0",
     "geom-normals": "^2.0.1",
@@ -49,12 +49,12 @@
     "grid-cells": "^2.0.0",
     "normals": "^1.1.0",
     "pex-cam": "^3.0.0-alpha.1",
-    "pex-color": "^2.0.4",
-    "pex-gui": "^3.0.0-alpha.2",
+    "pex-color": "^2.1.0",
+    "pex-gui": "^3.0.0",
     "pex-io": "^3.0.1",
-    "pex-math": "^4.0.0-alpha.2",
-    "pex-random": "^2.0.0-alpha.1",
-    "primitive-geometry": "^2.9.1",
+    "pex-math": "^4.1.0",
+    "pex-random": "^2.0.0",
+    "primitive-geometry": "^2.10.0",
     "typed-array-concat": "^3.0.0"
   },
   "engines": {
