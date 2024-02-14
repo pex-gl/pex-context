@@ -70,5 +70,12 @@ export default function polyfill(ctx) {
   if (!capabilities.isWebGL2) {
     gl.getExtension("OES_element_index_uint");
     gl.getExtension("OES_standard_derivatives");
+
+    const extsRGB = gl.getExtension("EXT_sRGB");
+    if (extsRGB) {
+      gl.SRGB ||= extsRGB.SRGB_EXT;
+      gl.SRGB8 ||= extsRGB.SRGB_ALPHA_EXT;
+      gl.SRGB8_ALPHA8 ||= extsRGB.SRGB8_ALPHA8_EXT;
+    }
   }
 }

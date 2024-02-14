@@ -94,6 +94,7 @@ function createContext(options = {}) {
       textureFilterAnisotropic: !!gl.getExtension(
         "EXT_texture_filter_anisotropic"
       ),
+      sRGB: isWebGL2 || !!gl.getExtension("EXT_sRGB"),
       disjointTimerQuery: !!(
         gl.getExtension("EXT_disjoint_timer_query_webgl2") ||
         gl.getExtension("EXT_disjoint_timer_query")
