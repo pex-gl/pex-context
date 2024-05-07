@@ -58,7 +58,8 @@
     "typed-array-concat": "^3.0.0"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.6.0"
+    "node": ">=20.0.0",
+    "npm": ">=9.6.4",
+    "snowdev": "2.0.0-alpha.26"
   }
 }
