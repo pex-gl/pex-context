@@ -1,6 +1,24 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+# [3.0.0-alpha.9](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.8...v3.0.0-alpha.9) (2024-05-07)
+
+
+### Bug Fixes
+
+* add all supported command props ([9b96c04](https://github.com/pex-gl/pex-context/commit/9b96c04eb51bf0e2b56ce97c2905f64e7833436e))
+* break frame loop when context is disposed  ([11cd9a2](https://github.com/pex-gl/pex-context/commit/11cd9a257bbde9eb2a3bd7cc8c0a7a690fc2f73a))
+* show error for multidraw and multiDrawInstancedBase missing fallback implementation ([bcb8198](https://github.com/pex-gl/pex-context/commit/bcb819866194e21c979f7322198e55e0f5731510))
+
+
+### Features
+
+* add base vertex and base instance fallback ([8aece5a](https://github.com/pex-gl/pex-context/commit/8aece5a1a1d0814fb6744a9722f71d3e623bddc7))
+* add fallback for unsupported multidraw extension ([4505d45](https://github.com/pex-gl/pex-context/commit/4505d45b5df0a98fb49bd80fc66475f26a27acb4)), closes [#132](https://github.com/pex-gl/pex-context/issues/132)
+* add sRGB capability and EXT_sRGB polyfill ([40470b0](https://github.com/pex-gl/pex-context/commit/40470b0d6d274d0c6ed7e5a41e0abe9db8a8123c))
+
+
 
 # [3.0.0-alpha.8](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.7...v3.0.0-alpha.8) (2023-06-01)
 
