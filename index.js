@@ -153,6 +153,7 @@ function createContext(options = {}) {
   };
 
   Object.assign(ctx, {
+    isDisposed: false,
     debugMode: false,
     debugCommands: [],
     resources: [],
@@ -276,7 +277,7 @@ function createContext(options = {}) {
             this.defaultState.pass.framebuffer.height = gl.drawingBufferHeight;
             gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
           }
-          if (cb() === false) return; // interrupt render loop
+          if (this.isDisposed || cb() === false) return; // interrupt render loop
           if (this.queries.length) {
             this.queries = this.queries.filter((q) => !q._available(this, q));
           }
@@ -738,6 +739,7 @@ function createContext(options = {}) {
         this.stats[resource.class].alive--;
         resource._dispose();
       } else {
+        this.isDisposed = true;
         while (this.resources.length) {
           this.dispose(this.resources[0]);
         }
