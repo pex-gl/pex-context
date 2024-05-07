@@ -43,8 +43,6 @@ function createPipeline(ctx, opts) {
   const pipeline = Object.assign(
     {
       class: "pipeline",
-      vert: null,
-      frag: null,
       program: null,
       depthWrite: true,
       depthTest: false,
