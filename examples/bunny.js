@@ -127,13 +127,11 @@ const drawFloorDepthCmd = {
 };
 
 // Geometry
-const bunnyBaseVertices = centerAndNormalize(bunny.positions).map((p) =>
-  vec3.scale(p, 2)
-);
+const bunnyBaseVertices = centerAndNormalize(structuredClone(bunny.positions), {
+  normalizedSize: 2,
+});
 const bunnyBaseNormals = vertexNormals(bunny.cells, bunny.positions);
-const bunnyNoiseVertices = centerAndNormalize(bunny.positions).map((p) =>
-  vec3.scale(p, 2)
-);
+const bunnyNoiseVertices = structuredClone(bunnyBaseVertices);
 const bunnyPositionBuffer = ctx.vertexBuffer(bunnyBaseVertices);
 const bunnyNormalBuffer = ctx.vertexBuffer(bunnyBaseNormals);
 
@@ -198,7 +196,7 @@ function updateBunny(ctx) {
     const f = random.noise3(
       v[0] * noiseFrequency,
       v[1] * noiseFrequency,
-      v[2] * noiseFrequency + elapsedSeconds
+      v[2] * noiseFrequency + elapsedSeconds,
     );
     v[0] += n[0] * noiseScale * (f + 1);
     v[1] += n[1] * noiseScale * (f + 1);
