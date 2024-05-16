@@ -31,9 +31,9 @@
   "types": "types/index.d.ts",
   "scripts": {
     "build": "snowdev build",
+    "deploy": "snowdev deploy",
     "dev": "snowdev dev",
-    "release": "snowdev release",
-    "release:alpha": "snowdev release --prerelease alpha"
+    "release": "snowdev release"
   },
   "dependencies": {
     "pex-gl": "^3.0.1"
