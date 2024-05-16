@@ -1,517 +1,583 @@
-const createGL = require('pex-gl')
-// const viz = require('viz.js')
-const isBrowser = require('is-browser')
-const assert = require('assert')
-const raf = require('raf')
-const log = require('debug')('context')
-const createTexture = require('./texture')
-const createFramebuffer = require('./framebuffer')
-const createRenderbuffer = require('./renderbuffer')
-const createPass = require('./pass')
-const createPipeline = require('./pipeline')
-const createProgram = require('./program')
-const createBuffer = require('./buffer')
-const createQuery = require('./query')
-const checkProps = require('./check-props')
+import createGL from "pex-gl";
 
-let ID = 0
+import createTexture from "./texture.js";
+import createFramebuffer from "./framebuffer.js";
+import createRenderbuffer from "./renderbuffer.js";
+import createPass from "./pass.js";
+import createPipeline from "./pipeline.js";
+import createVertexArray from "./vertex-array.js";
+import createProgram from "./program.js";
+import createBuffer from "./buffer.js";
+import createQuery from "./query.js";
+
+import {
+  checkProps,
+  isWebGL2 as checkWebGL2Context,
+  compareFBOAttachments,
+  draw,
+  enableVertexData,
+  NAMESPACE,
+} from "./utils.js";
+import polyfill from "./polyfill.js";
+import { addEnums } from "./types.js";
+
+let ID = 0;
 
 const allowedCommandProps = [
-  'name',
-  'pass',
-  'pipeline',
-  'uniforms',
-  'attributes',
-  'indices',
-  'count',
-  'instances',
-  'viewport',
-  'scissor'
-]
+  "name",
+  "pass",
+  "pipeline",
+  "uniforms",
+  "attributes",
+  "indices",
+  "count",
+  "first",
+  "baseVertex",
+  "baseInstance",
+  "multiDraw",
+  "instances",
+  "vertexArray",
+  "viewport",
+  "scissor",
+];
 
-function createContext(opts) {
-  assert(
-    !opts || typeof opts === 'object',
-    'pex-context: createContext requires opts argument to be null or an object'
-  )
-  let gl = null
+/**
+ * Create a context object
+ * @param {import("./types.js").PexContextOptions & import("pex-gl").Options} [options]
+ * @returns {ctx}
+ */
+function createContext(options = {}) {
+  const opts = {
+    pixelRatio: 1,
+    type: "webgl2",
+    ...options,
+  };
 
-  const defaultOpts = {
-    pixelRatio: 1
+  if (options.pixelRatio) {
+    opts.pixelRatio = Math.min(opts.pixelRatio, window.devicePixelRatio);
   }
 
-  opts = Object.assign({}, defaultOpts, opts)
+  const gl = opts.gl || createGL(opts);
+  console.assert(gl, "pex-context: createContext failed");
+  const isWebGL2 = checkWebGL2Context(gl);
 
-  if (opts.pixelRatio) {
-    opts = Object.assign(opts, {
-      pixelRatio: Math.min(opts.pixelRatio, window.devicePixelRatio)
-    })
-  }
-
-  if (!opts || !opts.gl) gl = createGL(opts)
-  else if (opts && opts.gl) gl = opts.gl
-  assert(gl, 'pex-context: createContext failed')
-
-  const capabilities = {
-    maxColorAttachments: 1,
-    maxTextureImageUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
-    maxVertexTextureImageUnits: gl.getParameter(
-      gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS
-    ),
-    maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
-    maxCubeMapTextureSize: gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
-    instancedArrays: false,
-    instancing: false, // TODO: deprecate
-    elementIndexUint32: !!gl.getExtension('OES_element_index_uint'),
-    standardDerivatives: !!gl.getExtension('OES_standard_derivatives'),
-    depthTexture: !!gl.getExtension('WEBGL_depth_texture'),
-    shaderTextureLod: !!gl.getExtension('EXT_shader_texture_lod'),
-    textureFloat: !!gl.getExtension('OES_texture_float'),
-    textureFloatLinear: !!gl.getExtension('OES_texture_float_linear'),
-    textureHalfFloat: !!gl.getExtension('OES_texture_half_float'),
-    textureHalfFloatLinear: !!gl.getExtension('OES_texture_half_float_linear'),
-    textureFilterAnisotropic: !!gl.getExtension(
-      'EXT_texture_filter_anisotropic'
-    )
-  }
-
-  if (!gl.HALF_FLOAT) {
-    const ext = gl.getExtension('OES_texture_half_float')
-    if (ext) {
-      gl.HALF_FLOAT = ext.HALF_FLOAT_OES
-    }
-  }
-
-  if (!gl.createQuery) {
-    const ext = gl.getExtension('EXT_disjoint_timer_query')
-    if (!ext) {
-      gl.TIME_ELAPSED = 'TIME_ELAPSED'
-      gl.QUERY_RESULT_AVAILABLE = 'QUERY_RESULT_AVAILABLE'
-      gl.GPU_DISJOINT = 'GPU_DISJOINT'
-      gl.QUERY_RESULT = 'QUERY_RESULT'
-      gl.createQuery = function() {
-        return {}
-      }
-      gl.deleteQuery = function() {}
-      gl.beginQuery = function() {}
-      gl.endQuery = function() {}
-      gl.getQueryObject = function(q, param) {
-        if (param === gl.QUERY_RESULT_AVAILABLE) return true
-        if (param === gl.QUERY_RESULT) return 0
-        return undefined
-      }
-    } else {
-      gl.TIME_ELAPSED = ext.TIME_ELAPSED_EXT
-      gl.QUERY_RESULT_AVAILABLE = ext.QUERY_RESULT_AVAILABLE_EXT
-      gl.GPU_DISJOINT = ext.GPU_DISJOINT_EXT
-      gl.QUERY_RESULT = ext.QUERY_RESULT_EXT
-      gl.createQuery = ext.createQueryEXT.bind(ext)
-      gl.deleteQuery = ext.deleteQueryEXT.bind(ext)
-      gl.beginQuery = ext.beginQueryEXT.bind(ext)
-      gl.endQuery = ext.endQueryEXT.bind(ext)
-      gl.getQueryObject = ext.getQueryObjectEXT.bind(ext)
-    }
-  }
-
-  const BlendFactor = {
-    One: gl.ONE,
-    Zero: gl.ZERO,
-    SrcAlpha: gl.SRC_ALPHA,
-    OneMinusSrcAlpha: gl.ONE_MINUS_SRC_ALPHA,
-    DstAlpha: gl.DST_ALPHA,
-    OneMinusDstAlpha: gl.ONE_MINUS_DST_ALPHA,
-    SrcColor: gl.SRC_COLOR,
-    OneMinusSrcColor: gl.ONE_MINUS_SRC_COLOR,
-    DstColor: gl.DST_COLOR,
-    OneMinusDstColor: gl.ONE_MINUS_DST_COLOR
-  }
-
-  const CubemapFace = {
-    PositiveX: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-    NegativeX: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-    PositiveY: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-    NegativeY: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-    PositiveZ: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-    NegativeZ: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
-  }
-
-  const DepthFunc = {
-    Never: gl.NEVER,
-    Less: gl.LESS,
-    Equal: gl.EQUAL,
-    LessEqual: gl.LEQUAL,
-    Greater: gl.GREATER,
-    NotEqual: gl.NOTEQUAL,
-    GreaterEqual: gl.GEQUAL,
-    Always: gl.ALWAYS
-  }
-
-  const DataType = {
-    Float16: gl.HALF_FLOAT,
-    Float32: gl.FLOAT,
-    Int8: gl.BYTE,
-    Int16: gl.SHORT,
-    Int32: gl.INT,
-    Uint8: gl.UNSIGNED_BYTE,
-    Uint16: gl.UNSIGNED_SHORT,
-    Uint32: gl.UNSIGNED_INT
-  }
-
-  const DataTypeConstructor = {
-    [DataType.Float16]: Float32Array,
-    [DataType.Float32]: Float32Array,
-    [DataType.Int8]: Int8Array,
-    [DataType.Int16]: Int16Array,
-    [DataType.Int32]: Int32Array,
-    [DataType.Uint8]: Uint8Array,
-    [DataType.Uint16]: Uint16Array,
-    [DataType.Uint32]: Uint32Array
-  }
-
-  const Face = {
-    Front: gl.FRONT,
-    Back: gl.BACK,
-    FrontAndBack: gl.FRONT_AND_BACK
-  }
-
-  const Filter = {
-    Nearest: gl.NEAREST,
-    Linear: gl.LINEAR,
-    NearestMipmapNearest: gl.NEAREST_MIPMAP_NEAREST,
-    NearestMipmapLinear: gl.NEAREST_MIPMAP_LINEAR,
-    LinearMipmapNearest: gl.LINEAR_MIPMAP_NEAREST,
-    LinearMipmapLinear: gl.LINEAR_MIPMAP_LINEAR
-  }
-
-  // Mapping of format and type (with alternative types)
-  const TextureFormat = {
-    // Unsized Internal Formats
-    RGB: [gl.RGB, DataType.Uint8], // gl.UNSIGNED_SHORT_5_6_5
-    RGBA: [gl.RGBA, DataType.Uint8], // gl.UNSIGNED_SHORT_4_4_4_4, gl.UNSIGNED_SHORT_5_5_5_1
-    LUMINANCE_ALPHA: [gl.LUMINANCE_ALPHA, DataType.Uint8],
-    LUMINANCE: [gl.LUMINANCE, DataType.Uint8],
-    ALPHA: [gl.ALPHA, DataType.Uint8],
-
-    // Sized internal formats
-    R8: [gl.RED, DataType.Uint8],
-    R8_SNORM: [gl.RED, DataType.Int8],
-    R16F: [gl.RED, DataType.Float16], // DataType.Float32
-    R32F: [gl.RED, DataType.Float32],
-
-    R8UI: [gl.RED_INTEGER, DataType.Uint8],
-    R8I: [gl.RED_INTEGER, DataType.Int8],
-    R16UI: [gl.RED_INTEGER, DataType.Uint16],
-    R16I: [gl.RED_INTEGER, DataType.Int16],
-    R32UI: [gl.RED_INTEGER, DataType.Uint32],
-    R32I: [gl.RED_INTEGER, DataType.Int32],
-
-    RG8: [gl.RG, DataType.Uint8],
-    RG8_SNORM: [gl.RG, DataType.Int8],
-    RG16F: [gl.RG, DataType.Float16], // DataType.Float32
-    RG32F: [gl.RG, DataType.Float32],
-
-    RG8UI: [gl.RG_INTEGER, DataType.Uint8],
-    RG8I: [gl.RG_INTEGER, DataType.Int8],
-    RG16UI: [gl.RG_INTEGER, DataType.Uint16],
-    RG16I: [gl.RG_INTEGER, DataType.Int16],
-    RG32UI: [gl.RG_INTEGER, DataType.Uint32],
-    RG32I: [gl.RG_INTEGER, DataType.Int32],
-
-    RGB8: [gl.RGB, DataType.Uint8],
-    SRGB8: [gl.RGB, DataType.Uint8],
-    RGB565: [gl.RGB, gl.UNSIGNED_SHORT_5_6_5], // DataType.Uint8
-    RGB8_SNORM: [gl.RGB, DataType.Int8],
-    R11F_G11F_B10F: [gl.RGB, gl.UNSIGNED_INT_10F_11F_11F_REV], // DataType.Float16, DataType.Float32
-    RGB9_E5: [gl.RGB, gl.UNSIGNED_INT_5_9_9_9_REV], // DataType.Float16, DataType.Float32
-    RGB16F: [gl.RGB, DataType.Float16], // DataType.Float32
-    RGB32F: [gl.RGB, DataType.Float32],
-
-    RGB8UI: [gl.RGB_INTEGER, DataType.Uint8],
-    RGB8I: [gl.RGB_INTEGER, DataType.Int8],
-    RGB16UI: [gl.RGB_INTEGER, DataType.Uint16],
-    RGB16I: [gl.RGB_INTEGER, DataType.Int16],
-    RGB32UI: [gl.RGB_INTEGER, DataType.Uint32],
-    RGB32I: [gl.RGB_INTEGER, DataType.Int32],
-
-    RGBA8: [gl.RGBA, DataType.Uint8],
-    SRGB8_ALPHA8: [gl.RGBA, DataType.Uint8],
-    RGBA8_SNORM: [gl.RGBA, DataType.Int8],
-    RGB5_A1: [gl.RGBA, gl.UNSIGNED_SHORT_5_5_5_1], // DataType.Uint8, gl.UNSIGNED_INT_2_10_10_10_REV
-    RGBA4: [gl.RGBA, gl.UNSIGNED_SHORT_4_4_4_4], // DataType.Uint8
-    RGB10_A2: [gl.RGBA, gl.UNSIGNED_INT_2_10_10_10_REV],
-    RGBA16F: [gl.RGBA, DataType.Float16], // DataType.Float32
-    RGBA32F: [gl.RGBA, DataType.Float32],
-
-    RGBA8UI: [gl.RGBA_INTEGER, DataType.Uint8],
-    RGBA8I: [gl.RGBA_INTEGER, DataType.Int8],
-    RGB10_A2UI: [gl.RGBA_INTEGER, gl.UNSIGNED_INT_2_10_10_10_REV],
-    RGBA16UI: [gl.RGBA_INTEGER, DataType.Uint16],
-    RGBA16I: [gl.RGBA_INTEGER, DataType.Int16],
-    RGBA32I: [gl.RGBA_INTEGER, DataType.Int32],
-    RGBA32UI: [gl.RGBA_INTEGER, DataType.Uint32],
-
-    // Depth and stencil
-    DEPTH_COMPONENT16: [gl.DEPTH_COMPONENT, DataType.Uint16], // DataType.Uint32
-    DEPTH_COMPONENT24: [gl.DEPTH_COMPONENT, DataType.Uint32],
-    DEPTH_COMPONENT32F: [gl.DEPTH_COMPONENT, DataType.Float32],
-    DEPTH24_STENCIL8: [gl.DEPTH_STENCIL, gl.UNSIGNED_INT_24_8],
-    DEPTH32F_STENCIL8: [gl.DEPTH_STENCIL, gl.FLOAT_32_UNSIGNED_INT_24_8_REV]
-  }
-  if (gl instanceof WebGLRenderingContext) {
-    if (capabilities.depthTexture) {
-      TextureFormat.DEPTH_COMPONENT = [gl.DEPTH_COMPONENT, DataType.Uint16]
-      TextureFormat.DEPTH_STENCIL = [gl.DEPTH_STENCIL, DataType.Uint16]
-    }
-    TextureFormat.R16FLegacy = [gl.ALPHA, DataType.Float16]
-    TextureFormat.R32FLegacy = [gl.ALPHA, DataType.Float32]
-  }
-  const PixelFormat = {
-    ...Object.fromEntries(
-      Object.keys(TextureFormat).map((internalFormat) => [
-        internalFormat,
-        internalFormat
-      ])
-    ),
-    // Legacy
-    Depth: 'DEPTH_COMPONENT',
-    Depth16: 'DEPTH_COMPONENT16',
-    Depth24: 'DEPTH_COMPONENT24'
-  }
-
-  const Encoding = {
-    Linear: 1,
-    Gamma: 2,
-    SRGB: 3,
-    RGBM: 4
-  }
-
-  const Primitive = {
-    Points: gl.POINTS,
-    Lines: gl.LINES,
-    LineStrip: gl.LINE_STRIP,
-    Triangles: gl.TRIANGLES,
-    TriangleStrip: gl.TRIANGLE_STRIP
-  }
-
-  const Usage = {
-    StaticDraw: gl.STATIC_DRAW,
-    DynamicDraw: gl.DYNAMIC_DRAW,
-    StreamDraw: gl.STREAM_DRAW
-  }
-
-  const Wrap = {
-    ClampToEdge: gl.CLAMP_TO_EDGE,
-    Repeat: gl.REPEAT
-  }
-
-  const QueryTarget = {
-    TimeElapsed: gl.TIME_ELAPSED
-  }
-
-  const QueryState = {
-    Ready: 'ready',
-    Active: 'active',
-    Pending: 'pending'
-  }
-
+  /**
+   * @namespace ctx
+   */
   const ctx = {
-    gl: gl,
-    BlendFactor: BlendFactor,
-    CubemapFace: CubemapFace,
-    DataType: DataType,
-    DataTypeConstructor: DataTypeConstructor,
-    DepthFunc: DepthFunc,
-    Face: Face,
-    Filter: Filter,
-    TextureFormat: TextureFormat,
-    PixelFormat: PixelFormat,
-    Encoding: Encoding,
-    Primitive: Primitive,
-    Usage: Usage,
-    Wrap: Wrap,
-    QueryTarget: QueryTarget,
-    QueryState: QueryState
-  }
+    /**
+     * The `RenderingContext` returned by `pex-gl`
+     * @memberof ctx
+     */
+    gl,
+    /**
+     * Max capabilities and extensions availability. See {@link #capabilitiesTable|Capabilities Table}.
+     * @memberof ctx
+     */
+    capabilities: {
+      isWebGL2,
+      maxColorAttachments: 1,
+      maxTextureImageUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
+      maxVertexTextureImageUnits: gl.getParameter(
+        gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS,
+      ),
+      maxVertexAttribs: gl.getParameter(gl.MAX_VERTEX_ATTRIBS),
+      maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
+      maxCubeMapTextureSize: gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
+      depthTexture: isWebGL2 || !!gl.getExtension("WEBGL_depth_texture"),
+      shaderTextureLod: isWebGL2 || !!gl.getExtension("EXT_shader_texture_lod"),
+      textureFloat: isWebGL2 || !!gl.getExtension("OES_texture_float"),
+      textureFloatLinear: !!gl.getExtension("OES_texture_float_linear"),
+      textureHalfFloat: isWebGL2 || !!gl.getExtension("OES_texture_half_float"),
+      textureHalfFloatLinear:
+        isWebGL2 || !!gl.getExtension("OES_texture_half_float_linear"),
+      textureFilterAnisotropic: !!gl.getExtension(
+        "EXT_texture_filter_anisotropic",
+      ),
+      sRGB: isWebGL2 || !!gl.getExtension("EXT_sRGB"),
+      disjointTimerQuery: !!(
+        gl.getExtension("EXT_disjoint_timer_query_webgl2") ||
+        gl.getExtension("EXT_disjoint_timer_query")
+      ),
+      // Note: supported color buffer types vary
+      colorBufferFloat: isWebGL2
+        ? !!gl.getExtension("EXT_color_buffer_float")
+        : !!gl.getExtension("WEBGL_color_buffer_float"),
+      colorBufferHalfFloat: !!gl.getExtension("EXT_color_buffer_half_float"),
+      floatBlend: !!gl.getExtension("EXT_float_blend"),
+      multiDraw: !!gl.getExtension("WEBGL_multi_draw"),
+      drawInstancedBase: !!gl.getExtension(
+        "WEBGL_draw_instanced_base_vertex_base_instance",
+      ),
+      multiDrawInstancedBase: !!gl.getExtension(
+        "WEBGL_multi_draw_instanced_base_vertex_base_instance",
+      ),
+    },
+    /**
+     * Getter for `gl.drawingBufferWidth`
+     * @memberof ctx
+     * @returns {number}
+     */
+    get width() {
+      return gl.drawingBufferWidth;
+    },
+    /**
+     * Getter for `gl.drawingBufferHeight`
+     * @memberof ctx
+     * @returns {number}
+     */
+    get height() {
+      return gl.drawingBufferHeight;
+    },
+  };
+
+  polyfill(ctx);
+  addEnums(ctx);
 
   const defaultState = {
     pass: {
       framebuffer: {
-        id: 'framebuffer_' + ID++,
+        id: `framebuffer_${ID++}`,
         target: gl.FRAMEBUFFER,
         handle: null,
         width: gl.drawingBufferWidth,
-        height: gl.drawingBufferHeight
+        height: gl.drawingBufferHeight,
       },
       clearColor: [0, 0, 0, 1],
-      clearDepth: 1
+      clearDepth: 1,
     },
     pipeline: createPipeline(ctx, {}),
     viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight],
     scissor: null,
-    count: 0
-  }
-
-  // extensions
-  if (!gl.drawElementsInstanced) {
-    const ext = gl.getExtension('ANGLE_instanced_arrays')
-    if (!ext) {
-      // TODO: this._caps[CAPS_INSTANCED_ARRAYS] = false;
-      gl.drawElementsInstanced = function() {
-        throw new Error(
-          'gl.drawElementsInstanced not available. ANGLE_instanced_arrays not supported'
-        )
-      }
-      gl.drawArraysInstanced = function() {
-        throw new Error(
-          'gl.drawArraysInstanced not available. ANGLE_instanced_arrays not supported'
-        )
-      }
-      gl.vertexAttribDivisor = function() {
-        throw new Error(
-          'gl.vertexAttribDivisor not available. ANGLE_instanced_arrays not supported'
-        )
-      }
-    } else {
-      // TODO: this._caps[CAPS_INSTANCED_ARRAYS] = true;
-      gl.drawElementsInstanced = ext.drawElementsInstancedANGLE.bind(ext)
-      gl.drawArraysInstanced = ext.drawArraysInstancedANGLE.bind(ext)
-      gl.vertexAttribDivisor = ext.vertexAttribDivisorANGLE.bind(ext)
-      capabilities.instancedArrays = true
-      capabilities.instancing = true // TODO: deprecate
-    }
-  } else {
-    capabilities.instancedArrays = true
-    capabilities.instancing = true // TODO: deprecate
-  }
-
-  if (!gl.drawBuffers) {
-    const ext = gl.getExtension('WEBGL_draw_buffers')
-    if (!ext) {
-      gl.drawBuffers = function() {
-        throw new Error('WEBGL_draw_buffers not supported')
-      }
-    } else {
-      gl.drawBuffers = ext.drawBuffersWEBGL.bind(ext)
-      capabilities.maxColorAttachments = gl.getParameter(
-        ext.MAX_COLOR_ATTACHMENTS_WEBGL
-      )
-    }
-  } else {
-    capabilities.maxColorAttachments = gl.getParameter('MAX_COLOR_ATTACHMENTS')
-  }
-
-  log('capabilities', capabilities)
-
-  function compareFBOAttachments(framebuffer, passOpts) {
-    const fboDepthAttachment = framebuffer.depth?.texture
-    const passDepthAttachment = passOpts.depth?.texture || passOpts.depth
-    if (fboDepthAttachment != passDepthAttachment) return false
-    if (framebuffer.color.length != passOpts.color.length) return false
-
-    for (let i = 0; i < framebuffer.color.length; i++) {
-      const fboColorAttachment = framebuffer.color[i]?.texture
-      const passColorAttachment =
-        passOpts.color[i]?.texture || passOpts.color[i]
-      if (fboColorAttachment != passColorAttachment) return false
-    }
-
-    return true
-  }
+    count: 0,
+  };
 
   Object.assign(ctx, {
+    isDisposed: false,
     debugMode: false,
-    capabilities: capabilities,
-    // debugGraph: '',
     debugCommands: [],
     resources: [],
     stats: {},
     queries: [],
     stack: [defaultState],
-    defaultState: defaultState,
-    pixelRatio: opts.pixelRatio || 1,
+    defaultState,
+    pixelRatio: opts.pixelRatio,
     state: {
       framebuffer: defaultState.pass.framebuffer,
       pipeline: createPipeline(ctx, {}),
       activeTextures: [],
-      activeAttributes: []
+      activeAttributes: [],
     },
-    getGLString: function(glEnum) {
-      let str = ''
+    getGLString(glEnum) {
+      let str = "UNDEFINED";
       for (let key in gl) {
-        if (gl[key] === glEnum) str = key
+        if (gl[key] === glEnum) {
+          str = key;
+          break;
+        }
       }
-      if (!str) {
-        str = 'UNDEFINED'
-      }
-      return str
+      return str;
     },
-    set: function(opts) {
-      assert(isBrowser, 'changing resolution is not supported in Plask')
-      if (opts.pixelRatio) {
-        this.updatePixelRatio = Math.min(
-          opts.pixelRatio,
-          window.devicePixelRatio
-        )
-      }
-
-      if (opts.width) {
-        this.updateWidth = opts.width
-      }
-
-      if (opts.height) {
-        this.updateHeight = opts.height
-      }
-    },
-    debug: function(enabled) {
-      this.debugMode = enabled
-      if (enabled) {
-        this.debugCommands = []
-      }
-    },
-    checkError: function() {
+    checkError() {
       if (this.debugMode) {
-        var error = gl.getError()
+        const error = gl.getError();
         if (error) {
-          this.debugMode = false // prevents rolling errors
-          if (isBrowser) log('State', this.state.state)
-          throw new Error(`GL error ${error} : ${this.getGLString(error)}`)
+          this.debugMode = false; // prevents rolling errors
+          console.debug(NAMESPACE, "state", this.state);
+          throw new Error(`GL error ${error}: ${this.getGLString(error)}`);
         }
       }
     },
-    resource: function(res) {
-      res.id = res.class + '_' + ID++
-      if (!this.stats[res.class]) {
-        this.stats[res.class] = { alive: 0, total: 0 }
+    resource(res) {
+      res.id = `${res.class}_${ID++}`;
+      this.stats[res.class] ||= { alive: 0, total: 0 };
+      this.stats[res.class].alive++;
+      this.stats[res.class].total++;
+      this.resources.push(res);
+      this.checkError();
+      return res;
+    },
+
+    // Public API
+
+    /**
+     * Set the context size and pixelRatio
+     * The new size and resolution will not be applied immediately but before drawing the next frame to avoid flickering.
+     * Context's canvas doesn't resize automatically, even if you don't pass width/height on init and the canvas is assigned the dimensions of the window. To handle resizing use the following code:
+     * ```js
+     * window.addEventListener('resize', () => {
+     *   ctx.set({ width: window.innerWidth, height: window.innerHeight });
+     * })
+     * ```
+     * @memberof ctx
+     * @param {import("./types.js").PexContextSetOptions} options
+     */
+    set({ pixelRatio, width, height }) {
+      if (pixelRatio) {
+        this.updatePixelRatio = Math.min(pixelRatio, window.devicePixelRatio);
       }
-      this.stats[res.class].alive++
-      this.stats[res.class].total++
-      this.resources.push(res)
-      this.checkError()
-      return res
+
+      if (width) {
+        this.updateWidth = width;
+      }
+
+      if (height) {
+        this.updateHeight = height;
+      }
     },
-    // texture2D({ data: TypedArray, width: Int, height: Int, format: PixelFormat, flipY: Boolean })
-    texture2D: function(opts) {
-      log('texture2D', opts)
-      opts.target = gl.TEXTURE_2D
-      return this.resource(createTexture(this, opts))
+
+    /**
+     * Enable debug mode
+     * @param {boolean} [enabled]
+     * @memberof ctx
+     */
+    debug(enabled) {
+      this.debugMode = enabled;
+      if (enabled) this.debugCommands = [];
     },
-    // textureCube({ data: [negxData, negyData,...], width: Int, height: Int, format: PixelFormat, flipY: Boolean })
-    textureCube: function(opts) {
-      log('textureCube', opts)
-      opts.target = gl.TEXTURE_CUBE_MAP
-      return this.resource(createTexture(this, opts))
+
+    /**
+     * Render Loop
+     * @memberof ctx
+     * @param {Function} cb Request Animation Frame callback
+     */
+    frame(cb) {
+      requestAnimationFrame(
+        function frame() {
+          if (this.updatePixelRatio) {
+            this.pixelRatio = this.updatePixelRatio;
+            // we need to reaply width/height and update styles
+            if (!this.updateWidth) {
+              this.updateWidth =
+                parseInt(gl.canvas.style.width) || gl.canvas.width;
+            }
+            if (!this.updateHeight) {
+              this.updateHeight =
+                parseInt(gl.canvas.style.height) || gl.canvas.height;
+            }
+            this.updatePixelRatio = 0;
+          }
+          if (this.updateWidth) {
+            gl.canvas.style.width = `${this.updateWidth}px`;
+            gl.canvas.width = this.updateWidth * this.pixelRatio;
+            this.updateWidth = 0;
+          }
+          if (this.updateHeight) {
+            gl.canvas.style.height = `${this.updateHeight}px`;
+            gl.canvas.height = this.updateHeight * this.pixelRatio;
+            this.updateHeight = 0;
+          }
+          if (
+            this.defaultState.viewport[2] !== gl.drawingBufferWidth ||
+            this.defaultState.viewport[3] !== gl.drawingBufferHeight
+          ) {
+            this.defaultState.viewport[2] = gl.drawingBufferWidth;
+            this.defaultState.viewport[3] = gl.drawingBufferHeight;
+            this.defaultState.pass.framebuffer.width = gl.drawingBufferWidth;
+            this.defaultState.pass.framebuffer.height = gl.drawingBufferHeight;
+            gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+          }
+          if (this.isDisposed || cb() === false) return; // interrupt render loop
+          if (this.queries.length) {
+            this.queries = this.queries.filter((q) => !q._available(this, q));
+          }
+          requestAnimationFrame(frame.bind(this));
+        }.bind(this),
+      );
+    },
+
+    /**
+     * Submit a command to the GPU.
+     * Commands are plain js objects with GPU resources needed to complete a draw call.
+     *
+     * ```js
+     * const cmd = {
+     *   pass: Pass
+     *   pipeline: Pipeline,
+     *   attributes: { name:  VertexBuffer | { buffer: VertexBuffer, offset: number, stride: number } },
+     *   indices: IndexBuffer | { buffer: IndexBuffer, offset: number, count: number },
+     *   // or
+     *   count: number,
+     *   instances: number,
+     *   uniforms: { name: number, name: Array, name: Texture2D },
+     *   viewport: [0, 0, 1920, 1080],
+     *   scissor: [0, 0, 1920, 1080]
+     * }
+     * ```
+     *
+     * _Note: Either indices or count need to be specified when drawing geometry._
+     * _Note: Scissor region is by default set to null and scissor test disabled._
+     *
+     * @example
+     *
+     * - `ctx.submit(cmd, opts)`: submit partially updated command without modifying the original one.
+     * ```js
+     * // Draw mesh with custom color
+     * ctx.submit(cmd, {
+     *   uniforms: {
+     *     uColor: [1, 0, 0, 0]
+     *   }
+     * })
+     * ```
+     *
+     * - `ctx.submit(cmd, [opts1, opts2, opts3...])`: submit a batch of commands differences in opts.
+     * ```js
+     * // Draw same mesh twice with different material and position
+     * ctx.submit(cmd, [
+     *   { pipeline: material1, uniforms: { uModelMatrix: position1 },
+     *   { pipeline: material2, uniforms: { uModelMatrix: position2 }
+     * ])
+     * ```
+     *
+     * - `ctx.submit(cmd, cb)`: submit command while preserving state from another command. This approach allows to simulate state stack with automatic cleanup at the end of callback.
+     * ```js
+     * // Render to texture
+     * ctx.submit(renderToFboCmd, () => {
+     *   ctx.submit(drawMeshCmd)
+     * })
+     * ```
+     *
+     * @memberof ctx
+     * @param {import("./types.js").PexCommand} cmd
+     * @param {import("./types.js").PexCommand | import("./types.js").PexCommand[]} [batches]
+     * @param {import("./types.js").PexCommand} [subCommand]
+     */
+    submit(cmd, batches, subCommand) {
+      const prevFramebufferId = this.state.framebuffer?.id;
+      if (this.debugMode) {
+        checkProps(allowedCommandProps, cmd);
+
+        console.debug(NAMESPACE, "submit", cmd.name || cmd.id, {
+          depth: this.stack.length,
+          cmd,
+          batches,
+          subCommand,
+          state: this.state,
+          stack: this.stack,
+        });
+      }
+
+      if (batches) {
+        if (Array.isArray(batches)) {
+          // TODO: quick hack
+          for (const batch of batches) {
+            this.submit(this.mergeCommands(cmd, batch, true), subCommand);
+          }
+
+          return;
+        } else if (typeof batches === "object") {
+          this.submit(this.mergeCommands(cmd, batches, true), subCommand);
+          return;
+        } else {
+          subCommand = batches; // shift argument
+        }
+      }
+
+      const parentState = this.stack[this.stack.length - 1];
+      const cmdState = this.mergeCommands(parentState, cmd, false);
+      this.apply(cmdState);
+
+      if (this.debugMode) {
+        const currFramebufferId = this.state.framebuffer?.id;
+        const framebufferCanged = prevFramebufferId != currFramebufferId;
+        console.debug(
+          NAMESPACE,
+          "fbo-state",
+          "  ".repeat(this.stack.length),
+          cmd.name,
+          framebufferCanged
+            ? `${prevFramebufferId} -> ${currFramebufferId}`
+            : currFramebufferId,
+          [...this.state.viewport],
+          this.state.scissor ? [...this.state.scissor] : "[]",
+        );
+
+        cmdState.debugId = this.debugCommands.length;
+        this.debugCommands.push({
+          cmd,
+          cmdState,
+          parentState,
+        });
+      }
+
+      if (subCommand) {
+        this.stack.push(cmdState);
+        subCommand();
+        this.stack.pop();
+      }
+
+      this.checkError();
+    },
+
+    program(opts) {
+      console.debug(NAMESPACE, "program", opts);
+      return this.resource(createProgram(this, opts));
+    },
+
+    /**
+     * Passes are responsible for setting render targets (textures) and their clearing values.
+     * FBOs are created internally and automatically.
+     * @memberof ctx
+     * @param {import("./pass.js").PassOptions} opts
+     * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const pass = ctx.pass({
+     *   color: [Texture2D, ...]
+     *   color: [{ texture: Texture2D | TextureCube, target: CubemapFace }, ...]
+     *   depth: Texture2D
+     *   clearColor: Array,
+     *   clearDepth: number,
+     * })
+     * ```
+     */
+    pass(opts) {
+      console.debug(
+        NAMESPACE,
+        "pass",
+        opts,
+        opts.color?.map(({ texture, info }) => texture?.info || info) || "",
+      );
+      return this.resource(createPass(this, opts));
+    },
+
+    /**
+     * Pipelines represent the state of the GPU rendering pipeline (shaders, blending, depth test etc).
+     * @memberof ctx
+     * @param {import("./pipeline.js").PipelineOptions} opts
+     * @returns {import("./types.js").PexResource}
+     *
+     *  @example
+     * ```js
+     * const pipeline = ctx.pipeline({
+     *   vert: string,
+     *   frag: string,
+     *   depthWrite: boolean,
+     *   depthTest: boolean,
+     *   depthFunc: DepthFunc,
+     *   blend: boolean,
+     *   blendSrcRGBFactor: BlendFactor,
+     *   blendSrcAlphaFactor: BlendFactor,
+     *   blendDstRGBFactor: BlendFactor,
+     *   blendDstAlphaFactor: BlendFactor,
+     *   cullFace: boolean,
+     *   cullFaceMode: Face,
+     *   colorMask: Array,
+     *   primitive: Primitive
+     * })
+     * ```
+     */
+    pipeline(opts) {
+      console.debug(NAMESPACE, "pipeline", opts);
+      return this.resource(createPipeline(this, opts));
+    },
+
+    /**
+     * Create a VAO resource.
+     * @memberof ctx
+     * @param {import("./vertex-array.js").VertexArrayOptions} opts
+     * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const vertexLayout = {
+     *   aPosition: { location: 0, type: "vec3" },
+     *   aNormal: { location: 1, type: "vec3" },
+     * };
+     *
+     * const drawCmd = {
+     *   pipeline: ctx.pipeline({
+     *     vertexLayout,
+     *     // ...
+     *   }),
+     *   vertexArray: ctx.vertexArray({
+     *     vertexLayout,
+     *     attributes: {
+     *       aPosition: ctx.vertexBuffer(geom.positions),
+     *       aNormal: { buffer: ctx.vertexBuffer(geom.normals) },
+     *     },
+     *     indices: ctx.indexBuffer(geom.cells),
+     *   }),
+     *   // ...
+     * };
+     * ```
+     */
+    vertexArray(opts) {
+      console.debug(NAMESPACE, "vertexArray", opts);
+      return this.resource(createVertexArray(this, opts));
+    },
+
+    /**
+     * Create a 2D Texture resource.
+     * @memberof ctx
+     * @param {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | import("./texture.js").TextureOptions} opts
+     * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const tex = ctx.texture2D({
+     *   data: [255, 255, 255, 255, 0, 0, 0, 255],
+     *   width: 2,
+     *   height: 1,
+     *   pixelFormat: ctx.PixelFormat.RGB8,
+     *   encoding: ctx.Encoding.Linear,
+     *   wrap: ctx.Wrap.Repeat
+     * })
+     * ```
+     */
+    texture2D(opts) {
+      console.debug(NAMESPACE, "texture2D", opts);
+      opts.target = gl.TEXTURE_2D;
+      return this.resource(createTexture(this, opts));
+    },
+    /**
+     * Create a 2D Texture cube resource.
+     * @memberof ctx
+     * @param {import("./texture.js").TextureCubeOptions} opts
+     * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const tex = ctx.textureCube({
+     *   data: [posx, negx, posy, negy, posz, negz],
+     *   width: 64,
+     *   height: 64
+     * ])
+     * ```
+     */
+    textureCube(opts) {
+      console.debug(NAMESPACE, "textureCube", opts);
+      opts.target = gl.TEXTURE_CUBE_MAP;
+      return this.resource(createTexture(this, opts));
     },
     // framebuffer({ color: [ Texture2D, .. ], depth: Texture2D }
     // framebuffer({ color: [ { texture: Texture2D, target: Enum, level: int }, .. ], depth: { texture: Texture2D }})
-    framebuffer: function(opts) {
-      log('framebuffer', opts)
-      return this.resource(createFramebuffer(this, opts))
+    framebuffer(opts) {
+      console.debug(NAMESPACE, "framebuffer", opts);
+      return this.resource(createFramebuffer(this, opts));
     },
-    // renderbuffer({ width: int, height: int })
-    renderbuffer: function(opts) {
-      log('renderbuffer', opts)
-      return this.resource(createRenderbuffer(this, opts))
+
+    /**
+     * Renderbuffers represent pixel data store for rendering operations.
+     * @memberof ctx
+     * @param {import("./renderbuffer.js").RenderbufferOptions} opts
+     * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const tex = ctx.renderbuffer({
+     *   width: 1280,
+     *   height: 720,
+     *   pixelFormat: ctx.PixelFormat.DEPTH_COMPONENT16
+     * })
+     * ```
+     */
+    renderbuffer(opts) {
+      console.debug(NAMESPACE, "renderbuffer", opts);
+      return this.resource(createRenderbuffer(this, opts));
     },
+
     // TODO: Should we have named versions or generic 'ctx.buffer' command?
     // In regl buffer() is ARRAY_BUFFER (aka VertexBuffer) and elements() is ELEMENT_ARRAY_BUFFER
     // Now in WebGL2 we get more types Uniform, TransformFeedback, Copy
@@ -519,100 +585,196 @@ function createContext(opts) {
     //    data: Array or ArrayBuffer
     //    type: 'float', 'uint16' etc
     // }
-    vertexBuffer: function(opts) {
-      log('vertexBuffer', opts)
-      if (opts.length) {
-        opts = { data: opts }
+
+    /**
+     * Create an attribute buffer (ARRAY_BUFFER) resource. Stores vertex data in the GPU memory.
+     * @memberof ctx
+     * @param {import("./buffer.js").BufferOptions} opts
+     * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const vertexBuffer = ctx.vertexBuffer({ data: Array|TypedArray|ArrayBuffer })
+     * ```
+     */
+    vertexBuffer(opts) {
+      console.debug(NAMESPACE, "vertexBuffer", opts);
+      if (opts.length) opts = { data: opts };
+      opts.target = gl.ARRAY_BUFFER;
+      return this.resource(createBuffer(this, opts));
+    },
+    /**
+     * Create an index buffer (ELEMENT_ARRAY_BUFFER) resource. Stores index data in the GPU memory.
+     * @memberof ctx
+     * @param {import("./buffer.js").BufferOptions} opts
+     * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const indexBuffer = ctx.vertexBuffer({ data: Array|TypedArray|ArrayBuffer })
+     * ```
+     */
+    indexBuffer(opts) {
+      console.debug(NAMESPACE, "indexBuffer", opts);
+      if (opts.length) opts = { data: opts };
+      opts.target = gl.ELEMENT_ARRAY_BUFFER;
+      return this.resource(createBuffer(this, opts));
+    },
+
+    /**
+     * Queries can be used for GPU timers.
+     * @memberof ctx
+     * @param {import("./query.js").QueryOptions} opts
+     * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const query = ctx.query({
+     *   target: QueryTarget
+     * })
+     * ```
+     */
+    query(opts) {
+      console.debug(NAMESPACE, "query", opts);
+      return this.resource(createQuery(this, opts));
+    },
+    /**
+     * Begin the query measurement.
+     * @memberof ctx
+     * @param {import("./query.js").PexQuery} query
+     * _Note: There can be only one query running at the time._
+     */
+    beginQuery(query) {
+      console.assert(
+        !this.activeQuery,
+        "Only one query can be active at the time",
+      );
+      if (query._begin(this, query)) {
+        this.activeQuery = query;
       }
-      opts.target = gl.ARRAY_BUFFER
-      return this.resource(createBuffer(this, opts))
     },
-    indexBuffer: function(opts) {
-      log('indexBuffer', opts)
-      if (opts.length) {
-        opts = { data: opts }
-      }
-      opts.target = gl.ELEMENT_ARRAY_BUFFER
-      return this.resource(createBuffer(this, opts))
-    },
-    program: function(opts) {
-      log('program', opts)
-      return this.resource(createProgram(this, opts))
-    },
-    pipeline: function(opts) {
-      log('pipeline', opts)
-      return this.resource(createPipeline(this, opts))
-    },
-    pass: function(opts) {
-      log(
-        'pass',
-        opts,
-        opts.color
-          ? opts.color.map((c) => (c.texture ? c.texture.info : c.info))
-          : ''
-      )
-      return this.resource(createPass(this, opts))
-    },
-    query: function(opts) {
-      log('query', opts)
-      return this.resource(createQuery(this, opts))
-    },
-    beginQuery: function(q) {
-      assert(!this.activeQuery, 'Only one query can be active at the time')
-      if (q._begin(this, q)) {
-        this.activeQuery = q
+    /**
+     * End the query measurement.
+     * @memberof ctx
+     * @param {import("./query.js").PexQuery} query
+     * _Note: The result is not available immediately and will be `null` until the state changes from `ctx.QueryState.Pending` to `ctx.QueryState.Ready`._
+     */
+    endQuery(query) {
+      if (query._end(this, query)) {
+        this.queries.push(query);
+        this.activeQuery = null;
       }
     },
-    endQuery: function(q) {
-      if (q._end(this, q)) {
-        this.queries.push(q)
-        this.activeQuery = null
+
+    /**
+     * Helper to read a block of pixels from a specified rectangle of the current color framebuffer.
+     * @memberof ctx
+     * @param {{ x: number, y: number, width: number, height: number }} viewport
+     * @returns {Uint8Array}
+     */
+    readPixels({ x = 0, y = 0, width, height }) {
+      const pixels = new Uint8Array(width * height * 4);
+      gl.readPixels(x, y, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+      return pixels;
+    },
+
+    /**
+     * Update a resource.
+     * @memberof ctx
+     * @param {import("./types.js").PexResource} resource
+     * @param {object} opts
+     *
+     * @example
+     * ```js
+     * ctx.update(buffer, { data: [] })
+     *
+     * ctx.update(texture, {
+     *   width: 1,
+     *   height: 1,
+     *   data: new Uint8Array([255, 0, 0, 255])
+     * })
+     * ```
+     */
+    update(resource, opts) {
+      if (this.debugMode) {
+        console.debug(NAMESPACE, "update", { resource, opts });
+      }
+      resource._update(this, resource, opts);
+    },
+
+    /**
+     * Delete one or all resource(s). Disposed resources are no longer valid for use.
+     * @memberof ctx
+     * @param {import("./types.js").PexResource} [resource]
+     *
+     * @example
+     *
+     * Delete all allocated resources:
+     * ```js
+     * ctx.dispose()
+     * ```
+     *
+     * Delete a single resource:
+     * ```js
+     * ctx.dispose(texture)
+     * ```
+     * _Note: Framebuffers are ref counted and released by Pass. Programs are also ref counted and released by Pipeline._
+     */
+    dispose(resource) {
+      if (this.debugMode) console.debug(NAMESPACE, "dispose", resource);
+      console.assert(
+        resource || arguments.length === 0,
+        "Trying to dispose undefined resource",
+      );
+      if (resource) {
+        if (!resource._dispose) {
+          console.assert(resource._dispose, "Trying to dispose non resource");
+        }
+        const idx = this.resources.indexOf(resource);
+        console.assert(
+          idx !== -1,
+          "Trying to dispose resource from another context",
+        );
+        this.resources.splice(idx, 1);
+        this.stats[resource.class].alive--;
+        resource._dispose();
+      } else {
+        this.isDisposed = true;
+        while (this.resources.length) {
+          this.dispose(this.resources[0]);
+        }
+        this.gl.canvas.width = 1;
+        this.gl.canvas.height = 1;
       }
     },
-    readPixels: function(opts) {
-      const x = opts.x || 0
-      const y = opts.y || 0
-      const width = opts.width
-      const height = opts.height
-      const format = gl.RGBA
-      const type = gl.UNSIGNED_BYTE
-      let pixels = null
-      pixels = new Uint8Array(width * height * 4)
-      gl.readPixels(x, y, width, height, format, type, pixels)
-      return pixels
-    },
-    // update(texture, { data: TypeArray, [width: Int, height: Int] })
-    // update(texture, { data: TypedArray })
-    update: function(resource, opts) {
-      if (this.debugMode) log('update', { resource: resource, opts: opts })
-      resource._update(this, resource, opts)
-    },
+
+    // Private API
     // TODO: i don't like this inherit flag
-    mergeCommands: function(parent, cmd, inherit) {
+    mergeCommands(parent, cmd, inherit) {
       // copy old state so we don't modify it's internals
-      const newCmd = Object.assign({}, parent)
+      const newCmd = Object.assign({}, parent);
 
       if (!inherit) {
         // clear values are not merged as they are applied only in the parent command
-        newCmd.pass = Object.assign({}, parent.pass)
-        newCmd.pass.clearColor = undefined
-        newCmd.pass.clearDepth = undefined
+        newCmd.pass = Object.assign({}, parent.pass);
+        newCmd.pass.clearColor = undefined;
+        newCmd.pass.clearDepth = undefined;
       }
 
       // overwrite properties from new command
-      Object.assign(newCmd, cmd)
+      Object.assign(newCmd, cmd);
 
       // set viewport to FBO sizes when rendering to a texture
       if (!cmd.viewport && cmd.pass && cmd.pass.opts.color) {
-        let tex = null
+        let tex = null;
         if (cmd.pass.opts.color[0]) {
-          tex = cmd.pass.opts.color[0].texture || cmd.pass.opts.color[0]
+          tex = cmd.pass.opts.color[0].texture || cmd.pass.opts.color[0];
         }
         if (cmd.pass.opts.depth) {
-          tex = cmd.pass.opts.depth.texture || cmd.pass.opts.depth
+          tex = cmd.pass.opts.depth.texture || cmd.pass.opts.depth;
         }
         if (tex) {
-          newCmd.viewport = [0, 0, tex.width, tex.height]
+          newCmd.viewport = [0, 0, tex.width, tex.height];
         }
       }
 
@@ -620,12 +782,12 @@ function createContext(opts) {
       newCmd.uniforms =
         parent.uniforms || cmd.uniforms
           ? Object.assign({}, parent.uniforms, cmd.uniforms)
-          : null
-      return newCmd
+          : null;
+      return newCmd;
     },
-    applyPass: function(pass) {
-      const gl = this.gl
-      const state = this.state
+    applyPass(pass) {
+      const gl = this.gl;
+      const state = this.state;
 
       // Need to find reliable way of deciding if i should update framebuffer
       // 1. If pass has fbo, bind it
@@ -633,91 +795,100 @@ function createContext(opts) {
       // 3. Else if there is only screen framebuffer on the stack and currently bound fbo is different, change it
       // 4. TODO: If there is pass with fbo and another fbo on stack throw error (no interleaved passes are allowed)
       if (pass.framebuffer) {
-        let framebuffer = pass.framebuffer
+        let framebuffer = pass.framebuffer;
         if (framebuffer.id !== state.framebuffer.id) {
           if (this.debugMode) {
-            log('change framebuffer', state.framebuffer, '->', framebuffer)
+            console.debug(
+              NAMESPACE,
+              "change framebuffer",
+              state.framebuffer,
+              "->",
+              framebuffer,
+            );
           }
           if (
             framebuffer._update &&
             !compareFBOAttachments(framebuffer, pass.opts)
           ) {
-            this.update(pass.framebuffer, pass.opts)
+            this.update(pass.framebuffer, pass.opts);
           }
-          ctx.state.framebuffer = framebuffer
-          gl.bindFramebuffer(framebuffer.target, framebuffer.handle)
+          ctx.state.framebuffer = framebuffer;
+          gl.bindFramebuffer(framebuffer.target, framebuffer.handle);
           if (framebuffer.drawBuffers && framebuffer.drawBuffers.length > 1) {
-            gl.drawBuffers(framebuffer.drawBuffers)
+            gl.drawBuffers(framebuffer.drawBuffers);
           }
         }
       } else {
         // inherit framebuffer from parent command
         // if pass doesn't specify color or depth attachments
         // and therefore doesn't have own framebuffer assigned
-        let framebuffer
-        let i = ctx.stack.length - 1
+        let framebuffer;
+        let i = ctx.stack.length - 1;
         while (!framebuffer && i >= 0) {
           if (ctx.stack[i].pass) {
-            framebuffer = ctx.stack[i].pass.framebuffer
+            framebuffer = ctx.stack[i].pass.framebuffer;
           }
-          --i
+          --i;
         }
         if (
           framebuffer == ctx.defaultState.pass.framebuffer &&
           ctx.state.framebuffer !== framebuffer
         ) {
-          ctx.state.framebuffer = framebuffer
-          gl.bindFramebuffer(framebuffer.target, framebuffer.handle)
+          ctx.state.framebuffer = framebuffer;
+          gl.bindFramebuffer(framebuffer.target, framebuffer.handle);
         }
       }
 
-      let clearBits = 0
+      let clearBits = 0;
       if (pass.clearColor !== undefined) {
-        if (this.debugMode) log('clearing color', pass.clearColor)
-        clearBits |= gl.COLOR_BUFFER_BIT
+        if (this.debugMode) {
+          console.debug(NAMESPACE, "clearing color", pass.clearColor);
+        }
+        clearBits |= gl.COLOR_BUFFER_BIT;
         // TODO this might be unnecesary but we don't know because we don't store the clearColor in state
         gl.clearColor(
           pass.clearColor[0],
           pass.clearColor[1],
           pass.clearColor[2],
-          pass.clearColor[3]
-        )
+          pass.clearColor[3],
+        );
       }
 
       if (pass.clearDepth !== undefined) {
-        if (this.debugMode) log('clearing depth', pass.clearDepth)
-        clearBits |= gl.DEPTH_BUFFER_BIT
+        if (this.debugMode) {
+          console.debug(NAMESPACE, "clearing depth", pass.clearDepth);
+        }
+        clearBits |= gl.DEPTH_BUFFER_BIT;
 
         if (!state.depthWrite) {
-          state.depthWrite = true
-          gl.depthMask(true)
+          state.depthWrite = true;
+          gl.depthMask(true);
         }
         // TODO this might be unnecesary but we don't know because we don't store the clearDepth in state
-        gl.clearDepth(pass.clearDepth)
+        gl.clearDepth(pass.clearDepth);
       }
 
-      if (clearBits) {
-        gl.clear(clearBits)
-      }
-      this.checkError()
+      if (clearBits) gl.clear(clearBits);
+
+      this.checkError();
     },
-    applyPipeline: function(pipeline) {
-      const gl = this.gl
-      const state = this.state
+    applyPipeline(pipeline) {
+      const gl = this.gl;
+      const state = this.state;
 
       if (pipeline.depthWrite !== state.depthWrite) {
-        state.depthWrite = pipeline.depthWrite
-        gl.depthMask(state.depthWrite)
+        state.depthWrite = pipeline.depthWrite;
+        gl.depthMask(state.depthWrite);
       }
 
       if (pipeline.depthTest !== state.depthTest) {
-        state.depthTest = pipeline.depthTest
-        state.depthTest ? gl.enable(gl.DEPTH_TEST) : gl.disable(gl.DEPTH_TEST)
+        state.depthTest = pipeline.depthTest;
+        state.depthTest ? gl.enable(gl.DEPTH_TEST) : gl.disable(gl.DEPTH_TEST);
       }
 
       if (pipeline.depthFunc !== state.depthFunc) {
-        state.depthFunc = pipeline.depthFunc
-        gl.depthFunc(state.depthFunc)
+        state.depthFunc = pipeline.depthFunc;
+        gl.depthFunc(state.depthFunc);
       }
 
       if (
@@ -727,29 +898,29 @@ function createContext(opts) {
         pipeline.blendDstRGBFactor !== state.blendDstRGBFactor ||
         pipeline.blendDstAlphaFactor !== state.blendDstAlphaFactor
       ) {
-        state.blend = pipeline.blend
-        state.blendSrcRGBFactor = pipeline.blendSrcRGBFactor
-        state.blendSrcAlphaFactor = pipeline.blendSrcAlphaFactor
-        state.blendDstRGBFactor = pipeline.blendDstRGBFactor
-        state.blendDstAlphaFactor = pipeline.blendDstAlphaFactor
-        state.blend ? gl.enable(gl.BLEND) : gl.disable(gl.BLEND)
+        state.blend = pipeline.blend;
+        state.blendSrcRGBFactor = pipeline.blendSrcRGBFactor;
+        state.blendSrcAlphaFactor = pipeline.blendSrcAlphaFactor;
+        state.blendDstRGBFactor = pipeline.blendDstRGBFactor;
+        state.blendDstAlphaFactor = pipeline.blendDstAlphaFactor;
+        state.blend ? gl.enable(gl.BLEND) : gl.disable(gl.BLEND);
         gl.blendFuncSeparate(
           state.blendSrcRGBFactor,
           state.blendDstRGBFactor,
           state.blendSrcAlphaFactor,
-          state.blendDstAlphaFactor
-        )
+          state.blendDstAlphaFactor,
+        );
       }
 
       if (
         pipeline.cullFace !== state.cullFace ||
         pipeline.cullFaceMode !== state.cullFaceMode
       ) {
-        state.cullFace = pipeline.cullFace
-        state.cullFaceMode = pipeline.cullFaceMode
-        state.cullFace ? gl.enable(gl.CULL_FACE) : gl.disable(gl.CULL_FACE)
+        state.cullFace = pipeline.cullFace;
+        state.cullFaceMode = pipeline.cullFaceMode;
+        state.cullFace ? gl.enable(gl.CULL_FACE) : gl.disable(gl.CULL_FACE);
         if (state.cullFace) {
-          gl.cullFace(state.cullFaceMode)
+          gl.cullFace(state.cullFaceMode);
         }
       }
       if (
@@ -758,507 +929,227 @@ function createContext(opts) {
         pipeline.colorMask[2] !== state.pipeline.colorMask[2] ||
         pipeline.colorMask[3] !== state.pipeline.colorMask[3]
       ) {
-        state.pipeline.colorMask[0] = pipeline.colorMask[0]
-        state.pipeline.colorMask[1] = pipeline.colorMask[1]
-        state.pipeline.colorMask[2] = pipeline.colorMask[2]
-        state.pipeline.colorMask[3] = pipeline.colorMask[3]
+        state.pipeline.colorMask[0] = pipeline.colorMask[0];
+        state.pipeline.colorMask[1] = pipeline.colorMask[1];
+        state.pipeline.colorMask[2] = pipeline.colorMask[2];
+        state.pipeline.colorMask[3] = pipeline.colorMask[3];
         gl.colorMask(
           pipeline.colorMask[0],
           pipeline.colorMask[1],
           pipeline.colorMask[2],
-          pipeline.colorMask[3]
-        )
+          pipeline.colorMask[3],
+        );
       }
 
       if (pipeline.program !== state.program) {
-        state.program = pipeline.program
+        state.program = pipeline.program;
         if (state.program) {
-          gl.useProgram(state.program.handle)
+          gl.useProgram(state.program.handle);
         }
       }
 
-      if (pipeline.vertexLayout) {
-        state.vertexLayout = pipeline.vertexLayout
-      }
-      this.checkError()
-    },
-    applyUniforms: function(uniforms, cmd) {
-      const gl = this.gl
-      const state = this.state
-      let numTextures = 0
+      if (pipeline.vertexLayout) state.vertexLayout = pipeline.vertexLayout;
 
-      if (!state.program) {
-        assert.fail('Trying to draw without an active program')
+      this.checkError();
+    },
+    applyUniforms(uniforms, cmd) {
+      const gl = this.gl;
+      const { program, activeTextures } = this.state;
+
+      if (!program) {
+        throw new Error("Trying to draw without an active program");
       }
+
+      let numTextures = 0;
 
       const requiredUniforms = this.debugMode
-        ? Object.keys(state.program.uniforms)
-        : null
+        ? Object.keys(program.uniforms)
+        : null;
 
-      for (var name in uniforms) {
-        let value = uniforms[name]
+      for (const name in uniforms) {
+        let value = uniforms[name];
         // TODO: find a better way to not trying to set unused uniforms that might have been inherited
-        if (
-          !state.program.uniforms[name] &&
-          !state.program.uniforms[name + '[0]']
-        ) {
-          continue
+        if (!program.uniforms[name] && !program.uniforms[`${name}[0]`]) {
+          continue;
         }
         if (value === null || value === undefined) {
-          log('invalid command', cmd)
-          assert.fail(`Can't set uniform "${name}" with a null value`)
+          if (this.debugMode) console.debug(NAMESPACE, "invalid command", cmd);
+          throw new Error(`Can't set uniform "${name}" with a null value`);
         }
         // FIXME: uniform array hack
-        if (Array.isArray(value) && !state.program.uniforms[name]) {
+        if (Array.isArray(value) && !program.uniforms[name]) {
           if (this.debugMode) {
-            log('unknown uniform', name, Object.keys(state.program.uniforms))
+            console.debug(
+              NAMESPACE,
+              "unknown uniform",
+              name,
+              Object.keys(program.uniforms),
+            );
           }
-          for (var i = 0; i < value.length; i++) {
-            var nameIndex = name + '[' + i + ']'
-            state.program.setUniform(nameIndex, value[i])
+          for (let i = 0; i < value.length; i++) {
+            const nameIndex = `${name}[${i}]`;
+            program.setUniform(nameIndex, value[i]);
             if (this.debugMode) {
-              requiredUniforms.splice(requiredUniforms.indexOf(nameIndex), 1)
+              requiredUniforms.splice(requiredUniforms.indexOf(nameIndex), 1);
             }
           }
         } else if (value.target) {
           // assuming texture
           // FIXME: texture binding hack
-          const slot = numTextures++
-          gl.activeTexture(gl.TEXTURE0 + slot)
-          if (state.activeTextures[slot] !== value) {
-            gl.bindTexture(value.target, value.handle)
-            state.activeTextures[slot] = value
+          const slot = numTextures++;
+          gl.activeTexture(gl.TEXTURE0 + slot);
+          if (activeTextures[slot] !== value) {
+            gl.bindTexture(value.target, value.handle);
+            activeTextures[slot] = value;
           }
-          state.program.setUniform(name, slot)
+          program.setUniform(name, slot);
           if (this.debugMode) {
-            requiredUniforms.splice(requiredUniforms.indexOf(name), 1)
+            requiredUniforms.splice(requiredUniforms.indexOf(name), 1);
           }
-        } else if (!value.length && typeof value === 'object') {
-          log('invalid command', cmd)
-          assert.fail(`Can set uniform "${name}" with an Object value`)
+        } else if (!value.length && typeof value === "object") {
+          if (this.debugMode) console.debug(NAMESPACE, "invalid command", cmd);
+          throw new Error(`Can set uniform "${name}" with an Object value`);
         } else {
-          state.program.setUniform(name, value)
+          program.setUniform(name, value);
           if (this.debugMode) {
-            requiredUniforms.splice(requiredUniforms.indexOf(name), 1)
+            requiredUniforms.splice(requiredUniforms.indexOf(name), 1);
           }
         }
       }
       if (this.debugMode && requiredUniforms.length > 0) {
-        log('invalid command', cmd)
-        assert.fail(
-          `Trying to draw with missing uniforms: ${requiredUniforms.join(', ')}`
-        )
+        console.debug(NAMESPACE, "invalid command", cmd);
+        throw new Error(
+          `Trying to draw with missing uniforms: ${requiredUniforms.join(", ")}`,
+        );
       }
-      this.checkError()
+      this.checkError();
     },
-    drawVertexData: function(cmd) {
-      const state = this.state
-      const vertexLayout = state.vertexLayout
+    drawVertexData(cmd) {
+      const { vertexLayout, program, vertexArray } = this.state;
 
-      if (!state.program) {
-        assert.fail('Trying to draw without an active program')
+      if (!program) {
+        throw new Error("Trying to draw without an active program");
       }
 
       if (this.debugMode) {
         // TODO: can vertex layout be ever different if it's derived from pipeline's shader?
         if (
-          vertexLayout.length !== Object.keys(state.program.attributes).length
+          Object.keys(vertexLayout).length !==
+          Object.keys(program.attributes).length
         ) {
-          log(
-            'Invalid vertex layout not matching the shader',
+          console.debug(
+            NAMESPACE,
+            "Invalid vertex layout not matching the shader",
             vertexLayout,
-            state.program.attributes,
-            cmd
-          )
-          assert.fail('Invalid vertex layout not matching the shader')
-        }
-      }
-
-      let instanced = false
-      // TODO: disable unused vertex array slots
-      for (let i = 0; i < 16; i++) {
-        state.activeAttributes[i] = null
-        gl.disableVertexAttribArray(i)
-      }
-
-      // TODO: the same as i support [tex] and { texture: tex } i should support buffers in attributes?
-      for (let i = 0; i < vertexLayout.length; i++) {
-        const layout = vertexLayout[i]
-        const name = layout[0]
-        const location = layout[1]
-        const size = layout[2]
-        const attrib = cmd.attributes[i] || cmd.attributes[name]
-
-        if (!attrib) {
-          log(
-            'Invalid command',
+            program.attributes,
             cmd,
-            "doesn't satisfy vertex layout",
-            vertexLayout
-          )
-          assert.fail(
-            `Command is missing attribute "${name}" at location ${location} with ${attrib}`
-          )
+          );
+          throw new Error("Invalid vertex layout not matching the shader");
         }
-
-        let buffer = attrib.buffer
-        if (!buffer && attrib.class === 'vertexBuffer') {
-          buffer = attrib
-        }
-
-        if (!buffer || !buffer.target) {
-          log('Invalid command', cmd)
-          assert.fail(
-            `Trying to draw arrays with invalid buffer for attribute : ${name}`
-          )
-        }
-
-        gl.bindBuffer(buffer.target, buffer.handle)
-        if (size === 16) {
-          gl.enableVertexAttribArray(location + 0)
-          gl.enableVertexAttribArray(location + 1)
-          gl.enableVertexAttribArray(location + 2)
-          gl.enableVertexAttribArray(location + 3)
-          state.activeAttributes[location + 0] = buffer
-          state.activeAttributes[location + 1] = buffer
-          state.activeAttributes[location + 2] = buffer
-          state.activeAttributes[location + 3] = buffer
-          // we still check for buffer type because while e.g. pex-renderer would copy buffer type to attrib
-          // a raw pex-context example probably would not
-          gl.vertexAttribPointer(
-            location,
-            4,
-            attrib.type || buffer.type,
-            attrib.normalized || false,
-            attrib.stride || 64,
-            attrib.offset || 0
-          )
-          gl.vertexAttribPointer(
-            location + 1,
-            4,
-            attrib.type || buffer.type,
-            attrib.normalized || false,
-            attrib.stride || 64,
-            attrib.offset || 16
-          )
-          gl.vertexAttribPointer(
-            location + 2,
-            4,
-            attrib.type || buffer.type,
-            attrib.normalized || false,
-            attrib.stride || 64,
-            attrib.offset || 32
-          )
-          gl.vertexAttribPointer(
-            location + 3,
-            4,
-            attrib.type || buffer.type,
-            attrib.normalized || false,
-            attrib.stride || 64,
-            attrib.offset || 48
-          )
-          if (attrib.divisor) {
-            gl.vertexAttribDivisor(location + 0, attrib.divisor)
-            gl.vertexAttribDivisor(location + 1, attrib.divisor)
-            gl.vertexAttribDivisor(location + 2, attrib.divisor)
-            gl.vertexAttribDivisor(location + 3, attrib.divisor)
-            instanced = true
-          } else if (capabilities.instancing) {
-            gl.vertexAttribDivisor(location + 0, 0)
-            gl.vertexAttribDivisor(location + 1, 0)
-            gl.vertexAttribDivisor(location + 2, 0)
-            gl.vertexAttribDivisor(location + 3, 0)
-          }
-        } else {
-          gl.enableVertexAttribArray(location)
-          state.activeAttributes[location] = buffer
-          gl.vertexAttribPointer(
-            location,
-            size,
-            attrib.type || buffer.type,
-            attrib.normalized || false,
-            attrib.stride || 0,
-            attrib.offset || 0
-          )
-          if (attrib.divisor) {
-            gl.vertexAttribDivisor(location, attrib.divisor)
-            instanced = true
-          } else if (capabilities.instancing) {
-            gl.vertexAttribDivisor(location, 0)
-          }
-        }
-        // TODO: how to match index with vertexLayout location?
       }
 
-      let primitive = cmd.pipeline.primitive
-      if (cmd.indices) {
-        let indexBuffer = cmd.indices.buffer
-        if (!indexBuffer && cmd.indices.class === 'indexBuffer') {
-          indexBuffer = cmd.indices
+      if (cmd.vertexArray) {
+        //TODO: verify vertex layout
+        for (let i = 0; i < vertexLayout.length; i++) {
+          const [name, location] = vertexLayout[i];
+          if (
+            !cmd.vertexArray.attributes[name] ||
+            !cmd.vertexArray.attributes[name].location === location
+          ) {
+            if (this.debugMode) {
+              console.debug(
+                NAMESPACE,
+                "invalid command",
+                cmd,
+                "vertex array doesn't satisfy vertex layout",
+                vertexLayout,
+              );
+            }
+            throw new Error(
+              `Command is missing attribute "${name}" at location ${location}`,
+            );
+          }
         }
-        if (!indexBuffer || !indexBuffer.target) {
-          log('Invalid command', cmd)
-          assert.fail(`Trying to draw arrays with invalid buffer for elements`)
+
+        if (vertexArray !== cmd.vertexArray.handle) {
+          this.state.vertexArray = cmd.vertexArray.handle;
+          gl.bindVertexArray(cmd.vertexArray.handle);
         }
-        state.indexBuffer = indexBuffer
-        gl.bindBuffer(indexBuffer.target, indexBuffer.handle)
-        var count = cmd.count || indexBuffer.length
-        var offset = cmd.indices.offset || 0
-        var type = cmd.indices.type || indexBuffer.type
-        if (instanced) {
-          // TODO: check if instancing available
-          gl.drawElementsInstanced(
-            primitive,
-            count,
-            type,
-            offset,
-            cmd.instances
-          )
-        } else {
-          gl.drawElements(primitive, count, type, offset)
-        }
-      } else if (cmd.count) {
-        const first = 0
-        if (instanced) {
-          gl.drawArraysInstanced(primitive, first, cmd.count, cmd.instances)
-        } else {
-          gl.drawArrays(primitive, first, cmd.count)
+        if (cmd.vertexArray.indices) {
+          let indexBuffer = cmd.vertexArray.indices.buffer;
+          if (!indexBuffer && cmd.vertexArray.indices.class === "indexBuffer") {
+            indexBuffer = cmd.vertexArray.indices;
+          }
+          this.state.indexBuffer = indexBuffer;
         }
       } else {
-        assert.fail('Vertex arrays requres elements or count to draw')
+        if (this.state.vertexArray !== undefined) {
+          this.state.vertexArray = undefined;
+          gl.bindVertexArray(null);
+        }
+
+        // Sets ctx.state.indexBuffer and ctx.state.activeAttributes
+        enableVertexData(ctx, vertexLayout, cmd, true);
       }
-      this.checkError()
+
+      draw(ctx, cmd);
+
+      this.checkError();
     },
-    frame: function(cb) {
-      const self = this
-      raf(function frame() {
-        if (self.updatePixelRatio) {
-          self.pixelRatio = self.updatePixelRatio
-          // we need to reaply width/height and update styles
-          if (!self.updateWidth) {
-            self.updateWidth =
-              parseInt(gl.canvas.style.width) || gl.canvas.width
-          }
-          if (!self.updateHeight) {
-            self.updateHeight =
-              parseInt(gl.canvas.style.height) || gl.canvas.height
-          }
-          self.updatePixelRatio = 0
-        }
-        if (self.updateWidth) {
-          gl.canvas.style.width = self.updateWidth + 'px'
-          gl.canvas.width = self.updateWidth * self.pixelRatio
-          self.updateWidth = 0
-        }
-        if (self.updateHeight) {
-          gl.canvas.style.height = self.updateHeight + 'px'
-          gl.canvas.height = self.updateHeight * self.pixelRatio
-          self.updateHeight = 0
-        }
-        if (
-          self.defaultState.viewport[2] !== gl.drawingBufferWidth ||
-          self.defaultState.viewport[3] !== gl.drawingBufferHeight
-        ) {
-          self.defaultState.viewport[2] = gl.drawingBufferWidth
-          self.defaultState.viewport[3] = gl.drawingBufferHeight
-          self.defaultState.pass.framebuffer.width = gl.drawingBufferWidth
-          self.defaultState.pass.framebuffer.height = gl.drawingBufferHeight
-          gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
-        }
-        if (cb() === false) {
-          // interrupt render loop
-          return
-        }
-        if (self.queries.length) {
-          self.queries = self.queries.filter((q) => !q._available(self, q))
-        }
-        raf(frame)
-      })
-    },
+
     // TODO: switching to lightweight resources would allow to just clone state
     // and use commands as state modifiers?
-    apply: function(cmd) {
-      const state = this.state
+    apply(cmd) {
+      if (this.debugMode) {
+        console.debug(NAMESPACE, "apply", cmd.name || cmd.id, {
+          cmd,
+          state: JSON.parse(JSON.stringify(this.state)),
+        });
+      }
 
-      if (this.debugMode)
-        log('apply', cmd.name || cmd.id, {
-          cmd: cmd,
-          state: JSON.parse(JSON.stringify(state))
-        })
-
-      this.checkError()
+      this.checkError();
 
       if (cmd.scissor) {
-        if (cmd.scissor !== state.scissor) {
-          state.scissor = cmd.scissor
-          gl.enable(gl.SCISSOR_TEST)
+        if (cmd.scissor !== this.state.scissor) {
+          this.state.scissor = cmd.scissor;
+          gl.enable(gl.SCISSOR_TEST);
           gl.scissor(
-            state.scissor[0],
-            state.scissor[1],
-            state.scissor[2],
-            state.scissor[3]
-          )
+            this.state.scissor[0],
+            this.state.scissor[1],
+            this.state.scissor[2],
+            this.state.scissor[3],
+          );
         }
       } else {
-        if (cmd.scissor !== state.scissor) {
-          state.scissor = cmd.scissor
-          gl.disable(gl.SCISSOR_TEST)
+        if (cmd.scissor !== this.state.scissor) {
+          this.state.scissor = cmd.scissor;
+          gl.disable(gl.SCISSOR_TEST);
         }
       }
 
-      if (cmd.pass) this.applyPass(cmd.pass)
-      if (cmd.pipeline) this.applyPipeline(cmd.pipeline)
-      if (cmd.uniforms) this.applyUniforms(cmd.uniforms)
+      if (cmd.pass) this.applyPass(cmd.pass);
+      if (cmd.pipeline) this.applyPipeline(cmd.pipeline);
+      if (cmd.uniforms) this.applyUniforms(cmd.uniforms);
 
-      if (cmd.viewport) {
-        if (cmd.viewport !== state.viewport) {
-          state.viewport = cmd.viewport
-          gl.viewport(
-            state.viewport[0],
-            state.viewport[1],
-            state.viewport[2],
-            state.viewport[3]
-          )
-        }
+      if (cmd.viewport && cmd.viewport !== this.state.viewport) {
+        this.state.viewport = cmd.viewport;
+        gl.viewport(
+          this.state.viewport[0],
+          this.state.viewport[1],
+          this.state.viewport[2],
+          this.state.viewport[3],
+        );
       }
 
-      if (cmd.attributes) {
-        this.drawVertexData(cmd)
-      }
+      if (cmd.attributes || cmd.vertexArray) this.drawVertexData(cmd);
     },
-    submit: function(cmd, batches, subCommand) {
-      const prevFramebufferId = this.state.framebuffer?.id
-      if (this.debugMode) {
-        checkProps(allowedCommandProps, cmd)
-        if (batches && subCommand) {
-          log('submit', cmd.name || cmd.id, {
-            depth: this.stack.length,
-            cmd: cmd,
-            batches: batches,
-            subCommand: subCommand,
-            state: this.state,
-            stack: this.stack
-          })
-        } else if (batches) {
-          log('submit', cmd.name || cmd.id, {
-            depth: this.stack.length,
-            cmd: cmd,
-            batches: batches,
-            state: this.state,
-            stack: this.stack
-          })
-        } else {
-          log('submit', cmd.name || cmd.id, {
-            depth: this.stack.length,
-            cmd: cmd,
-            state: this.state,
-            stack: this.stack
-          })
-        }
-      }
+  });
 
-      if (batches) {
-        if (Array.isArray(batches)) {
-          // TODO: quick hack
-          for (let i = 0; i < batches.length; i++) {
-            const batch = batches[i]
-            this.submit(this.mergeCommands(cmd, batch, true), subCommand)
-          }
-          return
-        } else if (typeof batches === 'object') {
-          this.submit(this.mergeCommands(cmd, batches, true), subCommand)
-          return
-        } else {
-          subCommand = batches // shift argument
-        }
-      }
+  if (opts.debug) ctx.debug(true);
+  console.debug(NAMESPACE, "capabilities", ctx.capabilities);
 
-      const parentState = this.stack[this.stack.length - 1]
-      const cmdState = this.mergeCommands(parentState, cmd, false)
-      this.apply(cmdState)
-
-      const currFramebufferId = this.state.framebuffer?.id
-      if (this.debugMode) {
-        const framebufferCanged = prevFramebufferId != currFramebufferId
-        log(
-          'fbo-state',
-          '  '.repeat(this.stack.length),
-          cmd.name,
-          framebufferCanged
-            ? `${prevFramebufferId} -> ${currFramebufferId}`
-            : currFramebufferId,
-          [...this.state.viewport],
-          this.state.scissor ? [...this.state.scissor] : "[]"
-        )
-      }
-
-      if (this.debugMode) {
-        cmdState.debugId = this.debugCommands.length
-        this.debugCommands.push({
-          cmd,
-          cmdState,
-          parentState
-        })
-      }
-      if (subCommand) {
-        if (this.debugMode) {
-          this.debugGraph += `subgraph cluster_${cmd.name || cmd.id} {\n`
-          this.debugGraph += `label = "${cmd.name}"\n`
-          if (cmd.program) {
-            this.debugGraph += `${cmd.program.id} -> cluster_${cmd.name ||
-              cmd.id}\n`
-          }
-          if (cmd.framebuffer) {
-            this.debugGraph += `${cmd.framebuffer.id} -> cluster_${cmd.name ||
-              cmd.id}\n`
-            for (let i = 0; i < cmd.framebuffer.color; i++) {
-              const attachment = cmd.framebuffer.color[i]
-              this.debugGraph += `${attachment.texture.id} -> ${
-                cmd.framebuffer.id
-              }\n`
-            }
-            if (cmd.framebuffer.depth) {
-              this.debugGraph += `${cmd.framebuffer.depth.texture.id} -> ${
-                cmd.framebuffer.id
-              }\n`
-            }
-          }
-        }
-        this.stack.push(cmdState)
-        subCommand()
-        this.stack.pop()
-        if (this.debugMode) {
-          this.debugGraph += '}\n'
-        }
-      }
-      this.checkError()
-    },
-    dispose: function(res) {
-      log('dispose', res)
-      assert(
-        res || arguments.length === 0,
-        'Trying to dispose undefined resource'
-      )
-      if (res) {
-        if (!res._dispose) {
-          assert(res._dispose, 'Trying to dispose non resource')
-        }
-        const idx = this.resources.indexOf(res)
-        assert(idx !== -1, 'Trying to dispose resource from another context')
-        this.resources.splice(idx, 1)
-        this.stats[res.class].alive--
-        res._dispose()
-      } else {
-        while (this.resources.length) {
-          this.dispose(this.resources[0])
-        }
-        this.gl.canvas.width = 1
-        this.gl.canvas.height = 1
-      }
-    }
-  })
-  ctx.apply(defaultState)
-  return ctx
+  ctx.apply(defaultState);
+  return ctx;
 }
 
-module.exports = createContext
+export default createContext;

@@ -1,171 +1,210 @@
-const createContext = require('../')
-const createCube = require('primitive-cube')
-const splitVertices = require('geom-split-vertices')
-const normals = require('geom-normals')
-const random = require('pex-random')
-const GUI = require('pex-gui')
+import createContext from "../index.js";
 
-const ctx = createContext({})
+import { perspective as createCamera, orbiter as createOrbiter } from "pex-cam";
+import random from "pex-random";
+import createGUI from "pex-gui";
 
-const W = window.innerWidth
-const H = window.innerHeight
-const halfW = Math.floor(W / 2)
-const halfH = Math.floor(H / 2)
+import { cube, sphere } from "primitive-geometry";
+import splitVertices from "geom-split-vertices";
+import computeNormals from "geom-normals";
+import merge from "geom-merge";
+import gridCells from "grid-cells";
 
-const gui = new GUI(ctx)
-gui.addHeader('Indexed').setPosition(10, 10)
-gui.addHeader('Unndexed').setPosition(W / 2 + 10, 10)
-gui.addHeader('Indexed instanced').setPosition(10, H / 2 + 10)
-gui.addHeader('Unindexed instanced').setPosition(W / 2 + 10, H / 2 + 10)
+import { viewportToCanvasPosition } from "./utils.js";
+import basicVert from "./shaders/basic.vert.js";
+import basicFrag from "./shaders/basic.frag.js";
+import basicInstancedPositionVert from "./shaders/basic-instanced-position.vert.js";
 
-const camera = require('pex-cam/perspective')({
-  aspect: W / H,
+const pixelRatio = devicePixelRatio;
+const ctx = (window.ctx = createContext({ pixelRatio, debug: true }));
+
+const gui = createGUI(ctx, { theme: { columnWidth: 260 } });
+
+const W = ctx.gl.drawingBufferWidth;
+const H = ctx.gl.drawingBufferHeight;
+
+const nW = 2;
+const nH = 3;
+const cells = gridCells(W, H, nW, nH, 0).map((cell) => [
+  cell[0],
+  H - cell[1] - cell[3], // flip upside down as we are using viewport coordinates
+  cell[2],
+  cell[3],
+]);
+
+const camera = createCamera({
+  aspect: W / nW / (H / nH),
   fov: Math.PI / 3,
-  position: [2, 1, 2]
-})
+  position: [2, 2, 3],
+});
+createOrbiter({ camera });
 
 const clearCmd = {
   pass: ctx.pass({
-    clearColor: [0, 0, 0, 1],
-    clearDepth: 1
-  })
-}
+    clearColor: [0.2, 0.2, 0.2, 1],
+    clearDepth: 1,
+  }),
+};
 
 const drawCmd = {
-  pass: ctx.pass({
-    clearColor: [0.2, 0.2, 0.2, 1],
-    clearDepth: 1
-  }),
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: /* glsl */ `
-      attribute vec3 aPosition;
-      attribute vec3 aNormal;
-      uniform mat4 uProjectionMatrix;
-      uniform mat4 uViewMatrix;
-      varying vec3 vNormal;
-      void main () {
-        gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
-        vNormal = aNormal;
-      }
-    `,
-    frag: /* glsl */ `
-      precision mediump float;
-
-      varying vec3 vNormal;
-      void main () {
-        gl_FragColor.rgb = vNormal * 0.5 + 0.5;
-        gl_FragColor.a = 1.0;
-      }
-    `
+    vert: basicVert,
+    frag: basicFrag,
   }),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
-    uViewMatrix: camera.viewMatrix
-  }
-}
+    uViewMatrix: camera.viewMatrix,
+  },
+};
 
 const drawInstancedCmd = {
-  pass: ctx.pass({
-    clearColor: [0.2, 0.2, 0.2, 1],
-    clearDepth: 1
-  }),
   pipeline: ctx.pipeline({
     depthTest: true,
-    vert: /* glsl */ `
-      attribute vec3 aPosition;
-      attribute vec3 aNormal;
-      attribute vec3 aOffset;
-      uniform mat4 uProjectionMatrix;
-      uniform mat4 uViewMatrix;
-      varying vec3 vNormal;
-      void main () {
-        gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition + aOffset, 1.0);
-        vNormal = aNormal;
-      }
-    `,
-    frag: /* glsl */ `
-      #ifdef GL_ES
-      precision mediump float;
-      #endif
-      varying vec3 vNormal;
-      void main () {
-        gl_FragColor.rgb = vNormal * 0.5 + 0.5;
-        gl_FragColor.a = 1.0;
-      }
-    `
+    vert: basicInstancedPositionVert,
+    frag: basicFrag,
   }),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
-    uViewMatrix: camera.viewMatrix
-  }
-}
+    uViewMatrix: camera.viewMatrix,
+  },
+};
 
-const cube = createCube()
-const indexedPositions = ctx.vertexBuffer(cube.positions)
-const indexedNormals = ctx.vertexBuffer(cube.normals)
-const indices = ctx.indexBuffer(cube.cells)
+// Geometries
+const size = 0.7;
+const cubeGeometry = cube({ sx: size });
+const unindexedCube = splitVertices(cubeGeometry.positions, cubeGeometry.cells);
+const sphereGeometry = sphere({ radius: size / 2 });
+sphereGeometry.positions = sphereGeometry.positions.map((value, i) =>
+  i % 3 === 1 ? value + size * 1.2 : value
+);
+const unindexedSphere = splitVertices(
+  sphereGeometry.positions,
+  sphereGeometry.cells
+);
 
-const unindexedCube = splitVertices(cube)
-unindexedCube.normals = normals(unindexedCube.positions, unindexedCube.cells)
-const unindexedPositions = ctx.vertexBuffer(unindexedCube.positions)
-const unindexedNormals = ctx.vertexBuffer(unindexedCube.normals)
+const geometries = [sphereGeometry, cubeGeometry];
+const unindexedGeometries = [unindexedCube, unindexedSphere];
+const indexedMergedGeometry = merge(geometries);
+const unindexedMergedGeometry = merge(unindexedGeometries);
 
-const offsetPositions = new Array(20).fill(0).map(() => random.vec3(0.5))
-const offsets = ctx.vertexBuffer(offsetPositions)
+// Buffers
+const indices = ctx.indexBuffer(cubeGeometry.cells);
+const indexedPositions = ctx.vertexBuffer(cubeGeometry.positions);
+const indexedNormals = ctx.vertexBuffer(cubeGeometry.normals);
+const unindexedPositions = ctx.vertexBuffer(unindexedCube.positions);
+const unindexedNormals = ctx.vertexBuffer(
+  computeNormals(unindexedCube.positions, unindexedCube.cells)
+);
+const indexedMergedPositions = ctx.vertexBuffer(
+  indexedMergedGeometry.positions
+);
+const indexedMergedNormals = ctx.vertexBuffer(indexedMergedGeometry.normals);
+const unindexedMergedPositions = ctx.vertexBuffer(
+  unindexedMergedGeometry.positions
+);
+const unindexedMergedNormals = ctx.vertexBuffer(
+  computeNormals(
+    unindexedMergedGeometry.positions,
+    unindexedMergedGeometry.cells
+  )
+);
 
-ctx.frame(() => {
-  ctx.submit(clearCmd)
+random.seed("0");
+const instances = 3;
+const gridOffset = size * 1.2;
+const offsets = ctx.vertexBuffer(
+  Array.from({ length: instances }, (_, i) => [
+    i * gridOffset - (instances / 2) * gridOffset + gridOffset / 2,
+    0,
+    0,
+  ])
+);
 
-  // indexed
-  ctx.submit(drawCmd, {
-    viewport: [0, halfH, halfW, halfH],
-    scissor: [0, halfH, halfW, halfH],
-    attributes: {
-      aPosition: indexedPositions,
-      aNormal: indexedNormals
-    },
-    indices: indices
-  })
-
-  // unindexed
-  ctx.submit(drawCmd, {
-    viewport: [halfW, halfH, halfW, halfH],
-    scissor: [halfW, halfH, halfW, halfH],
-    attributes: {
-      aPosition: unindexedPositions,
-      aNormal: unindexedNormals
-    },
-    count: unindexedCube.positions.length
-  })
-
-  // indexed instanced
-  ctx.submit(drawInstancedCmd, {
-    viewport: [0, 0, halfW, halfH],
-    scissor: [0, 0, halfW, halfH],
+const commands = {
+  Indexed: {
     attributes: {
       aPosition: indexedPositions,
       aNormal: indexedNormals,
-      aOffset: { buffer: offsets, divisor: 1 }
     },
-    indices: indices,
-    instances: offsetPositions.length
-  })
-
-  // unindexed instanced
-  ctx.submit(drawInstancedCmd, {
-    viewport: [halfW, 0, halfW, halfH],
-    scissor: [halfW, 0, halfW, halfH],
+    indices,
+  },
+  Unindexed: {
     attributes: {
       aPosition: unindexedPositions,
       aNormal: unindexedNormals,
-      aOffset: { buffer: offsets, divisor: 1 }
     },
-    count: unindexedCube.positions.length,
-    instances: offsetPositions.length
-  })
+    count: unindexedCube.positions.length / 3,
+  },
+  "Indexed Instanced": {
+    attributes: {
+      aPosition: indexedPositions,
+      aNormal: indexedNormals,
+      aOffset: { buffer: offsets, divisor: 1 },
+    },
+    indices,
+    instances,
+  },
+  "Unindexed Instanced": {
+    attributes: {
+      aPosition: unindexedPositions,
+      aNormal: unindexedNormals,
+      aOffset: { buffer: offsets, divisor: 1 },
+    },
+    count: unindexedCube.positions.length / 3,
+    instances,
+  },
+  "Indexed Instanced BaseVertex BaseInstance": {
+    attributes: {
+      aPosition: indexedMergedPositions,
+      aNormal: indexedMergedNormals,
+      aOffset: { buffer: offsets, divisor: 1 },
+    },
+    indices,
+    // Start drawing at the second instance
+    instances: instances - 1,
+    baseInstance: 1,
+    // Start vertex at the cube geometry
+    baseVertex: geometries[0].positions.length / 3,
+  },
+  "Unindexed Instanced BaseInstance": {
+    attributes: {
+      aPosition: unindexedMergedPositions,
+      aNormal: unindexedMergedNormals,
+      aOffset: { buffer: offsets, divisor: 1 },
+    },
+    // count: unindexedMergedPositions.length / 3,
+    count: unindexedCube.positions.length / 3,
+    // Start drawing at the second instance
+    instances: instances - 1,
+    baseInstance: 1,
+  },
+};
+const headers = {};
 
-  window.dispatchEvent(new CustomEvent('pex-screenshot'))
+const commandsEntries = Object.entries(commands);
 
-  gui.draw()
-})
+ctx.frame(() => {
+  ctx.submit(clearCmd);
+
+  cells.forEach((cell, index) => {
+    if (commandsEntries[index]) {
+      const [header, options] = commandsEntries[index];
+      headers[header] ||= gui.addHeader(header);
+      headers[header].setPosition(
+        ...viewportToCanvasPosition(cell, H, pixelRatio).map((n) => n + 10)
+      );
+      ctx.submit(options.instances ? drawInstancedCmd : drawCmd, {
+        viewport: cell,
+        scissor: cell,
+        ...options,
+      });
+    }
+  });
+
+  ctx.debug(false);
+
+  gui.draw();
+
+  window.dispatchEvent(new CustomEvent("pex-screenshot"));
+});
