@@ -6,7 +6,6 @@ import { checkProps } from "./utils.js";
  * @property {ctx.DataType} [type]
  * @property {ctx.Usage} [usage=ctx.Usage.StaticDraw]
  * @property {number} offset
- * @property {boolean} normalized
  */
 
 const allowedProps = [
@@ -15,7 +14,6 @@ const allowedProps = [
   "usage",
   "type",
   "offset",
-  "normalized",
 ];
 
 function createBuffer(ctx, opts) {

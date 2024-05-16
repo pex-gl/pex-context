@@ -293,8 +293,9 @@ ctx.vertexArray({
 const pipeline = ctx.pipeline({
   vert: /* glsl */ `
     attribute vec3 aPosition0;
+    attribute vec3 aPosition1;
     void main () {
-      gl_Position = vec4(aPosition0, 1.0);
+      gl_Position = vec4(aPosition1, 1.0);
     }`,
   frag: /* glsl */ `
     precision mediump float;
@@ -316,7 +317,7 @@ ctx.submit({
     // aPosition0: [0, 1, 0], // not supported yet
     // aPosition2: [[0, 1, 0]], // not supported yet
     aPosition0: ctx.vertexBuffer([0, 1, 0]),
-    aPosition1: ctx.vertexBuffer([0, 1, 0]),
+    aPosition1: { buffer: ctx.vertexBuffer([0, 1, 0]) },
   },
   uniforms: {
     texture: tex,

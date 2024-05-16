@@ -142,9 +142,11 @@ ctx.frame(() => {
 <dd></dd>
 <dt><a href="#PexResource">PexResource</a> : <code>object</code></dt>
 <dd><p>All resources are plain js object and once constructed their properties can be accessed directly.
-Please note those props are read only. To set new values or upload new data to GPU see <a href="context~update">updating resources</a>.</p>
+Please note those props are read only. To set new values or upload new data to GPU see <a href="#ctx.update">updating resources</a>.</p>
 </dd>
 <dt><a href="#PexTexture2D">PexTexture2D</a> : <code>object</code></dt>
+<dd></dd>
+<dt><a href="#PexAttribute">PexAttribute</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#PexCommand">PexCommand</a> : <code>object</code></dt>
 <dd></dd>
@@ -579,17 +581,17 @@ Pipelines represent the state of the GPU rendering pipeline (shaders, blending, 
 
 ```js
 const pipeline = ctx.pipeline({
-  vert: String,
-  frag: String,
-  depthWrite: Boolean,
-  depthTest: Boolean,
+  vert: string,
+  frag: string,
+  depthWrite: boolean,
+  depthTest: boolean,
   depthFunc: DepthFunc,
-  blend: Boolean,
+  blend: boolean,
   blendSrcRGBFactor: BlendFactor,
   blendSrcAlphaFactor: BlendFactor,
   blendDstRGBFactor: BlendFactor,
   blendDstAlphaFactor: BlendFactor,
-  cullFace: Boolean,
+  cullFace: boolean,
   cullFaceMode: Face,
   colorMask: Array,
   primitive: Primitive,
@@ -874,6 +876,7 @@ Create a context object
 | [type]     | <code>ctx.DataType</code>                                                                |                                   |
 | [usage]    | [<code>Usage</code>](#ctx.Usage)                                                         | <code>ctx.Usage.StaticDraw</code> |
 | offset     | <code>number</code>                                                                      |                                   |
+| stride     | <code>number</code>                                                                      |                                   |
 | normalized | <code>boolean</code>                                                                     |                                   |
 
 <a name="Attachment"></a>
@@ -1054,7 +1057,7 @@ Create a context object
 ## PexResource : <code>object</code>
 
 All resources are plain js object and once constructed their properties can be accessed directly.
-Please note those props are read only. To set new values or upload new data to GPU see [updating resources](context~update).
+Please note those props are read only. To set new values or upload new data to GPU see [updating resources](#ctx.update).
 
 **Kind**: global typedef
 **Properties**
@@ -1068,6 +1071,21 @@ Please note those props are read only. To set new values or upload new data to G
 ## PexTexture2D : <code>object</code>
 
 **Kind**: global typedef
+<a name="PexAttribute"></a>
+
+## PexAttribute : <code>object</code>
+
+**Kind**: global typedef
+**Properties**
+
+| Name         | Type                 | Description                             |
+| ------------ | -------------------- | --------------------------------------- |
+| buffer       | <code>object</code>  | ctx.vertexBuffer() or ctx.indexBuffer() |
+| [offset]     | <code>number</code>  |                                         |
+| [stride]     | <code>number</code>  |                                         |
+| [divisor]    | <code>number</code>  |                                         |
+| [normalized] | <code>boolean</code> |                                         |
+
 <a name="PexCommand"></a>
 
 ## PexCommand : <code>object</code>
@@ -1075,17 +1093,17 @@ Please note those props are read only. To set new values or upload new data to G
 **Kind**: global typedef
 **Properties**
 
-| Name       | Type                                             | Description                                                                                                                                              |
-| ---------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| pass       | [<code>PassOptions</code>](#PassOptions)         |                                                                                                                                                          |
-| pipeline   | [<code>PipelineOptions</code>](#PipelineOptions) |                                                                                                                                                          |
-| attributes | <code>object</code>                              | vertex attributes, map of `attibuteName: ctx.VertexBuffer` or `attributeName: { buffer: VertexBuffer, offset: number, stride: number, divisor: number }` |
-| indices    | <code>object</code>                              | indices, `ctx.IndexBuffer` or `{ buffer: IndexBuffer, offset: number, stride: number }`                                                                  |
-| count      | <code>number</code>                              | number of vertices to draw                                                                                                                               |
-| instances  | <code>number</code>                              | number instances to draw                                                                                                                                 |
-| uniforms   | <code>object</code>                              | shader uniforms, map of `name: value`                                                                                                                    |
-| viewport   | [<code>Viewport</code>](#Viewport)               | drawing viewport bounds                                                                                                                                  |
-| scissor    | [<code>Viewport</code>](#Viewport)               | scissor test bounds                                                                                                                                      |
+| Name         | Type                                             | Description                                                                                                     |
+| ------------ | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| pass         | [<code>PassOptions</code>](#PassOptions)         |                                                                                                                 |
+| pipeline     | [<code>PipelineOptions</code>](#PipelineOptions) |                                                                                                                 |
+| [attributes] | <code>object</code>                              | vertex attributes, map of `attributeName: ctx.vertexBuffer()` or [`attributeName: PexAttribute`](#PexAttribute) |
+| [indices]    | <code>object</code>                              | indices, `ctx.indexBuffer()` or [`PexAttribute`](#PexAttribute)                                                 |
+| [count]      | <code>number</code>                              | number of vertices to draw                                                                                      |
+| [instances]  | <code>number</code>                              | number instances to draw                                                                                        |
+| [uniforms]   | <code>object</code>                              | shader uniforms, map of `name: value`                                                                           |
+| [viewport]   | [<code>Viewport</code>](#Viewport)               | drawing viewport bounds                                                                                         |
+| [scissor]    | [<code>Viewport</code>](#Viewport)               | scissor test bounds                                                                                             |
 
 <a name="PexContextSetOptions"></a>
 
@@ -1139,20 +1157,20 @@ const maxTextureSize = ctx.capabilities.maxTextureSize;
 | `maxVertexAttribs`           | number  |
 | `maxTextureSize`             | number  |
 | `maxCubeMapTextureSize`      | number  |
-| `depthTexture`               | Boolean |
-| `shaderTextureLod`           | Boolean |
-| `textureFloat`               | Boolean |
-| `textureFloatLinear`         | Boolean |
-| `textureHalfFloat`           | Boolean |
-| `textureHalfFloatLinear`     | Boolean |
-| `textureFilterAnisotropic`   | Boolean |
-| `disjointTimerQuery`         | Boolean |
-| `colorBufferFloat`           | Boolean |
-| `colorBufferHalfFloat`       | Boolean |
-| `floatBlend`                 | Boolean |
-| `multiDraw`                  | Boolean |
-| `drawInstancedBase`          | Boolean |
-| `multiDrawInstancedBase`     | Boolean |
+| `depthTexture`               | boolean |
+| `shaderTextureLod`           | boolean |
+| `textureFloat`               | boolean |
+| `textureFloatLinear`         | boolean |
+| `textureHalfFloat`           | boolean |
+| `textureHalfFloatLinear`     | boolean |
+| `textureFilterAnisotropic`   | boolean |
+| `disjointTimerQuery`         | boolean |
+| `colorBufferFloat`           | boolean |
+| `colorBufferHalfFloat`       | boolean |
+| `floatBlend`                 | boolean |
+| `multiDraw`                  | boolean |
+| `drawInstancedBase`          | boolean |
+| `multiDrawInstancedBase`     | boolean |
 
 ## License
 

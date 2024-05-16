@@ -451,17 +451,17 @@ function createContext(options = {}) {
      *  @example
      * ```js
      * const pipeline = ctx.pipeline({
-     *   vert: String,
-     *   frag: String,
-     *   depthWrite: Boolean,
-     *   depthTest: Boolean,
+     *   vert: string,
+     *   frag: string,
+     *   depthWrite: boolean,
+     *   depthTest: boolean,
      *   depthFunc: DepthFunc,
-     *   blend: Boolean,
+     *   blend: boolean,
      *   blendSrcRGBFactor: BlendFactor,
      *   blendSrcAlphaFactor: BlendFactor,
      *   blendDstRGBFactor: BlendFactor,
      *   blendDstAlphaFactor: BlendFactor,
-     *   cullFace: Boolean,
+     *   cullFace: boolean,
      *   cullFaceMode: Face,
      *   colorMask: Array,
      *   primitive: Primitive

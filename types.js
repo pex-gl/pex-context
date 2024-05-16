@@ -11,7 +11,7 @@
 /**
  * @typedef {object} PexResource
  * All resources are plain js object and once constructed their properties can be accessed directly.
- * Please note those props are read only. To set new values or upload new data to GPU see [updating resources]{@link context~update}.
+ * Please note those props are read only. To set new values or upload new data to GPU see [updating resources]{@link ctx.update}.
  * @property {string} name
  */
 
@@ -20,16 +20,25 @@
  */
 
 /**
+ * @typedef {object} PexAttribute
+ * @property {object} buffer ctx.vertexBuffer() or ctx.indexBuffer()
+ * @property {number} [offset]
+ * @property {number} [stride]
+ * @property {number} [divisor]
+ * @property {boolean} [normalized]
+ */
+
+/**
  * @typedef {object} PexCommand
  * @property {import("./pass.js").PassOptions} pass
  * @property {import("./pipeline.js").PipelineOptions} pipeline
- * @property {object} attributes vertex attributes, map of `attibuteName: ctx.VertexBuffer`   or `attributeName: { buffer: VertexBuffer, offset: number, stride: number, divisor: number }`
- * @property {object} indices indices, `ctx.IndexBuffer` or `{ buffer: IndexBuffer, offset: number, stride: number }`
- * @property {number} count number of vertices to draw
- * @property {number} instances number instances to draw
- * @property {object} uniforms shader uniforms, map of `name: value`
- * @property {Viewport} viewport drawing viewport bounds
- * @property {Viewport} scissor scissor test bounds
+ * @property {object} [attributes] vertex attributes, map of `attributeName: ctx.vertexBuffer()`  or [`attributeName: PexAttribute`]{@link PexAttribute}
+ * @property {object} [indices] indices, `ctx.indexBuffer()` or [`PexAttribute`]{@link PexAttribute}
+ * @property {number} [count] number of vertices to draw
+ * @property {number} [instances] number instances to draw
+ * @property {object} [uniforms] shader uniforms, map of `name: value`
+ * @property {Viewport} [viewport] drawing viewport bounds
+ * @property {Viewport} [scissor] scissor test bounds
  */
 
 /**
