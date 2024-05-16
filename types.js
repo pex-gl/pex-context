@@ -39,6 +39,30 @@
  * @property {object} [uniforms] shader uniforms, map of `name: value`
  * @property {Viewport} [viewport] drawing viewport bounds
  * @property {Viewport} [scissor] scissor test bounds
+ * @property {MultiDrawOptions} [multiDraw]
+ * @property {number} [baseVertex]
+ * @property {number} [baseInstance]
+ */
+/**
+ * @typedef {object} MultiDrawOptions
+ * @see [WEBGL_multi_draw extension]{@link https://registry.khronos.org/webgl/extensions/WEBGL_multi_draw/}
+ * @see [WEBGL_draw_instanced_base_vertex_base_instance extension]{@link https://registry.khronos.org/webgl/extensions/WEBGL_draw_instanced_base_vertex_base_instance/}
+ * @see [WEBGL_multi_draw_instanced_base_vertex_base_instance extension]{@link https://registry.khronos.org/webgl/extensions/WEBGL_multi_draw_instanced_base_vertex_base_instance/}
+ *
+ * @property {(Int32Array|Array)} counts
+ * @property {number} [countsOffset]
+ * @property {(Int32Array|Array)} offsets
+ * @property {number} [offsetsOffset]
+ * @property {(Int32Array|Array)} firsts
+ * @property {number} [firstsOffset]
+ * @property {(Int32Array|Array)} instanceCounts
+ * @property {number} [instanceCountsOffset]
+ *
+ * @property {(Int32Array|Array)} baseVertices
+ * @property {number} [baseVerticesOffset]
+ * @property {(UInt32Array|Array)} baseInstances
+ * @property {number} [baseInstancesOffset]
+ * @property {number} [drawCount]
  */
 
 /**

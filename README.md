@@ -150,6 +150,8 @@ Please note those props are read only. To set new values or upload new data to G
 <dd></dd>
 <dt><a href="#PexCommand">PexCommand</a> : <code>object</code></dt>
 <dd></dd>
+<dt><a href="#MultiDrawOptions">MultiDrawOptions</a> : <code>object</code></dt>
+<dd></dd>
 <dt><a href="#PexContextSetOptions">PexContextSetOptions</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#Viewport">Viewport</a> : <code>Array.&lt;number&gt;</code></dt>
@@ -870,14 +872,12 @@ Create a context object
 **Kind**: global typedef
 **Properties**
 
-| Name       | Type                                                                                     | Default                           |
-| ---------- | ---------------------------------------------------------------------------------------- | --------------------------------- |
-| data       | <code>Array</code> \| [<code>TypedArray</code>](#TypedArray) \| <code>ArrayBuffer</code> |                                   |
-| [type]     | <code>ctx.DataType</code>                                                                |                                   |
-| [usage]    | [<code>Usage</code>](#ctx.Usage)                                                         | <code>ctx.Usage.StaticDraw</code> |
-| offset     | <code>number</code>                                                                      |                                   |
-| stride     | <code>number</code>                                                                      |                                   |
-| normalized | <code>boolean</code>                                                                     |                                   |
+| Name    | Type                                                                                     | Default                           |
+| ------- | ---------------------------------------------------------------------------------------- | --------------------------------- |
+| data    | <code>Array</code> \| [<code>TypedArray</code>](#TypedArray) \| <code>ArrayBuffer</code> |                                   |
+| [type]  | <code>ctx.DataType</code>                                                                |                                   |
+| [usage] | [<code>Usage</code>](#ctx.Usage)                                                         | <code>ctx.Usage.StaticDraw</code> |
+| offset  | <code>number</code>                                                                      |                                   |
 
 <a name="Attachment"></a>
 
@@ -1093,17 +1093,49 @@ Please note those props are read only. To set new values or upload new data to G
 **Kind**: global typedef
 **Properties**
 
-| Name         | Type                                             | Description                                                                                                     |
-| ------------ | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| pass         | [<code>PassOptions</code>](#PassOptions)         |                                                                                                                 |
-| pipeline     | [<code>PipelineOptions</code>](#PipelineOptions) |                                                                                                                 |
-| [attributes] | <code>object</code>                              | vertex attributes, map of `attributeName: ctx.vertexBuffer()` or [`attributeName: PexAttribute`](#PexAttribute) |
-| [indices]    | <code>object</code>                              | indices, `ctx.indexBuffer()` or [`PexAttribute`](#PexAttribute)                                                 |
-| [count]      | <code>number</code>                              | number of vertices to draw                                                                                      |
-| [instances]  | <code>number</code>                              | number instances to draw                                                                                        |
-| [uniforms]   | <code>object</code>                              | shader uniforms, map of `name: value`                                                                           |
-| [viewport]   | [<code>Viewport</code>](#Viewport)               | drawing viewport bounds                                                                                         |
-| [scissor]    | [<code>Viewport</code>](#Viewport)               | scissor test bounds                                                                                             |
+| Name           | Type                                               | Description                                                                                                     |
+| -------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| pass           | [<code>PassOptions</code>](#PassOptions)           |                                                                                                                 |
+| pipeline       | [<code>PipelineOptions</code>](#PipelineOptions)   |                                                                                                                 |
+| [attributes]   | <code>object</code>                                | vertex attributes, map of `attributeName: ctx.vertexBuffer()` or [`attributeName: PexAttribute`](#PexAttribute) |
+| [indices]      | <code>object</code>                                | indices, `ctx.indexBuffer()` or [`PexAttribute`](#PexAttribute)                                                 |
+| [count]        | <code>number</code>                                | number of vertices to draw                                                                                      |
+| [instances]    | <code>number</code>                                | number instances to draw                                                                                        |
+| [uniforms]     | <code>object</code>                                | shader uniforms, map of `name: value`                                                                           |
+| [viewport]     | [<code>Viewport</code>](#Viewport)                 | drawing viewport bounds                                                                                         |
+| [scissor]      | [<code>Viewport</code>](#Viewport)                 | scissor test bounds                                                                                             |
+| [multiDraw]    | [<code>MultiDrawOptions</code>](#MultiDrawOptions) |                                                                                                                 |
+| [baseVertex]   | <code>number</code>                                |                                                                                                                 |
+| [baseInstance] | <code>number</code>                                |                                                                                                                 |
+
+<a name="MultiDrawOptions"></a>
+
+## MultiDrawOptions : <code>object</code>
+
+**Kind**: global typedef
+**See**
+
+- [WEBGL_multi_draw extension](https://registry.khronos.org/webgl/extensions/WEBGL_multi_draw/)
+- [WEBGL_draw_instanced_base_vertex_base_instance extension](https://registry.khronos.org/webgl/extensions/WEBGL_draw_instanced_base_vertex_base_instance/)
+- [WEBGL_multi_draw_instanced_base_vertex_base_instance extension](https://registry.khronos.org/webgl/extensions/WEBGL_multi_draw_instanced_base_vertex_base_instance/)
+
+**Properties**
+
+| Name                   | Type                                           |
+| ---------------------- | ---------------------------------------------- |
+| counts                 | <code>Int32Array</code> \| <code>Array</code>  |
+| [countsOffset]         | <code>number</code>                            |
+| offsets                | <code>Int32Array</code> \| <code>Array</code>  |
+| [offsetsOffset]        | <code>number</code>                            |
+| firsts                 | <code>Int32Array</code> \| <code>Array</code>  |
+| [firstsOffset]         | <code>number</code>                            |
+| instanceCounts         | <code>Int32Array</code> \| <code>Array</code>  |
+| [instanceCountsOffset] | <code>number</code>                            |
+| baseVertices           | <code>Int32Array</code> \| <code>Array</code>  |
+| [baseVerticesOffset]   | <code>number</code>                            |
+| baseInstances          | <code>UInt32Array</code> \| <code>Array</code> |
+| [baseInstancesOffset]  | <code>number</code>                            |
+| [drawCount]            | <code>number</code>                            |
 
 <a name="PexContextSetOptions"></a>
 
