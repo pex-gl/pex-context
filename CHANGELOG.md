@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [3.0.0](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.9...v3.0.0) (2024-05-16)
+
+
+
 # [3.0.0-alpha.9](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.8...v3.0.0-alpha.9) (2024-05-07)
 
 
