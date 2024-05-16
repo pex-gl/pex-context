@@ -12,8 +12,6 @@
 
 Modern WebGL state wrapper for [PEX](https://pex.gl): allocate GPU resources (textures, buffers), setup state pipelines and passes, and combine them into commands.
 
-![](https://raw.githubusercontent.com/pex-gl/pex-context/main/screenshot.gif)
-
 ## Installation
 
 ```bash
@@ -80,7 +78,7 @@ void main() {
       Math.PI / 4,
       W / H,
       0.1,
-      100
+      100,
     ),
     uViewMatrix: mat4.lookAt(mat4.create(), [2, 2, 5], [0, 0, 0], [0, 1, 0]),
   },
