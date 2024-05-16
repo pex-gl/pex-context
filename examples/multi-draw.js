@@ -163,5 +163,5 @@ ctx.frame(() => {
 
   ctx.debug(false);
 
-  window.dispatchEvent(new CustomEvent("pex-screenshot"));
+  window.dispatchEvent(new CustomEvent("screenshot"));
 });

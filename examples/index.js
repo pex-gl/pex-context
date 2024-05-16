@@ -28,10 +28,10 @@
     "vao",
     "vao-instanced",
   ];
-  window.pexExamples = examples;
 
   const list = document.querySelector(".Examples-list");
   if (params.has("screenshot")) {
+    window.screenshotItems = examples;
     list.classList.add("u-hide");
   } else if (id) {
     list.classList.add("Examples-list--side");
