@@ -4,4 +4,3 @@ web_modules
 types
 lib
 examples/screenshots/*-diff.png
-examples/build/*
