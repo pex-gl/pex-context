@@ -1,66 +1,63 @@
-const createContext = require('../')
-const createCube = require('primitive-cube')
-const createCamera = require('pex-cam/perspective')
+import createContext from "../index.js";
 
-const basicVert = require('./shaders/basic.vert.js')
-const basicFrag = require('./shaders/basic.frag.js')
+import { perspective as createCamera } from "pex-cam";
 
-const ctx = createContext({
-  pixelRatio: window.devicePixelRatio
-})
+import { cube } from "primitive-geometry";
 
-const cube = createCube()
+import basicVert from "./shaders/basic.vert.js";
+import basicFrag from "./shaders/basic.frag.js";
+
+const ctx = createContext({ debug: true });
+
+const geom = cube();
 const camera = createCamera({
   position: [2, 2, 2],
   fov: Math.PI / 3,
-  aspect: ctx.gl.canvas.width / ctx.gl.canvas.height
-})
+});
 
 const clearCmd = {
   pass: ctx.pass({
-    clearColor: [0, 0, 0, 1],
-    clearDepth: 1
-  })
-}
+    clearColor: [0.2, 0.2, 0.2, 1],
+    clearDepth: 1,
+  }),
+};
 
 const drawCmd = {
-  pass: ctx.pass({
-    clearColor: [0.2, 0.2, 0.2, 1],
-    clearDepth: 1
-  }),
   pipeline: ctx.pipeline({
     depthTest: true,
     vert: basicVert,
-    frag: basicFrag
+    frag: basicFrag,
   }),
   attributes: {
-    aPosition: ctx.vertexBuffer(cube.positions),
-    aNormal: ctx.vertexBuffer(cube.normals)
+    aPosition: ctx.vertexBuffer(geom.positions),
+    aNormal: ctx.vertexBuffer(geom.normals),
   },
-  indices: ctx.indexBuffer(cube.cells),
+  indices: ctx.indexBuffer(geom.cells),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
-    uViewMatrix: camera.viewMatrix
-  }
-}
+    uViewMatrix: camera.viewMatrix,
+  },
+};
 
-window.addEventListener('resize', () => {
-  ctx.set({
-    width: window.innerWidth,
-    height: window.innerHeight
-  })
-  camera.set({
-    aspect: ctx.gl.canvas.width / ctx.gl.canvas.height
-  })
-})
+const onResize = () => {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  ctx.set({ width: W, height: H });
+  camera.set({ aspect: W / H });
+};
+window.addEventListener("resize", onResize);
+onResize();
 
 ctx.frame(() => {
-  ctx.submit(clearCmd)
+  ctx.submit(clearCmd);
   ctx.submit(drawCmd, {
     uniforms: {
       uProjectionMatrix: camera.projectionMatrix,
-      uViewMatrix: camera.viewMatrix
-    }
-  })
-  window.dispatchEvent(new CustomEvent('pex-screenshot'))
-})
+      uViewMatrix: camera.viewMatrix,
+    },
+  });
+
+  ctx.debug(false);
+
+  window.dispatchEvent(new CustomEvent("screenshot"));
+});

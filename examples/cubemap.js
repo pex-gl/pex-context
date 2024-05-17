@@ -1,111 +1,126 @@
-const createContext = require('../')
-const load = require('pex-io/load')
-const raf = require('raf')
-const isBrowser = require('is-browser')
-const createCamera = require('pex-cam/perspective')
-const createOrbiter = require('pex-cam/orbiter')
-const createSphere = require('primitive-sphere')
-const mat4 = require('pex-math/mat4')
-const GUI = require('pex-gui')
+import createContext from "../index.js";
 
-const skyboxVert = require('./shaders/skybox.vert.js')
-const skyboxFrag = require('./shaders/skybox.frag.js')
-const reflectionVert = require('./shaders/reflection.vert.js')
-const reflectionFrag = require('./shaders/reflection.frag.js')
+import { load } from "pex-io";
+import { perspective as createCamera, orbiter as createOrbiter } from "pex-cam";
+import { mat4 } from "pex-math";
+import createGUI from "pex-gui";
 
-const ctx = createContext()
-const gui = new GUI(ctx)
+import { sphere } from "primitive-geometry";
+
+import skyboxVert from "./shaders/skybox.vert.js";
+import skyboxFrag from "./shaders/skybox.frag.js";
+import positionNormalMVPVert from "./shaders/position-normal-mvp.vert.js";
+import reflectionFrag from "./shaders/reflection.frag.js";
+
+const ctx = createContext({ debug: true });
+const gui = createGUI(ctx);
+gui.addFPSMeeter();
+gui.addStats();
 
 const camera = createCamera({
   fov: Math.PI / 4,
   aspect: ctx.gl.canvas.width / ctx.gl.canvas.height,
-  position: [0, 0.5, 3],
-  target: [0, 0, 0]
-})
+  position: [5, 5, 5],
+});
 
-createOrbiter({ camera: camera, distance: 10 })
-
-const ASSETS_DIR = isBrowser ? '/assets' : `${__dirname}/assets`
+createOrbiter({ camera, element: ctx.gl.canvas });
 
 const clearScreenCmd = {
   pass: ctx.pass({
     clearColor: [0.2, 0.2, 0.2, 1],
-    clearDepth: 1
-  })
-}
+    clearDepth: 1,
+  }),
+};
 
-const sphere = createSphere()
+const geom = sphere({ radius: 1 });
 
 const drawCmd = {
   pipeline: ctx.pipeline({
-    vert: reflectionVert,
+    vert: positionNormalMVPVert,
     frag: reflectionFrag,
-    depthTest: true
+    depthTest: true,
   }),
-  attributes: {
-    aPosition: ctx.vertexBuffer(sphere.positions),
-    aNormal: ctx.vertexBuffer(sphere.normals)
-  },
-  indices: ctx.indexBuffer(sphere.cells),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
-    uModelMatrix: mat4.create()
-  }
-}
-
-const skyboxPositions = [[-1, -1], [1, -1], [1, 1], [-1, 1]]
-const skyboxFaces = [[0, 1, 2], [0, 2, 3]]
+    uModelMatrix: mat4.create(),
+  },
+  attributes: {
+    aPosition: ctx.vertexBuffer(geom.positions),
+    aNormal: ctx.vertexBuffer(geom.normals),
+  },
+  indices: ctx.indexBuffer(geom.cells),
+};
 
 const drawSkybox = {
   pipeline: ctx.pipeline({
     vert: skyboxVert,
-    frag: skyboxFrag
+    frag: skyboxFrag,
   }),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
     uViewMatrix: camera.viewMatrix,
-    uEnvMap: null
+    uModelMatrix: mat4.create(),
+    uEnvMap: null,
   },
   attributes: {
-    aPosition: ctx.vertexBuffer(skyboxPositions)
+    aPosition: ctx.vertexBuffer([
+      [-1, -1],
+      [1, -1],
+      [1, 1],
+      [-1, 1],
+    ]),
   },
-  indices: ctx.indexBuffer(skyboxFaces)
-}
+  indices: ctx.indexBuffer([
+    [0, 1, 2],
+    [0, 2, 3],
+  ]),
+};
 
 const resources = {
-  negx: { image: `${ASSETS_DIR}/images/pisa/pisa_negx.jpg` },
-  negy: { image: `${ASSETS_DIR}/images/pisa/pisa_negy.jpg` },
-  negz: { image: `${ASSETS_DIR}/images/pisa/pisa_negz.jpg` },
-  posx: { image: `${ASSETS_DIR}/images/pisa/pisa_posx.jpg` },
-  posy: { image: `${ASSETS_DIR}/images/pisa/pisa_posy.jpg` },
-  posz: { image: `${ASSETS_DIR}/images/pisa/pisa_posz.jpg` }
-}
+  negx: {
+    image: new URL("./assets/images/pisa/pisa_negx.jpg", import.meta.url),
+  },
+  negy: {
+    image: new URL("./assets/images/pisa/pisa_negy.jpg", import.meta.url),
+  },
+  negz: {
+    image: new URL("./assets/images/pisa/pisa_negz.jpg", import.meta.url),
+  },
+  posx: {
+    image: new URL("./assets/images/pisa/pisa_posx.jpg", import.meta.url),
+  },
+  posy: {
+    image: new URL("./assets/images/pisa/pisa_posy.jpg", import.meta.url),
+  },
+  posz: {
+    image: new URL("./assets/images/pisa/pisa_posz.jpg", import.meta.url),
+  },
+};
 
-load(resources, (err, res) => {
-  if (err) throw err
+const res = await load(resources);
 
-  const envMapCube = ctx.textureCube({
-    data: [res.posx, res.negx, res.posy, res.negy, res.posz, res.negz],
-    width: res.negx.width,
-    height: res.negy.height,
-    encoding: ctx.Encoding.SRGB
-  })
+const envMapCube = ctx.textureCube({
+  data: [res.posx, res.negx, res.posy, res.negy, res.posz, res.negz],
+  width: res.negx.width,
+  height: res.negy.height,
+  encoding: ctx.Encoding.SRGB,
+});
 
-  gui.addTextureCube('Cubemap', envMapCube, { flipEnvMap: -1 })
+gui.addTextureCube("Cubemap", envMapCube, { flipEnvMap: -1 });
 
-  drawSkybox.uniforms.uEnvMap = envMapCube
-  drawCmd.uniforms.uEnvMap = envMapCube
-  drawCmd.uniforms.uCameraPosition = camera.position
+drawSkybox.uniforms.uEnvMap = envMapCube;
+drawCmd.uniforms.uEnvMap = envMapCube;
+drawCmd.uniforms.uCameraPosition = camera.position;
 
-  raf(function frame() {
-    ctx.submit(clearScreenCmd)
-    ctx.submit(drawSkybox)
-    ctx.submit(drawCmd)
+ctx.frame(() => {
+  ctx.submit(clearScreenCmd);
+  ctx.submit(drawSkybox);
+  ctx.submit(drawCmd);
 
-    gui.draw()
+  ctx.debug(false);
 
-    window.dispatchEvent(new CustomEvent('pex-screenshot'))
-    raf(frame)
-  })
-})
+  gui.draw();
+
+  window.dispatchEvent(new CustomEvent("screenshot"));
+});

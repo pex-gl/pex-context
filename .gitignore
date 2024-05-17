@@ -1,5 +1,6 @@
-.DS_Store
 node_modules
-experiments
-.tern-port
+web_modules
+.DS_Store
+types
+lib
 examples/screenshots/*-diff.png

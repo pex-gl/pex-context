@@ -1,18 +1,15 @@
-module.exports = /* glsl */ `
+export default /* glsl */ `
 precision highp float;
 
-varying vec3 vNormalWorld;
-varying vec3 vPositionWorld;
+varying vec3 vNormal;
+varying vec3 vPosition;
 
 uniform vec3 uCameraPosition;
 uniform samplerCube uEnvMap;
 
 void main () {
-  vec3 N = normalize(vNormalWorld);
-  vec3 I = normalize(vPositionWorld - uCameraPosition);
-  vec3 R = reflect(I, N);
-  R.z *= -1.0;
-
+  vec3 I = normalize(vPosition - uCameraPosition);
+  vec3 R = reflect(I, normalize(vNormal));
   gl_FragColor = textureCube(uEnvMap, R);
 }
-`
+`;

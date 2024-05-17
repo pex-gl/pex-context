@@ -1,37 +1,35 @@
-const createContext = require('../')
-const createCube = require('primitive-cube')
-const mat4 = require('pex-math/mat4')
+import createContext from "../index.js";
 
-const basicVert = require('./shaders/basic.vert.js')
-const basicFrag = require('./shaders/basic.frag.js')
+import { mat4 } from "pex-math";
+import { cube } from "primitive-geometry";
 
-const W = 640
-const H = 480
-const ctx = createContext({ width: W, height: H })
-const cube = createCube()
+import basicVert from "./shaders/basic.vert.js";
+import basicFrag from "./shaders/basic.frag.js";
+
+const W = 640;
+const H = 480;
+const ctx = createContext({ width: W, height: H, debug: true });
+
+const geom = cube();
 
 const clearCmd = {
   pass: ctx.pass({
-    clearColor: [0, 0, 0, 1],
-    clearDepth: 1
-  })
-}
+    clearColor: [0.2, 0.2, 0.2, 1],
+    clearDepth: 1,
+  }),
+};
 
 const drawCmd = {
-  pass: ctx.pass({
-    clearColor: [0.1, 0.1, 0.1, 1],
-    clearDepth: 1
-  }),
   pipeline: ctx.pipeline({
     depthTest: true,
     vert: basicVert,
-    frag: basicFrag
+    frag: basicFrag,
   }),
   attributes: {
-    aPosition: ctx.vertexBuffer(cube.positions),
-    aNormal: ctx.vertexBuffer(cube.normals)
+    aPosition: ctx.vertexBuffer(geom.positions),
+    aNormal: ctx.vertexBuffer(geom.normals),
   },
-  indices: ctx.indexBuffer(cube.cells),
+  indices: ctx.indexBuffer(geom.cells),
   uniforms: {
     uProjectionMatrix: mat4.perspective(
       mat4.create(),
@@ -40,12 +38,15 @@ const drawCmd = {
       0.1,
       100
     ),
-    uViewMatrix: mat4.lookAt(mat4.create(), [2, 2, 5], [0, 0, 0], [0, 1, 0])
-  }
-}
+    uViewMatrix: mat4.lookAt(mat4.create(), [2, 2, 5], [0, 0, 0], [0, 1, 0]),
+  },
+};
 
 ctx.frame(() => {
-  ctx.submit(clearCmd)
-  ctx.submit(drawCmd)
-  window.dispatchEvent(new CustomEvent('pex-screenshot'))
-})
+  ctx.submit(clearCmd);
+  ctx.submit(drawCmd);
+
+  ctx.debug(false);
+
+  window.dispatchEvent(new CustomEvent("screenshot"));
+});

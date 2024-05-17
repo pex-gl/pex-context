@@ -1,102 +1,132 @@
-const assert = require('assert')
-const checkProps = require('./check-props')
+import { checkProps } from "./utils.js";
 
-const allowedProps = ['target', 'data', 'usage', 'type', 'offset']
+/**
+ * @typedef {import("./types.js").PexResource} BufferOptions
+ * @property {Array|import("./types.js").TypedArray|ArrayBuffer} data
+ * @property {ctx.DataType} [type]
+ * @property {ctx.Usage} [usage=ctx.Usage.StaticDraw]
+ * @property {number} offset
+ */
+
+const allowedProps = [
+  "target", // Note: only at creation
+  "data",
+  "usage",
+  "type",
+  "offset",
+];
 
 function createBuffer(ctx, opts) {
-  const gl = ctx.gl
-  checkProps(allowedProps, opts)
-  assert(
-    opts.target === gl.ARRAY_BUFFER || opts.target === gl.ELEMENT_ARRAY_BUFFER,
-    'Invalid buffer target'
-  )
+  checkProps(allowedProps, opts);
 
-  let className =
-    opts.target === gl.ARRAY_BUFFER ? 'vertexBuffer' : 'indexBuffer'
+  const gl = ctx.gl;
+  console.assert(
+    opts.target === gl.ARRAY_BUFFER || opts.target === gl.ELEMENT_ARRAY_BUFFER,
+    "Invalid buffer target",
+  );
 
   const buffer = {
-    class: className,
+    class: opts.target === gl.ARRAY_BUFFER ? "vertexBuffer" : "indexBuffer",
     handle: gl.createBuffer(),
     target: opts.target,
     usage: opts.usage || gl.STATIC_DRAW,
     _update: updateBuffer,
-    _dispose: function() {
-      gl.deleteBuffer(this.handle)
-      this.handle = null
-    }
-  }
+    _dispose() {
+      gl.deleteBuffer(this.handle);
+      this.handle = null;
+    },
+  };
 
-  updateBuffer(ctx, buffer, opts)
+  updateBuffer(ctx, buffer, opts);
 
-  return buffer
+  return buffer;
 }
 
 function updateBuffer(ctx, buffer, opts) {
-  checkProps(allowedProps, opts)
+  checkProps(allowedProps, opts);
 
-  const gl = ctx.gl
-  let data = opts.data || opts
-  let type = opts.type || buffer.type
-  let offset = opts.offset || 0
+  const gl = ctx.gl;
+  let data = opts.data || opts;
+  let type = opts.type;
+  let offset = opts.offset || 0;
 
   if (Array.isArray(data)) {
     if (!type) {
-      if (opts.target === gl.ARRAY_BUFFER) {
-        type = ctx.DataType.Float32
-      }
-      if (opts.target === gl.ELEMENT_ARRAY_BUFFER) {
-        type = ctx.DataType.Uint16
+      if (buffer.target === gl.ARRAY_BUFFER) {
+        type = ctx.DataType.Float32;
+      } else if (buffer.target === gl.ELEMENT_ARRAY_BUFFER) {
+        type = ctx.DataType.Uint16;
       }
     }
 
-    var sourceData = data
-    var elemSize = Array.isArray(sourceData[0]) ? sourceData[0].length : 1
-    var size = elemSize * sourceData.length
+    const sourceData = data;
+    const elemSize = Array.isArray(sourceData[0]) ? sourceData[0].length : 1;
+    const size = elemSize * sourceData.length;
 
     if (type === ctx.DataType.Float32) {
-      data = new Float32Array(elemSize === 1 ? sourceData : size)
+      data = new Float32Array(elemSize === 1 ? sourceData : size);
     } else if (type === ctx.DataType.Uint8) {
-      data = new Uint8Array(elemSize === 1 ? sourceData : size)
+      data = new Uint8Array(elemSize === 1 ? sourceData : size);
     } else if (type === ctx.DataType.Uint16) {
-      data = new Uint16Array(elemSize === 1 ? sourceData : size)
+      data = new Uint16Array(elemSize === 1 ? sourceData : size);
     } else if (type === ctx.DataType.Uint32) {
-      data = new Uint32Array(elemSize === 1 ? sourceData : size)
+      data = new Uint32Array(elemSize === 1 ? sourceData : size);
+    } else if (type === ctx.DataType.Int8) {
+      data = new Int8Array(elemSize === 1 ? sourceData : size);
     }
 
     if (elemSize > 1) {
-      for (var i = 0; i < sourceData.length; i++) {
-        for (var j = 0; j < elemSize; j++) {
-          var index = i * elemSize + j
-          data[index] = sourceData[i][j]
+      for (let i = 0; i < sourceData.length; i++) {
+        for (let j = 0; j < elemSize; j++) {
+          const index = i * elemSize + j;
+          data[index] = sourceData[i][j];
         }
       }
     }
   } else if (data instanceof Float32Array) {
-    type = ctx.DataType.Float32
+    type = ctx.DataType.Float32;
   } else if (data instanceof Uint8Array) {
-    type = ctx.DataType.Uint8
+    type = ctx.DataType.Uint8;
   } else if (data instanceof Uint16Array) {
-    type = ctx.DataType.Uint16
+    type = ctx.DataType.Uint16;
   } else if (data instanceof Uint32Array) {
-    type = ctx.DataType.Uint32
+    type = ctx.DataType.Uint32;
+  } else if (data instanceof Int8Array) {
+    type = ctx.DataType.Int8;
   } else if (data instanceof ArrayBuffer) {
     // assuming type was provided
+    if (!type) {
+      if (buffer.target === gl.ARRAY_BUFFER) {
+        type = ctx.DataType.Float32;
+      } else if (buffer.target === gl.ELEMENT_ARRAY_BUFFER) {
+        type = ctx.DataType.Uint16;
+      }
+    }
   } else {
-    throw new Error(`Unknown buffer data type: ${data.constructor}`)
+    throw new Error(`Unknown buffer data type: ${data.constructor}`);
   }
 
-  buffer.type = type
+  buffer.type = type;
 
   // TODO: is this a valid guess?
-  buffer.length = data.length
+  buffer.length =
+    data.length ??
+    data.byteLength / ctx.DataTypeConstructor[type].BYTES_PER_ELEMENT;
+
+  if (ctx.state.vertexArray) {
+    ctx.state.vertexArray = undefined;
+    gl.bindVertexArray(null);
+  }
 
   // TODO: push state, and pop as this can modify existing VBO?
-  gl.bindBuffer(buffer.target, buffer.handle)
+  gl.bindBuffer(buffer.target, buffer.handle);
   if (offset) {
-    gl.bufferSubData(buffer.target, offset, data)
+    gl.bufferSubData(buffer.target, offset, data);
   } else {
-    gl.bufferData(buffer.target, data, buffer.usage)
+    gl.bufferData(buffer.target, data, buffer.usage);
   }
+
+  buffer.info = ctx.DataTypeConstructor[type].name;
 }
 
-module.exports = createBuffer
+export default createBuffer;

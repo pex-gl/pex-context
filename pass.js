@@ -1,48 +1,45 @@
-const checkProps = require('./check-props')
+import { checkProps } from "./utils.js";
+
+/**
+ * @typedef {import("./types.js").PexResource} PassOptions
+ * @property {import("./types.js").PexTexture2D[]|import("./framebuffer.js").Attachment[]} [color] render target
+ * @property {import("./types.js").PexTexture2D} [depth] render target
+ * @property {import("./types.js").Color} [clearColor]
+ * @property {number} [clearDepth]
+ */
 
 const allowedProps = [
-  'name',
-  'framebuffer',
-  'color',
-  'depth',
-  'clearColor',
-  'clearDepth'
-]
+  "name",
+  "framebuffer",
+  "color",
+  "depth",
+  "clearColor",
+  "clearDepth",
+];
 
 function createPass(ctx, opts) {
-  checkProps(allowedProps, opts)
+  checkProps(allowedProps, opts);
 
   const pass = {
-    class: 'pass',
-    opts: opts,
-    // framebuffer: opts.framebuffer,
+    class: "pass",
+    opts,
     clearColor: opts.clearColor,
     clearDepth: opts.clearDepth,
-    _dispose: function() {
-      this.opts = null
-      this.clearColor = null
-      this.clearDepth = null
-      if (this.framebuffer === ctx.defaultState.pass.sharedFramebuffer) {
-        if (--ctx.defaultState.pass.sharedFramebuffer.refCount === 0) {
-          ctx.defaultState.pass.sharedFramebuffer._dispose()
-          ctx.defaultState.pass.sharedFramebuffer = null
-        }
+    _dispose() {
+      this.opts = null;
+      this.clearColor = null;
+      this.clearDepth = null;
+      if (this.framebuffer) {
+        ctx.dispose(this.framebuffer);
+        this.framebuffer = null;
       }
-      this.framebuffer = null
-    }
-  }
+    },
+  };
 
-  // if color or depth targets are present assign shared framebuffer 
-  // otherwise we will inherit framebuffer from parent command or screen
-  if (opts.color || opts.depth) {
-    if (!ctx.defaultState.pass.sharedFramebuffer) {
-      ctx.defaultState.pass.sharedFramebuffer = ctx.framebuffer({})
-    }
-    pass.framebuffer = ctx.defaultState.pass.sharedFramebuffer
-    ctx.defaultState.pass.sharedFramebuffer.refCount++
-  }
+  // Inherits framebuffer from parent command or screen, if no target specified
+  if (opts.color || opts.depth) pass.framebuffer = ctx.framebuffer(opts);
 
-  return pass
+  return pass;
 }
 
-module.exports = createPass
+export default createPass;

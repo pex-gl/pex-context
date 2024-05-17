@@ -1,105 +1,116 @@
-const createContext = require('../')
-const random = require('pex-random')
-const mat4 = require('pex-math/mat4')
-const mat3 = require('pex-math/mat3')
-const vec4 = require('pex-math/vec4')
+import createContext from "../index.js";
 
-const showNormalsVert = require('./shaders/show-normals.vert.js')
-const showNormalsFrag = require('./shaders/show-normals.frag.js')
+import { vec4, mat3, mat4 } from "pex-math";
+import { perspective as createCamera } from "pex-cam";
+import random from "pex-random";
 
-const ctx = createContext()
+import { cube } from "primitive-geometry";
 
-const W = ctx.gl.drawingBufferWidth
-const H = ctx.gl.drawingBufferHeight
-const vw = 800
-const vh = 400
-const vx = (W - vw) / 2
-const vy = (H - vh) / 2
-const viewport = [vx, vy, vw, vh]
+import basicMVP from "./shaders/basic-mvp.vert.js";
+import basicFrag from "./shaders/basic.frag.js";
 
-const camera = require('pex-cam/perspective')({
+const ctx = createContext({ debug: true });
+
+let viewport;
+const vw = 800;
+const vh = 400;
+
+const camera = createCamera({
   fov: Math.PI / 4,
   aspect: vw / vh,
-  near: 0.1,
-  far: 1000,
-  target: [0, 0, 0],
-  position: [5, 1, 5]
-})
+  position: [5, 1, 5],
+});
 
-const cube = require('primitive-cube')(0.5)
+const geom = cube();
 
-const cubes = []
-for (var i = 0; i < 8; i++) {
-  const pos = random.vec3(3)
-  const m = mat4.create()
-  mat4.translate(m, pos)
+random.seed(4);
 
-  const label = document.createElement('span')
-  label.innerText = 'Cube ' + i
-  label.style.position = 'absolute'
-  label.style.left = '50px'
-  label.style.top = '50px'
-  label.style.color = 'white'
-  label.style.fontFamily = 'sans-serif'
-  label.style.pointerEvents = 'none'
-  document.body.appendChild(label)
+const cubes = [];
+for (let i = 0; i < 8; i++) {
+  const position = random.vec3(3);
+  const modelMatrix = mat4.create();
+  mat4.translate(modelMatrix, position);
+
+  const label = document.createElement("span");
+  label.innerText = `Cube ${i}`;
+  Object.assign(label.style, {
+    position: "absolute",
+    left: "50px",
+    top: "50px",
+    color: "white",
+    fontFamily: "sans-serif",
+    pointerEvents: "none",
+    transform: "translate3d(-50%, -50%, 0)",
+  });
+  document.body.appendChild(label);
 
   cubes.push({
-    label: label,
-    position: pos,
-    modelMatrix: m,
-    normalMatrix: mat3.create()
-  })
+    label,
+    position,
+    modelMatrix,
+    normalMatrix: mat3.create(),
+  });
 }
 
 const clearCmd = {
   pass: ctx.pass({
-    clearColor: [0.1, 0.1, 0.1, 1.0],
-    clearDepth: 1
-  })
-}
+    clearColor: [0.1, 0.1, 0.1, 1],
+    clearDepth: 1,
+  }),
+};
 
 const drawInViewport = {
   pass: ctx.pass({
-    clearColor: [0.2, 0.2, 0.2, 1]
+    clearColor: [0.2, 0.2, 0.2, 1],
   }),
-  viewport: viewport,
-  scissor: viewport
-}
+  // viewport,
+  // scissor: viewport,
+};
 
 const drawCubeCmd = {
   pipeline: ctx.pipeline({
-    vert: showNormalsVert,
-    frag: showNormalsFrag,
-    depthTest: true
+    vert: basicMVP,
+    frag: basicFrag,
+    depthTest: true,
   }),
   attributes: {
-    aPosition: ctx.vertexBuffer(cube.positions),
-    aNormal: ctx.vertexBuffer(cube.normals)
+    aPosition: ctx.vertexBuffer(geom.positions),
+    aNormal: ctx.vertexBuffer(geom.normals),
   },
-  indices: ctx.indexBuffer(cube.cells),
+  indices: ctx.indexBuffer(geom.cells),
   uniforms: {
     uProjectionMatrix: camera.projectionMatrix,
-    uViewMatrix: camera.viewMatrix
-  }
-}
+    uViewMatrix: camera.viewMatrix,
+  },
+};
 
-const tempMat = mat4.create()
-const pos = [0, 0, 0, 0]
+const onResize = () => {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  viewport = [(W - vw) / 2, (H - vh) / 2, vw, vh];
+  ctx.set({ width: W, height: H})
+
+  drawInViewport.viewport = drawInViewport.scissor = viewport;
+};
+window.addEventListener("resize", onResize);
+onResize();
+
+const tempMat = mat4.create();
+const pos = [0, 0, 0, 0];
 
 ctx.frame(() => {
-  ctx.submit(clearCmd)
+  ctx.submit(clearCmd);
 
   ctx.submit(drawInViewport, () => {
-    cubes.forEach((c) => {
+    cubes.forEach(({ modelMatrix, normalMatrix, position, label }) => {
       // normal matrix = inverse transpose of model view matrix
       // you can just pass mat3(viewMatrix) if you scaling is uniform
-      mat4.identity(tempMat)
-      mat4.mult(tempMat, c.modelMatrix)
-      mat4.mult(tempMat, camera.viewMatrix)
-      mat4.invert(tempMat)
-      mat4.transpose(tempMat)
-      mat3.fromMat4(c.normalMatrix, tempMat)
+      mat4.identity(tempMat);
+      mat4.mult(tempMat, modelMatrix);
+      mat4.mult(tempMat, camera.viewMatrix);
+      mat4.invert(tempMat);
+      mat4.transpose(tempMat);
+      mat3.fromMat4(normalMatrix, tempMat);
 
       // more info at MDN
       // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection
@@ -109,47 +120,50 @@ ctx.frame(() => {
       // we assume model position is [0, 0, 0] so world position is c.position
       // we could also transform 0,0,0 point by model matrix
       // vec4.multMat4([0, 0, 0, 1], c.modelMatrix)
-      vec4.fromVec3(pos, c.position)
-      pos[3] = 1 // vec4 bug fix
+      vec4.fromVec3(pos, position);
+      pos[3] = 1; // vec4 bug fix
 
       // world space to view space
-      vec4.multMat4(pos, camera.viewMatrix)
+      vec4.multMat4(pos, camera.viewMatrix);
 
       // view space to clip space
-      vec4.multMat4(pos, camera.projectionMatrix)
+      vec4.multMat4(pos, camera.projectionMatrix);
 
       // homogeneous coordinates to cartesian coordinates
       // "When dividing by w, this can effectively increase the precision
       // of very large numbers by operating on two potentially smaller,
       // less error-prone numbers."
       // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection
-      const w = pos[3]
+      const w = pos[3];
       if (w !== 0) {
-        pos[0] /= w
-        pos[1] /= w
-        pos[2] /= w
+        pos[0] /= w;
+        pos[1] /= w;
+        pos[2] /= w;
       }
 
       // homogeneous coordinates [-1, 1] to normalized [0, 1]
       // note that we multiply y by -0.5 because in WebGL Y axis increases up
       // and in HTML / Canvas it increases from top to bottom
-      pos[0] = pos[0] * 0.5 + 0.5
-      pos[1] = pos[1] * -0.5 + 0.5
+      pos[0] = pos[0] * 0.5 + 0.5;
+      pos[1] = pos[1] * -0.5 + 0.5;
 
       // normalized to screen coordinates
-      pos[0] = viewport[0] + pos[0] * viewport[2]
-      pos[1] = viewport[1] + pos[1] * viewport[3]
+      pos[0] = viewport[0] + pos[0] * viewport[2];
+      pos[1] = viewport[1] + pos[1] * viewport[3];
 
-      c.label.style.left = pos[0] + 'px'
-      c.label.style.top = pos[1] + 'px'
+      label.style.left = `${pos[0]}px`;
+      label.style.top = `${pos[1]}px`;
 
       ctx.submit(drawCubeCmd, {
         uniforms: {
-          uModelMatrix: c.modelMatrix,
-          uNormalMatrix: c.normalMatrix
-        }
-      })
-    })
-  })
-  window.dispatchEvent(new CustomEvent('pex-screenshot'))
-})
+          uModelMatrix: modelMatrix,
+          uNormalMatrix: normalMatrix,
+        },
+      });
+    });
+  });
+
+  ctx.debug(false);
+
+  window.dispatchEvent(new CustomEvent("screenshot"));
+});
