@@ -456,6 +456,7 @@ export const addEnums = (ctx) => {
   ctx.Wrap = {
     ClampToEdge: gl.CLAMP_TO_EDGE,
     Repeat: gl.REPEAT,
+    MirroredRepeat: gl.MIRRORED_REPEAT,
   };
 
   /** @enum */
