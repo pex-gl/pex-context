@@ -1,6 +1,12 @@
 import { NAMESPACE } from "./utils.js";
 
-const builtInAttributes = ["gl_VertexID", "gl_InstanceID"];
+const builtInAttributes = [
+  "gl_VertexID",
+  "gl_InstanceID",
+  "gl_DrawID",
+  "gl_BaseVertex",
+  "gl_BaseInstance",
+];
 
 function createProgram(ctx, opts) {
   const gl = ctx.gl;
