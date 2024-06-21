@@ -1,5 +1,7 @@
 import { NAMESPACE } from "./utils.js";
 
+const builtInAttributes = ["gl_VertexID", "gl_InstanceID"];
+
 function createProgram(ctx, opts) {
   const gl = ctx.gl;
 
@@ -158,6 +160,10 @@ function updateAttributes(ctx, program) {
     const info = gl.getActiveAttrib(program.handle, i);
     const name = info.name;
     const size = ctx.AttributeSize[info.type];
+
+    if (builtInAttributes.includes(name)) {
+      continue;
+    }
 
     if (size === undefined) {
       throw new Error(
