@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [3.1.0](https://github.com/pex-gl/pex-context/compare/v3.0.0...v3.1.0) (2024-06-21)
+
+
+### Bug Fixes
+
+* skip built-in attributes in program ([4a37026](https://github.com/pex-gl/pex-context/commit/4a37026b6593655d9168f6099515d2ac510b62db)), closes [#142](https://github.com/pex-gl/pex-context/issues/142)
+
+
+### Features
+
+* add MIRRORED_REPEAT to ctx.Wrap ([aaec02a](https://github.com/pex-gl/pex-context/commit/aaec02abd65d9e790a65c6496fe227f149935249)), closes [#141](https://github.com/pex-gl/pex-context/issues/141)
+
+
+
 # [3.0.0](https://github.com/pex-gl/pex-context/compare/v3.0.0-alpha.9...v3.0.0) (2024-05-16)
 
 

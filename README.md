@@ -399,10 +399,11 @@ One of:
 **Kind**: static enum of [<code>ctx</code>](#ctx)
 **Properties**
 
-| Name        | Default                       |
-| ----------- | ----------------------------- |
-| ClampToEdge | <code>gl.CLAMP_TO_EDGE</code> |
-| Repeat      | <code>gl.REPEAT</code>        |
+| Name           | Default                         |
+| -------------- | ------------------------------- |
+| ClampToEdge    | <code>gl.CLAMP_TO_EDGE</code>   |
+| Repeat         | <code>gl.REPEAT</code>          |
+| MirroredRepeat | <code>gl.MIRRORED_REPEAT</code> |
 
 <a name="ctx.QueryTarget"></a>
 
