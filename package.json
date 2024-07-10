@@ -26,7 +26,12 @@
     "Marcin Ignac <marcin.ignac@gmail.com> (http://marcinignac.com)"
   ],
   "type": "module",
-  "exports": "./index.js",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./index.js"
+    }
+  },
   "main": "index.js",
   "types": "types/index.d.ts",
   "scripts": {

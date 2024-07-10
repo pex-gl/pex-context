@@ -1,6 +1,6 @@
 node_modules
-web_modules
 .DS_Store
-types
-lib
-examples/screenshots/*-diff.png
+/types
+/lib
+/examples/screenshots/*-diff.png
+/web_modules
