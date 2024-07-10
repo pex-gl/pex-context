@@ -53,9 +53,9 @@ export default function polyfill(ctx) {
     };
     gl.getQueryObject = gl.getQueryParameter;
   } else {
-    const extDTQ = capabilities.isWebGL2
-      ? gl.getExtension("EXT_disjoint_timer_query_webgl2")
-      : gl.getExtension("EXT_disjoint_timer_query");
+    const extDTQ =
+      gl.getExtension("EXT_disjoint_timer_query_webgl2") ||
+      gl.getExtension("EXT_disjoint_timer_query");
     gl.TIME_ELAPSED = extDTQ.TIME_ELAPSED_EXT;
     gl.GPU_DISJOINT = extDTQ.GPU_DISJOINT_EXT;
     gl.QUERY_RESULT ||= extDTQ.QUERY_RESULT_EXT;
