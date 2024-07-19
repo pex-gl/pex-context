@@ -417,10 +417,10 @@ export const addEnums = (ctx) => {
     // they come from the extension and need _EXT suffix
     RGBA32F:
       (extColorBufferFloat && gl.RGBA32F) ||
-      gl.getExtension("WEBGL_color_buffer_float").RGBA32F_EXT, // WebGL1 only
+      gl.getExtension("WEBGL_color_buffer_float")?.RGBA32F_EXT, // WebGL1 only
     RGBA16F:
       (extColorBufferFloat && gl.RGBA16F) ||
-      gl.getExtension("EXT_color_buffer_half_float").RGBA16F_EXT, // WebGL1/2
+      gl.getExtension("EXT_color_buffer_half_float")?.RGBA16F_EXT, // WebGL1/2
     R16F: extColorBufferFloat && gl.R16F,
     RG16F: extColorBufferFloat && gl.RG16F,
     R32F: extColorBufferFloat && gl.R32F,
