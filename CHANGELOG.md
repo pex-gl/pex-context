@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.1.2](https://github.com/pex-gl/pex-context/compare/v3.1.1...v3.1.2) (2024-09-03)
+
+
+### Bug Fixes
+
+* do not assume EXT_disjoint_timer_query_webgl2 for webgl2 context ([d70e111](https://github.com/pex-gl/pex-context/commit/d70e11103beefbdc7e71547b2e33e9a66c720191)), closes [#143](https://github.com/pex-gl/pex-context/issues/143)
+* make sure WEBGL_color_buffer_float and EXT_color_buffer_half_float are available before setting ctx.RenderbufferFloatFormat ([1af54d0](https://github.com/pex-gl/pex-context/commit/1af54d030191024bf2bd0b7e8034d283fca5683d))
+
+
+
 ## [3.1.1](https://github.com/pex-gl/pex-context/compare/v3.1.0...v3.1.1) (2024-06-21)
 
 
