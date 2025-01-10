@@ -127,13 +127,16 @@ const drawFloorDepthCmd = {
 };
 
 // Geometry
-const bunnyBaseVertices = centerAndNormalize(structuredClone(bunny.positions), {
-  normalizedSize: 2,
-});
-const bunnyBaseNormals = vertexNormals(bunny.cells, bunny.positions);
-const bunnyNoiseVertices = structuredClone(bunnyBaseVertices);
-const bunnyPositionBuffer = ctx.vertexBuffer(bunnyBaseVertices);
-const bunnyNormalBuffer = ctx.vertexBuffer(bunnyBaseNormals);
+const bunnyGeometry = {
+  positions: centerAndNormalize(structuredClone(bunny.positions), {
+    normalizedSize: 2,
+  }),
+  normals: vertexNormals(bunny.cells, bunny.positions),
+  cells: bunny.cells,
+};
+const bunnyNoiseVertices = structuredClone(bunnyGeometry.positions);
+const bunnyPositionBuffer = ctx.vertexBuffer(bunnyGeometry.positions);
+const bunnyNormalBuffer = ctx.vertexBuffer(bunnyGeometry.normals);
 
 const bunnyAttributes = {
   attributes: {
@@ -184,15 +187,17 @@ function updateTime() {
   const deltaTime = (now - prevTime) / 1000;
   elapsedSeconds += deltaTime;
   prevTime = now;
+
+  return deltaTime;
 }
 
 function updateBunny(ctx) {
   const noiseFrequency = 1;
   const noiseScale = 0.1;
-  for (let i = 0; i < bunnyBaseVertices.length; i++) {
+  for (let i = 0; i < bunnyGeometry.positions.length; i++) {
     const v = bunnyNoiseVertices[i];
-    const n = bunnyBaseNormals[i];
-    vec3.set(v, bunnyBaseVertices[i]);
+    const n = bunnyGeometry.normals[i];
+    vec3.set(v, bunnyGeometry.positions[i]);
     const f = random.noise3(
       v[0] * noiseFrequency,
       v[1] * noiseFrequency,
@@ -242,6 +247,8 @@ const drawFullscreenQuadCmd = {
 export {
   ctx,
   gui,
+  camera,
+  bunnyGeometry,
   updateTime,
   updateBunny,
   depthPassCmd,

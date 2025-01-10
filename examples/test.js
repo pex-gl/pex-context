@@ -24,7 +24,7 @@ console.assert(tex.class === "texture", "Wrong texture class");
 
 console.assert(
   ctx.state.activeTextures[0] === tex,
-  "Creating texture should be remembered in active state"
+  "Creating texture should be remembered in active state",
 );
 
 Object.keys(ctx.PixelFormat)
@@ -90,7 +90,7 @@ const vertexBufferDefault = {
     data: new Float32Array([0, 1, 2, 3, 4, 5]),
   }),
   aTypedArrayBuffer: ctx.vertexBuffer(
-    new Float32Array([0, 1, 2, 3, 4, 5]).buffer
+    new Float32Array([0, 1, 2, 3, 4, 5]).buffer,
   ),
   aDataTypedArrayBuffer: ctx.vertexBuffer({
     data: new Float32Array([0, 1, 2, 3, 4, 5]).buffer,
@@ -99,15 +99,15 @@ const vertexBufferDefault = {
 Object.values(vertexBufferDefault).forEach((buffer, i) => {
   console.assert(
     buffer.length === 6,
-    `${i} - Invalid vertex buffer length: ${buffer.length}`
+    `${i} - Invalid vertex buffer length: ${buffer.length}`,
   );
   console.assert(
     buffer.type === ctx.DataType.Float32,
-    `${i} - Invalid vertex buffer data type: ${buffer.type}`
+    `${i} - Invalid vertex buffer data type: ${buffer.type}`,
   );
   console.assert(
     buffer.target === ctx.gl.ARRAY_BUFFER,
-    `${i} - Invalid vertex buffer target: ${buffer.target} != ${ctx.gl.ARRAY_BUFFER}`
+    `${i} - Invalid vertex buffer target: ${buffer.target} != ${ctx.gl.ARRAY_BUFFER}`,
   );
 });
 
@@ -129,7 +129,7 @@ const indexBuffers = {
     data: new Uint16Array([0, 1, 2, 3, 4, 5]),
   }),
   aTypedArrayBuffer: ctx.indexBuffer(
-    new Uint16Array([0, 1, 2, 3, 4, 5]).buffer
+    new Uint16Array([0, 1, 2, 3, 4, 5]).buffer,
   ),
   aDataTypedArrayBuffer: ctx.indexBuffer({
     data: new Uint16Array([0, 1, 2, 3, 4, 5]).buffer,
@@ -138,15 +138,15 @@ const indexBuffers = {
 Object.values(indexBuffers).forEach((buffer, i) => {
   console.assert(
     buffer.length === 6,
-    `${i} - Invalid index buffer length: ${buffer.length}`
+    `${i} - Invalid index buffer length: ${buffer.length}`,
   );
   console.assert(
     buffer.type === ctx.DataType.Uint16,
-    `${i} - Invalid index buffer data type: ${buffer.type}`
+    `${i} - Invalid index buffer data type: ${buffer.type}`,
   );
   console.assert(
     buffer.target === ctx.gl.ELEMENT_ARRAY_BUFFER,
-    `${i} - Invalid index buffer target: ${buffer.target} != ${ctx.gl.ELEMENT_ARRAY_BUFFER}`
+    `${i} - Invalid index buffer target: ${buffer.target} != ${ctx.gl.ELEMENT_ARRAY_BUFFER}`,
   );
 });
 
@@ -161,7 +161,7 @@ const indexBuffersTypes = {
 Object.entries(indexBuffersTypes).forEach(([type, buffer], i) => {
   console.assert(
     buffer.type === parseInt(type),
-    `${i} - Invalid index buffer data type: ${buffer.type}`
+    `${i} - Invalid index buffer data type: ${buffer.type}`,
   );
 });
 const indexBuffersTypeOption = {
@@ -239,7 +239,7 @@ const indexBuffersTypeOption = {
 Object.entries(indexBuffersTypeOption).forEach(([type, buffer], i) => {
   console.assert(
     buffer.type === parseInt(type),
-    `${i} - Invalid index buffer data type: ${buffer.type}`
+    `${i} - Invalid index buffer data type: ${buffer.type}`,
   );
 });
 
@@ -247,29 +247,29 @@ const bufferUpdateToTypedArray = ctx.vertexBuffer([0, 1, 2, 3, 4, 5]);
 ctx.update(bufferUpdateToTypedArray, { data: [0, 1, 2, 3, 4, 5] });
 console.assert(
   bufferUpdateToTypedArray.type === ctx.DataType.Float32,
-  `Invalid vertex buffer data type: ${bufferUpdateToTypedArray.type}`
+  `Invalid vertex buffer data type: ${bufferUpdateToTypedArray.type}`,
 );
 ctx.update(bufferUpdateToTypedArray, {
   data: new Uint16Array([0, 1, 2, 3, 4, 5]),
 });
 console.assert(
   bufferUpdateToTypedArray.type === ctx.DataType.Uint16,
-  `Invalid vertex buffer data type: ${bufferUpdateToTypedArray.type}`
+  `Invalid vertex buffer data type: ${bufferUpdateToTypedArray.type}`,
 );
 const bufferUpdateToArrayOfArrays = ctx.vertexBuffer(
-  new Uint16Array([0, 1, 2, 3, 4, 5])
+  new Uint16Array([0, 1, 2, 3, 4, 5]),
 );
 ctx.update(bufferUpdateToArrayOfArrays, {
   data: new Uint16Array([0, 1, 2, 3, 4, 5]),
 });
 console.assert(
   bufferUpdateToArrayOfArrays.type === ctx.DataType.Uint16,
-  `Invalid vertex buffer data type: ${bufferUpdateToArrayOfArrays.type}`
+  `Invalid vertex buffer data type: ${bufferUpdateToArrayOfArrays.type}`,
 );
 ctx.update(bufferUpdateToArrayOfArrays, { data: [0, 1, 2, 3, 4, 5] });
 console.assert(
   bufferUpdateToArrayOfArrays.type === ctx.DataType.Float32,
-  `Invalid vertex buffer data type: ${bufferUpdateToArrayOfArrays.type}`
+  `Invalid vertex buffer data type: ${bufferUpdateToArrayOfArrays.type}`,
 );
 
 /**
@@ -279,7 +279,7 @@ const vertexLayout = Object.fromEntries(
   Object.entries(vertexBufferDefault).map(([key], index) => [
     key,
     { location: index, type: "vec3" },
-  ])
+  ]),
 );
 
 ctx.vertexArray({
@@ -327,7 +327,7 @@ ctx.submit({
 
 console.assert(
   ctx.state.activeTextures[0] === tex,
-  "Using texture should be remembered in active state"
+  "Using texture should be remembered in active state",
 );
 
 /**
@@ -463,3 +463,20 @@ ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.R11F_G11F_B10F });
 // ctxWebGL1.renderbuffer({ pixelFormat: ctxWebGL1.PixelFormat.RGB32F });
 // ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.RGB16F });
 // ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.RGB32F });
+
+/**
+ * TRANSFORM-FEEDBACK
+ */
+console.log(vertexBufferDefault);
+
+const transformFeedbackVarying = ctx.vertexBuffer([0, 1, 2, 3, 4, 5]);
+ctx.transformFeedback({
+  varyings: {
+    aVarying: transformFeedbackVarying,
+  },
+});
+
+setTimeout(() => {
+  console.info("ctx.dispose()");
+  ctx.dispose();
+}, 3000);

@@ -26,6 +26,9 @@ function compareFBOAttachments(framebuffer, passOpts) {
   return true;
 }
 
+const getUniformLocation = (gl, program, name) =>
+  gl.getUniformLocation(program.handle, name);
+
 function enableVertexData(ctx, vertexLayout, cmd, updateState) {
   const gl = ctx.gl;
 
@@ -413,6 +416,7 @@ export {
   isWebGL2,
   checkProps,
   compareFBOAttachments,
+  getUniformLocation,
   enableVertexData,
   draw,
 };

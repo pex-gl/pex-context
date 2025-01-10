@@ -1,4 +1,3 @@
-import { vec3, quat } from "pex-math";
 import random from "pex-random";
 
 import {
