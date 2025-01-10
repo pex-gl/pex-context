@@ -24,6 +24,7 @@
     "shadows",
     "sub-pass",
     // "test",
+    "texture-array",
     "transform-feedback",
     "unindexed",
     "vao",

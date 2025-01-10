@@ -8,7 +8,7 @@ import { checkProps } from "./utils.js";
  */
 
 /**
- * @typedef {WebGLRenderingContext.TEXTURE_2D | WebGLRenderingContext.TEXTURE_CUBE_MAP} TextureTarget
+ * @typedef {WebGLRenderingContext.TEXTURE_2D | WebGLRenderingContext.TEXTURE_CUBE_MAP | WebGL2RenderingContext.TEXTURE_2D_ARRAY | WebGL2RenderingContext.TEXTURE_3D} TextureTarget
  */
 
 /**
@@ -72,14 +72,14 @@ function createTexture(ctx, opts) {
     target: opts.target,
     width: 0,
     height: 0,
-    _update: updateTexture2D,
+    _update: updateTexture,
     _dispose() {
       gl.deleteTexture(this.handle);
       this.handle = null;
     },
   };
 
-  updateTexture2D(ctx, texture, opts);
+  updateTexture(ctx, texture, opts);
 
   return texture;
 }
@@ -88,7 +88,7 @@ function orValue(a, b) {
   return a !== undefined ? a : b;
 }
 
-function updateTexture2D(ctx, texture, opts) {
+function updateTexture(ctx, texture, opts) {
   // checkProps(allowedProps, opts)
 
   const gl = ctx.gl;
@@ -101,29 +101,31 @@ function updateTexture2D(ctx, texture, opts) {
   let target = opts.target || texture.target;
   let pixelFormat =
     opts.pixelFormat || texture.pixelFormat || ctx.PixelFormat.RGBA8;
-  let encoding = opts.encoding || texture.encoding || ctx.Encoding.Linear;
-  let min = opts.min || texture.min || gl.NEAREST;
-  let mag = opts.mag || texture.mag || gl.NEAREST;
-  let wrapS =
+  const encoding = opts.encoding || texture.encoding || ctx.Encoding.Linear;
+  const min = opts.min || texture.min || gl.NEAREST;
+  const mag = opts.mag || texture.mag || gl.NEAREST;
+  const wrapS =
     opts.wrapS ||
     opts.wrap ||
     texture.wrapS ||
     texture.wrap ||
     gl.CLAMP_TO_EDGE;
-  let wrapT =
+  const wrapT =
     opts.wrapT ||
     opts.wrap ||
     texture.wrapT ||
     texture.wrap ||
     gl.CLAMP_TO_EDGE;
-  let aniso = opts.aniso || texture.aniso || 0;
-  let premultiplyAlpha = orValue(
+  const aniso = opts.aniso || texture.aniso || 0;
+  const premultiplyAlpha = orValue(
     opts.premultiplyAlpha,
     orValue(texture.premultiplyAlpha, false),
   );
   let internalFormat = opts.internalFormat || texture.internalFormat;
   let type;
   let format;
+
+  const isTexture2DArray = target === gl.TEXTURE_2D_ARRAY;
 
   const textureUnit = 0;
   gl.activeTexture(gl.TEXTURE0 + textureUnit);
@@ -175,8 +177,14 @@ function updateTexture2D(ctx, texture, opts) {
 
     // Handle pixel data with flags
     data = opts.data ? opts.data.data || opts.data : null;
-    if (!opts.width && data && data.width) width = data.width;
-    if (!opts.height && data && data.height) height = data.height;
+
+    if (isTexture2DArray) {
+      width ||= data[0]?.width;
+      height ||= data[0]?.height;
+    } else {
+      width ||= data.width;
+      height ||= data.height;
+    }
 
     console.assert(
       !data || (width !== undefined && height !== undefined),
@@ -228,102 +236,31 @@ function updateTexture2D(ctx, texture, opts) {
     type = opts.type || type;
     console.assert(type, `Texture2D.update Unknown type ${type}.`);
 
+    texture.internalFormat = internalFormat;
+    texture.format = format;
+    texture.type = type;
+    texture.target = target;
+    texture.compressed = compressed;
+
     if (target === gl.TEXTURE_2D) {
       // Prepare data for mipmaps
       data =
         Array.isArray(data) && data[0].data ? data : [{ data, width, height }];
 
-      for (let level = 0; level < data.length; level++) {
-        let { data: levelData, width, height } = data[level];
-
-        // Convert array of numbers to typed array
-        if (Array.isArray(levelData)) {
-          const TypedArray = ctx.DataTypeConstructor[type];
-          console.assert(TypedArray, `Unknown texture data type: ${type}`);
-          levelData = new TypedArray(levelData);
-        }
-
-        if (compressed) {
-          gl.compressedTexImage2D(
-            target,
-            level,
-            internalFormat,
-            width,
-            height,
-            0,
-            levelData,
-          );
-        } else if (width && height) {
-          gl.texImage2D(
-            target,
-            level,
-            internalFormat,
-            width,
-            height,
-            0,
-            format,
-            type,
-            levelData,
-          );
-        }
-      }
-
       if (data[0].width) texture.width = data[0].width;
       if (data[0].height) texture.height = data[0].height;
+
+      updateTexture2D(ctx, texture, data);
+    } else if (isTexture2DArray) {
+      texture.width = width;
+      texture.height = height;
+
+      updateTexture2DArray(ctx, texture, data);
     } else if (target === gl.TEXTURE_CUBE_MAP) {
-      console.assert(
-        !data || (Array.isArray(data) && data.length === 6),
-        "TextureCube requires data for 6 faces",
-      );
+      texture.width = width;
+      texture.height = height;
 
-      // TODO: gl.compressedTexImage2D, manual mimaps
-      let lod = 0;
-
-      for (let i = 0; i < 6; i++) {
-        let faceData = data ? data[i].data || data[i] : null;
-        const faceTarget = gl.TEXTURE_CUBE_MAP_POSITIVE_X + i;
-        if (Array.isArray(faceData)) {
-          // Convert array of numbers to typed array
-          const TypedArray = ctx.DataTypeConstructor[type];
-          console.assert(TypedArray, `Unknown texture data type: ${type}`);
-          faceData = new TypedArray(faceData);
-
-          gl.texImage2D(
-            faceTarget,
-            lod,
-            internalFormat,
-            width,
-            height,
-            0,
-            format,
-            type,
-            faceData,
-          );
-        } else if (faceData && faceData.nodeName) {
-          gl.texImage2D(
-            faceTarget,
-            lod,
-            internalFormat,
-            format,
-            type,
-            faceData,
-          );
-        } else {
-          gl.texImage2D(
-            faceTarget,
-            lod,
-            internalFormat,
-            width,
-            height,
-            0,
-            format,
-            type,
-            faceData,
-          );
-        }
-        texture.width = width;
-        texture.height = height;
-      }
+      updateTextureCube(ctx, texture, data);
     }
   } else {
     // TODO: should i assert of throw new Error(msg)?
@@ -332,32 +269,155 @@ function updateTexture2D(ctx, texture, opts) {
     );
   }
 
-  if (opts.mipmap) {
-    gl.generateMipmap(texture.target);
-  }
+  if (opts.mipmap) gl.generateMipmap(texture.target);
 
-  texture.compressed = compressed;
-  texture.target = target;
   texture.pixelFormat = pixelFormat;
-  texture.encoding = encoding;
   texture.min = min;
   texture.mag = mag;
   texture.wrapS = wrapS;
   texture.wrapT = wrapT;
-  texture.format = format;
   texture.flipY = flipY;
-  texture.internalFormat = internalFormat;
-  texture.type = type;
-  texture.info = "";
-  texture.info += Object.keys(ctx.PixelFormat).find(
+  texture.encoding = encoding;
+
+  texture.info = `${Object.keys(ctx.PixelFormat).find(
     (key) => ctx.PixelFormat[key] === pixelFormat,
-  );
-  texture.info += "_";
-  texture.info += Object.keys(ctx.Encoding).find(
+  )}_${Object.keys(ctx.Encoding).find(
     (key) => ctx.Encoding[key] === encoding,
-  );
+  )}`;
 
   return texture;
+}
+
+function updateTexture2D(ctx, texture, data) {
+  const gl = ctx.gl;
+  const { internalFormat, format, type, target, compressed } = texture;
+
+  for (let level = 0; level < data.length; level++) {
+    let { data: levelData, width, height } = data[level];
+
+    // Convert array of numbers to typed array
+    if (Array.isArray(levelData)) {
+      const TypedArray = ctx.DataTypeConstructor[type];
+      console.assert(TypedArray, `Unknown texture data type: ${type}`);
+      levelData = new TypedArray(levelData);
+    }
+
+    if (compressed) {
+      gl.compressedTexImage2D(
+        target,
+        level,
+        internalFormat,
+        width,
+        height,
+        0,
+        levelData,
+      );
+    } else if (width && height) {
+      gl.texImage2D(
+        target,
+        level,
+        internalFormat,
+        width,
+        height,
+        0,
+        format,
+        type,
+        levelData,
+      );
+    }
+  }
+}
+
+// TODO: compressed and lod
+function updateTexture2DArray(ctx, texture, data) {
+  const gl = ctx.gl;
+  const {
+    internalFormat,
+    format,
+    type,
+    target,
+    width,
+    height = width,
+  } = texture;
+
+  gl.texStorage3D(
+    gl.TEXTURE_2D_ARRAY,
+    1,
+    internalFormat,
+    width,
+    height,
+    data.length,
+  );
+
+  let lod = 0;
+
+  for (let i = 0; i < data.length; i++) {
+    const pixels = data[i].data || data[i];
+
+    gl.texSubImage3D(
+      target,
+      lod,
+      0,
+      0,
+      i,
+      width,
+      height,
+      1,
+      format,
+      type,
+      pixels,
+    );
+  }
+}
+
+function updateTextureCube(ctx, texture, data) {
+  console.assert(
+    !data || (Array.isArray(data) && data.length === 6),
+    "TextureCube requires data for 6 faces",
+  );
+
+  const gl = ctx.gl;
+  const { internalFormat, format, type, width, height = width } = texture;
+
+  // TODO: gl.compressedTexImage2D, manual mimaps
+  let lod = 0;
+
+  for (let i = 0; i < 6; i++) {
+    let faceData = data ? data[i].data || data[i] : null;
+    const faceTarget = gl.TEXTURE_CUBE_MAP_POSITIVE_X + i;
+    if (Array.isArray(faceData)) {
+      // Convert array of numbers to typed array
+      const TypedArray = ctx.DataTypeConstructor[type];
+      console.assert(TypedArray, `Unknown texture data type: ${type}`);
+      faceData = new TypedArray(faceData);
+
+      gl.texImage2D(
+        faceTarget,
+        lod,
+        internalFormat,
+        width,
+        height,
+        0,
+        format,
+        type,
+        faceData,
+      );
+    } else if (faceData && faceData.nodeName) {
+      gl.texImage2D(faceTarget, lod, internalFormat, format, type, faceData);
+    } else {
+      gl.texImage2D(
+        faceTarget,
+        lod,
+        internalFormat,
+        width,
+        height,
+        0,
+        format,
+        type,
+        faceData,
+      );
+    }
+  }
 }
 
 export default createTexture;

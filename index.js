@@ -572,6 +572,24 @@ function createContext(options = {}) {
       return this.resource(createTexture(this, opts));
     },
     /**
+     * Create a 2D Texture Array resource.
+     * @memberof ctx
+     * @param {import("./texture.js").TextureOptions} opts
+     * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const tex = ctx.texture2DArray({
+     *   data: [img, img, img],
+     * })
+     * ```
+     */
+    texture2DArray(opts) {
+      console.debug(NAMESPACE, "texture2DArray", opts);
+      opts.target = gl.TEXTURE_2D_ARRAY;
+      return this.resource(createTexture(this, opts));
+    },
+    /**
      * Create a 2D Texture cube resource.
      * @memberof ctx
      * @param {import("./texture.js").TextureCubeOptions} opts
