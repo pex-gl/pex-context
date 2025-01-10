@@ -12,69 +12,14 @@ const offsets = structuredClone(bunnyGeometry.positions);
 const instances = offsets.length;
 
 const scalesBuffer = ctx.vertexBuffer(offsets.map(() => [1, 1, 1]));
-const scalesBufferNext = ctx.vertexBuffer(offsets.map(() => [1, 1, 1]));
-const rotationsBuffer = ctx.vertexBuffer(
-  bunnyGeometry.normals.map((normal) =>
-    quat.fromDirection(quat.create(), normal),
-  ),
-);
+const scalesBuffer2 = ctx.vertexBuffer(offsets.map(() => [1, 1, 1]));
 
-// Commands
 const clearCmd = {
   pass: ctx.pass({
     clearColor: [0.2, 0.2, 0.2, 1],
     clearDepth: 1,
   }),
 };
-
-const drawVertexLayout = {
-  aPosition: { location: 0, type: "vec3" },
-  aNormal: { location: 1, type: "vec3" },
-  aOffset: { location: 2, type: "vec3" },
-  aScale: { location: 3, type: "vec3" },
-  aRotation: { location: 4, type: "vec4" },
-};
-
-const uniforms = {
-  uProjectionMatrix: camera.projectionMatrix,
-  uViewMatrix: camera.viewMatrix,
-  uModelMatrix: mat4.create(),
-};
-
-const drawCmd = {
-  pipeline: ctx.pipeline({
-    vertexLayout: drawVertexLayout,
-    cullFace: true,
-    vert: basicMVPInstancedVert,
-    frag: basicFrag,
-  }),
-  uniforms,
-  instances,
-};
-
-const drawVertexArrayCurrent = ctx.vertexArray({
-  vertexLayout: drawVertexLayout,
-  attributes: {
-    aPosition: { buffer: ctx.vertexBuffer(geom.positions) },
-    aNormal: { buffer: ctx.vertexBuffer(geom.normals) },
-    aOffset: { buffer: ctx.vertexBuffer(offsets), divisor: 1 },
-    aScale: { buffer: scalesBuffer, divisor: 1 },
-    aRotation: { buffer: rotationsBuffer, divisor: 1 },
-  },
-  indices: ctx.indexBuffer(geom.cells),
-});
-
-const drawVertexArrayNext = ctx.vertexArray({
-  vertexLayout: drawVertexLayout,
-  attributes: {
-    aPosition: { buffer: ctx.vertexBuffer(geom.positions) },
-    aNormal: { buffer: ctx.vertexBuffer(geom.normals) },
-    aOffset: { buffer: ctx.vertexBuffer(offsets), divisor: 1 },
-    aScale: { buffer: scalesBuffer, divisor: 1 },
-    aRotation: { buffer: rotationsBuffer, divisor: 1 },
-  },
-  indices: ctx.indexBuffer(geom.cells),
-});
 
 const updateVertexLayout = {
   aScale: { location: 0, type: "vec3" },
@@ -113,59 +58,115 @@ void main() {}
   `,
     primitive: ctx.Primitive.POINTS,
   }),
-  uniforms,
   count: instances,
 };
 
-const updateCmdCurrent = {
-  vertexArray: ctx.vertexArray({
+const updateCmdVertexArrays = [
+  ctx.vertexArray({
+    vertexLayout: updateVertexLayout,
+    attributes: {
+      aScale: { buffer: scalesBuffer2 },
+    },
+  }),
+  ctx.vertexArray({
     vertexLayout: updateVertexLayout,
     attributes: {
       aScale: { buffer: scalesBuffer },
     },
   }),
-  transformFeedback: ctx.transformFeedback({
-    varyings: {
-      outScale: scalesBufferNext,
-    },
-  }),
-};
+];
 
-const updateCmdNext = {
-  vertexArray: ctx.vertexArray({
-    vertexLayout: updateVertexLayout,
-    attributes: {
-      aScale: { buffer: scalesBufferNext },
-    },
-  }),
-  transformFeedback: ctx.transformFeedback({
+const updateCmdTransformFeedbacks = [
+  ctx.transformFeedback({
     varyings: {
       outScale: scalesBuffer,
     },
   }),
+  ctx.transformFeedback({
+    varyings: {
+      outScale: scalesBuffer2,
+    },
+  }),
+];
+
+const drawVertexLayout = {
+  aPosition: { location: 0, type: "vec3" },
+  aNormal: { location: 1, type: "vec3" },
+  aOffset: { location: 2, type: "vec3" },
+  aScale: { location: 3, type: "vec3" },
+  aRotation: { location: 4, type: "vec4" },
 };
+
+const drawCmd = {
+  pipeline: ctx.pipeline({
+    vertexLayout: drawVertexLayout,
+    cullFace: true,
+    vert: basicMVPInstancedVert,
+    frag: basicFrag,
+  }),
+  uniforms: {
+    uProjectionMatrix: camera.projectionMatrix,
+    uViewMatrix: camera.viewMatrix,
+    uModelMatrix: mat4.create(),
+  },
+  instances,
+};
+
+const attributes = {
+  aPosition: { buffer: ctx.vertexBuffer(geom.positions) },
+  aNormal: { buffer: ctx.vertexBuffer(geom.normals) },
+  aOffset: { buffer: ctx.vertexBuffer(offsets), divisor: 1 },
+  aScale: { buffer: scalesBuffer, divisor: 1 },
+  aRotation: {
+    buffer: ctx.vertexBuffer(
+      bunnyGeometry.normals.map((normal) =>
+        quat.fromDirection(quat.create(), normal),
+      ),
+    ),
+    divisor: 1,
+  },
+};
+
+const indices = ctx.indexBuffer(geom.cells);
+
+const drawCmdVertexArrays = [
+  ctx.vertexArray({
+    vertexLayout: drawVertexLayout,
+    attributes: {
+      ...attributes,
+      aScale: { buffer: scalesBuffer, divisor: 1 },
+    },
+    indices,
+  }),
+  ctx.vertexArray({
+    vertexLayout: drawVertexLayout,
+    attributes: {
+      ...attributes,
+      aScale: { buffer: scalesBuffer2, divisor: 1 },
+    },
+    indices,
+  }),
+];
 
 let frameIndex = 0;
 
 ctx.frame(() => {
   ctx.submit(clearCmd);
 
-  const isCurrent = frameIndex % 2 === 0;
+  const flipIndex = frameIndex % 2;
 
-  ctx.submit(
-    updateCmd,
-    Object.assign(isCurrent ? updateCmdCurrent : updateCmdNext, {
-      uniforms: { uFrameIndex: frameIndex },
-    }),
-  );
-
+  ctx.submit(updateCmd, {
+    uniforms: { uFrameIndex: frameIndex },
+    vertexArray: updateCmdVertexArrays[flipIndex],
+    transformFeedback: updateCmdTransformFeedbacks[flipIndex],
+  });
   ctx.submit(drawCmd, {
-    vertexArray: isCurrent ? drawVertexArrayCurrent : drawVertexArrayNext,
+    vertexArray: drawCmdVertexArrays[flipIndex],
   });
 
-  ctx.debug(false);
-
   frameIndex++;
+
+  ctx.debug(false);
 
   gui.draw();
 
