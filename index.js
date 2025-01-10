@@ -826,7 +826,6 @@ function createContext(options = {}) {
       return newCmd;
     },
     applyPass(pass) {
-      const gl = this.gl;
       const state = this.state;
 
       // Need to find reliable way of deciding if i should update framebuffer
@@ -913,7 +912,6 @@ function createContext(options = {}) {
       this.checkError();
     },
     applyPipeline(pipeline) {
-      const gl = this.gl;
       const state = this.state;
 
       if (pipeline.depthWrite !== state.depthWrite) {
@@ -1000,7 +998,6 @@ function createContext(options = {}) {
     applyUniforms(uniforms, cmd) {
       this.checkActiveProgram();
 
-      const gl = this.gl;
       const { program, activeTextures } = this.state;
 
       let numTextures = 0;
@@ -1067,15 +1064,8 @@ function createContext(options = {}) {
       }
       this.checkError();
     },
-    applyTransformFeedback(transformFeedback, uniforms) {
-      const gl = this.gl;
+    applyTransformFeedback(transformFeedback) {
       const { program } = this.state;
-
-      gl.enable(gl.RASTERIZER_DISCARD);
-
-      // unbind buffer from other attachment points just in case
-      gl.bindBuffer(gl.ARRAY_BUFFER, null);
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
       if (!program.varyings) {
         program.varyings = Object.keys(transformFeedback.varyings);
@@ -1094,11 +1084,7 @@ function createContext(options = {}) {
             name,
           );
         });
-        this.applyUniforms(uniforms);
       }
-
-      gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback.handle);
-      gl.beginTransformFeedback(transformFeedback.primitiveMode);
     },
     drawVertexData(cmd) {
       this.checkActiveProgram();
@@ -1168,7 +1154,22 @@ function createContext(options = {}) {
         enableVertexData(ctx, vertexLayout, cmd, true);
       }
 
+      if (cmd.transformFeedback) {
+        gl.enable(gl.RASTERIZER_DISCARD);
+        gl.bindTransformFeedback(
+          gl.TRANSFORM_FEEDBACK,
+          cmd.transformFeedback.handle,
+        );
+        gl.beginTransformFeedback(cmd.transformFeedback.primitiveMode);
+      }
+
       draw(ctx, cmd);
+
+      if (cmd.transformFeedback) {
+        gl.endTransformFeedback();
+        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
+        gl.disable(gl.RASTERIZER_DISCARD);
+      }
 
       this.checkError();
     },
@@ -1184,6 +1185,18 @@ function createContext(options = {}) {
       }
 
       this.checkError();
+
+      if (cmd.pass) this.applyPass(cmd.pass);
+
+      if (cmd.viewport && cmd.viewport !== this.state.viewport) {
+        this.state.viewport = cmd.viewport;
+        gl.viewport(
+          this.state.viewport[0],
+          this.state.viewport[1],
+          this.state.viewport[2],
+          this.state.viewport[3],
+        );
+      }
 
       if (cmd.scissor) {
         if (cmd.scissor !== this.state.scissor) {
@@ -1203,31 +1216,15 @@ function createContext(options = {}) {
         }
       }
 
-      if (cmd.pass) this.applyPass(cmd.pass);
       if (cmd.pipeline) this.applyPipeline(cmd.pipeline);
+
+      if (cmd.transformFeedback) {
+        this.applyTransformFeedback(cmd.transformFeedback);
+      }
+
       if (cmd.uniforms) this.applyUniforms(cmd.uniforms);
 
-      if (cmd.viewport && cmd.viewport !== this.state.viewport) {
-        this.state.viewport = cmd.viewport;
-        gl.viewport(
-          this.state.viewport[0],
-          this.state.viewport[1],
-          this.state.viewport[2],
-          this.state.viewport[3],
-        );
-      }
-
-      if (cmd.transformFeedback) {
-        this.applyTransformFeedback(cmd.transformFeedback, cmd.uniforms, cmd);
-      }
-
       if (cmd.attributes || cmd.vertexArray) this.drawVertexData(cmd);
-
-      if (cmd.transformFeedback) {
-        gl.endTransformFeedback();
-        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
-        gl.disable(gl.RASTERIZER_DISCARD);
-      }
     },
   });
 

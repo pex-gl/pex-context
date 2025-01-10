@@ -3,6 +3,8 @@ import { checkProps } from "./utils.js";
 /**
  * @typedef {import("./types.js").PexResource} TransformFeedbackOptions
  * @property {object} varyings
+ * @property {number} bufferMode
+ * @property {number} primitiveMode
  */
 
 const allowedProps = ["varyings", "bufferMode", "primitiveMode"];
