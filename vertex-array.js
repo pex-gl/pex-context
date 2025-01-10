@@ -14,6 +14,10 @@ function createVertexArray(ctx, opts) {
     class: "vertexArray",
     handle: gl.createVertexArray(),
     _update: updateVertexArray,
+    _dispose() {
+      gl.deleteVertexArray(this.handle);
+      this.handle = null;
+    },
     ...opts,
   };
 
