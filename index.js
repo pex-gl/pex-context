@@ -150,6 +150,23 @@ function createContext(options = {}) {
     viewport: [0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight],
     scissor: null,
     count: 0,
+    framebuffer: undefined,
+    indexBuffer: undefined,
+    activeAttributes: undefined,
+    activeTextures: undefined,
+    vertexArray: undefined,
+    vertexLayout: undefined,
+    program: undefined,
+    cullFace: undefined,
+    cullFaceMode: undefined,
+    blend: undefined,
+    blendSrcRGBFactor: undefined,
+    blendSrcAlphaFactor: undefined,
+    blendDstRGBFactor: undefined,
+    blendDstAlphaFactor: undefined,
+    depthFunc: undefined,
+    depthTest: undefined,
+    depthWrite: undefined,
   };
 
   Object.assign(ctx, {
