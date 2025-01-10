@@ -49,8 +49,7 @@ const colorMap2 = ctx.texture2D({
   encoding: ctx.Encoding.SRGB,
 });
 
-const clearScreenCmd = {
-  name: "clearScreen",
+const clearCmd = {
   pass: ctx.pass({
     clearColor: [0.2, 0.2, 0.2, 1],
   }),
@@ -140,7 +139,7 @@ onResize();
 
 ctx.frame(() => {
   const size = window.innerWidth / 4;
-  ctx.submit(clearScreenCmd);
+  ctx.submit(clearCmd);
   ctx.submit(drawPassCmd, () => {
     ctx.submit(drawFloorCmd);
   });

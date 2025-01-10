@@ -48,8 +48,7 @@ const cubeInstances = [
   { position: [0, 0, -3], color: [0.5, 0.0, 1.0, 1.0] },
 ];
 
-const clearScreenCmd = {
-  name: "clearScreen",
+const clearCmd = {
   pass: ctx.pass({
     clearColor: [0.2, 0.2, 0.2, 1],
   }),
@@ -300,7 +299,7 @@ function drawSkybox(camera) {
 }
 
 ctx.frame(() => {
-  ctx.submit(clearScreenCmd);
+  ctx.submit(clearCmd);
 
   sides.forEach((side) => {
     const target = [0, 0, 0];
