@@ -1,4 +1,4 @@
-import { NAMESPACE } from "./utils.js";
+import { NAMESPACE, getUniformLocation } from "./utils.js";
 
 const builtInAttributes = [
   "gl_VertexID",
@@ -17,6 +17,7 @@ function createProgram(ctx, opts) {
     attributes: [],
     attributesPerLocation: {},
     uniforms: {},
+    varyings: null,
     refCount: 0,
     _update: updateProgram,
     _dispose() {
@@ -25,6 +26,7 @@ function createProgram(ctx, opts) {
       this.attributes = null;
       this.attributesPerLocation = null;
       this.uniforms = null;
+      this.varyings = null;
     },
     setUniform(name, value) {
       const uniform = this.uniforms[name];
@@ -136,7 +138,7 @@ function updateUniforms(ctx, program) {
       name,
       type: info.type,
       size,
-      location: gl.getUniformLocation(program.handle, name),
+      location: getUniformLocation(gl, program, name),
     };
     if (info.size > 1) {
       for (let j = 1; j < info.size; j++) {
@@ -145,7 +147,7 @@ function updateUniforms(ctx, program) {
         }]`;
         program.uniforms[indexedName] = {
           type: info.type,
-          location: gl.getUniformLocation(program.handle, indexedName),
+          location: getUniformLocation(gl, program, indexedName),
         };
       }
     }

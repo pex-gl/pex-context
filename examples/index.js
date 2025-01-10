@@ -24,6 +24,7 @@
     "shadows",
     "sub-pass",
     // "test",
+    "transform-feedback",
     "unindexed",
     "vao",
     "vao-instanced",

@@ -6,6 +6,7 @@ import createRenderbuffer from "./renderbuffer.js";
 import createPass from "./pass.js";
 import createPipeline from "./pipeline.js";
 import createVertexArray from "./vertex-array.js";
+import createTransformFeedback from "./transform-feedback.js";
 import createProgram from "./program.js";
 import createBuffer from "./buffer.js";
 import createQuery from "./query.js";
@@ -16,6 +17,7 @@ import {
   compareFBOAttachments,
   draw,
   enableVertexData,
+  getUniformLocation,
   NAMESPACE,
 } from "./utils.js";
 import polyfill from "./polyfill.js";
@@ -37,6 +39,7 @@ const allowedCommandProps = [
   "multiDraw",
   "instances",
   "vertexArray",
+  "transformFeedback",
   "viewport",
   "scissor",
 ];
@@ -526,6 +529,26 @@ function createContext(options = {}) {
     },
 
     /**
+     * Create a transform feedback
+     * @memberof ctx
+     * @param {import("./transform-feedback.js").TransformFeedbackOptions} opts
+     * @returns {import("./types.js").PexResource}
+     *
+     * @example
+     * ```js
+     * const tex = ctx.transformFeedback({
+     *   varyings: {
+     *     outPosition: positionsBuf,
+     *   },
+     * })
+     * ```
+     */
+    transformFeedback(opts) {
+      console.debug(NAMESPACE, "transformFeedback", opts);
+      return this.resource(createTransformFeedback(this, opts));
+    },
+
+    /**
      * Create a 2D Texture resource.
      * @memberof ctx
      * @param {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | import("./texture.js").TextureOptions} opts
@@ -969,13 +992,16 @@ function createContext(options = {}) {
 
       this.checkError();
     },
-    applyUniforms(uniforms, cmd) {
-      const gl = this.gl;
-      const { program, activeTextures } = this.state;
-
-      if (!program) {
+    checkActiveProgram() {
+      if (!this.state.program) {
         throw new Error("Trying to draw without an active program");
       }
+    },
+    applyUniforms(uniforms, cmd) {
+      this.checkActiveProgram();
+
+      const gl = this.gl;
+      const { program, activeTextures } = this.state;
 
       let numTextures = 0;
 
@@ -1041,12 +1067,43 @@ function createContext(options = {}) {
       }
       this.checkError();
     },
-    drawVertexData(cmd) {
-      const { vertexLayout, program, vertexArray } = this.state;
+    applyTransformFeedback(transformFeedback, uniforms) {
+      const gl = this.gl;
+      const { program } = this.state;
 
-      if (!program) {
-        throw new Error("Trying to draw without an active program");
+      gl.enable(gl.RASTERIZER_DISCARD);
+
+      // unbind buffer from other attachment points just in case
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+      if (!program.varyings) {
+        program.varyings = Object.keys(transformFeedback.varyings);
+
+        gl.transformFeedbackVaryings(
+          program.handle,
+          program.varyings,
+          transformFeedback.bufferMode,
+        );
+        gl.linkProgram(program.handle);
+
+        Object.keys(program.uniforms).forEach((name) => {
+          program.uniforms[name].location = getUniformLocation(
+            gl,
+            program,
+            name,
+          );
+        });
+        this.applyUniforms(uniforms);
       }
+
+      gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback.handle);
+      gl.beginTransformFeedback(transformFeedback.primitiveMode);
+    },
+    drawVertexData(cmd) {
+      this.checkActiveProgram();
+
+      const { vertexLayout, program, vertexArray } = this.state;
 
       if (this.debugMode) {
         // TODO: can vertex layout be ever different if it's derived from pipeline's shader?
@@ -1061,7 +1118,9 @@ function createContext(options = {}) {
             program.attributes,
             cmd,
           );
-          throw new Error("Invalid vertex layout not matching the shader");
+          throw new Error(
+            "Invalid vertex layout not matching the shader. Is any attribute not used in the shader?",
+          );
         }
       }
 
@@ -1158,7 +1217,17 @@ function createContext(options = {}) {
         );
       }
 
+      if (cmd.transformFeedback) {
+        this.applyTransformFeedback(cmd.transformFeedback, cmd.uniforms, cmd);
+      }
+
       if (cmd.attributes || cmd.vertexArray) this.drawVertexData(cmd);
+
+      if (cmd.transformFeedback) {
+        gl.endTransformFeedback();
+        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
+        gl.disable(gl.RASTERIZER_DISCARD);
+      }
     },
   });
 
