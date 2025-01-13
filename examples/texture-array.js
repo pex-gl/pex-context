@@ -24,9 +24,7 @@ const data = [
   await loadImage(new URL("./assets/images/test/test_pz.png", import.meta.url)),
 ];
 
-const textureArray = ctx.texture2DArray({
-  data,
-});
+const textureArray = ctx.texture2DArray(data);
 
 const clearCmd = {
   pass: ctx.pass({

@@ -574,7 +574,7 @@ function createContext(options = {}) {
     /**
      * Create a 2D Texture Array resource.
      * @memberof ctx
-     * @param {import("./texture.js").TextureOptions} opts
+     * @param {HTMLImageElement[] | HTMLVideoElement[] | HTMLCanvasElement[] | import("./texture.js").TextureOptions} opts
      * @returns {import("./types.js").PexResource}
      *
      * @example

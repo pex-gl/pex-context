@@ -2,7 +2,7 @@ import { checkProps } from "./utils.js";
 
 /**
  * @typedef {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement} TextureOptionsData
- * @property {Array|import("./types.js").TypedArray} data
+ * @property {Array | import("./types.js").TypedArray} data
  * @property {number} width
  * @property {number} height
  */
@@ -13,10 +13,10 @@ import { checkProps } from "./utils.js";
 
 /**
  * @typedef {import("./types.js").PexResource} TextureOptions
- * @property {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | Array | import("./types.js").TypedArray |TextureOptionsData | HTMLImageElement[] | TextureOptionsData[]} [data]
+ * @property {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | Array | import("./types.js").TypedArray | TextureOptionsData} [data]
  * @property {number} [width]
  * @property {number} [height]
- * @property {ctx.PixelFormat} [pixelFormat=ctx.PixelFormat.RGB8]
+ * @property {ctx.PixelFormat} [pixelFormat=ctx.PixelFormat.RGBA8]
  * @property {ctx.TextureFormat} [internalFormat=ctx.TextureFormat.RGBA]
  * @property {ctx.DataType} [type=ctx.TextureFormat[opts.pixelFormat]]
  * @property {ctx.Encoding} [encoding=ctx.Encoding.Linear]
@@ -34,9 +34,15 @@ import { checkProps } from "./utils.js";
  */
 
 /**
+ * @typedef {import("./types.js").PexResource} Texture2DArrayOptions
+ * @augments TextureOptions
+ * @property {HTMLImageElement[] | TextureOptionsData[] | Array[] | import("./types.js").TypedArray[]} [data]
+ */
+
+/**
  * @typedef {import("./types.js").PexResource} TextureCubeOptions
  * @augments TextureOptions
- * @property {HTMLImageElement[]|import("./types.js").TypedArray[]} [data] 6 images, one for each face +X, -X, +Y, -Y, +Z, -Z
+ * @property {HTMLImageElement[] | import("./types.js").TypedArray[]} [data] 6 images, one for each face +X, -X, +Y, -Y, +Z, -Z
  */
 
 const allowedProps = [
@@ -62,7 +68,7 @@ const allowedProps = [
 ];
 
 function createTexture(ctx, opts) {
-  checkProps(allowedProps, opts);
+  if (!Array.isArray(opts)) checkProps(allowedProps, opts);
 
   const gl = ctx.gl;
 
@@ -88,11 +94,12 @@ function orValue(a, b) {
   return a !== undefined ? a : b;
 }
 
+const isElement = (element) => element && element instanceof Element;
+
 function updateTexture(ctx, texture, opts) {
   // checkProps(allowedProps, opts)
 
   const gl = ctx.gl;
-  let compressed = opts.compressed || texture.compressed;
 
   let data = null;
   let width = opts.width;
@@ -121,15 +128,15 @@ function updateTexture(ctx, texture, opts) {
     opts.premultiplyAlpha,
     orValue(texture.premultiplyAlpha, false),
   );
+  const compressed = opts.compressed || texture.compressed;
+
   let internalFormat = opts.internalFormat || texture.internalFormat;
   let type;
   let format;
 
-  const isTexture2DArray = target === gl.TEXTURE_2D_ARRAY;
-
   const textureUnit = 0;
   gl.activeTexture(gl.TEXTURE0 + textureUnit);
-  gl.bindTexture(texture.target, texture.handle);
+  gl.bindTexture(texture.target, texture.handle); // TODO: use target?
   ctx.state.activeTextures[textureUnit] = texture;
 
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
@@ -143,28 +150,44 @@ function updateTexture(ctx, texture, opts) {
     gl.texParameterf(target, anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, aniso);
   }
 
-  const img = opts.data ? opts.data : opts;
+  // Data provided as element or ImageBitmap:
+  // - width/height are retrieved from the element
+  // - format/type are set to defaults
+  const element = opts.data || opts;
   if (
-    (img && img.nodeName) ||
-    (!ctx.capabilities.isWebGL2 && img instanceof ImageBitmap)
+    isElement(element) ||
+    (!ctx.capabilities.isWebGL2 && element instanceof ImageBitmap)
   ) {
     console.assert(
-      img instanceof HTMLImageElement ||
-        img instanceof HTMLVideoElement ||
-        img instanceof HTMLCanvasElement ||
-        img instanceof ImageBitmap,
+      element instanceof HTMLImageElement ||
+        element instanceof HTMLVideoElement ||
+        element instanceof HTMLCanvasElement ||
+        element instanceof ImageBitmap,
       "Texture2D.update opts has to be HTMLImageElement, HTMLVideoElement, HTMLCanvasElement or ImageBitmap",
     );
-    width = img.width || img.videoHeight;
-    height = img.height || img.videoHeight;
-    internalFormat = gl.RGBA;
-    format = gl.RGBA;
-    type = gl.UNSIGNED_BYTE;
+
     pixelFormat = ctx.PixelFormat.RGBA;
-    gl.texImage2D(target, 0, internalFormat, format, type, img);
-    texture.width = width;
-    texture.height = height;
-  } else if (typeof opts === "object") {
+
+    texture.internalFormat = gl.RGBA;
+    texture.format = gl.RGBA;
+    texture.type = gl.UNSIGNED_BYTE;
+    texture.target = target;
+    texture.compressed = false;
+
+    texture.width = element.videoWidth || element.width;
+    texture.height = element.videoHeight || element.height;
+
+    gl.texImage2D(
+      texture.target,
+      0,
+      texture.internalFormat,
+      texture.format,
+      texture.type,
+      element,
+    );
+  }
+  // Data provided as object:
+  else if (typeof opts === "object") {
     // Check data type
     console.assert(
       !data ||
@@ -175,15 +198,19 @@ function updateTexture(ctx, texture, opts) {
       "Texture2D.update opts.data has to be null, an Array or a TypedArray",
     );
 
-    // Handle pixel data with flags
-    data = opts.data ? opts.data.data || opts.data : null;
-
+    const isTexture2DArray = target === gl.TEXTURE_2D_ARRAY;
     if (isTexture2DArray) {
-      width ||= data[0]?.width;
-      height ||= data[0]?.height;
+      data = Array.isArray(opts) ? opts : (opts.data ?? null);
+
+      width ||= data?.[0]?.data?.width || data?.[0]?.width;
+      height ||= data?.[0]?.data?.height || data?.[0]?.height;
     } else {
-      width ||= data.width;
-      height ||= data.height;
+      // Handle pixel data with flags
+      data = opts.data ? opts.data.data || opts.data : null;
+
+      // Update can be called without width/height (for flags only changes)
+      width ||= data?.width;
+      height ||= data?.height;
     }
 
     console.assert(
@@ -255,7 +282,7 @@ function updateTexture(ctx, texture, opts) {
       texture.width = width;
       texture.height = height;
 
-      updateTexture2DArray(ctx, texture, data);
+      if (data?.length) updateTexture2DArray(ctx, texture, data);
     } else if (target === gl.TEXTURE_CUBE_MAP) {
       texture.width = width;
       texture.height = height;
@@ -328,45 +355,23 @@ function updateTexture2D(ctx, texture, data) {
   }
 }
 
-// TODO: compressed and lod
 function updateTexture2DArray(ctx, texture, data) {
   const gl = ctx.gl;
-  const {
-    internalFormat,
-    format,
-    type,
-    target,
-    width,
-    height = width,
-  } = texture;
+  const { internalFormat, format, type, target, width, height } = texture;
 
-  gl.texStorage3D(
-    gl.TEXTURE_2D_ARRAY,
-    1,
-    internalFormat,
-    width,
-    height,
-    data.length,
-  );
+  const depth = data.length;
 
+  // TODO: compressed and lod
   let lod = 0;
 
-  for (let i = 0; i < data.length; i++) {
+  for (let i = 0; i < depth; i++) {
     const pixels = data[i].data || data[i];
+    const w = pixels.width ?? width;
+    const h = pixels.height ?? height;
 
-    gl.texSubImage3D(
-      target,
-      lod,
-      0,
-      0,
-      i,
-      width,
-      height,
-      1,
-      format,
-      type,
-      pixels,
-    );
+    if (i === 0) gl.texStorage3D(target, 1, internalFormat, w, h, depth);
+
+    gl.texSubImage3D(target, lod, 0, 0, i, w, h, 1, format, type, pixels);
   }
 }
 
@@ -377,7 +382,7 @@ function updateTextureCube(ctx, texture, data) {
   );
 
   const gl = ctx.gl;
-  const { internalFormat, format, type, width, height = width } = texture;
+  const { internalFormat, format, type, width, height } = texture;
 
   // TODO: gl.compressedTexImage2D, manual mimaps
   let lod = 0;
@@ -402,7 +407,7 @@ function updateTextureCube(ctx, texture, data) {
         type,
         faceData,
       );
-    } else if (faceData && faceData.nodeName) {
+    } else if (isElement(faceData)) {
       gl.texImage2D(faceTarget, lod, internalFormat, format, type, faceData);
     } else {
       gl.texImage2D(
