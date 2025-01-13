@@ -17,3 +17,18 @@ export const viewportToCanvasPosition = (viewport, H, pixelRatio) => [
   viewport[0] / pixelRatio,
   (H * (1 - viewport[1] / H - viewport[3] / H)) / pixelRatio,
 ];
+
+export const loadVideo = async (video, src) =>
+  await new Promise((resolve, reject) => {
+    video.addEventListener("canplaythrough", function canplaythrough() {
+      video.removeEventListener("canplaythrough", canplaythrough);
+      resolve(video);
+    });
+    video.addEventListener("error", function error(event) {
+      video.removeEventListener("error", error);
+      reject(event);
+    });
+    video.src = src;
+
+    video.load();
+  });
