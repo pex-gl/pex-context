@@ -96,6 +96,12 @@ function orValue(a, b) {
 
 const isElement = (element) => element && element instanceof Element;
 
+const arrayToTypedArray = (ctx, type, array) => {
+  const TypedArray = ctx.DataTypeConstructor[type];
+  console.assert(TypedArray, `Unknown texture data type: ${type}`);
+  return new TypedArray(array);
+};
+
 function updateTexture(ctx, texture, opts) {
   // checkProps(allowedProps, opts)
 
@@ -134,13 +140,17 @@ function updateTexture(ctx, texture, opts) {
   let type;
   let format;
 
+  // Bind
   const textureUnit = 0;
   gl.activeTexture(gl.TEXTURE0 + textureUnit);
-  gl.bindTexture(texture.target, texture.handle); // TODO: use target?
+  gl.bindTexture(target, texture.handle);
   ctx.state.activeTextures[textureUnit] = texture;
 
+  // Pixel storage mode
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
+
+  // Parameters
   gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, mag);
   gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, min);
   gl.texParameteri(target, gl.TEXTURE_WRAP_S, wrapS);
@@ -322,11 +332,8 @@ function updateTexture2D(ctx, texture, data) {
   for (let level = 0; level < data.length; level++) {
     let { data: levelData, width, height } = data[level];
 
-    // Convert array of numbers to typed array
     if (Array.isArray(levelData)) {
-      const TypedArray = ctx.DataTypeConstructor[type];
-      console.assert(TypedArray, `Unknown texture data type: ${type}`);
-      levelData = new TypedArray(levelData);
+      levelData = arrayToTypedArray(ctx, type, levelData);
     }
 
     if (compressed) {
@@ -391,10 +398,7 @@ function updateTextureCube(ctx, texture, data) {
     let faceData = data ? data[i].data || data[i] : null;
     const faceTarget = gl.TEXTURE_CUBE_MAP_POSITIVE_X + i;
     if (Array.isArray(faceData)) {
-      // Convert array of numbers to typed array
-      const TypedArray = ctx.DataTypeConstructor[type];
-      console.assert(TypedArray, `Unknown texture data type: ${type}`);
-      faceData = new TypedArray(faceData);
+      faceData = arrayToTypedArray(ctx, type, faceData);
 
       gl.texImage2D(
         faceTarget,
