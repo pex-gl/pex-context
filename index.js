@@ -878,6 +878,43 @@ function createContext(options = {}) {
         }
       }
 
+      this.checkError();
+    },
+    applyViewport(viewport) {
+      if (viewport && viewport !== this.state.viewport) {
+        this.state.viewport = viewport;
+        gl.viewport(
+          this.state.viewport[0],
+          this.state.viewport[1],
+          this.state.viewport[2],
+          this.state.viewport[3],
+        );
+      }
+
+      this.checkError();
+    },
+    applyScissor(scissor) {
+      if (scissor) {
+        if (scissor !== this.state.scissor) {
+          this.state.scissor = scissor;
+          gl.enable(gl.SCISSOR_TEST);
+          gl.scissor(
+            this.state.scissor[0],
+            this.state.scissor[1],
+            this.state.scissor[2],
+            this.state.scissor[3],
+          );
+        }
+      } else {
+        if (scissor !== this.state.scissor) {
+          this.state.scissor = scissor;
+          gl.disable(gl.SCISSOR_TEST);
+        }
+      }
+
+      this.checkError();
+    },
+    applyClear(pass) {
       let clearBits = 0;
       if (pass.clearColor !== undefined) {
         if (this.debugMode) {
@@ -899,8 +936,8 @@ function createContext(options = {}) {
         }
         clearBits |= gl.DEPTH_BUFFER_BIT;
 
-        if (!state.depthWrite) {
-          state.depthWrite = true;
+        if (!this.state.depthWrite) {
+          this.state.depthWrite = true;
           gl.depthMask(true);
         }
         // TODO this might be unnecesary but we don't know because we don't store the clearDepth in state
@@ -1048,7 +1085,7 @@ function createContext(options = {}) {
           }
         } else if (!value.length && typeof value === "object") {
           if (this.debugMode) console.debug(NAMESPACE, "invalid command", cmd);
-          throw new Error(`Can set uniform "${name}" with an Object value`);
+          throw new Error(`Can't set uniform "${name}" with an Object value`);
         } else {
           program.setUniform(name, value);
           if (this.debugMode) {
@@ -1084,6 +1121,7 @@ function createContext(options = {}) {
             name,
           );
         });
+        this.checkError();
       }
     },
     drawVertexData(cmd) {
@@ -1188,33 +1226,10 @@ function createContext(options = {}) {
 
       if (cmd.pass) this.applyPass(cmd.pass);
 
-      if (cmd.viewport && cmd.viewport !== this.state.viewport) {
-        this.state.viewport = cmd.viewport;
-        gl.viewport(
-          this.state.viewport[0],
-          this.state.viewport[1],
-          this.state.viewport[2],
-          this.state.viewport[3],
-        );
-      }
+      this.applyViewport(cmd.viewport);
+      this.applyScissor(cmd.scissor);
 
-      if (cmd.scissor) {
-        if (cmd.scissor !== this.state.scissor) {
-          this.state.scissor = cmd.scissor;
-          gl.enable(gl.SCISSOR_TEST);
-          gl.scissor(
-            this.state.scissor[0],
-            this.state.scissor[1],
-            this.state.scissor[2],
-            this.state.scissor[3],
-          );
-        }
-      } else {
-        if (cmd.scissor !== this.state.scissor) {
-          this.state.scissor = cmd.scissor;
-          gl.disable(gl.SCISSOR_TEST);
-        }
-      }
+      if (cmd.pass) this.applyClear(cmd.pass);
 
       if (cmd.pipeline) this.applyPipeline(cmd.pipeline);
 
