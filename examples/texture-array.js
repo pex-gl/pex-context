@@ -57,10 +57,9 @@ uniform sampler2DArray uTextureArray;
 
 out vec4 outColor;
 
-const float textureCount = ${data.length.toFixed(1)};
-
 void main() {
   vec2 uv = vTexCoord;
+  float textureCount = float(textureSize(uTextureArray, 0).z);
   float level = floor(uv.x * textureCount);
 
   uv.x *= textureCount;
