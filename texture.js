@@ -369,7 +369,7 @@ function updateTexture2DArray(ctx, texture, data) {
   const depth = data.length;
 
   // TODO: compressed and lod
-  let lod = 0;
+  const lod = 0;
 
   for (let i = 0; i < depth; i++) {
     const pixels = data[i].data || data[i];
@@ -392,28 +392,19 @@ function updateTextureCube(ctx, texture, data) {
   const { internalFormat, format, type, width, height } = texture;
 
   // TODO: gl.compressedTexImage2D, manual mimaps
-  let lod = 0;
+  const lod = 0;
 
   for (let i = 0; i < 6; i++) {
     let faceData = data ? data[i].data || data[i] : null;
     const faceTarget = gl.TEXTURE_CUBE_MAP_POSITIVE_X + i;
-    if (Array.isArray(faceData)) {
-      faceData = arrayToTypedArray(ctx, type, faceData);
 
-      gl.texImage2D(
-        faceTarget,
-        lod,
-        internalFormat,
-        width,
-        height,
-        0,
-        format,
-        type,
-        faceData,
-      );
-    } else if (isElement(faceData)) {
+    if (isElement(faceData)) {
       gl.texImage2D(faceTarget, lod, internalFormat, format, type, faceData);
     } else {
+      if (Array.isArray(faceData)) {
+        faceData = arrayToTypedArray(ctx, type, faceData);
+      }
+
       gl.texImage2D(
         faceTarget,
         lod,
