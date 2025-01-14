@@ -209,8 +209,10 @@ function updateTexture(ctx, texture, opts) {
     );
 
     const isTexture2DArray = target === gl.TEXTURE_2D_ARRAY;
-    if (isTexture2DArray) {
-      data = Array.isArray(opts) ? opts : (opts.data ?? null);
+    const isTextureCube = target === gl.TEXTURE_CUBE_MAP;
+
+    if (isTexture2DArray || isTextureCube) {
+      data = Array.isArray(opts) && opts.length ? opts : (opts.data ?? null);
 
       width ||= data?.[0]?.data?.width || data?.[0]?.width;
       height ||= data?.[0]?.data?.height || data?.[0]?.height;
@@ -293,7 +295,7 @@ function updateTexture(ctx, texture, opts) {
       texture.height = height;
 
       if (data?.length) updateTexture2DArray(ctx, texture, data);
-    } else if (target === gl.TEXTURE_CUBE_MAP) {
+    } else if (isTextureCube) {
       texture.width = width;
       texture.height = height;
 

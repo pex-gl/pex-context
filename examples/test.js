@@ -110,18 +110,19 @@ Object.keys(ctx.PixelFormat)
 // Test texture2D/2DArray/Cube creation/update API
 const textures = {
   // Texture 2D
-  "Array, requires width/height": ctx.texture2D({
+  "texture2D: empty": ctx.texture2D({}),
+  "texture2D: Array, requires width/height": ctx.texture2D({
     data: Array.from(imageData),
     width: 1,
     height: 1,
   }),
-  // "TypedArray => not allowed as no width/height": textures.push(ctx.texture2D(imageData)),
-  "TypedArray as data prop, requires width/height": ctx.texture2D({
+  // "texture2D: TypedArray => not allowed as no width/height": textures.push(ctx.texture2D(imageData)),
+  "texture2D: TypedArray as data prop, requires width/height": ctx.texture2D({
     data: imageData,
     width: 1,
     height: 1,
   }),
-  "Mipmap levels": ctx.texture2D({
+  "texture2D: Mipmap levels": ctx.texture2D({
     data: [
       { data: imageData2By2, width: 2, height: 2 },
       { data: imageData, width: 1, height: 1 },
@@ -130,53 +131,55 @@ const textures = {
     height: 2,
   }),
 
-  HTMLImageElement: ctx.texture2D(imageElement),
-  "HTMLImageElement as data prop": ctx.texture2D({ data: imageElement }),
-  HTMLCanvasElement: ctx.texture2D(context2d.canvas),
-  "HTMLCanvasElement as data prop": ctx.texture2D({ data: context2d.canvas }),
+  "texture2D: HTMLImageElement": ctx.texture2D(imageElement),
+  "texture2D: HTMLImageElement as data prop": ctx.texture2D({
+    data: imageElement,
+  }),
+  "texture2D: HTMLCanvasElement": ctx.texture2D(context2d.canvas),
+  "texture2D: HTMLCanvasElement as data prop": ctx.texture2D({
+    data: context2d.canvas,
+  }),
   HTMLVideoElement: ctx.texture2D(videoElement),
-  "HTMLVideoElement as data prop": ctx.texture2D({ data: videoElement }),
+  "texture2D: HTMLVideoElement as data prop": ctx.texture2D({
+    data: videoElement,
+  }),
 
   // Texture 2D array
-  "HTMLImageElement[]": ctx.texture2DArray(imageElementArray),
-  "HTMLImageElement[] as data prop": ctx.texture2DArray({
+  "texture2DArray: empty": ctx.texture2DArray([]),
+  "texture2DArray: HTMLImageElement[]": ctx.texture2DArray(imageElementArray),
+  "texture2DArray: HTMLImageElement[] as data prop": ctx.texture2DArray({
     data: imageElementArray,
   }),
-  "HTMLImageElement in TextureOptionsData[] as data prop": ctx.texture2DArray({
-    data: imageElementArray.map((img) => ({ data: img })),
-  }),
-  // "TypedArray[] => not allowed as no width/height": ctx.texture2DArray(imageDataArray),
-  "TypedArray[] as data prop, requires width/height": ctx.texture2DArray({
-    data: imageDataArray,
-    width: 1,
-    height: 1,
-  }),
-  "TypedArray in TextureOptionsData[], requires width/height on the first item":
+  "texture2DArray: HTMLImageElement in TextureOptionsData[] as data prop":
+    ctx.texture2DArray({
+      data: imageElementArray.map((img) => ({ data: img })),
+    }),
+  // "texture2DArray: TypedArray[] => not allowed as no width/height": ctx.texture2DArray(imageDataArray),
+  "texture2DArray: TypedArray[] as data prop, requires width/height":
+    ctx.texture2DArray({ data: imageDataArray, width: 1, height: 1 }),
+  "texture2DArray: TypedArray in TextureOptionsData[], requires width/height on the first item":
     ctx.texture2DArray(
       imageDataArray.map((data) => ({ data, width: 1, height: 1 })),
     ),
-  "TypedArray in TextureOptionsData[] as data prop": ctx.texture2DArray({
-    data: imageDataArray.map((data) => ({ data, width: 1, height: 1 })),
-  }),
+  "texture2DArray: TypedArray in TextureOptionsData[] as data prop":
+    ctx.texture2DArray({
+      data: imageDataArray.map((data) => ({ data, width: 1, height: 1 })),
+    }),
 
-  // "TypedArray in TextureOptionsData[], different width/height":
+  // "texture2DArray: TypedArray in TextureOptionsData[], different width/height":
   //   ctx.texture2DArray([
   //     { data: imageData2By2, width: 2, height: 2 },
   //     { data: imageData, width: 1, height: 1 },
   //   ]),
 
   // Texture cube
-  "Array of Image as data prop, requires width/height": ctx.textureCube({
+  "textureCube: empty": ctx.textureCube({}),
+  "textureCube: HTMLImageElement[]": ctx.textureCube(imageElementArray),
+  "textureCube: HTMLImageElement[] as data prop": ctx.textureCube({
     data: imageElementArray,
-    // TODO: remove requirement for width/height?
-    width: imageElementArray[0].width,
-    height: imageElementArray[0].height,
   }),
-  "Array of TypedArray as data prop, requires width/height": ctx.textureCube({
-    data: imageDataArray,
-    width: 1,
-    height: 1,
-  }),
+  "textureCube: Array of TypedArray as data prop, requires width/height":
+    ctx.textureCube({ data: imageDataArray, width: 1, height: 1 }),
 };
 
 // Texture update
@@ -480,7 +483,7 @@ ctx.submit({
     [0, 2, 3],
   ]),
   uniforms: {
-    uTexture: Object.values(textures).at(3),
+    uTexture: Object.values(textures).at(4),
 
     uInt: -1,
     uUint: 1,
