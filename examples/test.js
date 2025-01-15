@@ -1,15 +1,58 @@
 import createContext from "../index.js";
 
+import createRenderingContext from "pex-gl";
 import baboon from "baboon-image-uri";
 import { loadImage } from "pex-io";
 
 import testVert from "./shaders/test.vert.js";
 import screenImageFrag from "./shaders/screen-image.frag.js";
 
-import { es300Fragment } from "./utils.js";
+import { es300Fragment, loadVideo } from "./utils.js";
 
 const ctx = createContext();
 const ctxWebGL1 = createContext({ type: "webgl", width: 2, height: 2 });
+
+// Testing Data
+const imageData = new Uint8Array([0, 255, 0, 255]);
+// prettier-ignore
+const imageData2By2 = new Uint8Array([
+  0, 255, 0, 255,
+  0, 255, 0, 255,
+  0, 255, 0, 255,
+  0, 255, 0, 255,
+]);
+const imageElement = await loadImage(baboon);
+const imageElementArray = new Array(6).fill(imageElement);
+const imageDataArray = new Array(6).fill(imageData);
+const context2d = createRenderingContext({
+  type: "2d",
+  width: 256,
+  height: 256,
+});
+context2d.fillStyle = "#0f0";
+context2d.fillRect(0, 0, 256, 256);
+const videoElement = document.createElement("video");
+videoElement.autoplay = true;
+videoElement.loop = true;
+videoElement.muted = true;
+videoElement.crossOrigin = "anonymous";
+
+document.body.append(videoElement);
+Object.assign(videoElement.style, {
+  position: "fixed",
+  width: "100px",
+  top: 0,
+  right: 0,
+});
+
+try {
+  await loadVideo(
+    videoElement,
+    "https://upload.wikimedia.org/wikipedia/commons/d/d4/Rabbit_browsing.webm",
+  );
+} catch (error) {
+  console.error(error);
+}
 
 /**
  * Texture
@@ -20,13 +63,12 @@ const tex = ctx.texture2D({
   height: 1,
 });
 console.assert(tex.type === ctx.DataType.Uint8);
-console.assert(tex.class === "texture", "Wrong texture class");
-
 console.assert(
   ctx.state.activeTextures[0] === tex,
   "Creating texture should be remembered in active state",
 );
 
+// Test pixelFormat
 Object.keys(ctx.PixelFormat)
   .filter((f) => !["Depth", "Depth16", "Depth24"].includes(f))
   .forEach((pixelFormat) => {
@@ -61,12 +103,92 @@ Object.keys(ctx.PixelFormat)
         )
       )
     ) {
-      ctxWebGL1.texture2D({pixelFormat, width: 1, height: 1 });
+      ctxWebGL1.texture2D({ pixelFormat, width: 1, height: 1 });
     }
   });
 
-// update with array, should default to Uint8
-// const tex2 = ctx.texture2D({ data: [0, 0, 0, 0], width: 1, height: 1 })
+// Test texture2D/2DArray/Cube creation/update API
+const textures = {
+  // Texture 2D
+  "texture2D: empty": ctx.texture2D({}),
+  "texture2D: Array, requires width/height": ctx.texture2D({
+    data: Array.from(imageData),
+    width: 1,
+    height: 1,
+  }),
+  // "texture2D: TypedArray => not allowed as no width/height": textures.push(ctx.texture2D(imageData)),
+  "texture2D: TypedArray as data prop, requires width/height": ctx.texture2D({
+    data: imageData,
+    width: 1,
+    height: 1,
+  }),
+  "texture2D: Mipmap levels": ctx.texture2D({
+    data: [
+      { data: imageData2By2, width: 2, height: 2 },
+      { data: imageData, width: 1, height: 1 },
+    ],
+    width: 2,
+    height: 2,
+  }),
+
+  "texture2D: HTMLImageElement": ctx.texture2D(imageElement),
+  "texture2D: HTMLImageElement as data prop": ctx.texture2D({
+    data: imageElement,
+  }),
+  "texture2D: HTMLCanvasElement": ctx.texture2D(context2d.canvas),
+  "texture2D: HTMLCanvasElement as data prop": ctx.texture2D({
+    data: context2d.canvas,
+  }),
+  HTMLVideoElement: ctx.texture2D(videoElement),
+  "texture2D: HTMLVideoElement as data prop": ctx.texture2D({
+    data: videoElement,
+  }),
+
+  // Texture 2D array
+  "texture2DArray: empty": ctx.texture2DArray([]),
+  "texture2DArray: HTMLImageElement[]": ctx.texture2DArray(imageElementArray),
+  "texture2DArray: HTMLImageElement[] as data prop": ctx.texture2DArray({
+    data: imageElementArray,
+  }),
+  "texture2DArray: HTMLImageElement in TextureOptionsData[] as data prop":
+    ctx.texture2DArray({
+      data: imageElementArray.map((img) => ({ data: img })),
+    }),
+  // "texture2DArray: TypedArray[] => not allowed as no width/height": ctx.texture2DArray(imageDataArray),
+  "texture2DArray: TypedArray[] as data prop, requires width/height":
+    ctx.texture2DArray({ data: imageDataArray, width: 1, height: 1 }),
+  "texture2DArray: TypedArray in TextureOptionsData[], requires width/height on the first item":
+    ctx.texture2DArray(
+      imageDataArray.map((data) => ({ data, width: 1, height: 1 })),
+    ),
+  "texture2DArray: TypedArray in TextureOptionsData[] as data prop":
+    ctx.texture2DArray({
+      data: imageDataArray.map((data) => ({ data, width: 1, height: 1 })),
+    }),
+
+  // "texture2DArray: TypedArray in TextureOptionsData[], different width/height":
+  //   ctx.texture2DArray([
+  //     { data: imageData2By2, width: 2, height: 2 },
+  //     { data: imageData, width: 1, height: 1 },
+  //   ]),
+
+  // Texture cube
+  "textureCube: empty": ctx.textureCube({}),
+  "textureCube: HTMLImageElement[]": ctx.textureCube(imageElementArray),
+  "textureCube: HTMLImageElement[] as data prop": ctx.textureCube({
+    data: imageElementArray,
+  }),
+  "textureCube: Array of TypedArray as data prop, requires width/height":
+    ctx.textureCube({ data: imageDataArray, width: 1, height: 1 }),
+};
+
+// Texture update
+for (let [name, texture] of Object.entries(textures)) {
+  texture.name = name;
+  ctx.update(texture, { aniso: 16 });
+  ctx.update(texture, { data: null, aniso: 16 });
+  ctx.update(texture, { data: null });
+}
 
 /**
  * Buffers
@@ -320,13 +442,13 @@ ctx.submit({
     aPosition1: { buffer: ctx.vertexBuffer([0, 1, 0]) },
   },
   uniforms: {
-    texture: tex,
+    texture: Object.values(textures).at(0),
   },
   indices: ctx.indexBuffer([0]),
 });
 
 console.assert(
-  ctx.state.activeTextures[0] === tex,
+  ctx.state.activeTextures[0] === Object.values(textures).at(0),
   "Using texture should be remembered in active state",
 );
 
@@ -361,10 +483,7 @@ ctx.submit({
     [0, 2, 3],
   ]),
   uniforms: {
-    uTexture: ctx.texture2D({
-      data: await loadImage(baboon),
-      flipY: true,
-    }),
+    uTexture: Object.values(textures).at(4),
 
     uInt: -1,
     uUint: 1,
@@ -467,16 +586,15 @@ ctx.renderbuffer({ pixelFormat: ctx.PixelFormat.R11F_G11F_B10F });
 /**
  * TRANSFORM-FEEDBACK
  */
-console.log(vertexBufferDefault);
-
 const transformFeedbackVarying = ctx.vertexBuffer([0, 1, 2, 3, 4, 5]);
 ctx.transformFeedback({
+  // varyings: vertexBufferDefault,
   varyings: {
     aVarying: transformFeedbackVarying,
   },
 });
 
-setTimeout(() => {
-  console.info("ctx.dispose()");
-  ctx.dispose();
-}, 3000);
+// setTimeout(() => {
+//   console.info("ctx.dispose()");
+//   ctx.dispose();
+// }, 3000);

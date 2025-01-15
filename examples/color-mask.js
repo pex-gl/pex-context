@@ -60,8 +60,7 @@ const drawTextureCmd = {
   },
 };
 
-const clearScreenCmd = {
-  name: "clearScreen",
+const clearCmd = {
   pass: ctx.pass({
     clearColor: [0.2, 0.2, 0.2, 1],
   }),
@@ -78,7 +77,7 @@ ctx.frame(() => {
   const h = ctx.height;
   const size = Math.floor(w / 4);
 
-  ctx.submit(clearScreenCmd);
+  ctx.submit(clearCmd);
 
   ctx.submit(drawTextureCmd, {
     viewport: [0, h * 0.5 - size * 0.5, size, size],

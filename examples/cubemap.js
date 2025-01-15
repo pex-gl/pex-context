@@ -25,7 +25,7 @@ const camera = createCamera({
 
 createOrbiter({ camera, element: ctx.gl.canvas });
 
-const clearScreenCmd = {
+const clearCmd = {
   pass: ctx.pass({
     clearColor: [0.2, 0.2, 0.2, 1],
     clearDepth: 1,
@@ -114,7 +114,7 @@ drawCmd.uniforms.uEnvMap = envMapCube;
 drawCmd.uniforms.uCameraPosition = camera.position;
 
 ctx.frame(() => {
-  ctx.submit(clearScreenCmd);
+  ctx.submit(clearCmd);
   ctx.submit(drawSkybox);
   ctx.submit(drawCmd);
 
