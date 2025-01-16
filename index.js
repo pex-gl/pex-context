@@ -430,7 +430,7 @@ function createContext(options = {}) {
     },
 
     program(opts) {
-      console.debug(NAMESPACE, "program", opts);
+      if (this.debugMode) console.debug(NAMESPACE, "program", opts);
       return this.resource(createProgram(this, opts));
     },
 
@@ -453,12 +453,14 @@ function createContext(options = {}) {
      * ```
      */
     pass(opts) {
-      console.debug(
-        NAMESPACE,
-        "pass",
-        opts,
-        opts.color?.map(({ texture, info }) => texture?.info || info) || "",
-      );
+      if (this.debugMode) {
+        console.debug(
+          NAMESPACE,
+          "pass",
+          opts,
+          opts.color?.map(({ texture, info }) => texture?.info || info) || "",
+        );
+      }
       return this.resource(createPass(this, opts));
     },
 
@@ -489,7 +491,7 @@ function createContext(options = {}) {
      * ```
      */
     pipeline(opts) {
-      console.debug(NAMESPACE, "pipeline", opts);
+      if (this.debugMode) console.debug(NAMESPACE, "pipeline", opts);
       return this.resource(createPipeline(this, opts));
     },
 
@@ -524,7 +526,7 @@ function createContext(options = {}) {
      * ```
      */
     vertexArray(opts) {
-      console.debug(NAMESPACE, "vertexArray", opts);
+      if (this.debugMode) console.debug(NAMESPACE, "vertexArray", opts);
       return this.resource(createVertexArray(this, opts));
     },
 
@@ -544,7 +546,7 @@ function createContext(options = {}) {
      * ```
      */
     transformFeedback(opts) {
-      console.debug(NAMESPACE, "transformFeedback", opts);
+      if (this.debugMode) console.debug(NAMESPACE, "transformFeedback", opts);
       return this.resource(createTransformFeedback(this, opts));
     },
 
@@ -567,7 +569,7 @@ function createContext(options = {}) {
      * ```
      */
     texture2D(opts) {
-      console.debug(NAMESPACE, "texture2D", opts);
+      if (this.debugMode) console.debug(NAMESPACE, "texture2D", opts);
       opts.target = gl.TEXTURE_2D;
       return this.resource(createTexture(this, opts));
     },
@@ -585,7 +587,7 @@ function createContext(options = {}) {
      * ```
      */
     texture2DArray(opts) {
-      console.debug(NAMESPACE, "texture2DArray", opts);
+      if (this.debugMode) console.debug(NAMESPACE, "texture2DArray", opts);
       opts.target = gl.TEXTURE_2D_ARRAY;
       return this.resource(createTexture(this, opts));
     },
@@ -605,14 +607,14 @@ function createContext(options = {}) {
      * ```
      */
     textureCube(opts) {
-      console.debug(NAMESPACE, "textureCube", opts);
+      if (this.debugMode) console.debug(NAMESPACE, "textureCube", opts);
       opts.target = gl.TEXTURE_CUBE_MAP;
       return this.resource(createTexture(this, opts));
     },
     // framebuffer({ color: [ Texture2D, .. ], depth: Texture2D }
     // framebuffer({ color: [ { texture: Texture2D, target: Enum, level: int }, .. ], depth: { texture: Texture2D }})
     framebuffer(opts) {
-      console.debug(NAMESPACE, "framebuffer", opts);
+      if (this.debugMode) console.debug(NAMESPACE, "framebuffer", opts);
       return this.resource(createFramebuffer(this, opts));
     },
 
@@ -632,7 +634,7 @@ function createContext(options = {}) {
      * ```
      */
     renderbuffer(opts) {
-      console.debug(NAMESPACE, "renderbuffer", opts);
+      if (this.debugMode) console.debug(NAMESPACE, "renderbuffer", opts);
       return this.resource(createRenderbuffer(this, opts));
     },
 
@@ -656,7 +658,7 @@ function createContext(options = {}) {
      * ```
      */
     vertexBuffer(opts) {
-      console.debug(NAMESPACE, "vertexBuffer", opts);
+      if (this.debugMode) console.debug(NAMESPACE, "vertexBuffer", opts);
       if (opts.length) opts = { data: opts };
       opts.target = gl.ARRAY_BUFFER;
       return this.resource(createBuffer(this, opts));
@@ -673,7 +675,7 @@ function createContext(options = {}) {
      * ```
      */
     indexBuffer(opts) {
-      console.debug(NAMESPACE, "indexBuffer", opts);
+      if (this.debugMode) console.debug(NAMESPACE, "indexBuffer", opts);
       if (opts.length) opts = { data: opts };
       opts.target = gl.ELEMENT_ARRAY_BUFFER;
       return this.resource(createBuffer(this, opts));
@@ -693,7 +695,7 @@ function createContext(options = {}) {
      * ```
      */
     query(opts) {
-      console.debug(NAMESPACE, "query", opts);
+      if (this.debugMode) console.debug(NAMESPACE, "query", opts);
       return this.resource(createQuery(this, opts));
     },
     /**
