@@ -1,4 +1,4 @@
-import { checkProps } from "./utils.js";
+import { checkProps, isObject } from "./utils.js";
 
 /**
  * @typedef {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement} TextureOptionsData
@@ -31,6 +31,7 @@ import { checkProps } from "./utils.js";
  * @property {boolean} [flipY=false]
  * @property {boolean} [compressed=false]
  * @property {TextureTarget} [target]
+ * @property {number} [offset]
  */
 
 /**
@@ -65,10 +66,11 @@ const allowedProps = [
   "aniso",
   "premultiplyAlpha",
   "compressed",
+  "offset",
 ];
 
 function createTexture(ctx, opts) {
-  if (!Array.isArray(opts)) checkProps(allowedProps, opts);
+  if (isObject(opts)) checkProps(allowedProps, opts);
 
   const gl = ctx.gl;
 
@@ -95,6 +97,8 @@ function orValue(a, b) {
 }
 
 const isElement = (element) => element && element instanceof Element;
+const isBuffer = (object) =>
+  ["vertexBuffer", "indexBuffer"].includes(object?.class);
 
 const arrayToTypedArray = (ctx, type, array) => {
   const TypedArray = ctx.DataTypeConstructor[type];
@@ -289,7 +293,7 @@ function updateTexture(ctx, texture, opts) {
       if (data[0].width) texture.width = data[0].width;
       if (data[0].height) texture.height = data[0].height;
 
-      updateTexture2D(ctx, texture, data);
+      updateTexture2D(ctx, texture, data, opts);
     } else if (isTexture2DArray) {
       texture.width = width;
       texture.height = height;
@@ -327,7 +331,7 @@ function updateTexture(ctx, texture, opts) {
   return texture;
 }
 
-function updateTexture2D(ctx, texture, data) {
+function updateTexture2D(ctx, texture, data, { offset } = {}) {
   const gl = ctx.gl;
   const { internalFormat, format, type, target, compressed } = texture;
 
@@ -349,6 +353,9 @@ function updateTexture2D(ctx, texture, data) {
         levelData,
       );
     } else if (width && height) {
+      const fromBuffer = isBuffer(levelData);
+      if (fromBuffer) gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, levelData.handle);
+
       gl.texImage2D(
         target,
         level,
@@ -358,8 +365,10 @@ function updateTexture2D(ctx, texture, data) {
         0,
         format,
         type,
-        levelData,
+        fromBuffer ? (offset ?? 0) : levelData,
       );
+
+      if (fromBuffer) gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, null);
     }
   }
 }

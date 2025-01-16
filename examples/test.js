@@ -14,6 +14,7 @@ const ctxWebGL1 = createContext({ type: "webgl", width: 2, height: 2 });
 
 // Testing Data
 const imageData = new Uint8Array([0, 255, 0, 255]);
+const imageDataFloat = new Float32Array([0, 1, 0, 1]);
 // prettier-ignore
 const imageData2By2 = new Uint8Array([
   0, 255, 0, 255,
@@ -139,10 +140,37 @@ const textures = {
   "texture2D: HTMLCanvasElement as data prop": ctx.texture2D({
     data: context2d.canvas,
   }),
-  HTMLVideoElement: ctx.texture2D(videoElement),
+  "texture2D: HTMLVideoElement": ctx.texture2D(videoElement),
   "texture2D: HTMLVideoElement as data prop": ctx.texture2D({
     data: videoElement,
   }),
+  "texture2D: int pex buffer as data prop, requires width/height":
+    ctx.texture2D({
+      width: 1,
+      height: 1,
+      data: ctx.vertexBuffer(imageData),
+    }),
+  "texture2D: float pex buffer as data prop, requires width/height":
+    ctx.texture2D({
+      width: 1,
+      height: 1,
+      data: ctx.vertexBuffer(imageDataFloat),
+      pixelFormat: ctx.PixelFormat.RGBA32F,
+    }),
+  "texture2D: int pex buffer as data prop with offset, requires width/height":
+    ctx.texture2D({
+      width: 1,
+      height: 1,
+      offset: 4,
+      data: ctx.vertexBuffer(
+        // prettier-ignore
+        new Uint8Array([
+          255, 0, 0, 255,
+          0, 255, 0, 255,
+          0, 0, 255, 255
+        ]),
+      ),
+    }),
 
   // Texture 2D array
   "texture2DArray: empty": ctx.texture2DArray([]),
@@ -455,6 +483,9 @@ console.assert(
 /**
  * UNIFORMS
  */
+const uniformsTexture = Object.values(textures).at(4);
+console.log(Object.keys(textures).at(4));
+
 ctx.submit({
   pass: ctx.pass({
     clearColor: [0.2, 0.2, 0.2, 1],
@@ -483,7 +514,7 @@ ctx.submit({
     [0, 2, 3],
   ]),
   uniforms: {
-    uTexture: Object.values(textures).at(4),
+    uTexture: uniformsTexture,
 
     uInt: -1,
     uUint: 1,

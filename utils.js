@@ -10,6 +10,9 @@ const isWebGL2 = (gl) =>
   typeof WebGL2RenderingContext !== "undefined" &&
   gl instanceof WebGL2RenderingContext;
 
+const isObject = (obj) =>
+  Object.prototype.toString.call(obj) === "[object Object]";
+
 // State and gl
 function compareFBOAttachments(framebuffer, passOpts) {
   const fboDepthAttachment = framebuffer.depth?.texture;
@@ -414,6 +417,7 @@ function draw(ctx, cmd) {
 export {
   NAMESPACE,
   isWebGL2,
+  isObject,
   checkProps,
   compareFBOAttachments,
   getUniformLocation,
