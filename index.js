@@ -947,7 +947,8 @@ function createContext(options = {}) {
 
         if (isWebGL2 && isClearBufferArray) {
           for (let i = 0; i < clearValues.length; i++) {
-            gl.clearBufferfv(gl.COLOR, i, clearValues[i]);
+            const color = clearValues[i];
+            if (color) gl.clearBufferfv(gl.COLOR, i, color);
           }
         } else {
           clearBits |= gl.COLOR_BUFFER_BIT;
