@@ -13,6 +13,8 @@ const isWebGL2 = (gl) =>
 const isObject = (obj) =>
   Object.prototype.toString.call(obj) === "[object Object]";
 
+const is2DArray = (arr) => arr[0]?.length;
+
 // State and gl
 function compareFBOAttachments(framebuffer, passOpts) {
   const fboDepthAttachment = framebuffer.depth?.texture;
@@ -418,6 +420,7 @@ export {
   NAMESPACE,
   isWebGL2,
   isObject,
+  is2DArray,
   checkProps,
   compareFBOAttachments,
   getUniformLocation,

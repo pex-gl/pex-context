@@ -59,7 +59,10 @@ const drawPassCmd = {
   pass: ctx.pass({
     color: [colorMap, normalMap],
     depth: depthMap,
-    clearColor: [1, 0, 0, 1],
+    clearColor: [
+      [1, 0, 0, 1],
+      [0, 1, 0, 1],
+    ],
     clearDepth: 1,
   }),
 };

@@ -2,7 +2,7 @@ import { checkProps } from "./utils.js";
 
 /**
  * @typedef {import("./types.js").PexResource} BufferOptions
- * @property {Array|import("./types.js").TypedArray|ArrayBuffer} data
+ * @property {Array | import("./types.js").TypedArray | ArrayBuffer} data
  * @property {ctx.DataType} [type]
  * @property {ctx.Usage} [usage=ctx.Usage.StaticDraw]
  * @property {number} offset

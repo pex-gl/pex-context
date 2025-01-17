@@ -18,6 +18,7 @@ import {
   draw,
   enableVertexData,
   getUniformLocation,
+  is2DArray,
   NAMESPACE,
 } from "./utils.js";
 import polyfill from "./polyfill.js";
@@ -447,7 +448,7 @@ function createContext(options = {}) {
      *   color: [Texture2D, ...]
      *   color: [{ texture: Texture2D | TextureCube, target: CubemapFace }, ...]
      *   depth: Texture2D
-     *   clearColor: Array,
+     *   clearColor: Array | Array[],
      *   clearDepth: number,
      * })
      * ```
@@ -940,14 +941,19 @@ function createContext(options = {}) {
         if (this.debugMode) {
           console.debug(NAMESPACE, "clearing color", pass.clearColor);
         }
-        clearBits |= gl.COLOR_BUFFER_BIT;
-        // TODO this might be unnecesary but we don't know because we don't store the clearColor in state
-        gl.clearColor(
-          pass.clearColor[0],
-          pass.clearColor[1],
-          pass.clearColor[2],
-          pass.clearColor[3],
-        );
+
+        const clearValues = pass.clearColor;
+        const isClearBufferArray = is2DArray(clearValues);
+
+        if (isWebGL2 && isClearBufferArray) {
+          for (let i = 0; i < clearValues.length; i++) {
+            gl.clearBufferfv(gl.COLOR, i, clearValues[i]);
+          }
+        } else {
+          clearBits |= gl.COLOR_BUFFER_BIT;
+          // TODO this might be unnecesary but we don't know because we don't store the clearColor in state
+          gl.clearColor(...(isClearBufferArray ? clearValues[0] : clearValues)); // Fallback in WebGL1 clearing all buffers
+        }
       }
 
       if (pass.clearDepth !== undefined) {
