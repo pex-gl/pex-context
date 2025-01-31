@@ -128,13 +128,15 @@ ctx.frame(() => {
 <dd></dd>
 <dt><a href="#TextureOptionsData">TextureOptionsData</a> : <code>HTMLImageElement</code> | <code>HTMLVideoElement</code> | <code>HTMLCanvasElement</code></dt>
 <dd></dd>
-<dt><a href="#TextureTarget">TextureTarget</a> : <code>WebGLRenderingContext.TEXTURE_2D</code> | <code>WebGLRenderingContext.TEXTURE_CUBE_MAP</code></dt>
+<dt><a href="#TextureTarget">TextureTarget</a> : <code>WebGLRenderingContext.TEXTURE_2D</code> | <code>WebGLRenderingContext.TEXTURE_CUBE_MAP</code> | <code>WebGL2RenderingContext.TEXTURE_2D_ARRAY</code> | <code>WebGL2RenderingContext.TEXTURE_3D</code></dt>
 <dd></dd>
 <dt><a href="#TextureOptions">TextureOptions</a> : <code><a href="#PexResource">PexResource</a></code></dt>
 <dd></dd>
+<dt><a href="#Texture2DArrayOptions">Texture2DArrayOptions</a> : <code><a href="#PexResource">PexResource</a></code></dt>
+<dd></dd>
 <dt><a href="#TextureCubeOptions">TextureCubeOptions</a> : <code><a href="#PexResource">PexResource</a></code></dt>
 <dd></dd>
-<dt><a href="#VertexArrayOptions">VertexArrayOptions</a> : <code><a href="#PexResource">PexResource</a></code></dt>
+<dt><a href="#TransformFeedbackOptions">TransformFeedbackOptions</a> : <code><a href="#PexResource">PexResource</a></code></dt>
 <dd></dd>
 <dt><a href="#PexContextOptions">PexContextOptions</a> : <code>object</code></dt>
 <dd></dd>
@@ -159,6 +161,8 @@ Please note those props are read only. To set new values or upload new data to G
 <dd><p>[r, g, b, a]</p>
 </dd>
 <dt><a href="#TypedArray">TypedArray</a> : <code>Int8Array</code> | <code>Uint8Array</code> | <code>Uint8ClampedArray</code> | <code>Int16Array</code> | <code>Uint16Array</code> | <code>Int32Array</code> | <code>Uint32Array</code> | <code>Float32Array</code> | <code>Float64Array</code> | <code>BigInt64Array</code> | <code>BigUint64Array</code></dt>
+<dd></dd>
+<dt><a href="#VertexArrayOptions">VertexArrayOptions</a> : <code><a href="#PexResource">PexResource</a></code></dt>
 <dd></dd>
 </dl>
 
@@ -193,7 +197,9 @@ Please note those props are read only. To set new values or upload new data to G
   - [.pass(opts)](#ctx.pass) ⇒ [<code>PexResource</code>](#PexResource)
   - [.pipeline(opts)](#ctx.pipeline) ⇒ [<code>PexResource</code>](#PexResource)
   - [.vertexArray(opts)](#ctx.vertexArray) ⇒ [<code>PexResource</code>](#PexResource)
+  - [.transformFeedback(opts)](#ctx.transformFeedback) ⇒ [<code>PexResource</code>](#PexResource)
   - [.texture2D(opts)](#ctx.texture2D) ⇒ [<code>PexResource</code>](#PexResource)
+  - [.texture2DArray(opts)](#ctx.texture2DArray) ⇒ [<code>PexResource</code>](#PexResource)
   - [.textureCube(opts)](#ctx.textureCube) ⇒ [<code>PexResource</code>](#PexResource)
   - [.renderbuffer(opts)](#ctx.renderbuffer) ⇒ [<code>PexResource</code>](#PexResource)
   - [.vertexBuffer(opts)](#ctx.vertexBuffer) ⇒ [<code>PexResource</code>](#PexResource)
@@ -561,7 +567,7 @@ const pass = ctx.pass({
   color: [Texture2D, ...]
   color: [{ texture: Texture2D | TextureCube, target: CubemapFace }, ...]
   depth: Texture2D
-  clearColor: Array,
+  clearColor: Array | Array[],
   clearDepth: number,
 })
 ```
@@ -636,6 +642,28 @@ const drawCmd = {
 };
 ```
 
+<a name="ctx.transformFeedback"></a>
+
+### ctx.transformFeedback(opts) ⇒ [<code>PexResource</code>](#PexResource)
+
+Create a transform feedback
+
+**Kind**: static method of [<code>ctx</code>](#ctx)
+
+| Param | Type                                                               |
+| ----- | ------------------------------------------------------------------ |
+| opts  | [<code>TransformFeedbackOptions</code>](#TransformFeedbackOptions) |
+
+**Example**
+
+```js
+const tex = ctx.transformFeedback({
+  varyings: {
+    outPosition: positionsBuf,
+  },
+});
+```
+
 <a name="ctx.texture2D"></a>
 
 ### ctx.texture2D(opts) ⇒ [<code>PexResource</code>](#PexResource)
@@ -658,6 +686,26 @@ const tex = ctx.texture2D({
   pixelFormat: ctx.PixelFormat.RGB8,
   encoding: ctx.Encoding.Linear,
   wrap: ctx.Wrap.Repeat,
+});
+```
+
+<a name="ctx.texture2DArray"></a>
+
+### ctx.texture2DArray(opts) ⇒ [<code>PexResource</code>](#PexResource)
+
+Create a 2D Texture Array resource.
+
+**Kind**: static method of [<code>ctx</code>](#ctx)
+
+| Param | Type                                                                                                                                                                                         |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| opts  | <code>Array.&lt;HTMLImageElement&gt;</code> \| <code>Array.&lt;HTMLVideoElement&gt;</code> \| <code>Array.&lt;HTMLCanvasElement&gt;</code> \| [<code>TextureOptions</code>](#TextureOptions) |
+
+**Example**
+
+```js
+const tex = ctx.texture2DArray({
+  data: [img, img, img],
 });
 ```
 
@@ -979,7 +1027,7 @@ Create a context object
 
 <a name="TextureTarget"></a>
 
-## TextureTarget : <code>WebGLRenderingContext.TEXTURE_2D</code> \| <code>WebGLRenderingContext.TEXTURE_CUBE_MAP</code>
+## TextureTarget : <code>WebGLRenderingContext.TEXTURE_2D</code> \| <code>WebGLRenderingContext.TEXTURE_CUBE_MAP</code> \| <code>WebGL2RenderingContext.TEXTURE_2D_ARRAY</code> \| <code>WebGL2RenderingContext.TEXTURE_3D</code>
 
 **Kind**: global typedef
 <a name="TextureOptions"></a>
@@ -989,26 +1037,39 @@ Create a context object
 **Kind**: global typedef
 **Properties**
 
-| Name               | Type                                                                                                                                                                                                                                                                                                                                              | Default                                          | Description                                                                                                                  |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| [data]             | <code>HTMLImageElement</code> \| <code>HTMLVideoElement</code> \| <code>HTMLCanvasElement</code> \| <code>Array</code> \| [<code>TypedArray</code>](#TypedArray) \| [<code>TextureOptionsData</code>](#TextureOptionsData) \| <code>Array.&lt;HTMLImageElement&gt;</code> \| [<code>Array.&lt;TextureOptionsData&gt;</code>](#TextureOptionsData) |                                                  |                                                                                                                              |
-| [width]            | <code>number</code>                                                                                                                                                                                                                                                                                                                               |                                                  |                                                                                                                              |
-| [height]           | <code>number</code>                                                                                                                                                                                                                                                                                                                               |                                                  |                                                                                                                              |
-| [pixelFormat]      | [<code>PixelFormat</code>](#ctx.PixelFormat)                                                                                                                                                                                                                                                                                                      | <code>ctx.PixelFormat.RGB8</code>                |                                                                                                                              |
-| [internalFormat]   | <code>ctx.TextureFormat</code>                                                                                                                                                                                                                                                                                                                    | <code>ctx.TextureFormat.RGBA</code>              |                                                                                                                              |
-| [type]             | <code>ctx.DataType</code>                                                                                                                                                                                                                                                                                                                         | <code>ctx.TextureFormat[opts.pixelFormat]</code> |                                                                                                                              |
-| [encoding]         | [<code>Encoding</code>](#ctx.Encoding)                                                                                                                                                                                                                                                                                                            | <code>ctx.Encoding.Linear</code>                 |                                                                                                                              |
-| [wrapS]            | [<code>Wrap</code>](#ctx.Wrap)                                                                                                                                                                                                                                                                                                                    | <code>ctx.Wrap.ClampToEdge</code>                |                                                                                                                              |
-| [wrapT]            | [<code>Wrap</code>](#ctx.Wrap)                                                                                                                                                                                                                                                                                                                    | <code>ctx.Wrap.ClampToEdge</code>                |                                                                                                                              |
-| [wrap]             | [<code>Wrap</code>](#ctx.Wrap)                                                                                                                                                                                                                                                                                                                    | <code>ctx.Wrap.ClampToEdge</code>                |                                                                                                                              |
-| [min]              | [<code>Filter</code>](#ctx.Filter)                                                                                                                                                                                                                                                                                                                | <code>ctx.Filter.Nearest</code>                  |                                                                                                                              |
-| [mag]              | [<code>Filter</code>](#ctx.Filter)                                                                                                                                                                                                                                                                                                                | <code>ctx.Filter.Nearest</code>                  |                                                                                                                              |
-| [aniso]            | <code>number</code>                                                                                                                                                                                                                                                                                                                               | <code>0</code>                                   | requires [EXT_texture_filter_anisotropic](https://www.khronos.org/registry/webgl/extensions/EXT_texture_filter_anisotropic/) |
-| [mipmap]           | <code>boolean</code>                                                                                                                                                                                                                                                                                                                              | <code>true</code>                                | requires `min` to be set to `ctx.Filter.LinearMipmapLinear` or similar                                                       |
-| [premultiplyAlpha] | <code>boolean</code>                                                                                                                                                                                                                                                                                                                              | <code>false</code>                               |                                                                                                                              |
-| [flipY]            | <code>boolean</code>                                                                                                                                                                                                                                                                                                                              | <code>false</code>                               |                                                                                                                              |
-| [compressed]       | <code>boolean</code>                                                                                                                                                                                                                                                                                                                              | <code>false</code>                               |                                                                                                                              |
-| [target]           | [<code>TextureTarget</code>](#TextureTarget)                                                                                                                                                                                                                                                                                                      |                                                  |                                                                                                                              |
+| Name               | Type                                                                                                                                                                                                                       | Default                                          | Description                                                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| [data]             | <code>HTMLImageElement</code> \| <code>HTMLVideoElement</code> \| <code>HTMLCanvasElement</code> \| <code>Array</code> \| [<code>TypedArray</code>](#TypedArray) \| [<code>TextureOptionsData</code>](#TextureOptionsData) |                                                  |                                                                                                                              |
+| [width]            | <code>number</code>                                                                                                                                                                                                        |                                                  |                                                                                                                              |
+| [height]           | <code>number</code>                                                                                                                                                                                                        |                                                  |                                                                                                                              |
+| [pixelFormat]      | [<code>PixelFormat</code>](#ctx.PixelFormat)                                                                                                                                                                               | <code>ctx.PixelFormat.RGBA8</code>               |                                                                                                                              |
+| [internalFormat]   | <code>ctx.TextureFormat</code>                                                                                                                                                                                             | <code>ctx.TextureFormat.RGBA</code>              |                                                                                                                              |
+| [type]             | <code>ctx.DataType</code>                                                                                                                                                                                                  | <code>ctx.TextureFormat[opts.pixelFormat]</code> |                                                                                                                              |
+| [encoding]         | [<code>Encoding</code>](#ctx.Encoding)                                                                                                                                                                                     | <code>ctx.Encoding.Linear</code>                 |                                                                                                                              |
+| [wrapS]            | [<code>Wrap</code>](#ctx.Wrap)                                                                                                                                                                                             | <code>ctx.Wrap.ClampToEdge</code>                |                                                                                                                              |
+| [wrapT]            | [<code>Wrap</code>](#ctx.Wrap)                                                                                                                                                                                             | <code>ctx.Wrap.ClampToEdge</code>                |                                                                                                                              |
+| [wrap]             | [<code>Wrap</code>](#ctx.Wrap)                                                                                                                                                                                             | <code>ctx.Wrap.ClampToEdge</code>                |                                                                                                                              |
+| [min]              | [<code>Filter</code>](#ctx.Filter)                                                                                                                                                                                         | <code>ctx.Filter.Nearest</code>                  |                                                                                                                              |
+| [mag]              | [<code>Filter</code>](#ctx.Filter)                                                                                                                                                                                         | <code>ctx.Filter.Nearest</code>                  |                                                                                                                              |
+| [aniso]            | <code>number</code>                                                                                                                                                                                                        | <code>0</code>                                   | requires [EXT_texture_filter_anisotropic](https://www.khronos.org/registry/webgl/extensions/EXT_texture_filter_anisotropic/) |
+| [mipmap]           | <code>boolean</code>                                                                                                                                                                                                       | <code>true</code>                                | requires `min` to be set to `ctx.Filter.LinearMipmapLinear` or similar                                                       |
+| [premultiplyAlpha] | <code>boolean</code>                                                                                                                                                                                                       | <code>false</code>                               |                                                                                                                              |
+| [flipY]            | <code>boolean</code>                                                                                                                                                                                                       | <code>false</code>                               |                                                                                                                              |
+| [compressed]       | <code>boolean</code>                                                                                                                                                                                                       | <code>false</code>                               |                                                                                                                              |
+| [target]           | [<code>TextureTarget</code>](#TextureTarget)                                                                                                                                                                               |                                                  |                                                                                                                              |
+| [offset]           | <code>number</code>                                                                                                                                                                                                        |                                                  |                                                                                                                              |
+
+<a name="Texture2DArrayOptions"></a>
+
+## Texture2DArrayOptions : [<code>PexResource</code>](#PexResource)
+
+**Kind**: global typedef
+**Extends**: [<code>TextureOptions</code>](#TextureOptions)
+**Properties**
+
+| Name   | Type                                                                                                                                                                                                            |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [data] | <code>Array.&lt;HTMLImageElement&gt;</code> \| [<code>Array.&lt;TextureOptionsData&gt;</code>](#TextureOptionsData) \| <code>Array.&lt;Array&gt;</code> \| [<code>Array.&lt;TypedArray&gt;</code>](#TypedArray) |
 
 <a name="TextureCubeOptions"></a>
 
@@ -1022,18 +1083,18 @@ Create a context object
 | ------ | --------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
 | [data] | <code>Array.&lt;HTMLImageElement&gt;</code> \| [<code>Array.&lt;TypedArray&gt;</code>](#TypedArray) | 6 images, one for each face +X, -X, +Y, -Y, +Z, -Z |
 
-<a name="VertexArrayOptions"></a>
+<a name="TransformFeedbackOptions"></a>
 
-## VertexArrayOptions : [<code>PexResource</code>](#PexResource)
+## TransformFeedbackOptions : [<code>PexResource</code>](#PexResource)
 
 **Kind**: global typedef
 **Properties**
 
-| Name         | Type                |
-| ------------ | ------------------- |
-| vertexLayout | <code>object</code> |
-| [attributes] | <code>object</code> |
-| [indices]    | <code>object</code> |
+| Name          | Type                |
+| ------------- | ------------------- |
+| varyings      | <code>object</code> |
+| bufferMode    | <code>number</code> |
+| primitiveMode | <code>number</code> |
 
 <a name="PexContextOptions"></a>
 
@@ -1168,6 +1229,18 @@ Please note those props are read only. To set new values or upload new data to G
 ## TypedArray : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
 
 **Kind**: global typedef
+<a name="VertexArrayOptions"></a>
+
+## VertexArrayOptions : [<code>PexResource</code>](#PexResource)
+
+**Kind**: global typedef
+**Properties**
+
+| Name         | Type                |
+| ------------ | ------------------- |
+| vertexLayout | <code>object</code> |
+| [attributes] | <code>object</code> |
+| [indices]    | <code>object</code> |
 
 <!-- api-end -->
 

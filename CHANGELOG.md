@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [3.2.0](https://github.com/pex-gl/pex-context/compare/v3.1.2...v3.2.0) (2025-01-31)
+
+
+### Bug Fixes
+
+* add dispose to vertex array ([d1b6097](https://github.com/pex-gl/pex-context/commit/d1b6097aa18c9a523eaed653d6399ebb7739705f)), closes [#147](https://github.com/pex-gl/pex-context/issues/147)
+* apply viewport and scissor after binding fbo but before clear ([7376d9e](https://github.com/pex-gl/pex-context/commit/7376d9e1a41318b18f85dbe8b6da4e9d4fcddb09))
+* check color value exist when using clearBufferfv ([e2faebf](https://github.com/pex-gl/pex-context/commit/e2faebf5dac51ccf994ee14946698140e7a95829))
+
+
+### Features
+
+* add support for clearBuffer via clearColor ([163b0b8](https://github.com/pex-gl/pex-context/commit/163b0b8328548d5df4698b1fb57af479536fb086)), closes [#139](https://github.com/pex-gl/pex-context/issues/139)
+* add support for copy buffer to texture ([c81fb88](https://github.com/pex-gl/pex-context/commit/c81fb8856b5110318077b78c7b13dd7b31906854)), closes [#150](https://github.com/pex-gl/pex-context/issues/150)
+* add support for texture arrays ([9ffa021](https://github.com/pex-gl/pex-context/commit/9ffa02145cfcbb3333fd4e73b81894e5338e5208)), closes [#137](https://github.com/pex-gl/pex-context/issues/137)
+* add support for transform-feedback ([df4bd8a](https://github.com/pex-gl/pex-context/commit/df4bd8a770f38e7fb25731d95a4baf25d70f29df))
+* handle options array for texture array ([6e2e386](https://github.com/pex-gl/pex-context/commit/6e2e386f9accf9b8da2434d4a8c150cd85e4213d))
+* support passing array of elements to textureCube + remove mandatory width/height when passing an array of elements as data ([b5a53ce](https://github.com/pex-gl/pex-context/commit/b5a53ce482771218fde9d3c0c903645d581b538f))
+
+
+
 ## [3.1.2](https://github.com/pex-gl/pex-context/compare/v3.1.1...v3.1.2) (2024-09-03)
 
 
