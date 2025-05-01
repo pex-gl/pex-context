@@ -48,6 +48,8 @@ const msaaColorBuffer = ctx.renderbuffer({
   msaa: 4,
 });
 
+console.log('ctx.capabilities.maxSamples', ctx.capabilities.maxSamples)
+
 const msaaDepthBuffer = ctx.renderbuffer({
   width,
   height,
@@ -81,6 +83,21 @@ const resolveCmd = {
 };
 
 const geom = cube();
+
+const lineGeom = {
+  positions: []
+}
+let prevPos = null
+for (let i = 0; i < 128; i++) {
+  const a = i / 128 * Math.PI * 2
+  const pos = [
+   1 * Math.sin(a),
+   1 * Math.cos(a),
+   0
+  ]
+    lineGeom.positions.push([0,0,0])
+    lineGeom.positions.push(pos)
+}
 
 const img = await loadImage(new URL("./assets/checker.jpg", import.meta.url));
 
@@ -124,6 +141,37 @@ const drawCmd = {
   },
 };
 
+const drawLinesCmd = {
+  name: "DrawLinesCmd",
+  pipeline: ctx.pipeline({
+    vert: /*glsl*/`
+      attribute vec3 aPosition;
+      uniform mat4 uProjectionMatrix;
+      uniform mat4 uViewMatrix;
+
+      void main () {
+        gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
+      }
+    `,
+    frag: /*glsl*/`
+      precision highp float;
+      void main() {
+        gl_FragColor = vec4(1.0);
+      }
+   `,
+    depthTest: true,
+    primitive: ctx.Primitive.Lines
+  }),
+  attributes: {
+    aPosition: ctx.vertexBuffer(lineGeom.positions.flat()),
+  },
+  count: lineGeom.positions.length,
+  uniforms: {
+    uProjectionMatrix: camera.projectionMatrix,
+    uViewMatrix: camera.viewMatrix,
+  },
+};
+
 const drawTextureCmd = {
   name: "drawTexture",
   pipeline: ctx.pipeline({
@@ -156,6 +204,12 @@ const drawTextureCmd = {
 ctx.frame(() => {
   ctx.submit(captureMsaaCmd, () => {
     ctx.submit(drawCmd, {
+      uniforms: {
+        uProjectionMatrix: camera.projectionMatrix,
+        uViewMatrix: camera.viewMatrix,
+      },
+    });
+    ctx.submit(drawLinesCmd, {
       uniforms: {
         uProjectionMatrix: camera.projectionMatrix,
         uViewMatrix: camera.viewMatrix,
