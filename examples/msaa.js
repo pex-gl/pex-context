@@ -12,12 +12,29 @@ import basicTexturedVert from "./shaders/textured.vert.js";
 
 const ctx = createContext({
   debug: true,
-  pixelRatio: devicePixelRatio,
+  pixelRatio: 1,
   antialias: false,
 });
 const gl = ctx.gl;
 
-const geom = cube();
+const geom = cube({sx: 0.5});
+
+const lineGeom = {
+  positions: []
+}
+let prevPos = null
+for (let i = 0; i < 128; i++) {
+  const a = i / 128 * Math.PI * 2
+  const pos = [
+   1 * Math.sin(a),
+   1 * Math.cos(a),
+   0
+  ]
+    lineGeom.positions.push([0,0,0])
+    lineGeom.positions.push(pos)
+}
+
+
 const camera = createCamera({
   position: [1, 0.6, 1],
   fov: Math.PI / 3,
@@ -74,47 +91,32 @@ function initTextures() {
   };
 
   const fb = gl.createFramebuffer();
-  const colorRenderbuffer = gl.createRenderbuffer();
+  const colorRenderbuffer = ctx.renderbuffer({
+    width: w,
+    height: h,
+    pixelFormat: ctx.PixelFormat.RGBA8,
+    sampleCount: gl.getParameter(gl.MAX_SAMPLES)
+  })
+  const depthRenderbuffer = ctx.renderbuffer({
+    width: w,
+    height: h,
+    pixelFormat: ctx.PixelFormat.DEPTH_COMPONENT24,
+    sampleCount: gl.getParameter(gl.MAX_SAMPLES)
+  })
 
-  gl.bindRenderbuffer(gl.RENDERBUFFER, colorRenderbuffer);
-  gl.renderbufferStorageMultisample(
-    gl.RENDERBUFFER,
-    gl.getParameter(gl.MAX_SAMPLES),
-    gl.RGBA8,
-    w,
-    h
-  );
-  console.log("MAX_SAMPLES", gl.getParameter(gl.MAX_SAMPLES));
-  const depthRenderbuffer = gl.createRenderbuffer();
-  gl.bindRenderbuffer(gl.RENDERBUFFER, depthRenderbuffer);
-  gl.renderbufferStorageMultisample(
-    gl.RENDERBUFFER,
-    gl.getParameter(gl.MAX_SAMPLES),
-    gl.DEPTH_COMPONENT24,
-    w,
-    h
-  );
   gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
   gl.framebufferRenderbuffer(
     gl.FRAMEBUFFER,
     gl.COLOR_ATTACHMENT0,
     gl.RENDERBUFFER,
-    colorRenderbuffer
+    colorRenderbuffer.handle
   );
   gl.framebufferRenderbuffer(
     gl.FRAMEBUFFER,
     gl.DEPTH_ATTACHMENT,
     gl.RENDERBUFFER,
-    depthRenderbuffer
+    depthRenderbuffer.handle
   );
-  // using texture is not working
-  // gl.framebufferTexture2D(
-  //   gl.FRAMEBUFFER,
-  //   gl.DEPTH_ATTACHMENT,
-  //   depthMap.target,
-  //   depthMap.handle,
-  //   0
-  // );
   multisampledFbo = fb;
 }
 const frag = /* glsl */ `
@@ -178,7 +180,42 @@ const drawCmd = {
       flipY: true,
       pixelFormat: ctx.PixelFormat.RGBA8,
       encoding: ctx.Encoding.Linear,
+      min: ctx.Filter.LinearMipmapLinear,
+      mag: ctx.Filter.Linear,
+      aniso: 16,
+      mipmap: true
     }),
+  },
+};
+
+const drawLinesCmd = {
+  name: "DrawLinesCmd",
+  pipeline: ctx.pipeline({
+    vert: /*glsl*/`
+      attribute vec3 aPosition;
+      uniform mat4 uProjectionMatrix;
+      uniform mat4 uViewMatrix;
+
+      void main () {
+        gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
+      }
+    `,
+    frag: /*glsl*/`
+      precision highp float;
+      void main() {
+        gl_FragColor = vec4(1.0);
+      }
+   `,
+    depthTest: true,
+    primitive: ctx.Primitive.Lines
+  }),
+  attributes: {
+    aPosition: ctx.vertexBuffer(lineGeom.positions.flat()),
+  },
+  count: lineGeom.positions.length,
+  uniforms: {
+    uProjectionMatrix: camera.projectionMatrix,
+    uViewMatrix: camera.viewMatrix,
   },
 };
 
@@ -202,6 +239,13 @@ ctx.frame(() => {
   ctx.submit(clearCmd);
 
   ctx.submit(drawCmd, {
+    uniforms: {
+      uProjectionMatrix: camera.projectionMatrix,
+      uViewMatrix: camera.viewMatrix,
+    },
+  });
+
+  ctx.submit(drawLinesCmd, {
     uniforms: {
       uProjectionMatrix: camera.projectionMatrix,
       uViewMatrix: camera.viewMatrix,

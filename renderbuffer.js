@@ -44,14 +44,26 @@ function updateRenderbuffer(ctx, renderbuffer, opts) {
   );
 
   renderbuffer.format = internalFormat;
+  console.log('sample renderbuffer.format', renderbuffer.format, ctx.gl.RGBA8, ctx.gl.DEPTH_COMPONENT24)
 
+  console.log('sampleCount', opts.sampleCount)
   gl.bindRenderbuffer(renderbuffer.target, renderbuffer.handle);
+  if (opts.sampleCount) {
+    gl.renderbufferStorageMultisample(
+      renderbuffer.target,
+      Math.min(opts.sampleCount, ctx.capabilities.maxSamples),
+      renderbuffer.format,
+      renderbuffer.width,
+      renderbuffer.height
+    );
+  } else {
   gl.renderbufferStorage(
     renderbuffer.target,
     renderbuffer.format,
     renderbuffer.width,
     renderbuffer.height,
   );
+}
   gl.bindRenderbuffer(renderbuffer.target, null);
 }
 
