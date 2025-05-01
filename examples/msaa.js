@@ -43,7 +43,7 @@ createOrbiter({ camera });
 
 const clearCmd = {
   pass: ctx.pass({
-    clearColor: [0.2, 0.2, 0.2, 1],
+    clearColor: [0.0, 0.92, 0.2, 1],
     clearDepth: 1,
   }),
 };
@@ -53,7 +53,6 @@ let depthMap;
 let colorMap;
 let capturePassCmd;
 let blitPassCmd;
-let multisampledFbo;
 
 function initTextures() {
   const w = ctx.gl.canvas.width;
@@ -71,26 +70,16 @@ function initTextures() {
     encoding: ctx.Encoding.SRGB,
   });
 
-  capturePassCmd = {
-    name: "drawPass",
-    pass: ctx.pass({
-      color: [colorMap],
-      depth: depthMap,
-      clearColor: [0, 0, 0, 1],
-      clearDepth: 1,
-    }),
-  };
-
   blitPassCmd = {
     name: "blitPass",
     pass: ctx.pass({
       color: [colorMap],
       clearColor: [0, 0, 0, 1],
+      depth: depthMap,
       clearDepth: 1,
     }),
   };
 
-  const fb = gl.createFramebuffer();
   const colorRenderbuffer = ctx.renderbuffer({
     width: w,
     height: h,
@@ -103,21 +92,14 @@ function initTextures() {
     pixelFormat: ctx.PixelFormat.DEPTH_COMPONENT24,
     sampleCount: gl.getParameter(gl.MAX_SAMPLES)
   })
+  const capturePass = ctx.pass({
+    color: [colorRenderbuffer],
+    clearColor: [0,0,0,1],
+    depth: depthRenderbuffer,
+    clearDepth: 1
+  })
 
-  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-  gl.framebufferRenderbuffer(
-    gl.FRAMEBUFFER,
-    gl.COLOR_ATTACHMENT0,
-    gl.RENDERBUFFER,
-    colorRenderbuffer.handle
-  );
-  gl.framebufferRenderbuffer(
-    gl.FRAMEBUFFER,
-    gl.DEPTH_ATTACHMENT,
-    gl.RENDERBUFFER,
-    depthRenderbuffer.handle
-  );
-  multisampledFbo = fb;
+  capturePassCmd = { pass: capturePass }
 }
 const frag = /* glsl */ `
 precision highp float;
@@ -235,25 +217,26 @@ ctx.frame(() => {
   }
 
   //capture
-  gl.bindFramebuffer(gl.FRAMEBUFFER, multisampledFbo);
-  ctx.submit(clearCmd);
 
-  ctx.submit(drawCmd, {
-    uniforms: {
-      uProjectionMatrix: camera.projectionMatrix,
-      uViewMatrix: camera.viewMatrix,
-    },
-  });
 
-  ctx.submit(drawLinesCmd, {
-    uniforms: {
-      uProjectionMatrix: camera.projectionMatrix,
-      uViewMatrix: camera.viewMatrix,
-    },
-  });
+  ctx.submit(capturePassCmd, () => {
+    ctx.submit(drawCmd, {
+      uniforms: {
+        uProjectionMatrix: camera.projectionMatrix,
+        uViewMatrix: camera.viewMatrix,
+      },
+    });
+
+    ctx.submit(drawLinesCmd, {
+      uniforms: {
+        uProjectionMatrix: camera.projectionMatrix,
+        uViewMatrix: camera.viewMatrix,
+      },
+    });
+  })
 
   ctx.submit(blitPassCmd, () => {
-    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, multisampledFbo);
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, capturePassCmd.pass.framebuffer.handle);
     gl.clearBufferfv(gl.COLOR, 0, [1.0, 1.0, 1.0, 1.0]);
     gl.blitFramebuffer(
       0,
