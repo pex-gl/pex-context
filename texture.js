@@ -321,6 +321,7 @@ function updateTexture(ctx, texture, opts) {
   texture.wrapT = wrapT;
   texture.flipY = flipY;
   texture.encoding = encoding;
+  texture.mipmap = opts.mipmap;
 
   texture.info = `${Object.keys(ctx.PixelFormat).find(
     (key) => ctx.PixelFormat[key] === pixelFormat,
