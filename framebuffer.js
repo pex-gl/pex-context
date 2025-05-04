@@ -13,6 +13,7 @@ function createFramebuffer(ctx, opts) {
     class: "framebuffer",
     handle: gl.createFramebuffer(),
     target: gl.FRAMEBUFFER,
+    name: `framebuffer${opts.name ? '_' + opts.name : ''}`,
     drawBuffers: [],
     color: [],
     depth: null,
@@ -41,8 +42,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
   const gl = ctx.gl;
 
   // TODO: if color.length > 1 check for WebGL2 or gl.getExtension('WEBGL_draw_buffers')
-  framebuffer.color = opts.color.map((attachment) => {
-    if (attachment.target === gl.RENDERBUFFER) return attachment;
+  framebuffer.color = opts.color.map((attachment, i) => {
     const colorAttachment = attachment.texture
       ? attachment
       : { texture: attachment };
@@ -74,7 +74,8 @@ function updateFramebuffer(ctx, framebuffer, opts) {
         gl.FRAMEBUFFER,
         gl.COLOR_ATTACHMENT0 + i,
         gl.RENDERBUFFER,
-        colorAttachment.handle
+        //TODO: can we make this not the case?
+        colorAttachment.handle || colorAttachment.texture.handle
       );
     } else {
       gl.framebufferTexture2D(

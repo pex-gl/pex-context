@@ -428,6 +428,10 @@ function createContext(options = {}) {
         this.stack.pop();
       }
 
+      if (cmd.pass?.resolveFramebuffer) {
+        this.resolvePass(cmd.pass);
+      }
+
       this.checkError();
     },
 
@@ -901,6 +905,59 @@ function createContext(options = {}) {
       }
 
       this.checkError();
+    },
+    resolvePass: (pass) => {
+
+      const framebuffer = pass.framebuffer
+      const resolveFramebuffer = pass.resolveFramebuffer
+      ctx.state.framebuffer = resolveFramebuffer;
+
+      //bind buffer for writing to
+      gl.bindFramebuffer(resolveFramebuffer.target, resolveFramebuffer.handle);
+
+      //bind buffer for reading from
+      gl.bindFramebuffer(
+        gl.READ_FRAMEBUFFER,
+        pass.framebuffer.handle,
+      );
+
+
+      let drawBuffers = []
+      //i = -1 is depth buffer, doing it so we can have only one for loop
+      for(let i = -1; i < framebuffer.color.length; i++) {
+        const isDepth = i == -1
+        const attachment = isDepth ? framebuffer.depth.texture : framebuffer.color[i].texture
+        const mask = isDepth ? gl.DEPTH_BUFFER_BIT : gl.COLOR_BUFFER_BIT
+        const filter = isDepth ? gl.NEAREST : gl.LINEAR
+        if (i >= 0) {
+          drawBuffers[i] = gl.COLOR_ATTACHMENT0 + i
+          gl.drawBuffers(drawBuffers);
+          gl.readBuffer(gl.COLOR_ATTACHMENT0 + i);
+        }
+        gl.blitFramebuffer(
+          0,
+          0,
+          attachment.width,
+          attachment.height,
+          0,
+          0,
+          attachment.width,
+          attachment.height,
+          mask,
+          filter
+        );
+        if (i >= 0) {
+          //skip already written buffer on next write as we can only blit one attachment at the time
+          drawBuffers[i] = gl.NONE
+          if (resolveFramebuffer.color[i].texture.mipmap) {
+            ctx.update(pass.resolveFramebuffer.color[i].texture, { mipmap: true })
+          }
+        }
+      }
+      gl.bindFramebuffer(
+        gl.READ_FRAMEBUFFER,
+        null,
+      );
     },
     applyViewport(viewport) {
       if (viewport && viewport !== this.state.viewport) {
