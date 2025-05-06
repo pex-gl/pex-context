@@ -128,10 +128,12 @@ function initTextures() {
   captureAndResolvePassCmd = {
     pass: ctx.pass({
       name: 'captureAndResolvePassCmd',
-      color: [{
+      color: [
+      {
         texture: colorRenderbuffer,
         resolveTarget: colorMap
-      },{
+      },
+      {
         texture: normalRenderbuffer,
         resolveTarget: normalMap
       },
@@ -143,7 +145,8 @@ function initTextures() {
         texture: depthRenderbuffer,
         resolveTarget: depthMap
       },
-    }),
+     }
+    ),
   };
 
   window.ctx = ctx

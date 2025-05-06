@@ -907,8 +907,6 @@ function createContext(options = {}) {
       this.checkError();
     },
     resolvePass: (pass) => {
-
-      const framebuffer = pass.framebuffer
       const resolveFramebuffer = pass.resolveFramebuffer
       ctx.state.framebuffer = resolveFramebuffer;
 
@@ -922,17 +920,20 @@ function createContext(options = {}) {
       );
 
 
-      let drawBuffers = []
+      let drawBuffers = resolveFramebuffer.color ? resolveFramebuffer.color.map(() => gl.NONE) : null
       //i = -1 is depth buffer, doing it so we can have only one for loop
-      for(let i = -1; i < framebuffer.color.length; i++) {
+      const startIndex = resolveFramebuffer.depth ? -1 : 0
+      for(let i = startIndex; i < resolveFramebuffer.color.length; i++) {
         const isDepth = i == -1
-        const attachment = isDepth ? framebuffer.depth.texture : framebuffer.color[i].texture
+        const attachment = isDepth ? resolveFramebuffer.depth?.texture : resolveFramebuffer.color[i].texture
         const mask = isDepth ? gl.DEPTH_BUFFER_BIT : gl.COLOR_BUFFER_BIT
         const filter = isDepth ? gl.NEAREST : gl.LINEAR
         if (i >= 0) {
+          // attachment we writing to, only one
           drawBuffers[i] = gl.COLOR_ATTACHMENT0 + i
           gl.drawBuffers(drawBuffers);
-          gl.readBuffer(gl.COLOR_ATTACHMENT0 + i);
+          // attachment we are reading from
+          gl.readBuffer(gl.COLOR_ATTACHMENT0 + resolveFramebuffer.color[i].sourceIndex);
         }
         gl.blitFramebuffer(
           0,

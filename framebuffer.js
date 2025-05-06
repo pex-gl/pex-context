@@ -42,7 +42,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
   const gl = ctx.gl;
 
   // TODO: if color.length > 1 check for WebGL2 or gl.getExtension('WEBGL_draw_buffers')
-  framebuffer.color = opts.color.map((attachment, i) => {
+  framebuffer.color = opts.color ? opts.color.map((attachment, i) => {
     const colorAttachment = attachment.texture
       ? attachment
       : { texture: attachment };
@@ -51,7 +51,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
       colorAttachment.target = colorAttachment.texture.target;
     }
     return colorAttachment;
-  });
+  }) : [];
 
   framebuffer.depth = opts.depth
     ? opts.depth.texture
@@ -59,8 +59,8 @@ function updateFramebuffer(ctx, framebuffer, opts) {
       : { texture: opts.depth }
     : null;
 
-  framebuffer.width = framebuffer.color[0].width || framebuffer.color[0].texture.width;
-  framebuffer.height = framebuffer.color[0].height || framebuffer.color[0].texture.height;
+  framebuffer.width = (framebuffer.color[0] || framebuffer.depth).texture.width;
+  framebuffer.height = (framebuffer.color[0] || framebuffer.depth).texture.height;
 
   // TODO: ctx push framebuffer
   gl.bindFramebuffer(framebuffer.target, framebuffer.handle);

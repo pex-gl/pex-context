@@ -20,7 +20,7 @@ function compareFBOAttachments(framebuffer, passOpts) {
   const fboDepthAttachment = framebuffer.depth?.texture;
   const passDepthAttachment = passOpts.depth?.texture || passOpts.depth;
   if (fboDepthAttachment != passDepthAttachment) return false;
-  if (framebuffer.color.length != passOpts.color.length) return false;
+  if (framebuffer.color.length != passOpts.color?.length) return false;
 
   for (let i = 0; i < framebuffer.color.length; i++) {
     const fboColorAttachment = framebuffer.color[i]?.texture;

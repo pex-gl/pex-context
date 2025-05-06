@@ -39,22 +39,20 @@ function createPass(ctx, opts) {
   // Inherits framebuffer from parent command or screen, if no target specified
   if (opts.color || opts.depth) {
     pass.framebuffer = ctx.framebuffer(opts);
-    const colorsToResolve = opts.color?.filter((attachment) => attachment.resolveTarget)
-    const depthToResolve = opts.depth?.resolveTarget ? opts.depth : null
+    const colorsToResolve = opts.color ? opts.color.map((attachment, index) => {
+      if (attachment.resolveTarget) {
+         return { texture: attachment.resolveTarget, sourceIndex: index }
+      } else {
+        return null
+      }
+    }).filter((a) => a) : []
+    const depthToResolve = opts.depth?.resolveTarget ? opts.depth.resolveTarget : null
     if (colorsToResolve.length || depthToResolve) {
       const resolveOpts = {
-        blitMask: 0,
-        name: (opts.name ? opts.name + '_' : '') + "resolve"
+        name: (opts.name ? opts.name + '_' : '') + "resolve",
+        color: colorsToResolve,
+        depth: depthToResolve
       }
-      if (colorsToResolve.length) {
-        resolveOpts.blitMask ||= ctx.gl.COLOR_BUFFER_BIT
-        resolveOpts.color = colorsToResolve.map((attachment) => attachment.resolveTarget)
-      }
-      if (depthToResolve) {
-        resolveOpts.blitMask ||= ctx.gl.DEPTH_BUFFER_BIT
-        resolveOpts.depth = opts.depth.resolveTarget
-      }
-      console.log('resolve framebuffer needed', resolveOpts, pass)
       pass.resolveFramebuffer = ctx.framebuffer(resolveOpts);
     }
   }
