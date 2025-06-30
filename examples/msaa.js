@@ -10,9 +10,9 @@ import screenImageVert from "./shaders/screen-image.vert.js";
 import screenImageFrag from "./shaders/screen-image.frag.js";
 
 const ctx = createContext({
-  debug: true,
-  pixelRatio: window.devicePixelRatio,
+  pixelRatio: devicePixelRatio,
   antialias: false,
+  debug: true,
 });
 const gl = ctx.gl;
 
@@ -33,10 +33,9 @@ const camera = createCamera({
   position: [1, 0.6, 1],
   fov: Math.PI / 3,
   near: 1,
-  far: 10
+  far: 10,
 });
 createOrbiter({ camera });
-
 
 let firstFrame = true;
 let depthMap;
@@ -45,7 +44,6 @@ let normalMap;
 let uvMap;
 let capturePassCmd;
 let captureAndResolvePassCmd;
-
 
 function initTextures() {
   const w = ctx.gl.canvas.width;
@@ -63,7 +61,7 @@ function initTextures() {
     encoding: ctx.Encoding.SRGB,
     mipmap: true,
     min: ctx.Filter.LinearMipmapLinear,
-    mag: ctx.Filter.Linear
+    mag: ctx.Filter.Linear,
   });
   normalMap = ctx.texture2D({
     width: w,
@@ -72,7 +70,7 @@ function initTextures() {
     encoding: ctx.Encoding.SRGB,
     mipmap: true,
     min: ctx.Filter.LinearMipmapLinear,
-    mag: ctx.Filter.Linear
+    mag: ctx.Filter.Linear,
   });
   uvMap = ctx.texture2D({
     width: w,
@@ -81,7 +79,7 @@ function initTextures() {
     encoding: ctx.Encoding.SRGB,
     mipmap: true,
     min: ctx.Filter.LinearMipmapLinear,
-    mag: ctx.Filter.Linear
+    mag: ctx.Filter.Linear,
   });
 
   const colorRenderbuffer = ctx.renderbuffer({
@@ -110,16 +108,16 @@ function initTextures() {
   });
   capturePassCmd = {
     pass: ctx.pass({
-      name: 'capturePassCmd',
+      name: "capturePassCmd",
       color: [
         { texture: colorRenderbuffer },
         { texture: normalRenderbuffer },
-        { texture: uvRenderbuffer }
+        { texture: uvRenderbuffer },
       ],
       clearColor: [
         [0, 0, 0, 1],
         [0.5, 0.5, 0.5, 1],
-        [0, 0, 1, 1]
+        [0, 0, 1, 1],
       ],
       depth: depthRenderbuffer,
       clearDepth: 1,
@@ -127,32 +125,30 @@ function initTextures() {
   };
   captureAndResolvePassCmd = {
     pass: ctx.pass({
-      name: 'captureAndResolvePassCmd',
+      name: "captureAndResolvePassCmd",
       color: [
-      {
-        texture: colorRenderbuffer,
-        resolveTarget: colorMap
-      },
-      {
-        texture: normalRenderbuffer,
-        resolveTarget: normalMap
-      },
-      {
-        texture: uvRenderbuffer,
-        resolveTarget: uvMap
-      }],
+        {
+          texture: colorRenderbuffer,
+          resolveTarget: colorMap,
+        },
+        {
+          texture: normalRenderbuffer,
+          resolveTarget: normalMap,
+        },
+        {
+          texture: uvRenderbuffer,
+          resolveTarget: uvMap,
+        },
+      ],
       depth: {
         texture: depthRenderbuffer,
-        resolveTarget: depthMap
+        resolveTarget: depthMap,
       },
-     }
-    ),
+    }),
   };
-
-  window.ctx = ctx
 }
 
-const vert = /*glsl*/`#version 300 es
+const vert = /*glsl*/ `#version 300 es
 in vec3 aPosition;
 in vec3 aNormal;
 in vec2 aTexCoord;
@@ -169,9 +165,9 @@ void main () {
 
   gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
 }
-`
+`;
 
-const frag = /*glsl*/`#version 300 es
+const frag = /*glsl*/ `#version 300 es
   precision highp float;
 
   in vec3 vNormal;
@@ -292,8 +288,6 @@ const onResize = () => {
 window.addEventListener("resize", onResize);
 onResize();
 
-console.log('WTF')
-
 ctx.frame(() => {
   if (firstFrame) {
     firstFrame = false;
@@ -309,7 +303,7 @@ ctx.frame(() => {
         uViewMatrix: camera.viewMatrix,
       },
     });
-  })
+  });
 
   ctx.submit(captureAndResolvePassCmd, () => {
     ctx.submit(drawLinesCmd, {
@@ -327,8 +321,8 @@ ctx.frame(() => {
     viewport: [0, 0, ctx.gl.canvas.width, ctx.gl.canvas.height],
   });
 
-  const w = ctx.gl.canvas.width / 4
-  const h = ctx.gl.canvas.height / 4
+  const w = ctx.gl.canvas.width / 4;
+  const h = ctx.gl.canvas.height / 4;
   ctx.submit(drawTextureCmd, {
     uniforms: {
       uTexture: colorMap,
@@ -347,20 +341,19 @@ ctx.frame(() => {
     uniforms: {
       uTexture: uvMap,
     },
-    viewport: [w*2, 0, w, h],
+    viewport: [w * 2, 0, w, h],
   });
 
   ctx.submit(drawTextureCmd, {
     uniforms: {
       uTexture: depthMap,
     },
-    viewport: [w*3, 0, w, h],
+    viewport: [w * 3, 0, w, h],
   });
 
   ctx.debug(false);
 
-
   window.dispatchEvent(new CustomEvent("screenshot"));
 
-  return false
+  return false;
 });

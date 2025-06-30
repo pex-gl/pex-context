@@ -907,33 +907,35 @@ function createContext(options = {}) {
       this.checkError();
     },
     resolvePass: (pass) => {
-      const resolveFramebuffer = pass.resolveFramebuffer
+      const resolveFramebuffer = pass.resolveFramebuffer;
       ctx.state.framebuffer = resolveFramebuffer;
 
-      //bind buffer for writing to
+      // bind buffer for writing to
       gl.bindFramebuffer(resolveFramebuffer.target, resolveFramebuffer.handle);
 
-      //bind buffer for reading from
-      gl.bindFramebuffer(
-        gl.READ_FRAMEBUFFER,
-        pass.framebuffer.handle,
-      );
+      // bind buffer for reading from
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, pass.framebuffer.handle);
 
-
-      let drawBuffers = resolveFramebuffer.color ? resolveFramebuffer.color.map(() => gl.NONE) : null
-      //i = -1 is depth buffer, doing it so we can have only one for loop
-      const startIndex = resolveFramebuffer.depth ? -1 : 0
-      for(let i = startIndex; i < resolveFramebuffer.color.length; i++) {
-        const isDepth = i == -1
-        const attachment = isDepth ? resolveFramebuffer.depth?.texture : resolveFramebuffer.color[i].texture
-        const mask = isDepth ? gl.DEPTH_BUFFER_BIT : gl.COLOR_BUFFER_BIT
-        const filter = isDepth ? gl.NEAREST : gl.LINEAR
+      let drawBuffers = resolveFramebuffer.color
+        ? resolveFramebuffer.color.map(() => gl.NONE)
+        : null;
+      // i = -1 is depth buffer, doing it so we can have only one for loop
+      const startIndex = resolveFramebuffer.depth ? -1 : 0;
+      for (let i = startIndex; i < resolveFramebuffer.color.length; i++) {
+        const isDepth = i == -1;
+        const attachment = isDepth
+          ? resolveFramebuffer.depth?.texture
+          : resolveFramebuffer.color[i].texture;
+        const mask = isDepth ? gl.DEPTH_BUFFER_BIT : gl.COLOR_BUFFER_BIT;
+        const filter = isDepth ? gl.NEAREST : gl.LINEAR;
         if (i >= 0) {
           // attachment we writing to, only one
-          drawBuffers[i] = gl.COLOR_ATTACHMENT0 + i
+          drawBuffers[i] = gl.COLOR_ATTACHMENT0 + i;
           gl.drawBuffers(drawBuffers);
           // attachment we are reading from
-          gl.readBuffer(gl.COLOR_ATTACHMENT0 + resolveFramebuffer.color[i].sourceIndex);
+          gl.readBuffer(
+            gl.COLOR_ATTACHMENT0 + resolveFramebuffer.color[i].sourceIndex,
+          );
         }
         gl.blitFramebuffer(
           0,
@@ -945,20 +947,19 @@ function createContext(options = {}) {
           attachment.width,
           attachment.height,
           mask,
-          filter
+          filter,
         );
         if (i >= 0) {
-          //skip already written buffer on next write as we can only blit one attachment at the time
-          drawBuffers[i] = gl.NONE
+          // skip already written buffer on next write as we can only blit one attachment at the time
+          drawBuffers[i] = gl.NONE;
           if (resolveFramebuffer.color[i].texture.mipmap) {
-            ctx.update(pass.resolveFramebuffer.color[i].texture, { mipmap: true })
+            ctx.update(pass.resolveFramebuffer.color[i].texture, {
+              mipmap: true,
+            });
           }
         }
       }
-      gl.bindFramebuffer(
-        gl.READ_FRAMEBUFFER,
-        null,
-      );
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
     },
     applyViewport(viewport) {
       if (viewport && viewport !== this.state.viewport) {

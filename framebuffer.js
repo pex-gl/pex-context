@@ -13,7 +13,7 @@ function createFramebuffer(ctx, opts) {
     class: "framebuffer",
     handle: gl.createFramebuffer(),
     target: gl.FRAMEBUFFER,
-    name: `framebuffer${opts.name ? '_' + opts.name : ''}`,
+    name: `framebuffer${opts.name ? `_${opts.name}` : ""}`,
     drawBuffers: [],
     color: [],
     depth: null,
@@ -42,16 +42,18 @@ function updateFramebuffer(ctx, framebuffer, opts) {
   const gl = ctx.gl;
 
   // TODO: if color.length > 1 check for WebGL2 or gl.getExtension('WEBGL_draw_buffers')
-  framebuffer.color = opts.color ? opts.color.map((attachment, i) => {
-    const colorAttachment = attachment.texture
-      ? attachment
-      : { texture: attachment };
-    colorAttachment.level = 0; // we can't render to mipmap level other than 0 in webgl
-    if (!colorAttachment.target) {
-      colorAttachment.target = colorAttachment.texture.target;
-    }
-    return colorAttachment;
-  }) : [];
+  framebuffer.color = opts.color
+    ? opts.color.map((attachment) => {
+        const colorAttachment = attachment.texture
+          ? attachment
+          : { texture: attachment };
+        colorAttachment.level = 0; // we can't render to mipmap level other than 0 in webgl
+        if (!colorAttachment.target) {
+          colorAttachment.target = colorAttachment.texture.target;
+        }
+        return colorAttachment;
+      })
+    : [];
 
   framebuffer.depth = opts.depth
     ? opts.depth.texture
@@ -60,7 +62,9 @@ function updateFramebuffer(ctx, framebuffer, opts) {
     : null;
 
   framebuffer.width = (framebuffer.color[0] || framebuffer.depth).texture.width;
-  framebuffer.height = (framebuffer.color[0] || framebuffer.depth).texture.height;
+  framebuffer.height = (
+    framebuffer.color[0] || framebuffer.depth
+  ).texture.height;
 
   // TODO: ctx push framebuffer
   gl.bindFramebuffer(framebuffer.target, framebuffer.handle);
@@ -75,7 +79,7 @@ function updateFramebuffer(ctx, framebuffer, opts) {
         gl.COLOR_ATTACHMENT0 + i,
         gl.RENDERBUFFER,
         //TODO: can we make this not the case?
-        colorAttachment.handle || colorAttachment.texture.handle
+        colorAttachment.handle || colorAttachment.texture.handle,
       );
     } else {
       gl.framebufferTexture2D(
