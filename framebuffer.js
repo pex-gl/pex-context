@@ -13,6 +13,7 @@ function createFramebuffer(ctx, opts) {
     class: "framebuffer",
     handle: gl.createFramebuffer(),
     target: gl.FRAMEBUFFER,
+    name: `framebuffer${opts.name ? `_${opts.name}` : ""}`,
     drawBuffers: [],
     color: [],
     depth: null,
@@ -41,16 +42,18 @@ function updateFramebuffer(ctx, framebuffer, opts) {
   const gl = ctx.gl;
 
   // TODO: if color.length > 1 check for WebGL2 or gl.getExtension('WEBGL_draw_buffers')
-  framebuffer.color = opts.color.map((attachment) => {
-    const colorAttachment = attachment.texture
-      ? attachment
-      : { texture: attachment };
-    colorAttachment.level = 0; // we can't render to mipmap level other than 0 in webgl
-    if (!colorAttachment.target) {
-      colorAttachment.target = colorAttachment.texture.target;
-    }
-    return colorAttachment;
-  });
+  framebuffer.color = opts.color
+    ? opts.color.map((attachment) => {
+        const colorAttachment = attachment.texture
+          ? attachment
+          : { texture: attachment };
+        colorAttachment.level = 0; // we can't render to mipmap level other than 0 in webgl
+        if (!colorAttachment.target) {
+          colorAttachment.target = colorAttachment.texture.target;
+        }
+        return colorAttachment;
+      })
+    : [];
 
   framebuffer.depth = opts.depth
     ? opts.depth.texture
@@ -58,8 +61,10 @@ function updateFramebuffer(ctx, framebuffer, opts) {
       : { texture: opts.depth }
     : null;
 
-  framebuffer.width = framebuffer.color[0].texture.width;
-  framebuffer.height = framebuffer.color[0].texture.height;
+  framebuffer.width = (framebuffer.color[0] || framebuffer.depth).texture.width;
+  framebuffer.height = (
+    framebuffer.color[0] || framebuffer.depth
+  ).texture.height;
 
   // TODO: ctx push framebuffer
   gl.bindFramebuffer(framebuffer.target, framebuffer.handle);
@@ -68,15 +73,26 @@ function updateFramebuffer(ctx, framebuffer, opts) {
 
   framebuffer.color.forEach((colorAttachment, i) => {
     framebuffer.drawBuffers.push(gl.COLOR_ATTACHMENT0 + i);
-    gl.framebufferTexture2D(
-      framebuffer.target,
-      gl.COLOR_ATTACHMENT0 + i,
-      colorAttachment.target,
-      colorAttachment.texture.handle,
-      colorAttachment.level,
-    );
+    if (colorAttachment.target === gl.RENDERBUFFER) {
+      gl.framebufferRenderbuffer(
+        gl.FRAMEBUFFER,
+        gl.COLOR_ATTACHMENT0 + i,
+        gl.RENDERBUFFER,
+        //TODO: can we make this not the case?
+        colorAttachment.handle || colorAttachment.texture.handle,
+      );
+    } else {
+      gl.framebufferTexture2D(
+        framebuffer.target,
+        gl.COLOR_ATTACHMENT0 + i,
+        colorAttachment.target,
+        colorAttachment.texture.handle,
+        colorAttachment.level,
+      );
+    }
   });
 
+  //unbind any unused attachments
   for (
     let i = framebuffer.color.length;
     i < ctx.capabilities.maxColorAttachments;

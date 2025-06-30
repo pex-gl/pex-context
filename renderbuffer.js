@@ -46,12 +46,22 @@ function updateRenderbuffer(ctx, renderbuffer, opts) {
   renderbuffer.format = internalFormat;
 
   gl.bindRenderbuffer(renderbuffer.target, renderbuffer.handle);
-  gl.renderbufferStorage(
-    renderbuffer.target,
-    renderbuffer.format,
-    renderbuffer.width,
-    renderbuffer.height,
-  );
+  if (opts.sampleCount) {
+    gl.renderbufferStorageMultisample(
+      renderbuffer.target,
+      Math.min(opts.sampleCount, ctx.capabilities.maxSamples),
+      renderbuffer.format,
+      renderbuffer.width,
+      renderbuffer.height,
+    );
+  } else {
+    gl.renderbufferStorage(
+      renderbuffer.target,
+      renderbuffer.format,
+      renderbuffer.width,
+      renderbuffer.height,
+    );
+  }
   gl.bindRenderbuffer(renderbuffer.target, null);
 }
 

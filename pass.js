@@ -37,7 +37,29 @@ function createPass(ctx, opts) {
   };
 
   // Inherits framebuffer from parent command or screen, if no target specified
-  if (opts.color || opts.depth) pass.framebuffer = ctx.framebuffer(opts);
+  if (opts.color || opts.depth) {
+    pass.framebuffer = ctx.framebuffer(opts);
+
+    const colorsToResolve = opts.color
+      ? opts.color
+          .map((attachment, index) => {
+            if (attachment.resolveTarget) {
+              return { texture: attachment.resolveTarget, sourceIndex: index };
+            }
+          })
+          .filter((a) => a)
+      : [];
+    const depthToResolve = opts.depth?.resolveTarget;
+
+    if (colorsToResolve.length || depthToResolve) {
+      const resolveOpts = {
+        name: `${opts.name ? `${opts.name}_` : ""}resolve`,
+        color: colorsToResolve,
+        depth: depthToResolve,
+      };
+      pass.resolveFramebuffer = ctx.framebuffer(resolveOpts);
+    }
+  }
 
   return pass;
 }
