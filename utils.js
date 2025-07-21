@@ -39,9 +39,13 @@ function enableVertexData(ctx, vertexLayout, cmd, updateState) {
 
   const { attributes = {}, indices } = cmd;
 
-  for (let i = 0; i < ctx.capabilities.maxVertexAttribs; i++) {
-    ctx.state.activeAttributes[i] = null;
-    gl.disableVertexAttribArray(i);
+  for (let i = vertexLayout.length; i < ctx.capabilities.maxVertexAttribs; i++) {
+    if (ctx.state.activeAttributes[i]) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+      gl.vertexAttribPointer(i, 4, ctx.DataType.Float32, false, 0, 0);
+      gl.disableVertexAttribArray(i);
+      ctx.state.activeAttributes[i] = null;
+    }
   }
 
   for (let i = 0; i < vertexLayout.length; i++) {
