@@ -138,6 +138,8 @@ ctx.frame(() => {
 <dd></dd>
 <dt><a href="#TransformFeedbackOptions">TransformFeedbackOptions</a> : <code><a href="#PexResource">PexResource</a></code></dt>
 <dd></dd>
+<dt><a href="#VertexArrayOptions">VertexArrayOptions</a> : <code><a href="#PexResource">PexResource</a></code></dt>
+<dd></dd>
 <dt><a href="#PexContextOptions">PexContextOptions</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#PexResource">PexResource</a> : <code>object</code></dt>
@@ -161,8 +163,6 @@ Please note those props are read only. To set new values or upload new data to G
 <dd><p>[r, g, b, a]</p>
 </dd>
 <dt><a href="#TypedArray">TypedArray</a> : <code>Int8Array</code> | <code>Uint8Array</code> | <code>Uint8ClampedArray</code> | <code>Int16Array</code> | <code>Uint16Array</code> | <code>Int32Array</code> | <code>Uint32Array</code> | <code>Float32Array</code> | <code>Float64Array</code> | <code>BigInt64Array</code> | <code>BigUint64Array</code></dt>
-<dd></dd>
-<dt><a href="#VertexArrayOptions">VertexArrayOptions</a> : <code><a href="#PexResource">PexResource</a></code></dt>
 <dd></dd>
 </dl>
 
@@ -1096,6 +1096,19 @@ Create a context object
 | bufferMode    | <code>number</code> |
 | primitiveMode | <code>number</code> |
 
+<a name="VertexArrayOptions"></a>
+
+## VertexArrayOptions : [<code>PexResource</code>](#PexResource)
+
+**Kind**: global typedef
+**Properties**
+
+| Name         | Type                |
+| ------------ | ------------------- |
+| vertexLayout | <code>object</code> |
+| [attributes] | <code>object</code> |
+| [indices]    | <code>object</code> |
+
 <a name="PexContextOptions"></a>
 
 ## PexContextOptions : <code>object</code>
@@ -1229,18 +1242,6 @@ Please note those props are read only. To set new values or upload new data to G
 ## TypedArray : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
 
 **Kind**: global typedef
-<a name="VertexArrayOptions"></a>
-
-## VertexArrayOptions : [<code>PexResource</code>](#PexResource)
-
-**Kind**: global typedef
-**Properties**
-
-| Name         | Type                |
-| ------------ | ------------------- |
-| vertexLayout | <code>object</code> |
-| [attributes] | <code>object</code> |
-| [indices]    | <code>object</code> |
 
 <!-- api-end -->
 

@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [3.3.0](https://github.com/pex-gl/pex-context/compare/v3.2.0...v3.3.0) (2025-08-13)
+
+
+### Bug Fixes
+
+* unbind all vertex buffers from unused attributes ([df80778](https://github.com/pex-gl/pex-context/commit/df80778c9ae71d176909b6f75567f5e371175901))
+
+
+### Features
+
+* add renderbuffer support for msaa sampleCount ([d23187d](https://github.com/pex-gl/pex-context/commit/d23187d0c6d6d51e3e75fca42687ea61c922832a))
+* add renderbuffer support in pass.color ([d393cdd](https://github.com/pex-gl/pex-context/commit/d393cdd55797c531f807febd0dd878eee330ec76))
+* add support for arbitrary partial attachment blitting ([8fda334](https://github.com/pex-gl/pex-context/commit/8fda3340fe5e2f545721f0517d39618a5a0bad95))
+* add support for resolving multiple msaa renderbuffers ([e6701a2](https://github.com/pex-gl/pex-context/commit/e6701a2bb4b0410f68f3381efdf6481268ad4c9f))
+* keep mipmap flag inside texture ([984f4ef](https://github.com/pex-gl/pex-context/commit/984f4ef8aacf1562d5651a786ed1d85b3df74b49))
+
+
+
 # [3.2.0](https://github.com/pex-gl/pex-context/compare/v3.1.2...v3.2.0) (2025-01-31)
 
 
