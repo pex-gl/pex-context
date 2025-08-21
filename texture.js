@@ -180,9 +180,9 @@ function updateTexture(ctx, texture, opts) {
       "Texture2D.update opts has to be HTMLImageElement, HTMLVideoElement, HTMLCanvasElement or ImageBitmap",
     );
 
-    pixelFormat = ctx.PixelFormat.RGBA;
+    pixelFormat ||= ctx.PixelFormat.RGBA;
 
-    texture.internalFormat = gl.RGBA;
+    texture.internalFormat = gl[pixelFormat];
     texture.format = gl.RGBA;
     texture.type = gl.UNSIGNED_BYTE;
     texture.target = target;
