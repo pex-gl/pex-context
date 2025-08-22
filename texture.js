@@ -232,8 +232,8 @@ function updateTexture(ctx, texture, opts) {
 
     texture.compressed = false;
 
-    texture.width = element.videoWidth || element.width;
-    texture.height = element.videoHeight || element.height;
+    texture.width = element.videoWidth ?? element.width;
+    texture.height = element.videoHeight ?? element.height;
 
     // Allowed internal formats: RGB, RGBA, LUMINANCE, LUMINANCE_ALPHA, ALPHA, R8, RG8, RGB8, RGBA8, SRGB8, SRGB8_ALPHA8
     gl.texImage2D(target, 0, internalFormat, format, type, element);
