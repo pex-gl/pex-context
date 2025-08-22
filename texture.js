@@ -164,6 +164,56 @@ function updateTexture(ctx, texture, opts) {
     gl.texParameterf(target, anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, aniso);
   }
 
+  // Get internalFormat (format the GPU use internally) from opts.internalFormat (mainly for compressed texture) or pixelFormat
+  if (!internalFormat || opts.internalFormat) {
+    internalFormat = opts.internalFormat || gl[pixelFormat];
+
+    // WebGL1
+    if (ctx.gl instanceof WebGLRenderingContext) {
+      // WEBGL_depth_texture (WebGL1 only) just adds DEPTH_COMPONENT and DEPTH_STENCIL
+      if (
+        ctx.capabilities.depthTexture &&
+        ["DEPTH_COMPONENT16", "DEPTH_COMPONENT24"].includes(pixelFormat)
+      ) {
+        internalFormat = gl["DEPTH_COMPONENT"];
+      }
+
+      // Handle legacy types
+      if (!internalFormat) {
+        if (pixelFormat === ctx.PixelFormat.R16F) {
+          pixelFormat = "R16FLegacy";
+          internalFormat = gl.ALPHA;
+        } else if (pixelFormat === ctx.PixelFormat.R32F) {
+          pixelFormat = "R32FLegacy";
+          internalFormat = gl.ALPHA;
+        } else if (pixelFormat === ctx.PixelFormat.RGBA8) {
+          pixelFormat = ctx.PixelFormat.RGBA;
+          internalFormat = gl.RGBA;
+        } else if (
+          pixelFormat === ctx.PixelFormat.RGBA16F ||
+          pixelFormat === ctx.PixelFormat.RGBA32F
+        ) {
+          internalFormat = gl.RGBA;
+        }
+      }
+    }
+
+    console.assert(
+      internalFormat,
+      `Texture2D.update Unknown internalFormat "${internalFormat}" for pixelFormat "${pixelFormat}".`,
+    );
+  }
+
+  // Get actual format and type (data supplied), allowing type override
+  [format, type] = ctx.TextureFormat[pixelFormat];
+  type = opts.type || type;
+  console.assert(type, `Texture2D.update Unknown type ${type}.`);
+
+  texture.internalFormat = internalFormat;
+  texture.format = format;
+  texture.type = type;
+  texture.target = target;
+
   // Data provided as element or ImageBitmap:
   // - width/height are retrieved from the element
   // - format/type are set to defaults
@@ -180,25 +230,13 @@ function updateTexture(ctx, texture, opts) {
       "Texture2D.update opts has to be HTMLImageElement, HTMLVideoElement, HTMLCanvasElement or ImageBitmap",
     );
 
-    pixelFormat ||= ctx.PixelFormat.RGBA;
-
-    texture.internalFormat = gl[pixelFormat];
-    texture.format = gl.RGBA;
-    texture.type = gl.UNSIGNED_BYTE;
-    texture.target = target;
     texture.compressed = false;
 
     texture.width = element.videoWidth || element.width;
     texture.height = element.videoHeight || element.height;
 
-    gl.texImage2D(
-      texture.target,
-      0,
-      texture.internalFormat,
-      texture.format,
-      texture.type,
-      element,
-    );
+    // Allowed internal formats: RGB, RGBA, LUMINANCE, LUMINANCE_ALPHA, ALPHA, R8, RG8, RGB8, RGBA8, SRGB8, SRGB8_ALPHA8
+    gl.texImage2D(target, 0, internalFormat, format, type, element);
   }
   // Data provided as object:
   else if (typeof opts === "object") {
@@ -234,55 +272,6 @@ function updateTexture(ctx, texture, opts) {
       "Texture2D.update opts.width and opts.height are required when providing opts.data",
     );
 
-    // Get internalFormat (format the GPU use internally) from opts.internalFormat (mainly for compressed texture) or pixelFormat
-    if (!internalFormat || opts.internalFormat) {
-      internalFormat = opts.internalFormat || gl[pixelFormat];
-
-      // WebGL1
-      if (ctx.gl instanceof WebGLRenderingContext) {
-        // WEBGL_depth_texture (WebGL1 only) just adds DEPTH_COMPONENT and DEPTH_STENCIL
-        if (
-          ctx.capabilities.depthTexture &&
-          ["DEPTH_COMPONENT16", "DEPTH_COMPONENT24"].includes(pixelFormat)
-        ) {
-          internalFormat = gl["DEPTH_COMPONENT"];
-        }
-
-        // Handle legacy types
-        if (!internalFormat) {
-          if (pixelFormat === ctx.PixelFormat.R16F) {
-            pixelFormat = "R16FLegacy";
-            internalFormat = gl.ALPHA;
-          } else if (pixelFormat === ctx.PixelFormat.R32F) {
-            pixelFormat = "R32FLegacy";
-            internalFormat = gl.ALPHA;
-          } else if (pixelFormat === ctx.PixelFormat.RGBA8) {
-            pixelFormat = ctx.PixelFormat.RGBA;
-            internalFormat = gl.RGBA;
-          } else if (
-            pixelFormat === ctx.PixelFormat.RGBA16F ||
-            pixelFormat === ctx.PixelFormat.RGBA32F
-          ) {
-            internalFormat = gl.RGBA;
-          }
-        }
-      }
-
-      console.assert(
-        internalFormat,
-        `Texture2D.update Unknown internalFormat "${internalFormat}" for pixelFormat "${pixelFormat}".`,
-      );
-    }
-
-    // Get actual format and type (data supplied), allowing type override
-    [format, type] = ctx.TextureFormat[pixelFormat];
-    type = opts.type || type;
-    console.assert(type, `Texture2D.update Unknown type ${type}.`);
-
-    texture.internalFormat = internalFormat;
-    texture.format = format;
-    texture.type = type;
-    texture.target = target;
     texture.compressed = compressed;
 
     if (target === gl.TEXTURE_2D) {
