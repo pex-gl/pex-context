@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.3.1](https://github.com/pex-gl/pex-context/compare/v3.3.0...v3.3.1) (2025-08-22)
+
+
+### Bug Fixes
+
+* enable support for SRGB for HTML elements ([08c0ad1](https://github.com/pex-gl/pex-context/commit/08c0ad1b646e572519e9ea9e9cefaadc5c0ce130))
+* only check maxSamples for WebGL2 ([42836c0](https://github.com/pex-gl/pex-context/commit/42836c0faa971e522486f304fcb12904931ffcb4))
+* use nullish coalescing for videoWidth/Height ([7bff9b3](https://github.com/pex-gl/pex-context/commit/7bff9b30b7ddf629eb9b05930a8c3ab189272968))
+
+
+
 # [3.3.0](https://github.com/pex-gl/pex-context/compare/v3.2.0...v3.3.0) (2025-08-13)
 
 
