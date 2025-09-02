@@ -92,10 +92,6 @@ function createTexture(ctx, opts) {
   return texture;
 }
 
-function orValue(a, b) {
-  return a !== undefined ? a : b;
-}
-
 const isElement = (element) => element && element instanceof Element;
 const isBuffer = (object) =>
   ["vertexBuffer", "indexBuffer"].includes(object?.class);
@@ -114,7 +110,7 @@ function updateTexture(ctx, texture, opts) {
   let data = null;
   let width = opts.width;
   let height = opts.height;
-  let flipY = orValue(opts.flipY, orValue(texture.flipY, false));
+  let flipY = opts.flipY ?? texture.flipY ?? false;
   let target = opts.target || texture.target;
   let pixelFormat =
     opts.pixelFormat || texture.pixelFormat || ctx.PixelFormat.RGBA8;
@@ -134,10 +130,8 @@ function updateTexture(ctx, texture, opts) {
     texture.wrap ||
     gl.CLAMP_TO_EDGE;
   const aniso = opts.aniso || texture.aniso || 0;
-  const premultiplyAlpha = orValue(
-    opts.premultiplyAlpha,
-    orValue(texture.premultiplyAlpha, false),
-  );
+  const premultiplyAlpha =
+    opts.premultiplyAlpha ?? texture.premultiplyAlpha ?? false;
   const compressed = opts.compressed || texture.compressed;
 
   let internalFormat = opts.internalFormat || texture.internalFormat;
