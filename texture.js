@@ -138,7 +138,19 @@ function updateTexture(ctx, texture, opts) {
     opts.colorspaceConversion ?? opts.colorspaceConversion ?? gl.NONE;
   const compressed = opts.compressed || texture.compressed;
 
-  let internalFormat = opts.internalFormat || texture.internalFormat;
+  let internalFormat;
+
+  // Get internalFormat (format the GPU use internally) from opts.internalFormat (mainly for compressed texture) or pixelFormat
+  if (opts.internalFormat) {
+    internalFormat = opts.internalFormat;
+  } else {
+    if (opts.pixelFormat) {
+      internalFormat = gl[pixelFormat];
+    } else {
+      internalFormat = texture.internalFormat ?? gl[pixelFormat];
+    }
+  }
+
   let type;
   let format;
 
@@ -163,7 +175,6 @@ function updateTexture(ctx, texture, opts) {
     gl.texParameterf(target, anisoExt.TEXTURE_MAX_ANISOTROPY_EXT, aniso);
   }
 
-  // Get internalFormat (format the GPU use internally) from opts.internalFormat (mainly for compressed texture) or pixelFormat
   if (!internalFormat || opts.internalFormat) {
     internalFormat = opts.internalFormat || gl[pixelFormat];
 
