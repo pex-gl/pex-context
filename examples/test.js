@@ -135,6 +135,7 @@ const textures = {
   "texture2D: HTMLImageElement": ctx.texture2D(imageElement),
   "texture2D: HTMLImageElement as data prop": ctx.texture2D({
     data: imageElement,
+    flipY: true,
   }),
   "texture2D: HTMLCanvasElement": ctx.texture2D(context2d.canvas),
   "texture2D: HTMLCanvasElement as data prop": ctx.texture2D({
@@ -483,8 +484,7 @@ console.assert(
 /**
  * UNIFORMS
  */
-const uniformsTexture = Object.values(textures).at(4);
-console.log(Object.keys(textures).at(4));
+const uniformsTexture = Object.values(textures).at(5);
 
 ctx.submit({
   pass: ctx.pass({
