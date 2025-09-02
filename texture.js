@@ -29,6 +29,7 @@ import { checkProps, isObject } from "./utils.js";
  * @property {boolean} [mipmap=true] requires `min` to be set to `ctx.Filter.LinearMipmapLinear` or similar
  * @property {boolean} [premultiplyAlpha=false]
  * @property {boolean} [flipY=false]
+ * @property {boolean} [colorspaceConversion=gl.NONE]
  * @property {boolean} [compressed=false]
  * @property {TextureTarget} [target]
  * @property {number} [offset]
@@ -56,6 +57,7 @@ const allowedProps = [
   "type",
   "encoding",
   "flipY",
+  "colorspaceConversion",
   "mipmap",
   "target",
   "min",
@@ -110,8 +112,8 @@ function updateTexture(ctx, texture, opts) {
   let data = null;
   let width = opts.width;
   let height = opts.height;
-  let flipY = opts.flipY ?? texture.flipY ?? false;
-  let target = opts.target || texture.target;
+  const flipY = opts.flipY ?? texture.flipY ?? false;
+  const target = opts.target || texture.target;
   let pixelFormat =
     opts.pixelFormat || texture.pixelFormat || ctx.PixelFormat.RGBA8;
   const encoding = opts.encoding || texture.encoding || ctx.Encoding.Linear;
@@ -132,6 +134,8 @@ function updateTexture(ctx, texture, opts) {
   const aniso = opts.aniso || texture.aniso || 0;
   const premultiplyAlpha =
     opts.premultiplyAlpha ?? texture.premultiplyAlpha ?? false;
+  const colorspaceConversion =
+    opts.colorspaceConversion ?? opts.colorspaceConversion ?? gl.NONE;
   const compressed = opts.compressed || texture.compressed;
 
   let internalFormat = opts.internalFormat || texture.internalFormat;
@@ -147,6 +151,7 @@ function updateTexture(ctx, texture, opts) {
   // Pixel storage mode
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
+  gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, colorspaceConversion);
 
   // Parameters
   gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, mag);
@@ -303,6 +308,7 @@ function updateTexture(ctx, texture, opts) {
   texture.wrapS = wrapS;
   texture.wrapT = wrapT;
   texture.flipY = flipY;
+  texture.colorspaceConversion = colorspaceConversion;
   texture.encoding = encoding;
   texture.mipmap = opts.mipmap;
 
