@@ -55,7 +55,6 @@ const drawCmd = {
       height: img.height,
       flipY: true,
       pixelFormat: ctx.PixelFormat.RGBA8,
-      encoding: ctx.Encoding.Linear,
     }),
   },
 };

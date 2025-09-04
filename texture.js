@@ -19,7 +19,6 @@ import { checkProps, isObject } from "./utils.js";
  * @property {ctx.PixelFormat} [pixelFormat=ctx.PixelFormat.RGBA8]
  * @property {ctx.TextureFormat} [internalFormat=ctx.TextureFormat.RGBA]
  * @property {ctx.DataType} [type=ctx.TextureFormat[opts.pixelFormat]]
- * @property {ctx.Encoding} [encoding=ctx.Encoding.Linear]
  * @property {ctx.Wrap} [wrapS=ctx.Wrap.ClampToEdge]
  * @property {ctx.Wrap} [wrapT=ctx.Wrap.ClampToEdge]
  * @property {ctx.Wrap} [wrap=ctx.Wrap.ClampToEdge]
@@ -55,7 +54,6 @@ const allowedProps = [
   "pixelFormat",
   "internalFormat",
   "type",
-  "encoding",
   "flipY",
   "colorspaceConversion",
   "mipmap",
@@ -116,7 +114,6 @@ function updateTexture(ctx, texture, opts) {
   const target = opts.target || texture.target;
   let pixelFormat =
     opts.pixelFormat || texture.pixelFormat || ctx.PixelFormat.RGBA8;
-  const encoding = opts.encoding || texture.encoding || ctx.Encoding.Linear;
   const min = opts.min || texture.min || gl.NEAREST;
   const mag = opts.mag || texture.mag || gl.NEAREST;
   const wrapS =
@@ -320,14 +317,7 @@ function updateTexture(ctx, texture, opts) {
   texture.wrapT = wrapT;
   texture.flipY = flipY;
   texture.colorspaceConversion = colorspaceConversion;
-  texture.encoding = encoding;
   texture.mipmap = opts.mipmap;
-
-  texture.info = `${Object.keys(ctx.PixelFormat).find(
-    (key) => ctx.PixelFormat[key] === pixelFormat,
-  )}_${Object.keys(ctx.Encoding).find(
-    (key) => ctx.Encoding[key] === encoding,
-  )}`;
 
   return texture;
 }

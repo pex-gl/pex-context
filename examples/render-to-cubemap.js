@@ -36,7 +36,6 @@ const depthMap = ctx.texture2D({
   width: depthMapSize,
   height: depthMapSize,
   pixelFormat: ctx.PixelFormat.DEPTH_COMPONENT16,
-  encoding: ctx.Encoding.Linear,
 });
 
 const cubeInstances = [
@@ -103,7 +102,6 @@ const reflectionMap = ctx.textureCube({
   width: CUBEMAP_SIZE,
   height: CUBEMAP_SIZE,
   pixelFormat: ctx.PixelFormat.RGBA8,
-  encoding: ctx.Encoding.SRGB,
 });
 
 gui.addTextureCube("Reflection Cubemap RT", reflectionMap, { flipEnvMap: -1 });
@@ -123,7 +121,7 @@ const sides = [
     Math.PI / 2,
     1,
     0.1,
-    100
+    100,
   );
   side.viewMatrix = mat4.lookAt(mat4.create(), side.eye, side.target, side.up);
   side.drawPassCmd = {
@@ -215,7 +213,6 @@ const res = await load(resources);
 
 const equirect = ctx.texture2D({
   data: res.equirect,
-  encoding: ctx.Encoding.SRGB,
 });
 gui.addTexture2D("Equirect", equirect);
 
@@ -223,13 +220,11 @@ envMap = ctx.textureCube({
   data: [res.posx, res.negx, res.posy, res.negy, res.posz, res.negz],
   width: res.negx.width,
   height: res.negy.height,
-  encoding: ctx.Encoding.SRGB,
 });
 gui.addTextureCube("EnvMap Cubemap File", envMap, { flipEnvMap: -1 });
 
 const testEquirect = ctx.texture2D({
   data: res.testEquirect,
-  encoding: ctx.Encoding.SRGB,
 });
 gui.addTexture2D("Test Equirect File", testEquirect);
 
@@ -244,7 +239,6 @@ const testEnvMap = ctx.textureCube({
   ],
   width: res.testnegx.width,
   height: res.testnegy.height,
-  encoding: ctx.Encoding.SRGB,
 });
 gui.addTextureCube("Test EnvMap Cubemap File", testEnvMap, {
   flipEnvMap: -1,

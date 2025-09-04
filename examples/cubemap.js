@@ -104,7 +104,6 @@ const envMapCube = ctx.textureCube({
   data: [res.posx, res.negx, res.posy, res.negy, res.posz, res.negz],
   width: res.negx.width,
   height: res.negy.height,
-  encoding: ctx.Encoding.SRGB,
 });
 
 gui.addTextureCube("Cubemap", envMapCube, { flipEnvMap: -1 });

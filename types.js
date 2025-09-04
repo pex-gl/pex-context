@@ -429,14 +429,6 @@ export const addEnums = (ctx) => {
   };
 
   /** @enum */
-  ctx.Encoding = {
-    Linear: 1,
-    Gamma: 2,
-    SRGB: 3,
-    RGBM: 4,
-  };
-
-  /** @enum */
   ctx.Primitive = {
     Points: gl.POINTS,
     Lines: gl.LINES,

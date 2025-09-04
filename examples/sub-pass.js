@@ -45,14 +45,12 @@ const depthMap = ctx.texture2D({
   width: renderTargetSize,
   height: renderTargetSize,
   pixelFormat: ctx.PixelFormat.DEPTH_COMPONENT16,
-  encoding: ctx.Encoding.Linear,
 });
 
 const colorMap = ctx.texture2D({
   width: renderTargetSize,
   height: renderTargetSize,
   pixelFormat: ctx.PixelFormat.RGBA8,
-  encoding: ctx.Encoding.SRGB,
 });
 
 const drawToTexture1Cmd = {

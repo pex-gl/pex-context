@@ -47,13 +47,11 @@ const depthMap = ctx.texture2D({
   width: depthMapSize,
   height: depthMapSize,
   pixelFormat: ctx.PixelFormat.DEPTH_COMPONENT24,
-  encoding: ctx.Encoding.Linear,
 });
 const colorMap = ctx.texture2D({
   width: depthMapSize,
   height: depthMapSize,
   pixelFormat: ctx.PixelFormat.RGBA8,
-  encoding: ctx.Encoding.SRGB,
 });
 
 const depthPassCmd = {

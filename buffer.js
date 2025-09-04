@@ -125,8 +125,6 @@ function updateBuffer(ctx, buffer, opts) {
   } else {
     gl.bufferData(buffer.target, data, buffer.usage);
   }
-
-  buffer.info = ctx.DataTypeConstructor[type].name;
 }
 
 export default createBuffer;

@@ -459,14 +459,7 @@ function createContext(options = {}) {
      * ```
      */
     pass(opts) {
-      if (this.debugMode) {
-        console.debug(
-          NAMESPACE,
-          "pass",
-          opts,
-          opts.color?.map(({ texture, info }) => texture?.info || info) || "",
-        );
-      }
+      if (this.debugMode) console.debug(NAMESPACE, "pass", opts);
       return this.resource(createPass(this, opts));
     },
 
@@ -568,8 +561,7 @@ function createContext(options = {}) {
      *   data: [255, 255, 255, 255, 0, 0, 0, 255],
      *   width: 2,
      *   height: 1,
-     *   pixelFormat: ctx.PixelFormat.RGB8,
-     *   encoding: ctx.Encoding.Linear,
+     *   pixelFormat: ctx.PixelFormat.RGBA8,
      *   wrap: ctx.Wrap.Repeat
      * })
      * ```

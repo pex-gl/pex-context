@@ -9,7 +9,7 @@ import screenImageFrag from "./shaders/screen-image.frag.js";
 
 import { es300Fragment, loadVideo } from "./utils.js";
 
-const ctx = createContext();
+const ctx = createContext({ debug: true });
 const ctxWebGL1 = createContext({ type: "webgl", width: 2, height: 2 });
 
 // Testing Data

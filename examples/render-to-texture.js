@@ -28,25 +28,21 @@ const depthMap = ctx.texture2D({
   width: depthMapSize,
   height: depthMapSize,
   pixelFormat: ctx.PixelFormat.DEPTH_COMPONENT16,
-  encoding: ctx.Encoding.Linear,
 });
 const colorMap = ctx.texture2D({
   width: depthMapSize,
   height: depthMapSize,
   pixelFormat: ctx.PixelFormat.RGBA8,
-  encoding: ctx.Encoding.SRGB,
 });
 const normalMap = ctx.texture2D({
   width: depthMapSize,
   height: depthMapSize,
   pixelFormat: ctx.PixelFormat.RGBA8,
-  encoding: ctx.Encoding.Linear,
 });
 const colorMap2 = ctx.texture2D({
   width: depthMapSize / 2,
   height: depthMapSize / 2,
   pixelFormat: ctx.PixelFormat.RGBA8,
-  encoding: ctx.Encoding.SRGB,
 });
 
 const clearCmd = {
