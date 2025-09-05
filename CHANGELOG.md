@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [4.0.0](https://github.com/pex-gl/pex-context/compare/v3.3.1...v4.0.0) (2025-09-05)
+
+
+### Bug Fixes
+
+* handle pixelFormat options in texture update before computing internalFormat ([37b9be0](https://github.com/pex-gl/pex-context/commit/37b9be0a09e65195ed6f4e60dc1fb1ad9b39d2ce)), closes [#156](https://github.com/pex-gl/pex-context/issues/156)
+
+
+### Features
+
+* add colorspaceConversion option for UNPACK_COLORSPACE_CONVERSION_WEBGL ([ed3d07d](https://github.com/pex-gl/pex-context/commit/ed3d07d9f4fd8aed19093b607a5d07dacc120418)), closes [#157](https://github.com/pex-gl/pex-context/issues/157)
+* remove texture encoding ([d82a71a](https://github.com/pex-gl/pex-context/commit/d82a71a227ce02d79d46e15e10c7fe0f863e4292)), closes [#154](https://github.com/pex-gl/pex-context/issues/154)
+
+
+### BREAKING CHANGES
+
+* remove ctx.Encoding
+
+
+
 ## [3.3.1](https://github.com/pex-gl/pex-context/compare/v3.3.0...v3.3.1) (2025-08-22)
 
 
