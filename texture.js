@@ -288,16 +288,21 @@ function updateTexture(ctx, texture, opts) {
 
       if (data[0].width) texture.width = data[0].width;
       if (data[0].height) texture.height = data[0].height;
+      texture.depth = 1;
 
       updateTexture2D(ctx, texture, data, opts);
     } else if (isTexture2DArray) {
       texture.width = width;
       texture.height = height;
 
-      if (data?.length) updateTexture2DArray(ctx, texture, data);
+      if (data?.length) {
+        texture.depth = data.length;
+        updateTexture2DArray(ctx, texture, data);
+      }
     } else if (isTextureCube) {
       texture.width = width;
       texture.height = height;
+      texture.depth = 1;
 
       updateTextureCube(ctx, texture, data);
     }
