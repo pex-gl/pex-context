@@ -132,7 +132,7 @@ function updateTexture(ctx, texture, opts) {
   const premultiplyAlpha =
     opts.premultiplyAlpha ?? texture.premultiplyAlpha ?? false;
   const colorspaceConversion =
-    opts.colorspaceConversion ?? opts.colorspaceConversion ?? gl.NONE;
+    opts.colorspaceConversion ?? texture.colorspaceConversion ?? gl.NONE;
   const compressed = opts.compressed || texture.compressed;
 
   let internalFormat;
