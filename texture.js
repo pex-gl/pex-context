@@ -16,6 +16,7 @@ import { checkProps, isObject } from "./utils.js";
  * @property {HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | Array | import("./types.js").TypedArray | TextureOptionsData} [data]
  * @property {number} [width]
  * @property {number} [height]
+ * @property {number} [depth]
  * @property {ctx.PixelFormat} [pixelFormat=ctx.PixelFormat.RGBA8]
  * @property {ctx.TextureFormat} [internalFormat=ctx.TextureFormat.RGBA]
  * @property {ctx.DataType} [type=ctx.TextureFormat[opts.pixelFormat]]
