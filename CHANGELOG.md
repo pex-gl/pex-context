@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [4.1.0](https://github.com/pex-gl/pex-context/compare/v4.0.0...v4.1.0) (2025-12-08)
+
+
+### Bug Fixes
+
+* read texture.colorspaceConversion on update ([d02ac8b](https://github.com/pex-gl/pex-context/commit/d02ac8b1a516bafaa9858c546669ded0aed8c9cc))
+
+
+### Features
+
+* add depth to textures ([626193f](https://github.com/pex-gl/pex-context/commit/626193f10ef9954de06994e046bc7d20fa70ee8d)), closes [#137](https://github.com/pex-gl/pex-context/issues/137)
+
+
+
 # [4.0.0](https://github.com/pex-gl/pex-context/compare/v3.3.1...v4.0.0) (2025-09-05)
 
 
