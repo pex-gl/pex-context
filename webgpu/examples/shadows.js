@@ -1,5 +1,5 @@
 import createContext from "../index.js";
-import { mat4 } from "https://esm.sh/gl-matrix@3.4.3";
+import { mat4 } from "https://esm.sh/pex-math@4";
 import { cube } from "https://esm.sh/primitive-geometry@2.11.0";
 import bunnyData from "https://esm.sh/bunny@1.0.1";
 
@@ -78,33 +78,33 @@ const depthFrag = /*wgsl*/`
 
 const shadowVert = /*wgsl*/`
     struct U {
-      projectionMatrix: mat4x4f,
-      viewMatrix: mat4x4f,
-      modelMatrix: mat4x4f,
-      lightProjMatrix: mat4x4f,
-      lightViewMatrix: mat4x4f,
-      lightPos: vec4f,
-      color: vec4f,
+        projectionMatrix: mat4x4f,
+        viewMatrix: mat4x4f,
+        modelMatrix: mat4x4f,
+        lightProjMatrix: mat4x4f,
+        lightViewMatrix: mat4x4f,
+        lightPos: vec4f,
+        color: vec4f,
     };
     @group(0) @binding(0) var<uniform> u: U;
 
     struct Out {
-      @builtin(position) position: vec4f,
-      @location(0) normal: vec3f,
-      @location(1) worldPos: vec3f,
-      @location(2) lightSpacePos: vec4f,
+        @builtin(position) position: vec4f,
+        @location(0) normal: vec3f,
+        @location(1) worldPos: vec3f,
+        @location(2) lightSpacePos: vec4f,
     };
 
     @vertex fn vs_main(@location(0) pos: vec3f, @location(1) normal: vec3f) -> Out {
-      var o: Out;
-      let wp = u.modelMatrix * vec4f(pos, 1.0);
-      o.position = u.projectionMatrix * u.viewMatrix * wp;
-      o.normal = (u.modelMatrix * vec4f(normal, 0.0)).xyz;
-      o.worldPos = wp.xyz;
-      o.lightSpacePos = u.lightProjMatrix * u.lightViewMatrix * wp;
-      return o;
+        var o: Out;
+        let wp = u.modelMatrix * vec4f(pos, 1.0);
+        o.position = u.projectionMatrix * u.viewMatrix * wp;
+        o.normal = (u.modelMatrix * vec4f(normal, 0.0)).xyz;
+        o.worldPos = wp.xyz;
+        o.lightSpacePos = u.lightProjMatrix * u.lightViewMatrix * wp;
+        return o;
     }
-  `;
+    `;
 
 const shadowFrag = /*wgsl*/`
     struct U {
@@ -212,54 +212,23 @@ async function main() {
 
     // Camera setup
     const lightPos = [7, 4, 7];
-    const lightView = mat4.lookAt(
-        mat4.create(),
-        lightPos,
-        [0, 0, 0],
-        [0, 1, 0],
-    );
-    const lightProj = mat4.perspective(
-        mat4.create(),
-        Math.PI / 4,
-        1,
-        1,
-        50,
-    );
-    const camView = mat4.lookAt(
-        mat4.create(),
-        [3, 3, 3],
-        [0, 0, 0],
-        [0, 1, 0],
-    );
+    const lightView = mat4.lookAt(mat4.create(), lightPos, [0, 0, 0], [0, 1, 0]);
+    const lightProj = mat4.perspective(mat4.create(), Math.PI / 4, 1, 1, 50);
+    const camView = mat4.lookAt(mat4.create(), [3, 3, 3], [0, 0, 0], [0, 1, 0]);
     const camProj = mat4.create();
-    const floorModel = mat4.translate(
-        mat4.create(),
-        mat4.create(),
-        [0, -1, 0],
-    );
+    const floorModel = mat4.translate(mat4.create(), [0, -1, 0]);
     const bunnyModel = mat4.create();
 
-    ctx.frame(() => {
-        mat4.perspective(
-            camProj,
-            Math.PI / 4,
-            ctx.width / ctx.height,
-            0.1,
-            100,
-        );
-        mat4.rotateY(bunnyModel, bunnyModel, 0.01);
+    // Pre-compute light VP matrix (lightProj * lightView)
+    const lightVP = mat4.mult(mat4.copy(lightProj), lightView);
 
-        // Update depth uniforms
-        const floorDepthMVP = mat4.multiply(
-            mat4.create(),
-            mat4.multiply(mat4.create(), lightProj, lightView),
-            floorModel,
-        );
-        const bunnyDepthMVP = mat4.multiply(
-            mat4.create(),
-            mat4.multiply(mat4.create(), lightProj, lightView),
-            bunnyModel,
-        );
+    ctx.frame(() => {
+        mat4.perspective(camProj, Math.PI / 4, ctx.width / ctx.height, 0.1, 100);
+        mat4.rotate(bunnyModel, 0.01, [0, 1, 0]);
+
+        // Update depth uniforms: MVP = lightVP * model
+        const floorDepthMVP = mat4.mult(mat4.copy(lightVP), floorModel);
+        const bunnyDepthMVP = mat4.mult(mat4.copy(lightVP), bunnyModel);
         ctx.update(floorDepthUB, { data: floorDepthMVP });
         ctx.update(bunnyDepthUB, { data: bunnyDepthMVP });
 

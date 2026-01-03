@@ -1,5 +1,5 @@
 import createContext from "../index.js";
-import { mat4 } from "https://esm.sh/gl-matrix@3.4.3";
+import { mat4 } from "https://esm.sh/pex-math@4";
 import { cube } from "https://esm.sh/primitive-geometry@2.11.0";
 
 const W = 640;
@@ -71,19 +71,8 @@ async function main() {
         uniforms: { uMatrices: uniformBuffer },
     };
 
-    const projectionMatrix = mat4.perspective(
-        mat4.create(),
-        Math.PI / 4,
-        W / H,
-        0.1,
-        100,
-    );
-    const viewMatrix = mat4.lookAt(
-        mat4.create(),
-        [2, 2, 5],
-        [0, 0, 0],
-        [0, 1, 0],
-    );
+    const projectionMatrix = mat4.perspective(mat4.create(), Math.PI / 4, W / H, 0.1, 100);
+    const viewMatrix = mat4.lookAt(mat4.create(), [2, 2, 5], [0, 0, 0], [0, 1, 0]);
 
     const uniformData = new Float32Array(32);
     uniformData.set(projectionMatrix, 0);
