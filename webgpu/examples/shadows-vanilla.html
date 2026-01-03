@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebGPU Shadows Example</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #333;
+      }
+
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="canvas"></canvas>
+    <script type="module">
+      import { mat4 } from "https://esm.sh/gl-matrix@3.4.3";
+      import { cube } from "https://esm.sh/primitive-geometry@2.11.0";
+      import bunnyData from "https://esm.sh/bunny@1.0.1";
+
+      const SHADOW_MAP_SIZE = 1024;
+
+      async function init() {
+        if (!navigator.gpu) {
+          document.body.innerHTML =
+            '<h1 style="color:white">WebGPU not supported</h1>';
+          return;
+        }
+
+        const canvas = document.getElementById("canvas");
+        const adapter = await navigator.gpu.requestAdapter();
+        if (!adapter) {
+          document.body.innerHTML =
+            '<h1 style="color:white">No WebGPU adapter</h1>';
+          return;
+        }
+        const device = await adapter.requestDevice();
+        const context = canvas.getContext("webgpu");
+
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = canvas.clientWidth * dpr;
+        canvas.height = canvas.clientHeight * dpr;
+        const format = navigator.gpu.getPreferredCanvasFormat();
+        context.configure({ device, format, alphaMode: "premultiplied" });
+
+        // --- Geometry Processing ---
+        function processCube(geom) {
+          const positions = new Float32Array(geom.positions);
+          const normals = new Float32Array(geom.normals);
+          let indices;
+          if (geom.cells.length > 0 && typeof geom.cells[0] === "number") {
+            indices = new Uint16Array(geom.cells);
+          } else {
+            const flat = [];
+            for (let i = 0; i < geom.cells.length; i++) {
+              for (let j = 0; j < geom.cells[i].length; j++)
+                flat.push(geom.cells[i][j]);
+            }
+            indices = new Uint16Array(flat);
+          }
+          return { positions, normals, indices };
+        }
+
+        function processBunny(data) {
+          // Flatten positions
+          const positions = new Float32Array(data.positions.length * 3);
+          for (let i = 0; i < data.positions.length; i++) {
+            positions[i * 3] = data.positions[i][0];
+            positions[i * 3 + 1] = data.positions[i][1];
+            positions[i * 3 + 2] = data.positions[i][2];
+          }
+
+          // Compute smooth normals
+          const normals = new Float32Array(data.positions.length * 3);
+          for (let i = 0; i < data.cells.length; i++) {
+            const [i0, i1, i2] = data.cells[i];
+            const p0 = data.positions[i0];
+            const p1 = data.positions[i1];
+            const p2 = data.positions[i2];
+            const v1 = [p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]];
+            const v2 = [p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]];
+            const n = [
+              v1[1] * v2[2] - v1[2] * v2[1],
+              v1[2] * v2[0] - v1[0] * v2[2],
+              v1[0] * v2[1] - v1[1] * v2[0],
+            ];
+            for (const idx of [i0, i1, i2]) {
+              normals[idx * 3] += n[0];
+              normals[idx * 3 + 1] += n[1];
+              normals[idx * 3 + 2] += n[2];
+            }
+          }
+          // Normalize
+          for (let i = 0; i < normals.length; i += 3) {
+            const len =
+              Math.sqrt(
+                normals[i] ** 2 + normals[i + 1] ** 2 + normals[i + 2] ** 2,
+              ) || 1;
+            normals[i] /= len;
+            normals[i + 1] /= len;
+            normals[i + 2] /= len;
+          }
+
+          // Center and scale bunny
+          let minY = Infinity,
+            maxY = -Infinity;
+          for (let i = 1; i < positions.length; i += 3) {
+            minY = Math.min(minY, positions[i]);
+            maxY = Math.max(maxY, positions[i]);
+          }
+          const scale = 1.5 / (maxY - minY);
+          const centerY = (minY + maxY) / 2;
+          for (let i = 0; i < positions.length; i += 3) {
+            positions[i] *= scale;
+            positions[i + 1] = (positions[i + 1] - centerY) * scale + 0.5; // Shift up
+            positions[i + 2] *= scale;
+          }
+
+          const indices = new Uint16Array(data.cells.flat());
+          return { positions, normals, indices };
+        }
+
+        const floorGeom = processCube(cube({ sx: 6, sy: 0.1, sz: 6 }));
+        const bunnyGeom = processBunny(bunnyData);
+
+        function createBuffers(device, geom) {
+          const posBuffer = device.createBuffer({
+            size: geom.positions.byteLength,
+            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+            mappedAtCreation: true,
+          });
+          new Float32Array(posBuffer.getMappedRange()).set(geom.positions);
+          posBuffer.unmap();
+
+          const normBuffer = device.createBuffer({
+            size: geom.normals.byteLength,
+            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+            mappedAtCreation: true,
+          });
+          new Float32Array(normBuffer.getMappedRange()).set(geom.normals);
+          normBuffer.unmap();
+
+          const idxBuffer = device.createBuffer({
+            size: geom.indices.byteLength,
+            usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+            mappedAtCreation: true,
+          });
+          new Uint16Array(idxBuffer.getMappedRange()).set(geom.indices);
+          idxBuffer.unmap();
+
+          return {
+            posBuffer,
+            normBuffer,
+            idxBuffer,
+            indexCount: geom.indices.length,
+          };
+        }
+
+        const floor = createBuffers(device, floorGeom);
+        const bunny = createBuffers(device, bunnyGeom);
+
+        // --- Shadow Texture ---
+        const shadowTexture = device.createTexture({
+          size: [SHADOW_MAP_SIZE, SHADOW_MAP_SIZE],
+          format: "depth32float",
+          usage:
+            GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
+        });
+        const shadowTextureView = shadowTexture.createView();
+
+        // --- Shadow Shader (depth only) ---
+        const shadowShaderModule = device.createShaderModule({
+          code: `
+                    struct Uniforms { mvp: mat4x4f };
+                    @group(0) @binding(0) var<uniform> uniforms: Uniforms;
+
+                    @vertex fn vs_main(@location(0) position: vec3f) -> @builtin(position) vec4f {
+                        return uniforms.mvp * vec4f(position, 1.0);
+                    }
+                `,
+        });
+
+        // --- Main Shader with Shadow Mapping ---
+        const mainShaderModule = device.createShaderModule({
+          code: `
+                    struct Uniforms {
+                        mvp: mat4x4f,
+                        model: mat4x4f,
+                        lightMVP: mat4x4f,
+                        lightDir: vec4f,
+                        color: vec4f,
+                    };
+                    @group(0) @binding(0) var<uniform> uniforms: Uniforms;
+                    @group(0) @binding(1) var shadowMap: texture_depth_2d;
+                    @group(0) @binding(2) var shadowSampler: sampler_comparison;
+
+                    struct VertexOutput {
+                        @builtin(position) position: vec4f,
+                        @location(0) normal: vec3f,
+                        @location(1) worldPos: vec3f,
+                        @location(2) lightSpacePos: vec4f,
+                    };
+
+                    @vertex fn vs_main(@location(0) pos: vec3f, @location(1) normal: vec3f) -> VertexOutput {
+                        var output: VertexOutput;
+                        let worldPos = uniforms.model * vec4f(pos, 1.0);
+                        output.position = uniforms.mvp * vec4f(pos, 1.0);
+                        output.normal = (uniforms.model * vec4f(normal, 0.0)).xyz;
+                        output.worldPos = worldPos.xyz;
+                        output.lightSpacePos = uniforms.lightMVP * worldPos;
+                        return output;
+                    }
+
+                    @fragment fn fs_main(input: VertexOutput) -> @location(0) vec4f {
+                        // Shadow calculation
+                        let ndc = input.lightSpacePos.xyz / input.lightSpacePos.w;
+                        let uv = ndc.xy * 0.5 + 0.5;
+                        let shadowCoord = clamp(vec2f(uv.x, 1.0 - uv.y), vec2f(0.0), vec2f(1.0));
+                        let depth = clamp(ndc.z - 0.005, 0.0, 1.0);
+                        
+                        // Always sample - coordinates are clamped to valid range
+                        let shadow = textureSampleCompare(shadowMap, shadowSampler, shadowCoord, depth);
+
+                        // Lighting
+                        let N = normalize(input.normal);
+                        let L = normalize(uniforms.lightDir.xyz);
+                        let NdotL = max(dot(N, L), 0.0);
+
+                        let ambient = 0.2;
+                        let diffuse = NdotL * shadow * 0.8;
+                        return vec4f(uniforms.color.xyz * (ambient + diffuse), 1.0);
+                    }
+                `,
+        });
+
+        // --- Shadow Pipeline (depth only) ---
+        const shadowPipeline = device.createRenderPipeline({
+          layout: "auto",
+          vertex: {
+            module: shadowShaderModule,
+            entryPoint: "vs_main",
+            buffers: [
+              {
+                arrayStride: 3 * 4,
+                attributes: [
+                  { shaderLocation: 0, offset: 0, format: "float32x3" },
+                ],
+              },
+            ],
+          },
+          depthStencil: {
+            format: "depth32float",
+            depthWriteEnabled: true,
+            depthCompare: "less",
+          },
+          primitive: { topology: "triangle-list", cullMode: "back" },
+        });
+
+        // --- Main Pipeline ---
+        const mainPipeline = device.createRenderPipeline({
+          layout: "auto",
+          vertex: {
+            module: mainShaderModule,
+            entryPoint: "vs_main",
+            buffers: [
+              {
+                arrayStride: 3 * 4,
+                attributes: [
+                  { shaderLocation: 0, offset: 0, format: "float32x3" },
+                ],
+              },
+              {
+                arrayStride: 3 * 4,
+                attributes: [
+                  { shaderLocation: 1, offset: 0, format: "float32x3" },
+                ],
+              },
+            ],
+          },
+          fragment: {
+            module: mainShaderModule,
+            entryPoint: "fs_main",
+            targets: [{ format }],
+          },
+          depthStencil: {
+            format: "depth24plus",
+            depthWriteEnabled: true,
+            depthCompare: "less",
+          },
+          primitive: { topology: "triangle-list", cullMode: "back" },
+        });
+
+        // --- Uniform Buffers ---
+        const shadowUniformSize = 64;
+        const mainUniformSize = 320; // 5 mat4x4/vec4 = 5 * 64 = 320 bytes
+
+        const floorShadowUB = device.createBuffer({
+          size: shadowUniformSize,
+          usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+        });
+        const bunnyShadowUB = device.createBuffer({
+          size: shadowUniformSize,
+          usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+        });
+        const floorMainUB = device.createBuffer({
+          size: mainUniformSize,
+          usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+        });
+        const bunnyMainUB = device.createBuffer({
+          size: mainUniformSize,
+          usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+        });
+
+        // --- Bind Groups ---
+        const floorShadowBG = device.createBindGroup({
+          layout: shadowPipeline.getBindGroupLayout(0),
+          entries: [{ binding: 0, resource: { buffer: floorShadowUB } }],
+        });
+        const bunnyShadowBG = device.createBindGroup({
+          layout: shadowPipeline.getBindGroupLayout(0),
+          entries: [{ binding: 0, resource: { buffer: bunnyShadowUB } }],
+        });
+
+        const shadowSampler = device.createSampler({ compare: "less" });
+
+        const floorMainBG = device.createBindGroup({
+          layout: mainPipeline.getBindGroupLayout(0),
+          entries: [
+            { binding: 0, resource: { buffer: floorMainUB } },
+            { binding: 1, resource: shadowTextureView },
+            { binding: 2, resource: shadowSampler },
+          ],
+        });
+        const bunnyMainBG = device.createBindGroup({
+          layout: mainPipeline.getBindGroupLayout(0),
+          entries: [
+            { binding: 0, resource: { buffer: bunnyMainUB } },
+            { binding: 1, resource: shadowTextureView },
+            { binding: 2, resource: shadowSampler },
+          ],
+        });
+
+        // --- Screen Depth Texture ---
+        let depthTexture = device.createTexture({
+          size: [canvas.width, canvas.height],
+          format: "depth24plus",
+          usage: GPUTextureUsage.RENDER_ATTACHMENT,
+        });
+
+        // --- Matrices ---
+        const lightPos = [5, 8, 5];
+        const lightView = mat4.lookAt(
+          mat4.create(),
+          lightPos,
+          [0, 0, 0],
+          [0, 1, 0],
+        );
+        const lightProj = mat4.perspective(
+          mat4.create(),
+          Math.PI / 4,
+          1,
+          1,
+          50,
+        );
+        const lightVP = mat4.multiply(mat4.create(), lightProj, lightView);
+
+        const camView = mat4.lookAt(
+          mat4.create(),
+          [3, 3, 5],
+          [0, 0.5, 0],
+          [0, 1, 0],
+        );
+        const camProj = mat4.create();
+
+        const floorModel = mat4.create(); // Floor at origin
+        const bunnyModel = mat4.create();
+
+        function frame() {
+          // Handle resize
+          const w = Math.round(canvas.clientWidth * dpr);
+          const h = Math.round(canvas.clientHeight * dpr);
+          if (canvas.width !== w || canvas.height !== h) {
+            canvas.width = w;
+            canvas.height = h;
+            depthTexture.destroy();
+            depthTexture = device.createTexture({
+              size: [w, h],
+              format: "depth24plus",
+              usage: GPUTextureUsage.RENDER_ATTACHMENT,
+            });
+          }
+
+          mat4.perspective(
+            camProj,
+            Math.PI / 4,
+            canvas.width / canvas.height,
+            0.1,
+            100,
+          );
+          const camVP = mat4.multiply(mat4.create(), camProj, camView);
+
+          mat4.rotateY(bunnyModel, bunnyModel, 0.01);
+
+          // Compute MVPs
+          const floorMVP = mat4.multiply(mat4.create(), camVP, floorModel);
+          const bunnyMVP = mat4.multiply(mat4.create(), camVP, bunnyModel);
+          const floorLightMVP = mat4.multiply(
+            mat4.create(),
+            lightVP,
+            floorModel,
+          );
+          const bunnyLightMVP = mat4.multiply(
+            mat4.create(),
+            lightVP,
+            bunnyModel,
+          );
+
+          // Update shadow uniforms (just MVP)
+          device.queue.writeBuffer(floorShadowUB, 0, floorLightMVP);
+          device.queue.writeBuffer(bunnyShadowUB, 0, bunnyLightMVP);
+
+          // Update main uniforms (MVP, Model, LightMVP, LightDir, Color)
+          // Layout: mvp(64) + model(64) + lightMVP(64) + lightDir(16) + color(16) = 224 bytes
+          const floorData = new Float32Array(80); // 320 bytes
+          floorData.set(floorMVP, 0);
+          floorData.set(floorModel, 16);
+          floorData.set(floorLightMVP, 32);
+          floorData.set([lightPos[0], lightPos[1], lightPos[2], 0], 48);
+          floorData.set([0.8, 0.8, 0.8, 1], 52); // Floor color (gray)
+          device.queue.writeBuffer(floorMainUB, 0, floorData);
+
+          const bunnyData = new Float32Array(80);
+          bunnyData.set(bunnyMVP, 0);
+          bunnyData.set(bunnyModel, 16);
+          bunnyData.set(bunnyLightMVP, 32);
+          bunnyData.set([lightPos[0], lightPos[1], lightPos[2], 0], 48);
+          bunnyData.set([0.9, 0.7, 0.5, 1], 52); // Bunny color (tan)
+          device.queue.writeBuffer(bunnyMainUB, 0, bunnyData);
+
+          const cmd = device.createCommandEncoder();
+
+          // Shadow Pass
+          const shadowPass = cmd.beginRenderPass({
+            colorAttachments: [],
+            depthStencilAttachment: {
+              view: shadowTextureView,
+              depthClearValue: 1.0,
+              depthLoadOp: "clear",
+              depthStoreOp: "store",
+            },
+          });
+          shadowPass.setPipeline(shadowPipeline);
+          shadowPass.setBindGroup(0, floorShadowBG);
+          shadowPass.setVertexBuffer(0, floor.posBuffer);
+          shadowPass.setIndexBuffer(floor.idxBuffer, "uint16");
+          shadowPass.drawIndexed(floor.indexCount);
+          shadowPass.setBindGroup(0, bunnyShadowBG);
+          shadowPass.setVertexBuffer(0, bunny.posBuffer);
+          shadowPass.setIndexBuffer(bunny.idxBuffer, "uint16");
+          shadowPass.drawIndexed(bunny.indexCount);
+          shadowPass.end();
+
+          // Main Pass
+          const mainPass = cmd.beginRenderPass({
+            colorAttachments: [
+              {
+                view: context.getCurrentTexture().createView(),
+                clearValue: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 },
+                loadOp: "clear",
+                storeOp: "store",
+              },
+            ],
+            depthStencilAttachment: {
+              view: depthTexture.createView(),
+              depthClearValue: 1.0,
+              depthLoadOp: "clear",
+              depthStoreOp: "store",
+            },
+          });
+          mainPass.setPipeline(mainPipeline);
+          mainPass.setBindGroup(0, floorMainBG);
+          mainPass.setVertexBuffer(0, floor.posBuffer);
+          mainPass.setVertexBuffer(1, floor.normBuffer);
+          mainPass.setIndexBuffer(floor.idxBuffer, "uint16");
+          mainPass.drawIndexed(floor.indexCount);
+          mainPass.setBindGroup(0, bunnyMainBG);
+          mainPass.setVertexBuffer(0, bunny.posBuffer);
+          mainPass.setVertexBuffer(1, bunny.normBuffer);
+          mainPass.setIndexBuffer(bunny.idxBuffer, "uint16");
+          mainPass.drawIndexed(bunny.indexCount);
+          mainPass.end();
+
+          device.queue.submit([cmd.finish()]);
+          requestAnimationFrame(frame);
+        }
+
+        requestAnimationFrame(frame);
+      }
+
+      init().catch((e) => {
+        console.error(e);
+        document.body.innerHTML = `<h1 style="color:red">${e.message}</h1>`;
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebGPU Basic Example</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #333;
+      }
+
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="canvas"></canvas>
+    <script type="module">
+      import { mat4 } from "https://esm.sh/gl-matrix@3.4.3";
+      import { cube } from "https://esm.sh/primitive-geometry@2.11.0";
+
+      async function init() {
+        if (!navigator.gpu) {
+          console.error("WebGPU not supported");
+          alert("WebGPU not supported in this browser.");
+          return;
+        }
+
+        try {
+          const canvas = document.getElementById("canvas");
+          const adapter = await navigator.gpu.requestAdapter();
+          if (!adapter) {
+            console.error("No WebGPU adapter found.");
+            return;
+          }
+          const device = await adapter.requestDevice();
+          const context = canvas.getContext("webgpu");
+
+          const devicePixelRatio = window.devicePixelRatio || 1;
+          const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+
+          context.configure({
+            device,
+            format: presentationFormat,
+            alphaMode: "premultiplied",
+          });
+
+          // --- Geometry ---
+          const rawGeom = cube();
+          // primitive-geometry returns flat arrays suited for WebGL.
+          // positions: [x,y,z, x,y,z...], normals: [nx,ny,nz...]
+
+          // Ensure typed arrays
+          const positions = new Float32Array(rawGeom.positions);
+          const normals = new Float32Array(rawGeom.normals);
+          // primitive-geometry cells are usually 16-bit or 32-bit indices?
+          // It returns generic arrays. Let's assume Uint16 for cube (small vertex count).
+          // Actually primitive-geometry returns `cells` as array of arrays [ [0,1,2], ... ] for simplicial complexes?
+          // Let's check primitive-geometry output structure.
+          // "primitive-geometry" returns { positions: [], normals: [], uvs: [], cells: [[0,1,2], [2,3,0]...] }
+          // Check if cells is already flat or nested
+          let flatIndices;
+          if (
+            rawGeom.cells.length > 0 &&
+            typeof rawGeom.cells[0] === "number"
+          ) {
+            flatIndices = new Uint16Array(rawGeom.cells);
+          } else if (
+            rawGeom.cells.length > 0 &&
+            (Array.isArray(rawGeom.cells[0]) || rawGeom.cells[0].length)
+          ) {
+            // Array of arrays or array of TypedArrays
+            const flat = [];
+            for (let i = 0; i < rawGeom.cells.length; i++) {
+              const cell = rawGeom.cells[i];
+              for (let j = 0; j < cell.length; j++) flat.push(cell[j]);
+            }
+            flatIndices = new Uint16Array(flat);
+          } else {
+            // Fallback or empty
+            flatIndices = new Uint16Array(
+              rawGeom.cells.flat ? rawGeom.cells.flat() : rawGeom.cells,
+            );
+          }
+
+          const positionBuffer = device.createBuffer({
+            size: positions.byteLength,
+            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+            mappedAtCreation: true,
+          });
+          new Float32Array(positionBuffer.getMappedRange()).set(positions);
+          positionBuffer.unmap();
+
+          const normalBuffer = device.createBuffer({
+            size: normals.byteLength,
+            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+            mappedAtCreation: true,
+          });
+          new Float32Array(normalBuffer.getMappedRange()).set(normals);
+          normalBuffer.unmap();
+
+          const indexBuffer = device.createBuffer({
+            size: flatIndices.byteLength, // 2 bytes per Uint16
+            usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+            mappedAtCreation: true,
+          });
+          new Uint16Array(indexBuffer.getMappedRange()).set(flatIndices);
+          indexBuffer.unmap();
+
+          // --- Shaders ---
+          const shaderModule = device.createShaderModule({
+            code: `
+                    struct Uniforms {
+                        projectionMatrix : mat4x4<f32>,
+                        viewMatrix : mat4x4<f32>,
+                    };
+                    @binding(0) @group(0) var<uniform> uniforms : Uniforms;
+
+                    struct VertexInput {
+                        @location(0) position : vec3<f32>,
+                        @location(1) normal : vec3<f32>,
+                    };
+
+                    struct VertexOutput {
+                        @builtin(position) position : vec4<f32>,
+                        @location(0) color : vec4<f32>,
+                    };
+
+                    @vertex
+                    fn vs_main(input : VertexInput) -> VertexOutput {
+                        var output : VertexOutput;
+                        output.position = uniforms.projectionMatrix * uniforms.viewMatrix * vec4<f32>(input.position, 1.0);
+                        output.color = vec4<f32>(input.normal * 0.5 + 0.5, 1.0);
+                        return output;
+                    }
+
+                    @fragment
+                    fn fs_main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
+                        return color;
+                    }
+                `,
+          });
+
+          // --- Pipeline ---
+          const pipeline = device.createRenderPipeline({
+            layout: "auto",
+            vertex: {
+              module: shaderModule,
+              entryPoint: "vs_main",
+              buffers: [
+                {
+                  arrayStride: 3 * 4, // 3 floats, 4 bytes each
+                  attributes: [
+                    { shaderLocation: 0, offset: 0, format: "float32x3" },
+                  ], // Position
+                },
+                {
+                  arrayStride: 3 * 4,
+                  attributes: [
+                    { shaderLocation: 1, offset: 0, format: "float32x3" },
+                  ], // Normal
+                },
+              ],
+            },
+            fragment: {
+              module: shaderModule,
+              entryPoint: "fs_main",
+              targets: [{ format: presentationFormat }],
+            },
+            primitive: {
+              topology: "triangle-list",
+              cullMode: "back",
+            },
+            depthStencil: {
+              depthWriteEnabled: true,
+              depthCompare: "less",
+              format: "depth24plus",
+            },
+          });
+
+          // --- Uniforms ---
+          const uniformBufferSize = 4 * 16 * 2; // 2 matrices, 4x4 floats, 4 bytes/float
+          const uniformBuffer = device.createBuffer({
+            size: uniformBufferSize,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+          });
+
+          const bindGroup = device.createBindGroup({
+            layout: pipeline.getBindGroupLayout(0),
+            entries: [
+              {
+                binding: 0,
+                resource: { buffer: uniformBuffer },
+              },
+            ],
+          });
+
+          let depthTexture = device.createTexture({
+            size: [canvas.width, canvas.height],
+            format: "depth24plus",
+            usage: GPUTextureUsage.RENDER_ATTACHMENT,
+          });
+
+          // --- Render Loop ---
+          const projectionMatrix = mat4.create();
+          const viewMatrix = mat4.create();
+          // pex-context basic example view: eye=[2,2,5], center=[0,0,0], up=[0,1,0]
+          mat4.lookAt(viewMatrix, [2, 2, 5], [0, 0, 0], [0, 1, 0]);
+
+          function frame() {
+            // Handle resize
+            const width = Math.min(
+              device.limits.maxTextureDimension2D,
+              Math.round(canvas.clientWidth * devicePixelRatio),
+            );
+            const height = Math.min(
+              device.limits.maxTextureDimension2D,
+              Math.round(canvas.clientHeight * devicePixelRatio),
+            );
+            if (canvas.width !== width || canvas.height !== height) {
+              canvas.width = width;
+              canvas.height = height;
+              // Recreate depth texture on resize
+              if (depthTexture) depthTexture.destroy();
+              depthTexture = device.createTexture({
+                size: [canvas.width, canvas.height],
+                format: "depth24plus",
+                usage: GPUTextureUsage.RENDER_ATTACHMENT,
+              });
+            }
+
+            // Update Projection
+            const aspect = canvas.width / canvas.height;
+            mat4.perspective(projectionMatrix, Math.PI / 4, aspect, 0.1, 100);
+
+            // Upload uniforms
+            // WebGPU matrices are col-major, gl-matrix matches that.
+            device.queue.writeBuffer(uniformBuffer, 0, projectionMatrix);
+            device.queue.writeBuffer(uniformBuffer, 64, viewMatrix); // 16 floats * 4 bytes = 64 bytes offset
+
+            const commandEncoder = device.createCommandEncoder();
+            // Re-create depth view every frame or manage it on resize?
+            // Creating view is cheap.
+            // But texture size must match attachment size.
+            // Let's implement resize properly in a separate block if needed,
+            // for this basic example, we will assume depthTexture matches for now,
+            // but strictly should handle resize.
+            // I will add a resize check helper in the 'frame' to keep it robust.
+
+            const passEncoder = commandEncoder.beginRenderPass({
+              colorAttachments: [
+                {
+                  view: context.getCurrentTexture().createView(),
+                  clearValue: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 },
+                  loadOp: "clear",
+                  storeOp: "store",
+                },
+              ],
+              depthStencilAttachment: {
+                view: depthTexture.createView(),
+                depthClearValue: 1.0,
+                depthLoadOp: "clear",
+                depthStoreOp: "store",
+              },
+            });
+
+            passEncoder.setPipeline(pipeline);
+            passEncoder.setBindGroup(0, bindGroup);
+            passEncoder.setVertexBuffer(0, positionBuffer);
+            passEncoder.setVertexBuffer(1, normalBuffer);
+            passEncoder.setIndexBuffer(indexBuffer, "uint16");
+            passEncoder.drawIndexed(flatIndices.length);
+            passEncoder.end();
+
+            device.queue.submit([commandEncoder.finish()]);
+            requestAnimationFrame(frame);
+          }
+
+          // Initial call
+          requestAnimationFrame(frame);
+        } catch (err) {
+          console.error(err);
+          alert(`Init Error: ${err.message}`);
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>
