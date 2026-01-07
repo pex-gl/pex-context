@@ -21,6 +21,73 @@ const PIXEL_FORMAT_MAP = {
  * @param {Object} opts - Options
  * @returns {Object} texture resource
  */
+/**
+ * Create a cubemap texture
+ * @param {Object} ctx - Context
+ * @param {Object} opts - Options
+ * @returns {Object} texture resource
+ */
+export function createTextureCube(ctx, opts) {
+  const { device } = ctx;
+
+  const width = opts.width || 512;
+  const height = opts.height || 512;
+  const pixelFormat = PIXEL_FORMAT_MAP[opts.pixelFormat] || "rgba8unorm";
+
+  // Create cubemap texture (6 layers)
+  const gpuTexture = device.createTexture({
+    size: [width, height, 6],
+    format: pixelFormat,
+    dimension: "2d",
+    usage:
+      GPUTextureUsage.TEXTURE_BINDING |
+      GPUTextureUsage.RENDER_ATTACHMENT |
+      GPUTextureUsage.COPY_DST,
+  });
+
+  // Create cube view for sampling
+  const gpuTextureView = gpuTexture.createView({
+    dimension: "cube",
+  });
+
+  // Create individual face views for rendering to each face
+  const faceViews = [];
+  for (let i = 0; i < 6; i++) {
+    faceViews.push(
+      gpuTexture.createView({
+        dimension: "2d",
+        baseArrayLayer: i,
+        arrayLayerCount: 1,
+      }),
+    );
+  }
+
+  const texture = {
+    class: "textureCube",
+    gpuTexture,
+    gpuTextureView,
+    faceViews,
+    width,
+    height,
+    format: pixelFormat,
+    isCube: true,
+
+    _dispose() {
+      if (gpuTexture) {
+        gpuTexture.destroy();
+      }
+    },
+  };
+
+  return texture;
+}
+
+/**
+ * Create a 2D texture
+ * @param {Object} ctx - Context
+ * @param {Object} opts - Options
+ * @returns {Object} texture resource
+ */
 export default function createTexture(ctx, opts) {
   const { device } = ctx;
 

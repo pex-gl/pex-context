@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebGPU Mouse-Following Lines</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #333;
+            font-family: sans-serif;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .controls label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .controls input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <label>
+            <input type="checkbox" id="debugMode" />
+            Debug Mode
+        </label>
+        <label style="margin-top: 8px;">
+            Thickness: <span id="thicknessValue">5</span>px
+            <input type="range" id="thickness" min="1" max="40" value="5" style="width: 100px;" />
+        </label>
+    </div>
+    <script type="module" src="lines-mouse.js"></script>
+</body>
+
+</html>

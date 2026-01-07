@@ -34,13 +34,15 @@ export default function createPipeline(ctx, opts) {
     const location = attr.location ?? vertexBuffers.length;
     const attrFormat = attr.format || getFormatFromType(attr.type);
     const stride = attr.stride || getStrideFromFormat(attrFormat);
+    const stepMode = attr.stepMode || "vertex"; // 'vertex' or 'instance'
 
     vertexBuffers.push({
       arrayStride: stride,
+      stepMode,
       attributes: [
         {
           shaderLocation: location,
-          offset: 0,
+          offset: attr.offset || 0,
           format: attrFormat,
         },
       ],

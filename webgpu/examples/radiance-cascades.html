@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebGPU Radiance Cascades</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #1a1a1a;
+            font-family: system-ui, sans-serif;
+            color: #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: 1.4em;
+        }
+
+        canvas {
+            border: 1px solid #444;
+            cursor: crosshair;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 1536px;
+        }
+
+        .control {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .control label {
+            font-size: 0.85em;
+            color: #aaa;
+        }
+
+        .control input[type="range"] {
+            width: 100px;
+        }
+
+        .control input[type="color"] {
+            width: 50px;
+            height: 28px;
+            border: none;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #444;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #555;
+        }
+
+        .info {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Radiance Cascades - 2D Global Illumination</h1>
+    <canvas id="canvas" width="1536" height="512"></canvas>
+
+    <div class="controls">
+        <div class="control">
+            <label>Brush Radius: <span id="radiusVal">20</span></label>
+            <input type="range" id="brushRadius" min="1" max="100" value="20" />
+        </div>
+        <div class="control">
+            <label>Radiance: <span id="radianceVal">1.0</span></label>
+            <input type="range" id="brushRadiance" min="0" max="200" value="100" />
+        </div>
+        <div class="control">
+            <label>Color</label>
+            <input type="color" id="brushColor" value="#ffaa00" />
+        </div>
+        <div class="control" style="justify-content: flex-end;">
+            <button id="clearBtn">Clear</button>
+        </div>
+        <div class="control">
+            <label><input type="checkbox" id="eraseMode" /> Erase</label>
+        </div>
+    </div>
+
+    <div class="info">
+        Click and drag to paint emissive light sources. Light spreads via radiance cascades.
+    </div>
+
+    <script type="module" src="radiance-cascades.js"></script>
+</body>
+
+</html>

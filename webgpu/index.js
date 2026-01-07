@@ -5,7 +5,7 @@
  */
 
 import createBuffer from "./buffer.js";
-import createTexture from "./texture.js";
+import createTexture, { createTextureCube } from "./texture.js";
 import createPipeline from "./pipeline.js";
 import createPass from "./pass.js";
 import createSampler from "./sampler.js";
@@ -190,6 +190,16 @@ export default async function createContext(options = {}) {
     },
 
     /**
+     * Create a cubemap texture
+     * @param {Object} opts
+     * @returns {Object} texture
+     */
+    textureCube(opts) {
+      if (this.debugMode) console.debug("[webgpu-ctx] textureCube", opts);
+      return this.resource(createTextureCube(this, opts));
+    },
+
+    /**
      * Create a sampler
      * @param {Object} opts
      * @returns {Object} sampler
@@ -291,18 +301,20 @@ export default async function createContext(options = {}) {
           let slot = 0;
           for (const [name, attr] of Object.entries(cmd.attributes)) {
             const buffer = attr.buffer || attr;
-            renderPass.setVertexBuffer(slot, buffer.gpuBuffer);
+            const offset = attr.offset || 0;
+            renderPass.setVertexBuffer(slot, buffer.gpuBuffer, offset);
             slot++;
           }
         }
 
         // Set index buffer and draw
+        const instances = cmd.instances || 1;
         if (cmd.indices) {
           const indexBuffer = cmd.indices.buffer || cmd.indices;
           renderPass.setIndexBuffer(indexBuffer.gpuBuffer, indexBuffer.format);
-          renderPass.drawIndexed(indexBuffer.count);
+          renderPass.drawIndexed(indexBuffer.count, instances);
         } else if (cmd.count) {
-          renderPass.draw(cmd.count);
+          renderPass.draw(cmd.count, instances);
         }
 
         return;
@@ -343,18 +355,20 @@ export default async function createContext(options = {}) {
         let slot = 0;
         for (const [name, attr] of Object.entries(cmd.attributes)) {
           const buffer = attr.buffer || attr;
-          renderPass.setVertexBuffer(slot, buffer.gpuBuffer);
+          const offset = attr.offset || 0;
+          renderPass.setVertexBuffer(slot, buffer.gpuBuffer, offset);
           slot++;
         }
       }
 
       // Set index buffer and draw
+      const instances = cmd.instances || 1;
       if (cmd.indices) {
         const indexBuffer = cmd.indices.buffer || cmd.indices;
         renderPass.setIndexBuffer(indexBuffer.gpuBuffer, indexBuffer.format);
-        renderPass.drawIndexed(indexBuffer.count);
+        renderPass.drawIndexed(indexBuffer.count, instances);
       } else if (cmd.count) {
-        renderPass.draw(cmd.count);
+        renderPass.draw(cmd.count, instances);
       }
 
       renderPass.end();

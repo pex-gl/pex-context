@@ -1,0 +1,1 @@
+make new example and acompanying md file called radiance-cascades based on the effect described here https://tmpvar.com/poc/radiance-cascades/ and this code https://tmpvar.com/poc/radiance-cascades/flatland-2d/flatland-2d.js use lines-mouse example as baseline for interaction. use pex-context webgpu for everything
