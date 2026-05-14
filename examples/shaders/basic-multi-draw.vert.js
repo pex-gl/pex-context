@@ -1,6 +1,9 @@
 export default /* glsl */ `
-#ifdef USE_MULTI_DRAW
+#if defined(USE_MULTI_DRAW) || defined(USE_MULTI_DRAW_INSTANCED_BASE)
   #extension GL_ANGLE_multi_draw: require
+#else
+  uniform highp int uDrawID;
+  #define gl_DrawID uDrawID
 #endif
 
 attribute vec3 aPosition;
@@ -21,7 +24,6 @@ void main () {
     position.xyz += aOffset;
   #endif
 
-#ifdef USE_MULTI_DRAW
   if (gl_DrawID == 0) {
     vColor = vec4(1.0, 0.5, 0.5, 1.0);
   } else if (gl_DrawID == 1) {
@@ -31,9 +33,6 @@ void main () {
   } else {
     vColor = vec4(1.0, 1.0, 0.5, 1.0);
   }
-#else
-  vColor = vec4(1.0, 1.0, 1.0, 1.0);
-#endif
 
   gl_Position = uProjectionMatrix * uViewMatrix * position;
 }

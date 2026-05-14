@@ -15,7 +15,7 @@ import basicFrag from "./shaders/basic.frag.js";
 import basicMultiDrawVert from "./shaders/basic-multi-draw.vert.js";
 
 const pixelRatio = devicePixelRatio;
-const ctx = (window.ctx = createContext({ pixelRatio, debug: false }));
+const ctx = createContext({ pixelRatio, debug: false });
 
 const gui = createGUI(ctx, { theme: { columnWidth: 340 } });
 
@@ -161,6 +161,20 @@ ${basicMultiDrawVert}`,
     uViewMatrix: camera.viewMatrix,
   },
 };
+const drawInstancedBaseCmd = {
+  pipeline: ctx.pipeline({
+    depthTest: true,
+    vert: /* glsl */ `
+${ctx.capabilities.multiDrawInstancedBase ? "#define USE_MULTI_DRAW_INSTANCED_BASE" : ""}
+#define USE_INSTANCED_OFFSET
+${basicMultiDrawVert}`,
+    frag: basicFrag,
+  }),
+  uniforms: {
+    uProjectionMatrix: camera.projectionMatrix,
+    uViewMatrix: camera.viewMatrix,
+  },
+};
 
 const commands = {
   "MultiDraw Indexed": {
@@ -274,14 +288,19 @@ ctx.frame(() => {
       headers[header].setPosition(
         ...viewportToCanvasPosition(cell, H, pixelRatio).map((n) => n + 10),
       );
-      ctx.submit(
-        options.multiDraw.instanceCounts ? drawInstancedCmd : drawCmd,
-        {
-          viewport: cell,
-          scissor: cell,
-          ...options,
-        },
+      const hasBaseInstances = !!(
+        options.multiDraw.baseInstances || options.multiDraw.baseVertices
       );
+      const cmd = options.multiDraw.instanceCounts
+        ? hasBaseInstances
+          ? drawInstancedBaseCmd
+          : drawInstancedCmd
+        : drawCmd;
+      ctx.submit(cmd, {
+        viewport: cell,
+        scissor: cell,
+        ...options,
+      });
     }
   });
 
