@@ -191,7 +191,7 @@ function drawElements(ctx, cmd, instanced, primitive) {
   const offset = cmd.indices?.offset || cmd.vertexArray?.indices?.offset || 0;
   const type =
     cmd.indices?.type ||
-    cmd.vertexArray?.indices?.offset ||
+    cmd.vertexArray?.indices?.type ||
     ctx.state.indexBuffer.type;
 
   // Instanced drawing
