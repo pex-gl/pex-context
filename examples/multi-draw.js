@@ -6,6 +6,7 @@ import { plane, cube, sphere, torus } from "primitive-geometry";
 import merge from "geom-merge";
 import splitVertices from "geom-split-vertices";
 
+import basicMultiDrawVert from "./shaders/basic-multi-draw.vert.js";
 import basicFrag from "./shaders/basic.frag.js";
 
 const ctx = createContext({ pixelRatio: devicePixelRatio });
@@ -13,7 +14,7 @@ const ctx = createContext({ pixelRatio: devicePixelRatio });
 const camera = createCamera({
   position: [0, 0, 3],
 });
-createOrbiter({ camera });
+createOrbiter({ camera, element: ctx.gl.canvas });
 
 const clearCmd = {
   pass: ctx.pass({
@@ -28,12 +29,12 @@ const unindexed = true;
 const planeGeometry = plane();
 const sphereGeometry = sphere();
 sphereGeometry.positions = sphereGeometry.positions.map((value, i) =>
-  i % 3 === 0 ? value - 1.25 : value
+  i % 3 === 0 ? value - 1.25 : value,
 );
 const torusGeometry = torus();
 const cubeGeometry = cube();
 cubeGeometry.positions = cubeGeometry.positions.map((value, i) =>
-  i % 3 === 0 ? value + 1.25 : value
+  i % 3 === 0 ? value + 1.25 : value,
 );
 const geometries = [
   planeGeometry,
@@ -41,7 +42,7 @@ const geometries = [
   torusGeometry,
   cubeGeometry,
 ].map((geometry) =>
-  unindexed ? splitVertices(geometry.positions, geometry.cells) : geometry
+  unindexed ? splitVertices(geometry.positions, geometry.cells) : geometry,
 );
 
 const geometry = merge(geometries);
@@ -68,44 +69,13 @@ if (unindexed) {
     }
   }
 }
-console.log("geometry", geometry);
-console.log("counts", counts);
-console.log("offsets", offsets);
-console.log("firsts", firsts);
 
 const drawCmd = {
   pipeline: ctx.pipeline({
     depthTest: true,
     vert: /* glsl */ `
 ${ctx.capabilities.multiDraw ? "#define USE_MULTI_DRAW" : ""}
-#ifdef USE_MULTI_DRAW
-  #extension GL_ANGLE_multi_draw: require
-#endif
-
-attribute vec3 aPosition;
-
-uniform mat4 uProjectionMatrix;
-uniform mat4 uViewMatrix;
-
-varying vec4 vColor;
-
-void main () {
-  #ifdef USE_MULTI_DRAW
-    if (gl_DrawID == 0) {
-      vColor = vec4(1.0, 0.5, 0.5, 1.0);
-    } else if (gl_DrawID == 1) {
-      vColor = vec4(0.5, 1.0, 0.5, 1.0);
-    } else if (gl_DrawID == 2) {
-      vColor = vec4(0.5, 0.5, 1.0, 1.0);
-    } else {
-      vColor = vec4(1.0, 1.0, 0.5, 1.0);
-    }
-  #else
-    vColor = vec4(1.0, 1.0, 1.0, 1.0);
-  #endif
-
-  gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition, 1.0);
-}`,
+${basicMultiDrawVert}`,
     frag: basicFrag,
   }),
   attributes: {
